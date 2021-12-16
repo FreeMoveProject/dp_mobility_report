@@ -1,0 +1,45 @@
+<h2>Overview</h2>
+
+{{dataset_stats_table}}
+
+<h4>Additional variable</h4>
+{{extra_var_barchart}}
+
+{{missing_values_table}}
+
+<br>
+TODO: don't show exact values as they might be misleading. Maybe, e.g., with 99% chance there are no missing values (?)
+<br>
+There should not be any missing values within the dataset, except potentially within the additional variable. 
+If there are missing values present in the dataset this is an indicator for a faulty dataset.
+
+<h3>Temporal properties</h3>
+
+<h4>Number of trips over time</h4>
+
+ {{trips_over_time_linechart}}
+
+<br>
+
+<div>
+{{trips_over_time_summary_table}}
+</div>
+
+ <h4>Number of trips per weekday</h4>
+
+ {{trips_per_weekday_barchart}}
+
+ <h4>Number of trips per hour of day split by weekday and weekend</h4>
+
+ {{trips_per_hour_linechart}}
+
+<!---- <h3>Spatial properties</h3>
+
+TODO: keep raster cells with 0 points
+<br> 
+TODO: fix bug that all legends appear in first map
+<div style="width: 600px; height: 500px;">
+    {{spatial_distribution_raster}}
+</div>
+-->
+

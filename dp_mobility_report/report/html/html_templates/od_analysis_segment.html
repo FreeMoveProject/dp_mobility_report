@@ -1,0 +1,55 @@
+<h2>Origin-destination (OD) analysis</h2>
+
+<h3>OD flows between tiles</h3>
+
+# TODO: fix legend appearing in wrong chart
+
+<div style="width: 800px; height: 600px;">
+{{od_map}}
+</div>
+
+<h4>Intra-tile flows</h4>
+
+The number and percentage of flows that start and end within the same tile.
+
+<br>
+<br>
+{{intra_tile_flows_info}}
+<br>
+<br>
+
+A large number of intra-cell flows either indicate round-trips 
+(e.g., going running starting and ending at the home location) 
+or a tessellation that is to coarse to properly capture flows.
+
+{{flows_summary_table}}
+
+<div>
+    A different way of visualizing the distribution of number per flows is achieved by the cumuluated sum of all flows: 
+    If only a few flows include most of all visits, the curve has a steep increase in the beginning and a flat part at the end. 
+    If the visits are distributed equally over the entire flows the line is a straight diagonal.
+</div>
+
+{{flows_cumsum_linechart}}
+
+<h4>Most frequent OD connections</h4>
+
+{{most_freq_flows_ranking}}
+
+<h3>Trip statistics</h3>
+
+<h4>Travel time of trips (in minutes)</h4>
+
+{{outlier_count_travel_time_info}}
+
+{{travel_time_hist}}
+
+{{travel_time_summary_table}}
+
+<h4>Jump length (in meters)</h4>
+
+{{outlier_count_jump_length_info}}
+
+{{jump_length_hist}}
+
+{{jump_length_summary_table}}
