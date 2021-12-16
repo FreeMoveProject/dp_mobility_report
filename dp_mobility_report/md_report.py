@@ -1,12 +1,13 @@
+import warnings
 from pathlib import Path
 from typing import Union
-import warnings
-from tqdm.auto import tqdm
-from pandarallel import pandarallel
 
-from dp_mobility_report.report import report
-from dp_mobility_report.report.html.templates import render_html, create_html_assets
+from pandarallel import pandarallel
+from tqdm.auto import tqdm
+
 from dp_mobility_report.model import preprocessing
+from dp_mobility_report.report import report
+from dp_mobility_report.report.html.templates import create_html_assets, render_html
 
 
 class MobilityDataReport:
@@ -38,14 +39,14 @@ class MobilityDataReport:
         user_privacy=True,
     ) -> None:
         """Generate a mobility data report from a Dataset stored
-        as a pandas `DataFrame` in the specified format [...].
-       Used as is, it will output its content as an HTML report in a Jupyter notebook
+            as a pandas `DataFrame` in the specified format [...].
+           Used as is, it will output its content as an HTML report in a Jupyter notebook
 
-    Args:
-        df (DataFrame): DataFrame in defined format.
-        privacy_budget (float): privacy_budget
-        analysis_selection (list, optional): Select only certain analyses,
-        to reduce the used privacy budget. Options are ... . Defaults to ["all"].
+        Args:
+            df (DataFrame): DataFrame in defined format.
+            privacy_budget (float): privacy_budget
+            analysis_selection (list, optional): Select only certain analyses,
+            to reduce the used privacy budget. Options are ... . Defaults to ["all"].
         """
         if (extra_var is None) | (extra_var in df.columns):
             self.extra_var = extra_var

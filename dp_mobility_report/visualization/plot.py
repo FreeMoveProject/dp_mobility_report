@@ -1,12 +1,12 @@
 """Plot functions for the profiling report."""
 import math
-import numpy as np
-import seaborn as sns
-import matplotlib as mpl
-from matplotlib import pyplot as plt
 
 import folium
+import matplotlib as mpl
+import numpy as np
+import seaborn as sns
 from branca.colormap import linear
+from matplotlib import pyplot as plt
 
 sns.set_theme()
 dark_blue = "#283377"
@@ -152,7 +152,9 @@ def multi_choropleth_map(counts_per_tile_timewindow, tessellation):
                 linewidth=0.1,
                 ax=ax,
                 edgecolor="#FFFFFF",
-                missing_kwds=dict(color="lightgrey",),
+                missing_kwds=dict(
+                    color="lightgrey",
+                ),
             )
             ax.set_title(column_name)
 

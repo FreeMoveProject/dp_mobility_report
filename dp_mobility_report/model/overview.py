@@ -1,6 +1,7 @@
 from datetime import timedelta
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 
 from dp_mobility_report.model import utils
 from dp_mobility_report.model.section import Section

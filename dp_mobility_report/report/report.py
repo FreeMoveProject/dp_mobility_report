@@ -1,10 +1,9 @@
 from tqdm.auto import tqdm
 
-
 from dp_mobility_report.model import (
+    od_analysis,
     overview,
     place_analysis,
-    od_analysis,
     user_analysis,
 )
 

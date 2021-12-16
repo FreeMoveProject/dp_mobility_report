@@ -1,6 +1,6 @@
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 from shapely.geometry import Point
 
 
@@ -18,7 +18,9 @@ def preprocess_tessellation(tessellation):
                 tessellation, geometry="geometry", crs="EPSG:4326"
             )
         except:
-            raise Exception("Tessellation cannot be cast to a geopandas.GeoDataFrame.")
+            raise Exception(
+                "Tessellation cannot be cast to a geopandas.GeoDataFrame."
+            ) from ex
 
     return tessellation[["tile_id", "tile_name", "geometry"]]
 

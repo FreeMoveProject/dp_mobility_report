@@ -8,7 +8,7 @@ Installation
 Stable release
 --------------
 
-To install Mobility Data Report, run this command in your terminal:
+To install DP Mobility Report, run this command in your terminal:
 
 .. code-block:: console
 

@@ -1,6 +1,5 @@
 class Section:
-    """[summary]
-    """
+    """[summary]"""
 
     def __init__(self, data, n_outliers, privacy_budget=None, **kwargs) -> None:
 

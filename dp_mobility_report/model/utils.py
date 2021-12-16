@@ -1,6 +1,7 @@
 import numpy as np
-from dp_mobility_report.privacy import diff_privacy
+
 from dp_mobility_report.model.section import Section
+from dp_mobility_report.privacy import diff_privacy
 
 
 def cut_outliers(data, z_score_cutoff=None, min_value=None, max_value=None):
@@ -64,7 +65,9 @@ def dp_hist_section(
     )
 
     return Section(
-        data=(dp_hist_counts, hist[1]), n_outliers=dp_n_outliers, quartiles=quartiles,
+        data=(dp_hist_counts, hist[1]),
+        n_outliers=dp_n_outliers,
+        quartiles=quartiles,
     )
 
 
@@ -83,4 +86,8 @@ def hist_section(series, min_value=None, max_value=None, bin_size=None, max_bins
     quartiles = series.quantile([0, 0.25, 0.5, 0.75, 1])
     quartiles.index = ["min", "25%", "50%", "75%", "max"]
 
-    return Section(data=(hist[0], hist[1]), n_outliers=n_outliers, quartiles=quartiles,)
+    return Section(
+        data=(hist[0], hist[1]),
+        n_outliers=n_outliers,
+        quartiles=quartiles,
+    )

@@ -1,8 +1,9 @@
-import pandas as pd
 import math
+
 import diffprivlib
 import numpy as np
-from diffprivlib.validation import clip_to_bounds, check_bounds
+import pandas as pd
+from diffprivlib.validation import check_bounds, clip_to_bounds
 
 
 def bounds_dp(array, eps, sensitivity):

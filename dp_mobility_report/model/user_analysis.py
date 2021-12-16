@@ -1,11 +1,11 @@
 import math
 from datetime import timedelta
+
 import numpy as np
 import pandas as pd
-from scipy import stats
-
+from haversine import Unit, haversine
 from pandarallel import pandarallel
-from haversine import haversine, Unit
+from scipy import stats
 
 from dp_mobility_report.model import utils
 from dp_mobility_report.model.section import Section

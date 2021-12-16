@@ -1,7 +1,8 @@
-import pandas as pd
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
-from dp_mobility_report.report.html.utils import render_summary, get_template
+from dp_mobility_report.report.html.utils import get_template, render_summary
 from dp_mobility_report.visualization import plot, utils
 
 
@@ -64,11 +65,13 @@ def render_counts_per_tile(counts_per_tile, tessellation):
         right_on="tile_id",
     )
     # counts_per_tile_gdf.loc[counts_per_tile_gdf.visit_count.isna(), "visit_count"] = 0
-    return (
+    html = (
         plot.choropleth_map(counts_per_tile_gdf, "visit_count", "Number of visits")
         .get_root()
         .render()
     )
+    plt.close()
+    return html
 
 
 def render_counts_per_tile_cumsum(counts_per_tile):
@@ -89,6 +92,7 @@ def render_counts_per_tile_cumsum(counts_per_tile):
         add_diagonal=True,
     )
     html = utils.fig_to_html(chart)
+    plt.close()
     return html
 
 
@@ -154,5 +158,5 @@ def render_counts_per_tile_timewindow(counts_per_tile_timewindow, tessellation):
             + "<h4>Weekend: deviation from average</h4>"
             + utils.fig_to_html(relative_weekend)
         )
-
+    plt.close()
     return output_html

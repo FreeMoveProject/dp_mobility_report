@@ -1,4 +1,6 @@
-from dp_mobility_report.report.html.utils import fmt, render_summary, get_template
+import matplotlib.pyplot as plt
+
+from dp_mobility_report.report.html.utils import fmt, get_template, render_summary
 from dp_mobility_report.visualization import plot, utils
 
 
@@ -17,12 +19,12 @@ def render_overview(report, extra_var):
             report["ds_statistics"], extra_var
         )
 
-    if "extra_var_counts" in report:
-        extra_var_barchart = (
-            "No additional variable specified"
-            if extra_var is None
-            else render_extra_var(report["extra_var_counts"], extra_var)
-        )
+    # if "extra_var_counts" in report:
+    #     extra_var_barchart = (
+    #         "No additional variable specified"
+    #         if extra_var is None
+    #         else render_extra_var(report["extra_var_counts"], extra_var)
+    #     )
 
     if "missing_values" in report:
         missing_values_table = render_missing_values(
@@ -83,13 +85,13 @@ def render_dataset_statistics(dataset_statistics, extra_var=None):
         },
     ]
 
-    if "n_extra_var" in dataset_statistics:
-        dataset_stats_list.append(
-            {
-                "name": ("Distinct " + extra_var),
-                "value": fmt(dataset_statistics["n_extra_var"]),
-            }
-        )
+    # if "n_extra_var" in dataset_statistics:
+    #     dataset_stats_list.append(
+    #         {
+    #             "name": ("Distinct " + extra_var),
+    #             "value": fmt(dataset_statistics["n_extra_var"]),
+    #         }
+    #     )
 
     # create html from template
     template_table = get_template("table.html")
@@ -99,15 +101,15 @@ def render_dataset_statistics(dataset_statistics, extra_var=None):
     return dataset_stats_html
 
 
-def render_extra_var(extra_var_counts, extra_var):
-    barchart = plot.barchart(
-        data=extra_var_counts.reset_index(),
-        x="perc",
-        y="index",
-        x_axis_label="% of records",
-        y_axis_label=extra_var,
-    )
-    return utils.fig_to_html(barchart)
+# def render_extra_var(extra_var_counts, extra_var):
+#     barchart = plot.barchart(
+#         data=extra_var_counts.reset_index(),
+#         x="perc",
+#         y="index",
+#         x_axis_label="% of records",
+#         y_axis_label=extra_var,
+#     )
+#     return utils.fig_to_html(barchart)
 
 
 def render_missing_values(missing_values, extra_var):
@@ -151,6 +153,7 @@ def render_trips_over_time(trips_over_time_section):
             trips_over_time_section.data, "datetime", "trip_count", "Date", "Frequency"
         )
         html = utils.fig_to_html(chart)
+    plt.close()
     return html
 
 
@@ -172,6 +175,7 @@ def render_trips_per_weekday(trips_per_weekday):
             "Sunday",
         ],
     )
+    plt.close()
     return utils.fig_to_html(chart)
 
 
@@ -184,4 +188,5 @@ def render_trips_per_hour(trips_per_hour):
         hue_order=["weekday_start", "weekday_end", "weekend_start", "weekend_end"],
     )
     html = utils.fig_to_html(chart)
+    plt.close()
     return html

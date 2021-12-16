@@ -1,4 +1,5 @@
 import numbers
+
 import jinja2
 
 # Initializing Jinja
@@ -10,14 +11,14 @@ import jinja2
 # jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_path))
 
 package_loader = jinja2.PackageLoader(
-   "dp_mobility_report", "report/html/html_templates"
+    "dp_mobility_report", "report/html/html_templates"
 )
 jinja2_env = jinja2.Environment(
-   lstrip_blocks=True, trim_blocks=True, loader=package_loader
+    lstrip_blocks=True, trim_blocks=True, loader=package_loader
 )
 
+
 def get_template(template_name):
-    print(jinja2_env)
     return jinja2_env.get_template(template_name)
 
 

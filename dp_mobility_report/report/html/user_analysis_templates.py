@@ -1,9 +1,10 @@
+import matplotlib.pyplot as plt
 import pandas as pd
 
 from dp_mobility_report.report.html.utils import (
-    render_summary,
-    render_outlier_info,
     get_template,
+    render_outlier_info,
+    render_summary,
 )
 from dp_mobility_report.visualization import plot, utils
 
@@ -46,7 +47,8 @@ def render_user_analysis(mdreport):
 
     if "radius_gyration_section" in report:
         outlier_count_radius_gyration_info = render_outlier_info(
-            report["radius_gyration_section"].n_outliers, mdreport.max_jump_length,
+            report["radius_gyration_section"].n_outliers,
+            mdreport.max_jump_length,
         )
         radius_gyration_summary_table = render_summary(
             report["radius_gyration_section"].quartiles
@@ -124,7 +126,9 @@ def render_radius_gyration(radius_gyration_hist):
     hist = plot.histogram(
         radius_gyration_hist, x_axis_label="radius of gyration", x_axis_type=int
     )
-    return utils.fig_to_html(hist)
+    html = utils.fig_to_html(hist)
+    plt.close()
+    return html
 
 
 def render_location_entropy(location_entropy, tessellation):
@@ -137,7 +141,7 @@ def render_location_entropy(location_entropy, tessellation):
         left_on="tile_id",
         right_on="tile_id",
     )
-    return (
+    html = (
         plot.choropleth_map(
             location_entropy_gdf,
             "location_entropy",
@@ -147,6 +151,8 @@ def render_location_entropy(location_entropy, tessellation):
         .get_root()
         .render()
     )
+    plt.close()
+    return html
 
 
 def render_distinct_tiles_user(user_tile_count_hist):
@@ -155,7 +161,9 @@ def render_distinct_tiles_user(user_tile_count_hist):
         x_axis_label="number of distinct tiles a user has visited",
         x_axis_type=int,
     )
-    return utils.fig_to_html(hist)
+    html = utils.fig_to_html(hist)
+    plt.close()
+    return html
 
 
 def render_uncorrelated_entropy(uncorrelated_entropy):
@@ -163,11 +171,15 @@ def render_uncorrelated_entropy(uncorrelated_entropy):
         (uncorrelated_entropy[0], uncorrelated_entropy[1].round(2)),
         x_axis_label="uncorrelated entropy",
     )
-    return utils.fig_to_html(hist)
+    html = utils.fig_to_html(hist)
+    plt.close()
+    return html
 
 
 def render_real_entropy(real_entropy):
     hist = plot.histogram(
         (real_entropy[0], real_entropy[1].round(2)), x_axis_label="real entropy"
     )
-    return utils.fig_to_html(hist)
+    html = utils.fig_to_html(hist)
+    plt.close()
+    return html

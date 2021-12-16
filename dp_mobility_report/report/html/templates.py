@@ -1,9 +1,9 @@
 from dp_mobility_report.report.html import (
-    utils,
+    od_analysis_templates,
     overview_templates,
     place_analysis_templates,
-    od_analysis_templates,
     user_analysis_templates,
+    utils,
 )
 
 
@@ -21,6 +21,7 @@ def render_html(mdreport):
         overview_segment = overview_templates.render_overview(
             mdreport.report, mdreport.extra_var
         )
+
     if ("all" in mdreport.analysis_selection) | (
         "place_analysis" in mdreport.analysis_selection
     ):

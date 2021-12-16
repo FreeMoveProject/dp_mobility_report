@@ -4,7 +4,6 @@
 
 import pytest
 
-
 from dp_mobility_report import dp_mobility_report
 
 

@@ -1,14 +1,15 @@
-import pandas as pd
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import skmob
-from dp_mobility_report import md_report
 
+from dp_mobility_report import md_report
 from dp_mobility_report.model import od_analysis
 from dp_mobility_report.report.html.utils import (
     fmt,
-    render_summary,
-    render_outlier_info,
     get_template,
+    render_outlier_info,
+    render_summary,
 )
 from dp_mobility_report.visualization import plot, utils
 
@@ -39,7 +40,8 @@ def render_od_analysis(mdreport):
 
     if "travel_time_section" in report:
         outlier_count_travel_time_info = render_outlier_info(
-            report["travel_time_section"].n_outliers, mdreport.max_travel_time,
+            report["travel_time_section"].n_outliers,
+            mdreport.max_travel_time,
         )
         travel_time_hist = render_travel_time_hist(report["travel_time_section"].data)
         travel_time_summary_table = render_summary(
@@ -48,7 +50,8 @@ def render_od_analysis(mdreport):
 
     if "jump_length_section" in report:
         outlier_count_jump_length_info = render_outlier_info(
-            report["jump_length_section"].n_outliers, mdreport.max_jump_length,
+            report["jump_length_section"].n_outliers,
+            mdreport.max_jump_length,
         )
         jump_length_hist = render_jump_length_hist(report["jump_length_section"].data)
         jump_length_summary_table = render_summary(
@@ -75,9 +78,7 @@ def render_od_analysis(mdreport):
 
 def render_origin_destination_flows(od_flows, mdreport):
     n_flows = (
-        md_report.top_x_flows
-        if md_report.top_x_flows <= len(od_flows)
-        else len(od_flows)
+        mdreport.top_x_flows if mdreport.top_x_flows <= len(od_flows) else len(od_flows)
     )
     innerflow = od_flows[od_flows.origin == od_flows.destination]
 
@@ -102,7 +103,9 @@ def render_origin_destination_flows(od_flows, mdreport):
         .nlargest(n_flows, "flow")
         .plot_flows(flow_color="red", map_f=innerflow_chropleth)
     )
-    return od_map.get_root().render()
+    html = od_map.get_root().render()
+    plt.close()
+    return html
 
 
 def render_intra_tile_flows(od_flows):
@@ -133,6 +136,7 @@ def render_flows_cumsum(od_flows):
         add_diagonal=True,
     )
     html = utils.fig_to_html(chart)
+    plt.close()
     return html
 
 
@@ -177,11 +181,15 @@ def render_travel_time_hist(travel_time_hist):
     hist = plot.histogram(
         travel_time_hist, x_axis_label="travel time (min.)", x_axis_type=int
     )
-    return utils.fig_to_html(hist)
+    html_hist = utils.fig_to_html(hist)
+    plt.close()
+    return html_hist
 
 
 def render_jump_length_hist(jump_length_hist):
     hist = plot.histogram(
         jump_length_hist, x_axis_label="jump length (meters)", x_axis_type=int
     )
-    return utils.fig_to_html(hist)
+    html_hist = utils.fig_to_html(hist)
+    plt.close()
+    return html_hist

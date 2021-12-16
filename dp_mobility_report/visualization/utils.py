@@ -1,5 +1,6 @@
-import io
 import base64
+import io
+
 
 # TODO: better implementation and svg instead of png
 def fig_to_html(fig):
