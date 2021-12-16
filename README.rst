@@ -71,7 +71,7 @@ This package was highly inspired by the `pandas-profiling/pandas-profiling`_ pac
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
  
-.. _examples_: https://github.com/FreeMoveProject/dp_mobility_report/examples/html
+.. _examples: https://github.com/FreeMoveProject/dp_mobility_report/examples/html
 .. _`pandas-profiling/pandas-profiling`: https://github.com/pandas-profiling/pandas-profiling
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
