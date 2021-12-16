@@ -27,13 +27,15 @@ Differentially Private Mobility Data Report
 Install
 **********************
 
-.. code-block:: html
+.. code-block:: python
+
         pip install git+https://github.com/FreeMoveProject/dp_mobility_report
 
 Create a mobility report as HTML:
 **********************
 
-.. code-block:: html
+.. code-block:: python
+
         import pandas as pd
         import geopandas as gpd
 
