@@ -8,12 +8,12 @@ from dp_mobility_report.model import (
 )
 
 
-def report_elements(mdreport, disable_progress_bar=False):
+def report_elements(mdreport):
 
     report = dict()
 
     with tqdm(  # progress bar
-        total=4, desc="Create report", disable=disable_progress_bar
+        total=4, desc="Create report", disable=mdreport.disable_progress_bar
     ) as pbar:
         if ("all" in mdreport.analysis_selection) | (
             "overview" in mdreport.analysis_selection

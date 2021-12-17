@@ -88,6 +88,7 @@ class MobilityDataReport:
         self.top_x_flows = top_x_flows
         self.analysis_selection = analysis_selection
         self.evalu = evalu
+        self.disable_progress_bar = disable_progress_bar
 
     @property
     def report(self) -> dict:
