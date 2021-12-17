@@ -4,7 +4,7 @@ import geopandas as gpd
 
 from dp_mobility_report import md_report
 
-path_data = "/Users/alexandra/Documents/GitHub/evaluation_dp_mobility_report/data/processed"
+path_data = "data"
 path_html_output = "html"
 
 if not os.path.exists(path_html_output):
