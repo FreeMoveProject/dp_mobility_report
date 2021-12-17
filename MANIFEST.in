@@ -10,5 +10,8 @@ recursive-exclude * *.py[co]
 
 recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
 
+# Requirements
+include requirements*.txt
+
 # Templates and static resources
 recursive-include dp_mobility_report/report/html/html_templates *.html *.js *.css
