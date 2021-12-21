@@ -72,7 +72,7 @@ def get_missing_values(mdreport, eps):
         epsi = eps / len(columns)
     else:
         epsi = eps
-    missings = dict((mdreport.df.count() - len(mdreport.df))[columns])
+    missings = dict((len(mdreport.df) - mdreport.df.count())[columns])
 
     for col in columns:
         missings[col] = diff_privacy.counts_dp(
