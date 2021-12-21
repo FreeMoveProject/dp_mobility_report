@@ -102,7 +102,6 @@ def get_trips_over_time(mdreport, eps):
     # only keep date of datetime
     dp_quartiles = dp_quartiles.dt.date
 
-    # TODO: also add trips_per_month
     # different aggregations based on range of dates
     range_of_days = dp_quartiles["max"] - dp_quartiles["min"]
     if range_of_days > timedelta(days=712):  # more than two years (102 weeks)

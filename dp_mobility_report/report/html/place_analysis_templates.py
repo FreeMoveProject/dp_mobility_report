@@ -122,7 +122,6 @@ def render_most_freq_tiles_ranking(counts_per_tile, tessellation, top_x=10):
     return tile_ranking_html
 
 
-# TODO: fix berlin example (doesnt plot with altair?)
 def render_counts_per_tile_timewindow(counts_per_tile_timewindow, tessellation):
     output_html = ""
     if "weekday" in counts_per_tile_timewindow.columns:

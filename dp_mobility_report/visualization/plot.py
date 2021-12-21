@@ -117,7 +117,6 @@ def choropleth_map(
     return m
 
 
-# TODO: adjust color
 def multi_choropleth_map(counts_per_tile_timewindow, tessellation):
     counts_per_tile_timewindow = tessellation[["tile_id", "geometry"]].merge(
         counts_per_tile_timewindow, left_on="tile_id", right_index=True, how="left"
