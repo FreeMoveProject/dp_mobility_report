@@ -20,7 +20,7 @@ def preprocess_tessellation(tessellation):
         except:
             raise Exception(
                 "Tessellation cannot be cast to a geopandas.GeoDataFrame."
-            ) from ex
+            )
 
     return tessellation[["tile_id", "tile_name", "geometry"]]
 
@@ -38,8 +38,9 @@ def preprocess_data(df, tessellation, extra_var, max_trips_per_user, user_privac
         raise Exception("Column 'datetime' must be present in data.")
     df.loc[:, "id"] = range(0, len(df))
 
-    # make sure trip ids are unique
-    df["tid"] = df.groupby(["uid", "tid"]).ngroup()
+    # make sure trip ids are unique and ordered correctly
+    df["tid"] = df.sort_values(["uid", "datetime"]).groupby(["uid", "tid"], sort = False).ngroup()
+
 
     # remove unnessessary columns
     columns = ["id", "uid", "tid", "datetime", "lat", "lng"]
@@ -89,7 +90,6 @@ def assign_points_to_tessellation(df, tessellation):
     return pd.DataFrame(df)
 
 
-# TODO: speed up (parrellelize?)
 def sample_trips(df, max_trips_per_user, user_privacy):
     if user_privacy == True:
         tid_sample = (

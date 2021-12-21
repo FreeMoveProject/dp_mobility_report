@@ -39,21 +39,22 @@ def get_user_time_delta(mdreport, eps):
         epsi = eps / 6
         epsi_quart = 5 * epsi
 
-    df = mdreport.df.sort_values(
+    mdreport.df = mdreport.df.sort_values(
         ["uid", "tid", "datetime"]
-    )  # assuming tid numbers are integers and given in a chronological order
-    same_user = df.uid == df.uid.shift()
-    same_tid = df.tid == df.tid.shift()
-    user_time_delta = df.datetime - df.datetime.shift()
+    )  # assuming tid numbers are integers and given in a chronological order, as arranged in "preprocessing"
+    same_user = mdreport.df.uid == mdreport.df.uid.shift()
+    same_tid = mdreport.df.tid == mdreport.df.tid.shift()
+    user_time_delta = mdreport.df.datetime - mdreport.df.datetime.shift()
     user_time_delta[(same_tid) | (~same_user)] = None
-    n_deltas = len(user_time_delta[user_time_delta.notnull()])
-    user_time_delta = user_time_delta[user_time_delta >= timedelta(seconds=0)]
+    user_time_delta = user_time_delta[user_time_delta.notnull()]
+    overlaps = len(user_time_delta[user_time_delta < timedelta(seconds=0)])
+
 
     if len(user_time_delta) < 1:
         return None
 
     n_overlaps = diff_privacy.counts_dp(
-        n_deltas - len(user_time_delta),
+        overlaps,
         epsi,
         mdreport.max_trips_per_user,
         parallel=True,
