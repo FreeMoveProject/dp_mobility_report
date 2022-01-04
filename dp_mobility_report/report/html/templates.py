@@ -19,7 +19,7 @@ def render_html(mdreport):
         "overview" in mdreport.analysis_selection
     ):
         overview_segment = overview_templates.render_overview(
-            mdreport.report, mdreport.extra_var
+            mdreport.report #, mdreport.extra_var
         )
 
     if ("all" in mdreport.analysis_selection) | (

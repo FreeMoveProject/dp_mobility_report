@@ -56,7 +56,7 @@ def add_overview_elements(mdreport):
         #     else overview.get_extra_var_counts(mdreport,epsilon)
         # ),
         missing_values=overview.get_missing_values(mdreport, epsilon),
-        trips_over_time_section=overview.get_trips_over_time(mdreport, epsilon),
+        trips_over_time=overview.get_trips_over_time(mdreport, epsilon),
         trips_per_weekday=overview.get_trips_per_weekday(mdreport, epsilon),
         trips_per_hour=overview.get_trips_per_hour(mdreport, epsilon),
     )
@@ -67,10 +67,10 @@ def add_place_analysis_elements(mdreport):
         epsilon = mdreport.privacy_budget
     else:
         epsilon = mdreport.privacy_budget / 2
-    counts_per_tile_section = place_analysis.get_counts_per_tile(mdreport, epsilon)
+    counts_per_tile_section = place_analysis.get_visits_per_tile(mdreport, epsilon)
     return dict(
         counts_per_tile_section=counts_per_tile_section,
-        counts_per_tile_timewindow=place_analysis.get_counts_per_tile_timewindow(
+        counts_per_tile_timewindow=place_analysis.get_visits_per_tile_timewindow(
             mdreport, epsilon
         ),
     )

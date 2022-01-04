@@ -19,7 +19,7 @@ def bounds_dp(array, eps, sensitivity):
         array = array.sort_values().reset_index(drop=True)
     k = array.size
 
-    # ToDo: saskia Better way?
+    # TODO: saskia Better way?
     while result[1] < result[0]:
         for quant in [0, 1]:
             mech = diffprivlib.mechanisms.exponential.Exponential(

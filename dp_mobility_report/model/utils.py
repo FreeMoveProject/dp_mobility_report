@@ -58,7 +58,7 @@ def dp_hist_section(
         max_bins = int((max_value - min_value) / bin_size)
         max_bins = max_bins if max_bins > 2 else 2
     elif max_bins is None:
-        raise Exception("Either max_bins or bin_size needs to be defiend")
+        raise Exception("Either max_bins or bin_size needs to be defined")
     hist = np.histogram(series, bins=max_bins, range=(min_value, max_value))
     dp_hist_counts = diff_privacy.counts_dp(
         hist[0], epsi, sensitivity, parallel=True, nonzero=False

@@ -4,9 +4,9 @@ from dp_mobility_report.report.html.utils import fmt, get_template, render_summa
 from dp_mobility_report.visualization import plot, utils
 
 
-def render_overview(report, extra_var):
+def render_overview(report):
     dataset_stats_table = None
-    extra_var_barchart = None
+    #extra_var_barchart = None
     missing_values_table = None
     trips_over_time_linechart = None
     trips_over_time_linechart = None
@@ -16,7 +16,7 @@ def render_overview(report, extra_var):
 
     if "ds_statistics" in report:
         dataset_stats_table = render_dataset_statistics(
-            report["ds_statistics"], extra_var
+            report["ds_statistics"].data
         )
 
     # if "extra_var_counts" in report:
@@ -28,32 +28,32 @@ def render_overview(report, extra_var):
 
     if "missing_values" in report:
         missing_values_table = render_missing_values(
-            report["missing_values"], extra_var
+            report["missing_values"].data
         )
         # outlier_count_trips_over_time_info = render_outlier_info(
-        #     report["trips_over_time_section"].n_outliers
+        #     report["trips_over_time"].n_outliers
         # )
 
-    if "trips_over_time_section" in report:
+    if "trips_over_time" in report:
         trips_over_time_linechart = render_trips_over_time(
-            report["trips_over_time_section"]
+            report["trips_over_time"]
         )
         trips_over_time_summary_table = render_summary(
-            report["trips_over_time_section"].quartiles
+            report["trips_over_time"].quartiles
         )
 
     if "trips_per_weekday" in report:
         trips_per_weekday_barchart = render_trips_per_weekday(
-            report["trips_per_weekday"]
+            report["trips_per_weekday"].data
         )
 
     if "trips_per_hour" in report:
-        trips_per_hour_linechart = render_trips_per_hour(report["trips_per_hour"])
+        trips_per_hour_linechart = render_trips_per_hour(report["trips_per_hour"].data)
 
     template_structure = get_template("overview_segment.html")
     return template_structure.render(
         dataset_stats_table=dataset_stats_table,
-        extra_var_barchart=extra_var_barchart,
+        #extra_var_barchart=extra_var_barchart,
         missing_values_table=missing_values_table,
         trips_over_time_linechart=trips_over_time_linechart,
         trips_over_time_summary_table=trips_over_time_summary_table,
@@ -65,23 +65,23 @@ def render_overview(report, extra_var):
 
 ##### render single elements of the report #####
 ### render overview functions
-def render_dataset_statistics(dataset_statistics, extra_var=None):
+def render_dataset_statistics(dataset_statistics):
 
     dataset_stats_list = [
         {"name": "Number of records", "value": fmt(dataset_statistics["n_records"])},
         {"name": "Distinct trips", "value": fmt(dataset_statistics["n_trips"])},
         {
             "name": "Number of complete trips (start and and point)",
-            "value": fmt(dataset_statistics["ntrips_double"]),
+            "value": fmt(dataset_statistics["n_complete_trips"]),
         },
         {
             "name": "Number of incomplete trips (single point)",
-            "value": fmt(dataset_statistics["ntrips_single"]),
+            "value": fmt(dataset_statistics["n_incomplete_trips"]),
         },
         {"name": "Distinct users", "value": fmt(dataset_statistics["n_users"])},
         {
             "name": "Distinct locations (lat & lon combination)",
-            "value": fmt(dataset_statistics["n_places"]),
+            "value": fmt(dataset_statistics["n_locations"]),
         },
     ]
 
@@ -112,7 +112,7 @@ def render_dataset_statistics(dataset_statistics, extra_var=None):
 #     return utils.fig_to_html(barchart)
 
 
-def render_missing_values(missing_values, extra_var):
+def render_missing_values(missing_values):
     missing_values_list = [
         {"name": "User ID (uid)", "value": fmt(missing_values["uid"])},
         {"name": "Trip ID (tid)", "value": fmt(missing_values["tid"])},
@@ -121,10 +121,10 @@ def render_missing_values(missing_values, extra_var):
         {"name": "Longitude (lng)", "value": fmt(missing_values["lng"])},
     ]
 
-    if extra_var in missing_values:
-        missing_values_list.append(
-            {"name": (extra_var), "value": fmt(missing_values[extra_var])}
-        )
+    # if extra_var in missing_values:
+    #     missing_values_list.append(
+    #         {"name": (extra_var), "value": fmt(missing_values[extra_var])}
+    #     )
     template_table = get_template("table.html")
     missing_values_html = template_table.render(
         name="Missing values", rows=missing_values_list
@@ -132,15 +132,15 @@ def render_missing_values(missing_values, extra_var):
     return missing_values_html
 
 
-def render_trips_over_time(trips_over_time_section):
+def render_trips_over_time(trips_over_time):
     title = (
         "Date"
-        if trips_over_time_section.date_aggregation_level == "date"
+        if trips_over_time.datetime_precision == "date"
         else "Date (grouped by week)"
     )
-    if len(trips_over_time_section.data) <= 20:
+    if len(trips_over_time.data) <= 20:
         chart = plot.barchart(
-            data=trips_over_time_section.data,
+            data=trips_over_time.data,
             x="datetime",
             y="trip_count",
             x_axis_label="Date",
@@ -150,7 +150,7 @@ def render_trips_over_time(trips_over_time_section):
         html = utils.fig_to_html(chart)
     else:
         chart = plot.linechart(
-            trips_over_time_section.data, "datetime", "trip_count", "Date", "Frequency"
+            trips_over_time.data, "datetime", "trip_count", "Date", "Frequency"
         )
         html = utils.fig_to_html(chart)
     plt.close()

@@ -1,8 +1,8 @@
 from datetime import timedelta
 
-import numpy as np
 import pandas as pd
 
+from dp_mobility_report import constants as const
 from dp_mobility_report.model import utils
 from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
@@ -14,19 +14,20 @@ def get_dataset_statistics(mdreport, eps):
     else:
         epsi = eps / 4
 
-    pointsTrip = mdreport.df.groupby("tid").count().uid.value_counts()
-    n_start_end = diff_privacy.counts_dp(
-        pointsTrip, epsi, 2 * mdreport.max_trips_per_user, parallel=True
+    # counts for complete and incomplete trips
+    points_per_trip = diff_privacy.counts_dp(
+        mdreport.df.reset_index().groupby(const.TID).count()["index"].value_counts(), 
+        epsi, 
+        2 * mdreport.max_trips_per_user, parallel=True
     )
+    n_incomplete_trips = points_per_trip[1] if (1 in points_per_trip.index) else 0
+    n_complete_trips = points_per_trip[2] if (2 in points_per_trip.index) else 0
+    n_trips = n_incomplete_trips + n_complete_trips
+    n_records = n_incomplete_trips + n_complete_trips * 2
 
-    ntrips_single = n_start_end[1] if (1 in n_start_end.index) else 0
-    ntrips_double = n_start_end[2] if (2 in n_start_end.index) else 0
-    n_trips = ntrips_single + ntrips_double
-    n_records = ntrips_single + ntrips_double * 2
-
-    n_users = diff_privacy.counts_dp(mdreport.df.uid.nunique(), epsi, 1)
-    n_places = diff_privacy.counts_dp(
-        mdreport.df.groupby(["lat", "lng"]).ngroups,
+    n_users = diff_privacy.counts_dp(mdreport.df[const.UID].nunique(), epsi, 1)
+    n_locations = diff_privacy.counts_dp(
+        mdreport.df.groupby([const.LAT, const.LNG]).ngroups,
         epsi,
         2 * mdreport.max_trips_per_user,
     )
@@ -34,39 +35,19 @@ def get_dataset_statistics(mdreport, eps):
     stats = dict(
         n_records=n_records,
         n_trips=n_trips,
-        ntrips_double=ntrips_double,
-        ntrips_single=ntrips_single,
+        n_complete_trips=n_complete_trips,
+        n_incomplete_trips=n_incomplete_trips,
         n_users=n_users,
-        n_places=n_places,
+        n_locations=n_locations,
     )
-
-    # if mdreport.extra_var is not None:
-    #     # todo saskia consistent with get_extra_var_counts
-    #     n_extra_var = diff_privacy.counts_dp(mdreport.df[mdreport.extra_var].nunique(),epsi,2*mdreport.max_trips_per_user,parallel=True)
-    #     stats["n_extra_var"] = n_extra_var[0]
-
-    return stats
-
-
-# TODO: problem - "leaking of groupby keys"
-# def get_extra_var_counts(mdreport,eps):
-#     extra_var_value_counts = diff_privacy.counts_dp(mdreport.df[mdreport.extra_var].value_counts(),eps,2*mdreport.max_trips_per_user,parallel=True)
-#     #if eps==None:
-#      #   extra_var_value_counts = df[extra_var].value_counts()
-
-#     extra_var_perc = pd.Series(
-#         round(extra_var_value_counts / sum(extra_var_value_counts) * 100),
-#         name="perc",
-#     )
-#     return pd.concat([extra_var_value_counts, extra_var_perc], axis=1)
+    return Section(
+        data=stats,
+        privacy_budget=eps
+    )
 
 
 def get_missing_values(mdreport, eps):
-
-    # if mdreport.extra_var is not None:
-    #     columns = ["uid", "tid", "datetime", "lat", "lng", mdreport.extra_var]
-    # else:
-    columns = ["uid", "tid", "datetime", "lat", "lng"]
+    columns = [const.UID, const.TID, const.DATETIME, const.LAT, const.LNG]
 
     if eps is not None:
         epsi = eps / len(columns)
@@ -79,7 +60,10 @@ def get_missing_values(mdreport, eps):
             missings[col], epsi, 2 * mdreport.max_trips_per_user, nonzero=False
         )
 
-    return missings
+    return Section(
+        data=missings,
+        privacy_budget=eps
+    )
 
 
 def get_trips_over_time(mdreport, eps):
@@ -89,38 +73,37 @@ def get_trips_over_time(mdreport, eps):
     else:
         epsi = eps / 6
         epsi_quant = 5 * epsi
-    df_trip = mdreport.df[(mdreport.df.point_type == "end")]
+    df_trip = mdreport.df[(mdreport.df.point_type == const.END)] # only count each trip once
     dp_quartiles = diff_privacy.quartiles_dp(
         df_trip.datetime, epsi_quant, mdreport.max_trips_per_user
     )
 
     # cut based on dp min and max values
-    trips_over_time, _ = utils.cut_outliers(
+    trips_over_time, _ = utils.cut_outliers( # don't disclose outliers to the as the boundaries are not defined through user input
         df_trip.datetime, min_value=dp_quartiles["min"], max_value=dp_quartiles["max"]
     )
 
-    # only keep date of datetime
+    # only use date and remove time
     dp_quartiles = dp_quartiles.dt.date
 
     # different aggregations based on range of dates
     range_of_days = dp_quartiles["max"] - dp_quartiles["min"]
     if range_of_days > timedelta(days=712):  # more than two years (102 weeks)
         resample = "M"
-        date_aggregation_level = "month"
+        datetime_precision = const.PREC_MONTH
     if range_of_days > timedelta(days=90):  # more than three months
         resample = "W-Mon"
-        date_aggregation_level = "week"
+        datetime_precision = const.PREC_WEEK
     else:
         resample = "1D"
-        date_aggregation_level = "date"
+        datetime_precision = const.PREC_DATE
 
     trip_count = pd.DataFrame(trips_over_time)
     trip_count.loc[:, "trip_count"] = 1
     trip_count = (
-        trip_count.set_index("datetime").resample(resample).count().reset_index()
+        trip_count.set_index(const.DATETIME).resample(resample).count().reset_index()
     )
     trip_count.datetime = trip_count.datetime.dt.date
-    # real_entropy_section=user_analysis.get_real_entropy(_tdf,epsilon, mdreport.evalu)
     trip_count.trip_count = diff_privacy.counts_dp(
         trip_count["trip_count"],
         epsi,
@@ -131,20 +114,19 @@ def get_trips_over_time(mdreport, eps):
 
     return Section(
         data=trip_count,
-        n_outliers=None,
-        date_aggregation_level=date_aggregation_level,
-        quartiles=dp_quartiles,
+        privacy_budget=eps,
+        datetime_precision=datetime_precision,
+        quartiles=dp_quartiles
     )
 
 
 def get_trips_per_weekday(mdreport, eps):
-
-    mdreport.df.loc[:, "date"] = mdreport.df.datetime.dt.date
-    mdreport.df.loc[:, "day_name"] = mdreport.df.datetime.dt.day_name()
+    mdreport.df.loc[:, const.DATE] = mdreport.df.datetime.dt.date
+    mdreport.df.loc[:, const.DAY_NAME] = mdreport.df.datetime.dt.day_name()
 
     trips_per_weekday = (
-        mdreport.df[mdreport.df.point_type == "end"]  # count trips not records
-        .groupby(["day_name"])
+        mdreport.df[mdreport.df.point_type == const.END]  # count trips not records
+        .groupby([const.DAY_NAME])
         .count()
         .tid
     )
@@ -157,20 +139,27 @@ def get_trips_per_weekday(mdreport, eps):
         nonzero=False,
     )
 
-    return dp_trips_per_weekday
+    return Section(
+        data=dp_trips_per_weekday,
+        privacy_budget=eps
+        )
+
 
 
 def get_trips_per_hour(mdreport, eps):
-    hour_weekday = mdreport.df.groupby(["hour", "is_weekend", "point_type"]).count().tid
+    hour_weekday = mdreport.df.groupby([const.HOUR, const.IS_WEEKEND, const.POINT_TYPE]).count().tid
     hour_weekday.name = "count"
 
     dp_hour_weekday = diff_privacy.counts_dp(
         hour_weekday, eps, mdreport.max_trips_per_user, parallel=True
     ).reset_index()
 
-    dp_hour_weekday["time_category"] = (
-        dp_hour_weekday.is_weekend + "_" + dp_hour_weekday.point_type
+    dp_hour_weekday[const.TIME_CATEGORY] = (
+        dp_hour_weekday[const.IS_WEEKEND] + "_" + dp_hour_weekday[const.POINT_TYPE]
     )
-    dp_hour_weekday = dp_hour_weekday[["hour", "time_category", "count"]]
+    dp_hour_weekday = dp_hour_weekday[[const.HOUR, const.TIME_CATEGORY, "count"]]
 
-    return dp_hour_weekday
+    return Section(
+        data=dp_hour_weekday,
+        privacy_budget=eps
+        )
