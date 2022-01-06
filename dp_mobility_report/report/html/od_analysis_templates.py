@@ -30,32 +30,32 @@ def render_od_analysis(mdreport):
     report = mdreport.report
 
     if "od_flows" in report:
-        od_map = render_origin_destination_flows(report["od_flows"], mdreport)
-        intra_tile_flows_info = render_intra_tile_flows(report["od_flows"])
-        flows_summary_table = render_summary(report["od_flows"].flow.describe())
-        flows_cumsum_linechart = render_flows_cumsum(report["od_flows"])
+        od_map = render_origin_destination_flows(report["od_flows"].data, mdreport)
+        intra_tile_flows_info = render_intra_tile_flows(report["od_flows"].data)
+        flows_summary_table = render_summary(report["od_flows"].data.flow.describe())
+        flows_cumsum_linechart = render_flows_cumsum(report["od_flows"].data)
         most_freq_flows_ranking = render_most_freq_flows_ranking(
-            report["od_flows"], mdreport.tessellation
+            report["od_flows"].data, mdreport.tessellation
         )
 
-    if "travel_time_section" in report:
+    if "travel_time" in report:
         outlier_count_travel_time_info = render_outlier_info(
-            report["travel_time_section"].n_outliers,
+            report["travel_time"].n_outliers,
             mdreport.max_travel_time,
         )
-        travel_time_hist = render_travel_time_hist(report["travel_time_section"].data)
+        travel_time_hist = render_travel_time_hist(report["travel_time"].data)
         travel_time_summary_table = render_summary(
-            report["travel_time_section"].quartiles
+            report["travel_time"].quartiles
         )
 
-    if "jump_length_section" in report:
+    if "jump_length" in report:
         outlier_count_jump_length_info = render_outlier_info(
-            report["jump_length_section"].n_outliers,
+            report["jump_length"].n_outliers,
             mdreport.max_jump_length,
         )
-        jump_length_hist = render_jump_length_hist(report["jump_length_section"].data)
+        jump_length_hist = render_jump_length_hist(report["jump_length"].data)
         jump_length_summary_table = render_summary(
-            report["jump_length_section"].quartiles
+            report["jump_length"].quartiles
         )
     template_structure = get_template("od_analysis_segment.html")
     return template_structure.render(

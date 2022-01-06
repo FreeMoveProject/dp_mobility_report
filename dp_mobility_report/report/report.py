@@ -67,9 +67,9 @@ def add_place_analysis_elements(mdreport):
         epsilon = mdreport.privacy_budget
     else:
         epsilon = mdreport.privacy_budget / 2
-    counts_per_tile_section = place_analysis.get_visits_per_tile(mdreport, epsilon)
+    counts_per_tile = place_analysis.get_visits_per_tile(mdreport, epsilon)
     return dict(
-        counts_per_tile_section=counts_per_tile_section,
+        counts_per_tile=counts_per_tile,
         counts_per_tile_timewindow=place_analysis.get_visits_per_tile_timewindow(
             mdreport, epsilon
         ),
@@ -82,21 +82,9 @@ def add_od_analysis_elements(mdreport, _od_shape):
     else:
         epsilon = mdreport.privacy_budget / 3
     return dict(
-        od_flows=od_analysis.get_od_flows(_od_shape, epsilon, mdreport),
-        travel_time_section=od_analysis.get_travel_time(
-            _od_shape,
-            epsilon,
-            mdreport.max_trips_per_user,
-            mdreport.max_travel_time,
-            mdreport.bin_size_travel_time,
-        ),
-        jump_length_section=od_analysis.get_jump_length(
-            _od_shape,
-            epsilon,
-            mdreport.max_trips_per_user,
-            mdreport.max_jump_length,
-            mdreport.bin_size_jump_length,
-        ),
+        od_flows=od_analysis.get_od_flows(_od_shape, mdreport, epsilon),
+        travel_time=od_analysis.get_travel_time(_od_shape, mdreport, epsilon),
+        jump_length=od_analysis.get_jump_length(_od_shape, mdreport, epsilon)
     )
 
 
@@ -106,12 +94,12 @@ def add_user_analysis_elements(mdreport):
     else:
         epsilon = mdreport.privacy_budget / 7
     return dict(
-        traj_per_user_section=user_analysis.get_traj_per_user(mdreport, epsilon),
-        user_time_delta_section=user_analysis.get_user_time_delta(mdreport, epsilon),
-        radius_gyration_section=user_analysis.get_radius_of_gyration(mdreport, epsilon),
-        location_entropy_section=user_analysis.get_location_entropy(mdreport, epsilon),
-        user_tile_count_section=user_analysis.get_user_tile_count(mdreport, epsilon),
-        uncorrelated_entropy_section=user_analysis.get_uncorrelated_entropy(
+        traj_per_user=user_analysis.get_traj_per_user(mdreport, epsilon),
+        user_time_delta=user_analysis.get_user_time_delta(mdreport, epsilon),
+        radius_gyration=user_analysis.get_radius_of_gyration(mdreport, epsilon),
+        location_entropy=user_analysis.get_location_entropy(mdreport, epsilon),
+        user_tile_count=user_analysis.get_user_tile_count(mdreport, epsilon),
+        mobility_entropy=user_analysis.get_mobility_entropy(
             mdreport, epsilon
         ),
     )

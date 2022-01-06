@@ -3,7 +3,7 @@ from datetime import timedelta
 import pandas as pd
 
 from dp_mobility_report import constants as const
-from dp_mobility_report.model import utils
+from dp_mobility_report.model import m_utils
 from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
 
@@ -73,14 +73,14 @@ def get_trips_over_time(mdreport, eps):
     else:
         epsi = eps / 6
         epsi_quant = 5 * epsi
-    df_trip = mdreport.df[(mdreport.df.point_type == const.END)] # only count each trip once
+    df_trip = mdreport.df[(mdreport.df[const.POINT_TYPE] == const.END)] # only count each trip once
     dp_quartiles = diff_privacy.quartiles_dp(
-        df_trip.datetime, epsi_quant, mdreport.max_trips_per_user
+        df_trip[const.DATETIME], epsi_quant, mdreport.max_trips_per_user
     )
 
     # cut based on dp min and max values
-    trips_over_time, _ = utils.cut_outliers( # don't disclose outliers to the as the boundaries are not defined through user input
-        df_trip.datetime, min_value=dp_quartiles["min"], max_value=dp_quartiles["max"]
+    trips_over_time, _ = m_utils.cut_outliers( # don't disclose outliers to the as the boundaries are not defined through user input
+        df_trip[const.DATETIME], min_value=dp_quartiles["min"], max_value=dp_quartiles["max"]
     )
 
     # only use date and remove time
@@ -103,7 +103,7 @@ def get_trips_over_time(mdreport, eps):
     trip_count = (
         trip_count.set_index(const.DATETIME).resample(resample).count().reset_index()
     )
-    trip_count.datetime = trip_count.datetime.dt.date
+    trip_count.datetime = trip_count[const.DATETIME].dt.date
     trip_count.trip_count = diff_privacy.counts_dp(
         trip_count["trip_count"],
         epsi,
@@ -121,14 +121,13 @@ def get_trips_over_time(mdreport, eps):
 
 
 def get_trips_per_weekday(mdreport, eps):
-    mdreport.df.loc[:, const.DATE] = mdreport.df.datetime.dt.date
-    mdreport.df.loc[:, const.DAY_NAME] = mdreport.df.datetime.dt.day_name()
+    mdreport.df.loc[:, const.DATE] = mdreport.df[const.DATETIME].dt.date
+    mdreport.df.loc[:, const.DAY_NAME] = mdreport.df[const.DATETIME].dt.day_name()
 
     trips_per_weekday = (
-        mdreport.df[mdreport.df.point_type == const.END]  # count trips not records
+        mdreport.df[mdreport.df[const.POINT_TYPE] == const.END]  # count trips not records
         .groupby([const.DAY_NAME])
-        .count()
-        .tid
+        .count()[const.TID]
     )
 
     dp_trips_per_weekday = diff_privacy.counts_dp(
@@ -147,7 +146,7 @@ def get_trips_per_weekday(mdreport, eps):
 
 
 def get_trips_per_hour(mdreport, eps):
-    hour_weekday = mdreport.df.groupby([const.HOUR, const.IS_WEEKEND, const.POINT_TYPE]).count().tid
+    hour_weekday = mdreport.df.groupby([const.HOUR, const.IS_WEEKEND, const.POINT_TYPE]).count()[const.TID]
     hour_weekday.name = "count"
 
     dp_hour_weekday = diff_privacy.counts_dp(

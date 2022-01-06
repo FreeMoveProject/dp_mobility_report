@@ -20,69 +20,63 @@ def render_user_analysis(mdreport):
     location_entropy_map = None
     distinct_tiles_user_summary_table = None
     distinct_tiles_user_hist = None
-    uncorrelated_entropy_summary_table = None
-    uncorrelated_entropy_hist = None
+    mobility_entropy_summary_table = None
+    mobility_entropy_hist = None
     real_entropy_summary_table = None
     real_entropy_hist = None
 
     report = mdreport.report
 
-    if "traj_per_user_section" in report:
+    if "traj_per_user" in report:
         traj_per_user_summary_table = render_summary(
-            report["traj_per_user_section"].quartiles
+            report["traj_per_user"].quartiles
         )
 
-    if "traj_per_user_section" in report:
-        traj_per_user_hist = render_traj_per_user(report["traj_per_user_section"].data)
+    if "traj_per_user" in report:
+        traj_per_user_hist = render_traj_per_user(report["traj_per_user"].data)
 
-    if ("user_time_delta_section" in report) & (
-        report["user_time_delta_section"] is not None
+    if ("user_time_delta" in report) & (
+        report["user_time_delta"] is not None
     ):
         overlapping_trips_info = render_overlapping_trips(
-            report["user_time_delta_section"].n_outliers
+            report["user_time_delta"].n_outliers
         )
         time_between_traj_summary_table = render_summary(
-            report["user_time_delta_section"].quartiles
+            report["user_time_delta"].quartiles
         )
 
-    if "radius_gyration_section" in report:
+    if "radius_gyration" in report:
         outlier_count_radius_gyration_info = render_outlier_info(
-            report["radius_gyration_section"].n_outliers,
+            report["radius_gyration"].n_outliers,
             mdreport.max_jump_length,
         )
         radius_gyration_summary_table = render_summary(
-            report["radius_gyration_section"].quartiles
+            report["radius_gyration"].quartiles
         )
         radius_gyration_hist = render_radius_gyration(
-            report["radius_gyration_section"].data
+            report["radius_gyration"].data
         )
 
-    if "location_entropy_section" in report:
+    if "location_entropy" in report:
         location_entropy_map = render_location_entropy(
-            report["location_entropy_section"], mdreport.tessellation
+            report["location_entropy"].data, mdreport.tessellation
         )
 
-    if "user_tile_count_section" in report:
+    if "user_tile_count" in report:
         distinct_tiles_user_summary_table = render_summary(
-            report["user_tile_count_section"].quartiles
+            report["user_tile_count"].quartiles
         )
         distinct_tiles_user_hist = render_distinct_tiles_user(
-            report["user_tile_count_section"].data
+            report["user_tile_count"].data
         )
 
-    if "uncorrelated_entropy_section" in report:
-        uncorrelated_entropy_summary_table = render_summary(
-            report["uncorrelated_entropy_section"].quartiles
+    if "mobility_entropy" in report:
+        mobility_entropy_summary_table = render_summary(
+            report["mobility_entropy"].quartiles
         )
-        uncorrelated_entropy_hist = render_uncorrelated_entropy(
-            report["uncorrelated_entropy_section"].data
+        mobility_entropy_hist = render_mobility_entropy(
+            report["mobility_entropy"].data
         )
-
-    if "real_entropy" in report:
-        real_entropy_summary_table = render_summary(
-            report["real_entropy_section"].quartiles
-        )
-        real_entropy_hist = render_real_entropy(report["real_entropy_section"].data)
 
     template_structure = get_template("user_analysis_segment.html")
 
@@ -97,8 +91,8 @@ def render_user_analysis(mdreport):
         location_entropy_map=location_entropy_map,
         distinct_tiles_user_hist=distinct_tiles_user_hist,
         distinct_tiles_user_summary_table=distinct_tiles_user_summary_table,
-        uncorrelated_entropy_hist=uncorrelated_entropy_hist,
-        uncorrelated_entropy_summary_table=uncorrelated_entropy_summary_table,
+        mobility_entropy_hist=mobility_entropy_hist,
+        mobility_entropy_summary_table=mobility_entropy_summary_table,
         real_entropy_hist=real_entropy_hist,
         real_entropy_summary_table=real_entropy_summary_table,
     )
@@ -166,10 +160,10 @@ def render_distinct_tiles_user(user_tile_count_hist):
     return html
 
 
-def render_uncorrelated_entropy(uncorrelated_entropy):
+def render_mobility_entropy(mobility_entropy):
     hist = plot.histogram(
-        (uncorrelated_entropy[0], uncorrelated_entropy[1].round(2)),
-        x_axis_label="uncorrelated entropy",
+        (mobility_entropy[0], mobility_entropy[1].round(2)),
+        x_axis_label="mobility entropy",
     )
     html = utils.fig_to_html(hist)
     plt.close()

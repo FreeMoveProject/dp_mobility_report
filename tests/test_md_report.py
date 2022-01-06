@@ -3,6 +3,7 @@
 import pytest
 import pandas as pd
 import geopandas as gpd
+from dp_mobility_report import constants as const
 from dp_mobility_report import md_report
 
 
@@ -57,24 +58,23 @@ def test_wrong_input_params_MobilityDataReport(test_data, test_tessellation):
 
     # wrong input for max_trips_per_user
     mob_report = md_report.MobilityDataReport(test_data, test_tessellation, max_trips_per_user = -1, privacy_budget=None)
-    assert mob_report.max_trips_per_user == test_data.groupby("uid").nunique().tid.max()
+    assert mob_report.max_trips_per_user == test_data.groupby(const.UID).nunique()[const.TID].max()
     mob_report = md_report.MobilityDataReport(test_data, test_tessellation, max_trips_per_user = "not an int", privacy_budget=None)
-    assert mob_report.max_trips_per_user == test_data.groupby("uid").nunique().tid.max()
+    assert mob_report.max_trips_per_user == test_data.groupby(const.UID).nunique()[const.TID].max()
     mob_report = md_report.MobilityDataReport(test_data, test_tessellation, max_trips_per_user = 3.1, privacy_budget=None)
-    assert mob_report.max_trips_per_user == test_data.groupby("uid").nunique().tid.max()
+    assert mob_report.max_trips_per_user == test_data.groupby(const.UID).nunique()[const.TID].max()
 
 
 def test_report_output(test_data, test_tessellation):
     report = md_report.MobilityDataReport(test_data, test_tessellation, privacy_budget=None).report
     assert isinstance(report, dict)
     assert list(report.keys()) == ['ds_statistics', 'missing_values', 'trips_over_time', 'trips_per_weekday', 
-        'trips_per_hour', 'counts_per_tile_section', 'counts_per_tile_timewindow', 'od_flows', 'travel_time_section', 'jump_length_section', 
-        'traj_per_user_section', 'user_time_delta_section', 'radius_gyration_section', 'location_entropy_section', 'user_tile_count_section', 
-        'uncorrelated_entropy_section']
+        'trips_per_hour', 'counts_per_tile', 'counts_per_tile_timewindow', 'od_flows', 'travel_time', 'jump_length', 
+        'traj_per_user', 'user_time_delta', 'radius_gyration', 'location_entropy', 'user_tile_count', 
+        'mobility_entropy']
 
 
 def test_to_html_file(test_data, test_tessellation, tmp_path):
-    #create a file "myfile" in "mydir" in temp directory
     file_name = tmp_path / "html/test_output.html"
     file_name.parent.mkdir()
     md_report.MobilityDataReport(test_data, test_tessellation, privacy_budget=None).to_file(file_name)

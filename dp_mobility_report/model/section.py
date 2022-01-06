@@ -7,7 +7,7 @@ class Section:
     Potential further attributes: `quartiles`, `datetime_precision`.
     """
 
-    def __init__(self, data, privacy_budget=None, n_outliers=None, **kwargs) -> None:
+    def __init__(self, data, privacy_budget, n_outliers=None, **kwargs) -> None:
 
         self.data = data
         self.n_outliers = n_outliers

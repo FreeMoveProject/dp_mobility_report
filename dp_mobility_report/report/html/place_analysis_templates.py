@@ -14,28 +14,28 @@ def render_place_analysis(report, tessellation):
     most_freq_tiles_ranking = None
     counts_per_tile_time_map = None
 
-    if "counts_per_tile_section" in report:
+    if "counts_per_tile" in report:
         points_outside_tessellation_info = render_points_outside_tess(
-            report["counts_per_tile_section"].n_outliers
+            report["counts_per_tile"].n_outliers
         )
 
-    if "counts_per_tile_section" in report:
+    if "counts_per_tile" in report:
         counts_per_tile_map = render_counts_per_tile(
-            report["counts_per_tile_section"].data, tessellation
+            report["counts_per_tile"].data, tessellation
         )
         counts_per_tile_summary_table = render_summary(
-            report["counts_per_tile_section"].quartiles
+            report["counts_per_tile"].quartiles
         )
         counts_per_tile_cumsum_linechart = render_counts_per_tile_cumsum(
-            report["counts_per_tile_section"].data
+            report["counts_per_tile"].data
         )
         most_freq_tiles_ranking = render_most_freq_tiles_ranking(
-            report["counts_per_tile_section"].data, tessellation
+            report["counts_per_tile"].data, tessellation
         )
 
     if "counts_per_tile_timewindow" in report:
         counts_per_tile_time_map = render_counts_per_tile_timewindow(
-            report["counts_per_tile_timewindow"], tessellation
+            report["counts_per_tile_timewindow"].data, tessellation
         )
 
     template_structure = get_template("place_analysis_segment.html")

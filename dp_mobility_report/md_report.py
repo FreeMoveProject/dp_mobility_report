@@ -10,6 +10,7 @@ from tqdm.auto import tqdm
 from pandas import DataFrame
 from geopandas import GeoDataFrame
 
+from dp_mobility_report import constants as const
 from dp_mobility_report.model import preprocessing
 from dp_mobility_report.report import report
 from dp_mobility_report.report.html.templates import create_html_assets, render_html
@@ -101,7 +102,7 @@ class MobilityDataReport:
             self.max_trips_per_user = (
                 max_trips_per_user
                 if max_trips_per_user is not None
-                else df.groupby("uid").nunique().tid.max()
+                else df.groupby(const.UID).nunique()[const.TID].max()
             )
 
             if not user_privacy:
@@ -127,6 +128,9 @@ class MobilityDataReport:
         self.analysis_selection = analysis_selection
         self.evalu = evalu
         self.disable_progress_bar = disable_progress_bar
+        
+        # initialize parallel processing
+        pandarallel.initialize(verbose=0)
 
     @property
     def report(self) -> dict:
@@ -134,9 +138,6 @@ class MobilityDataReport:
         Returns:
             A dictionary with all report elements.
         """
-        # initialize parallel processing
-        pandarallel.initialize(verbose=0)
-
         if self._report is None:
             self._report = report.report_elements(self)
         return self._report
@@ -197,3 +198,4 @@ class MobilityDataReport:
                 pbar.update()
 
         output_file.write_text(data, encoding="utf-8")
+

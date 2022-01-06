@@ -1,12 +1,15 @@
 from pyproj import CRS
 
-# data set constants
 ID = "id"
 UID = "uid"
 TID = "tid"
 LAT = "lat"
 LNG = "lng"
 DATETIME = "datetime"
+TILE_ID_END = "tile_id_end"
+LNG_END = "lng_end"
+LAT_END = "lat_end"
+DATETIME_END = "datetime_end"
 DATE = "date"
 DAY_NAME = "day_name"
 HOUR = "hour"
@@ -16,7 +19,6 @@ POINT_TYPE = "point_type"
 START = "start"
 END = "end"
 
-# tessellation constants
 TILE_ID = "tile_id"
 TILE_NAME = "tile_name"
 GEOMETRY = "geometry"
@@ -27,3 +29,6 @@ DATETIME_PRECISION = "datetime_precision"
 PREC_DATE = "date"
 PREC_WEEK = "week"
 PREC_MONTH = "month"
+
+RADIUS_OF_GYRATION = "radius_of_gyration"
+LOCATION_ENTROPY = "location_entropy"

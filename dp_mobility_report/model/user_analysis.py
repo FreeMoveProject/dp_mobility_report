@@ -3,24 +3,23 @@ from datetime import timedelta
 
 import numpy as np
 import pandas as pd
-from haversine import Unit, haversine
-from pandarallel import pandarallel
 from scipy import stats
 
-from dp_mobility_report.model import utils
+from dp_mobility_report import constants as const
+from dp_mobility_report.model import m_utils
 from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
 
 
 def get_traj_per_user(mdreport, eps):
-    user_nunique = mdreport.df.groupby("uid").nunique().tid
+    user_nunique = mdreport.df.groupby(const.UID).nunique()[const.TID]
     max_trips = (
         mdreport.max_trips_per_user if mdreport.user_privacy else user_nunique.max()
     )
     # TODO: define max_bins
     max_bins = max_trips if max_trips < 10 else 10
 
-    return utils.dp_hist_section(
+    return m_utils.hist_section(
         user_nunique,
         eps,
         sensitivity=1,
@@ -40,11 +39,11 @@ def get_user_time_delta(mdreport, eps):
         epsi_quart = 5 * epsi
 
     mdreport.df = mdreport.df.sort_values(
-        ["uid", "tid", "datetime"]
+        [const.UID, const.TID, const.DATETIME]
     )  # assuming tid numbers are integers and given in a chronological order, as arranged in "preprocessing"
-    same_user = mdreport.df.uid == mdreport.df.uid.shift()
-    same_tid = mdreport.df.tid == mdreport.df.tid.shift()
-    user_time_delta = mdreport.df.datetime - mdreport.df.datetime.shift()
+    same_user = mdreport.df[const.UID] == mdreport.df[const.UID].shift()
+    same_tid = mdreport.df[const.TID] == mdreport.df[const.TID].shift()
+    user_time_delta = mdreport.df[const.DATETIME] - mdreport.df[const.DATETIME].shift()
     user_time_delta[(same_tid) | (~same_user)] = None
     user_time_delta = user_time_delta[user_time_delta.notnull()]
     overlaps = len(user_time_delta[user_time_delta < timedelta(seconds=0)])
@@ -64,12 +63,15 @@ def get_user_time_delta(mdreport, eps):
         user_time_delta, epsi_quart, mdreport.max_trips_per_user
     )
 
-    return Section(data=None, n_outliers=n_overlaps, quartiles=dp_quartiles)
+    return Section(data=None, 
+                  privacy_budget=eps,
+                  n_outliers=n_overlaps, 
+                  quartiles=dp_quartiles)
 
 
 def get_radius_of_gyration(mdreport, eps):
     rg = _radius_of_gyration(mdreport.df)
-    return utils.dp_hist_section(
+    return m_utils.hist_section(
         rg,
         eps,
         sensitivity=1,
@@ -80,126 +82,104 @@ def get_radius_of_gyration(mdreport, eps):
     )
 
 
-def _haversine_dist_squared(coords):
-    return (
-        haversine(
-            (float(coords[0]), float(coords[1])),
-            (float(coords[2]), float(coords[3])),
-            unit=Unit.METERS,
-        )
-        ** 2
-    )
-
-
-def _mean_then_square(x):
-    return np.sqrt(np.mean(x))
-
-
 def _radius_of_gyration(df):
     # create a lat_lng array for each individual
-    lats_lngs = df.set_index("uid")[["lat", "lng"]].groupby(level=0).apply(np.array)
+    lats_lngs = df.set_index(const.UID)[[const.LAT, const.LNG]].groupby(level=0).apply(np.array)
     # compute the center of mass for each individual
     center_of_masses = np.array([np.mean(x, axis=0) for x in lats_lngs])
     center_of_masses_df = pd.DataFrame(
         data=center_of_masses, index=lats_lngs.index, columns=["com_lat", "com_lng"]
     )
 
-    df_rg = df.merge(center_of_masses_df, how="left", left_on="uid", right_index=True)
+    df_rog = df.merge(center_of_masses_df, how="left", left_on=const.UID, right_index=True)
     # compute the distance between each location and its according center of mass
-    df_rg["com_dist"] = df_rg[["lat", "lng", "com_lat", "com_lng"]].parallel_apply(
+    def _haversine_dist_squared(coords): return m_utils.haversine_dist(coords) ** 2
+    df_rog["com_dist"] = df_rog[[const.LAT, const.LNG, "com_lat", "com_lng"]].parallel_apply(
         _haversine_dist_squared, axis=1
     )
+
     # compute radius of gyration
-    rg = df_rg.groupby("uid").com_dist.apply(_mean_then_square)
-    rg.name = "radius_of_gyration"
-    return rg
+    def _mean_then_square(x): return np.sqrt(np.mean(x))
+    rog = df_rog.groupby(const.UID).com_dist.apply(_mean_then_square)
+    rog.name = const.RADIUS_OF_GYRATION
+    return rog
+
+
+def _tile_visits_by_user(df):
+    return df.groupby([const.UID, const.TILE_ID], as_index=False).aggregate(count_by_user=(const.ID, "count"))
 
 
 def get_location_entropy(mdreport, eps):
+    total_visits_by_tile = mdreport.df.groupby(const.TILE_ID).aggregate(total_visits=(const.ID, "count"))
+    tile_visits_by_user = _tile_visits_by_user(mdreport.df).merge(
+        total_visits_by_tile,
+        left_on=const.TILE_ID,
+        right_index=True
+    )[[const.TILE_ID, "count_by_user", "total_visits"]]
 
-    # location entropy (based on Shannon Entropy)
-    tile_count_per_user = (
-        mdreport.df.reset_index()
-        .groupby(["tile_id", "uid"])
-        .aggregate(count_by_user=("id", "count"))
-        .reset_index()
+    tile_visits_by_user["p"] = (
+        tile_visits_by_user.count_by_user / tile_visits_by_user.total_visits
     )
-    total_count = (
-        mdreport.df.reset_index()
-        .groupby("tile_id")
-        .aggregate(total_count=("id", "count"))
-    )
-
-    # entropy of single tiles
-    tile_count_by_user = pd.merge(
-        tile_count_per_user, total_count, left_on="tile_id", right_index=True
-    )[["tile_id", "count_by_user", "total_count"]]
-
-    tile_count_by_user["p"] = (
-        tile_count_by_user.count_by_user / tile_count_by_user.total_count
-    )
-    tile_count_by_user["log2p"] = -tile_count_by_user.p.apply(lambda x: math.log(x, 2))
-    tile_count_by_user["location_entropy"] = (
-        tile_count_by_user.p * tile_count_by_user.log2p
+    tile_visits_by_user["log2p"] = -tile_visits_by_user.p.apply(lambda x: math.log(x, 2))
+    tile_visits_by_user[const.LOCATION_ENTROPY] = (
+        tile_visits_by_user.p * tile_visits_by_user.log2p
     )
 
-    location_entropy = tile_count_by_user.groupby("tile_id").sum().location_entropy
+    location_entropy = tile_visits_by_user.groupby(const.TILE_ID)[const.LOCATION_ENTROPY].sum()
     location_entropy_dp = diff_privacy.entropy_dp(
         location_entropy, eps, mdreport.max_trips_per_user
     )
-    return pd.Series(
+    data = pd.Series(
         location_entropy_dp, index=location_entropy.index, name=location_entropy.name
     )
+    return Section(data=data, 
+                privacy_budget=eps)
+
 
 
 def get_user_tile_count(mdreport, eps):
-    user_tile_count = mdreport.df.groupby("uid").nunique().tile_id
-    # TODO: define max_bins
-    max_bins = mdreport.max_trips_per_user if mdreport.max_trips_per_user < 10 else 10
-    return utils.dp_hist_section(
+    user_tile_count = mdreport.df.groupby(const.UID).nunique()[const.TILE_ID]
+    return m_utils.hist_section(
         user_tile_count,
         eps,
         sensitivity=1,
-        min_value=1,
-        max_value=2 * mdreport.max_trips_per_user,
-        max_bins=max_bins,
+        min_value=None,
+        max_value=None,
+        max_bins=None,
         evalu=mdreport.evalu,
     )
 
 
-def _uncorrelated_entropy(df):
-    total_visits_by_user = df.groupby("uid").id.count()
-    user_visits_to_tiles = df.groupby(["uid", "tile_id"], as_index=False).id.count()
-    user_visits_to_tiles = user_visits_to_tiles.merge(
+def _mobility_entropy(df):
+    total_visits_by_user = df.groupby(const.UID).aggregate(total_visits=(const.ID, "count"))
+    tile_visits_by_user = _tile_visits_by_user(df).merge(
         total_visits_by_user,
-        left_on="uid",
-        right_index=True,
-        suffixes=["_tile_visits", "_total_visits"],
+        left_on=const.UID,
+        right_index=True
     )
-    user_visits_to_tiles["probs"] = (
-        1.0 * user_visits_to_tiles.id_tile_visits / user_visits_to_tiles.id_total_visits
+    tile_visits_by_user["probs"] = (
+        1.0 * tile_visits_by_user.count_by_user / tile_visits_by_user.total_visits
     )
-    entropy = user_visits_to_tiles.groupby("uid").probs.apply(
+    entropy = tile_visits_by_user.groupby(const.UID).probs.apply(
         lambda x: stats.entropy(x, base=2)
     )
 
-    n_vals = df.groupby("uid").tile_id.nunique()
+    n_vals = df.groupby(const.UID)[const.TILE_ID].nunique()
     entropy = np.where(
         n_vals > 1, np.divide(entropy, np.log2(n_vals), where=n_vals > 1), 0
     )
     return entropy
 
 
-# TODO: define min and max values
-def get_uncorrelated_entropy(mdreport, eps):
-    uncorrel_entropy = _uncorrelated_entropy(mdreport.df)
+def get_mobility_entropy(mdreport, eps):
+    mobility_entropy = _mobility_entropy(mdreport.df)
 
-    return utils.dp_hist_section(
-        uncorrel_entropy,
+    return m_utils.hist_section(
+        mobility_entropy,
         eps,
         sensitivity=1,
-        # min_value = uncorrel_entropy.min(),
-        # max_value = uncorrel_entropy.max(),
+        min_value = 0,
+        max_value = 1,
         max_bins=10,
         evalu=mdreport.evalu,
     )

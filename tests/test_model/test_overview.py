@@ -62,8 +62,8 @@ def test_get_trips_per_weekday(test_mdreport):
 def test_get_trips_per_hour(test_mdreport):
     """Correct trips per hour values without noise."""
     trips_per_hour = overview.get_trips_per_hour(test_mdreport, None).data
-    assert trips_per_hour.hour.min() == 0
-    assert trips_per_hour.hour.max() == 23
-    assert trips_per_hour.time_category.unique().tolist() == ["weekday_end", "weekday_start", "weekend_end", "weekend_start"]
-    assert trips_per_hour.columns.tolist() == ["hour", "time_category", "count"]
+    assert trips_per_hour[const.HOUR].min() == 0
+    assert trips_per_hour[const.HOUR].max() == 23
+    assert trips_per_hour[const.TIME_CATEGORY].unique().tolist() == ["weekday_end", "weekday_start", "weekend_end", "weekend_start"]
+    assert trips_per_hour.columns.tolist() == [const.HOUR, const.TIME_CATEGORY, "count"]
     assert len(trips_per_hour) == 73

@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 
+from dp_mobility_report import constants as const
 from dp_mobility_report.report.html.utils import fmt, get_template, render_summary
 from dp_mobility_report.visualization import plot, utils
 
@@ -114,11 +115,11 @@ def render_dataset_statistics(dataset_statistics):
 
 def render_missing_values(missing_values):
     missing_values_list = [
-        {"name": "User ID (uid)", "value": fmt(missing_values["uid"])},
-        {"name": "Trip ID (tid)", "value": fmt(missing_values["tid"])},
-        {"name": "Timestamp (datetime)", "value": fmt(missing_values["datetime"])},
-        {"name": "Latitude (lat)", "value": fmt(missing_values["lat"])},
-        {"name": "Longitude (lng)", "value": fmt(missing_values["lng"])},
+        {"name": "User ID (uid)", "value": fmt(missing_values[const.UID])},
+        {"name": "Trip ID (tid)", "value": fmt(missing_values[const.TID])},
+        {"name": "Timestamp (datetime)", "value": fmt(missing_values[const.DATETIME])},
+        {"name": "Latitude (lat)", "value": fmt(missing_values[const.LAT])},
+        {"name": "Longitude (lng)", "value": fmt(missing_values[const.LNG])},
     ]
 
     # if extra_var in missing_values:
@@ -141,7 +142,7 @@ def render_trips_over_time(trips_over_time):
     if len(trips_over_time.data) <= 20:
         chart = plot.barchart(
             data=trips_over_time.data,
-            x="datetime",
+            x=const.DATETIME,
             y="trip_count",
             x_axis_label="Date",
             y_axis_label="Frequency",
@@ -150,7 +151,7 @@ def render_trips_over_time(trips_over_time):
         html = utils.fig_to_html(chart)
     else:
         chart = plot.linechart(
-            trips_over_time.data, "datetime", "trip_count", "Date", "Frequency"
+            trips_over_time.data, const.DATETIME, "trip_count", "Date", "Frequency"
         )
         html = utils.fig_to_html(chart)
     plt.close()
@@ -160,8 +161,8 @@ def render_trips_over_time(trips_over_time):
 def render_trips_per_weekday(trips_per_weekday):
     chart = plot.barchart(
         data=trips_per_weekday.reset_index(),
-        x="day_name",
-        y="tid",
+        x=const.DAY_NAME,
+        y=const.TID,
         x_axis_label="Weekday",
         y_axis_label="Average trips per weekday",
         rotate_label=True,
@@ -182,9 +183,9 @@ def render_trips_per_weekday(trips_per_weekday):
 def render_trips_per_hour(trips_per_hour):
     chart = plot.multi_linechart(
         trips_per_hour,
-        "hour",
+        const.HOUR,
         "count",
-        "time_category",
+        const.TIME_CATEGORY,
         hue_order=["weekday_start", "weekday_end", "weekend_start", "weekend_end"],
     )
     html = utils.fig_to_html(chart)

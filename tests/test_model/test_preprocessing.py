@@ -54,10 +54,11 @@ def test_raised_errors_in_preprocess_tessellation(test_tessellation):
 def test_preprocess_data(test_data, test_tessellation, caplog):
     """Test correct preprocessing of data."""
     processed_data = preprocessing.preprocess_data(test_data, test_tessellation, max_trips_per_user=5, user_privacy=True)
-    assert processed_data.columns.tolist() == ['tile_id', 'tile_name', 'tid', 'id', 'uid', 'datetime', 'lat', 'lng', 'hour', 'is_weekend', 'point_type']
+    assert processed_data.columns.tolist() == [const.TILE_ID, const.TILE_NAME, const.TID, const.ID, 
+        const.UID, const.DATETIME, const.LAT, const.LNG, const.HOUR, const.IS_WEEKEND, const.POINT_TYPE]
     
     # all waypoints are removed
-    n_per_tid = processed_data.groupby('tid').count().id
+    n_per_tid = processed_data.groupby(const.TID).count()[const.ID]
     assert max(n_per_tid) <= 2
     
     # log output if tile id already present
@@ -69,27 +70,27 @@ def test_preprocess_data(test_data, test_tessellation, caplog):
 def test_data_validation(test_data):
     """Test if correct errors are raised with wrong data input."""
     with pytest.raises(ValueError):
-        preprocessing._validate_columns(test_data.drop("uid", axis = 1))
+        preprocessing._validate_columns(test_data.drop(const.UID, axis = 1))
     with pytest.raises(ValueError):
-        preprocessing._validate_columns(test_data.drop("tid", axis = 1))
+        preprocessing._validate_columns(test_data.drop(const.TID, axis = 1))
     with pytest.raises(ValueError):
-        preprocessing._validate_columns(test_data.drop("lat", axis = 1))
+        preprocessing._validate_columns(test_data.drop(const.LAT, axis = 1))
     with pytest.raises(ValueError):
-        preprocessing._validate_columns(test_data.drop("lng", axis = 1))
+        preprocessing._validate_columns(test_data.drop(const.LNG, axis = 1))
     with pytest.raises(ValueError):
-        preprocessing._validate_columns(test_data.drop("datetime", axis = 1))
+        preprocessing._validate_columns(test_data.drop(const.DATETIME, axis = 1))
 
     with pytest.raises(TypeError):
-        test_data_ = test_data.drop("lat", axis = 1)
-        test_data_["lat"] = "not a float"
+        test_data_ = test_data.drop(const.LAT, axis = 1)
+        test_data_[const.LAT] = "not a float"
         preprocessing._validate_columns(test_data_)
     with pytest.raises(TypeError):
-        test_data_ = test_data.drop("lng", axis = 1)
-        test_data_["lng"] = "not a float"
+        test_data_ = test_data.drop(const.LNG, axis = 1)
+        test_data_[const.LNG] = "not a float"
         preprocessing._validate_columns(test_data_)
     with pytest.raises(TypeError):
-        test_data_ = test_data.drop("datetime", axis = 1)
-        test_data_["datetime"] = "not in datetime format"
+        test_data_ = test_data.drop(const.DATETIME, axis = 1)
+        test_data_[const.DATETIME] = "not in datetime format"
         preprocessing._validate_columns(test_data_)
     
 
@@ -99,12 +100,12 @@ def test_assign_points_to_tessellation(test_data, test_tessellation):
     assigned_df = preprocessing.assign_points_to_tessellation(test_data, test_tessellation)
     assert isinstance(assigned_df, pd.DataFrame)
     assert "tile_id" in assigned_df.columns
-    assert assigned_df[(round(assigned_df.lat, 4) == 52.5210)  & (round(assigned_df.lng, 4) == 13.3540)].tile_id.iloc[0] == 1
-    assert assigned_df[(round(assigned_df.lat, 4) == 52.4727)  & (round(assigned_df.lng, 4) ==13.4474)].tile_id.iloc[0] == 4
+    assert assigned_df[(round(assigned_df[const.LAT], 4) == 52.5210)  & (round(assigned_df[const.LNG], 4) == 13.3540)].tile_id.iloc[0] == 1
+    assert assigned_df[(round(assigned_df[const.LAT], 4) == 52.4727)  & (round(assigned_df[const.LNG], 4) ==13.4474)].tile_id.iloc[0] == 4
 
 def test_sample_trips(test_data):
     # same length, if max_trips_per_user are max
-    sampled_data = preprocessing.sample_trips(test_data, test_data.groupby("uid").nunique().tid.max(), True)
+    sampled_data = preprocessing.sample_trips(test_data, test_data.groupby(const.UID).nunique()[const.TID].max(), True)
     assert len(sampled_data) == len(test_data)
 
     # no sampling if user_privacy is false
@@ -112,8 +113,8 @@ def test_sample_trips(test_data):
     assert len(sampled_data) == len(test_data)
 
     sampled_data = preprocessing.sample_trips(test_data, 2, True)
-    assert sampled_data.groupby("uid").nunique().tid.sum() == 39
-    assert sampled_data.groupby("uid").nunique().tid.max() == 2
+    assert sampled_data.groupby(const.UID).nunique()[const.TID].sum() == 39
+    assert sampled_data.groupby(const.UID).nunique()[const.TID].max() == 2
 
     # no duplicates drawn from sample
     sampled_data = preprocessing.sample_trips(test_data, 100, True)

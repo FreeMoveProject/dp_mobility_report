@@ -47,7 +47,7 @@ def _validate_columns(df):
     if const.DATETIME not in df.columns:
         raise ValueError("Column 'datetime' must be present in data.")
     try:
-        df.loc[:, const.DATETIME] = pd.to_datetime(df.datetime)
+        df.loc[:, const.DATETIME] = pd.to_datetime(df[const.DATETIME])
     except:
         raise TypeError("Column 'datetime' cannot be cast to datetime.")
     return df
@@ -70,7 +70,7 @@ def preprocess_data(df, tessellation, max_trips_per_user, user_privacy):
     df = df.loc[:, columns]
 
     # create time related variables
-    df.loc[:, const.HOUR] = df.datetime.dt.hour
+    df.loc[:, const.HOUR] = df[const.DATETIME].dt.hour
     df.loc[:, const.IS_WEEKEND] = np.select(
         [df[const.DATETIME].dt.weekday > 4], ["weekend"], default="weekday"
     )
@@ -89,7 +89,7 @@ def preprocess_data(df, tessellation, max_trips_per_user, user_privacy):
         df = assign_points_to_tessellation(df, tessellation)
     else:
         logging.info("'tile_id' present in data. No new assignment of points to tessellation.")
-    df.tile_id = df.tile_id.astype(str)
+        df.tile_id = df.tile_id.astype(str)
 
     df = sample_trips(df, max_trips_per_user, user_privacy)
     return df
@@ -113,8 +113,8 @@ def sample_trips(df, max_trips_per_user, user_privacy):
         tid_sample = (
             df[[const.UID, const.TID]]
             .drop_duplicates(const.TID)
-            .groupby(const.UID)
-            .tid.apply(
+            .groupby(const.UID)[const.TID]
+            .apply(
                 lambda x: np.random.choice(
                     x,
                     size=(
@@ -125,7 +125,7 @@ def sample_trips(df, max_trips_per_user, user_privacy):
             )
         )
         return df.loc[
-            df.tid.isin(np.concatenate(tid_sample.values)),
+            df[const.TID].isin(np.concatenate(tid_sample.values)),
         ]
     else:
         return df
