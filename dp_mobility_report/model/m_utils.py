@@ -8,8 +8,8 @@ def haversine_dist(coords):
     # coords: provide coordinates as lat_start, lng_start, lat_end, lng_end
     return haversine(
         (float(coords[0]), float(coords[1])),
-        (float(coords[2]), float(coords[3])),
-        unit=Unit.METERS,
+        (float(coords[2]), float(coords[3]))#,
+        #unit=Unit.METERS,
     )
 
 def cut_outliers(data, min_value=None, max_value=None):
@@ -30,7 +30,7 @@ def hist_section(
     sensitivity,
     min_value=None,
     max_value=None,
-    bin_size=None,
+    bin_range=None,
     max_bins=None,
     evalu=False,
 ):
@@ -51,23 +51,32 @@ def hist_section(
         )
     else:
         dp_n_outliers = None
-    quartiles = diff_privacy.quartiles_dp(series, epsi_quart, sensitivity)
-    min_value = quartiles["min"]
-    max_value = quartiles["max"]
 
-    if bin_size is not None:
-        max_bins = int((max_value - min_value) / bin_size)
-        max_bins = max_bins if max_bins > 2 else 2
-    elif max_bins is None:
-        max_bins = int(max_value - min_value)+1  #TODO: assume discrete value
-        #raise Exception("Either max_bins or bin_size needs to be defined")
-    hist = np.histogram(series, bins=max_bins, range=(min_value, max_value))
-    dp_hist_counts = diff_privacy.counts_dp(
-        hist[0], epsi, sensitivity, parallel=True, nonzero=False
+    quartiles = diff_privacy.quartiles_dp(series, epsi_quart, sensitivity)
+    # TODO: or always diff private min and max values? (outliers are already cut)
+    min_value = quartiles["min"] if min_value is None else min_value
+    max_value = quartiles["max"] if max_value is None else max_value
+    
+    if np.issubdtype(series.dtype, np.integer) and (max_value-min_value < 10):
+        min_value = int(min_value)
+        max_value = int(max_value)
+        dp_values = np.array(range(min_value, max_value+1))
+        counts = np.bincount(series)[min_value:max_value+1]
+    else:
+        if bin_range is not None:
+            max_bins = int((max_value - min_value) / bin_range)
+            max_bins = max_bins if max_bins > 2 else 2
+        elif max_bins is None:
+            max_bins = 10 #set default of 10
+        hist = np.histogram(series, bins=max_bins, range=(min_value, max_value))
+        counts = hist[0]
+        dp_values = hist[1]
+    dp_counts = diff_privacy.counts_dp(
+        counts, epsi, sensitivity, parallel=True, nonzero=False
     )
 
     return Section(
-        data=(dp_hist_counts, hist[1]),
+        data=(dp_counts, dp_values),
         privacy_budget=eps,
         n_outliers=dp_n_outliers,
         quartiles=quartiles,

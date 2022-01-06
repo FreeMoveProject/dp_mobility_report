@@ -84,7 +84,7 @@ def get_travel_time(od_shape, mdreport, eps):
         mdreport.max_trips_per_user,
         min_value=0,
         max_value=mdreport.max_travel_time,
-        bin_size=mdreport.bin_size_travel_time,
+        bin_range=mdreport.bin_range_travel_time,
         evalu=mdreport.evalu,
     )
 
@@ -103,6 +103,6 @@ def get_jump_length(
         mdreport.max_trips_per_user,
         min_value=0,
         max_value=mdreport.max_jump_length,
-        bin_size=mdreport.bin_size_jump_length,
+        bin_range=mdreport.bin_range_jump_length,
         evalu=mdreport.evalu,
     )

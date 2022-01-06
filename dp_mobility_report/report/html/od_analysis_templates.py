@@ -188,7 +188,7 @@ def render_travel_time_hist(travel_time_hist):
 
 def render_jump_length_hist(jump_length_hist):
     hist = plot.histogram(
-        jump_length_hist, x_axis_label="jump length (meters)", x_axis_type=int
+        jump_length_hist, x_axis_label="jump length (kilometers)", x_axis_type=float
     )
     html_hist = utils.fig_to_html(hist)
     plt.close()

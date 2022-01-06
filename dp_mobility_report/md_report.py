@@ -1,5 +1,4 @@
 import warnings
-import logging
 
 from pathlib import Path
 from typing import Type, Union
@@ -31,20 +30,19 @@ class MobilityDataReport:
         df,
         tessellation,
         privacy_budget,
-        #extra_var=None,
         max_trips_per_user=None,
-        timewindows = [2,6,10,14,18,22],
-        max_travel_time=90,
-        bin_size_travel_time=10,
-        max_jump_length=15000,
-        bin_size_jump_length=1000,
-        max_radius_of_gyration=10000,
-        bin_size_radius_of_gyration=1000,
-        top_x_flows=100,
-        analysis_selection=["all"],
+        analysis_selection=[const.ALL],
         disable_progress_bar=False,
         evalu=False,
         user_privacy=True,
+        timewindows = [2,6,10,14,18,22],
+        max_travel_time=None,
+        bin_range_travel_time=None,
+        max_jump_length=None,
+        bin_range_jump_length=None,
+        max_radius_of_gyration=None,
+        bin_range_radius_of_gyration=None,
+        top_x_flows=100,
     ) -> None:
         """Generate a (differentially private) mobility report from a dataset stored as
     a pandas `DataFrame`. 
@@ -59,37 +57,23 @@ class MobilityDataReport:
             for higher accuracy of other analyses.
             Options are `overview`, `place_analysis`, `od_analysis`, `user_analysis` and `all`. Defaults to ["all"].
         """
-        # if (extra_var is None) | (extra_var in df.columns):
-        #     self.extra_var = extra_var
-        # else:
-        #     self.extra_var = None
-        #     warnings.warn(
-        #         f"{extra_var} does not exist in the DataFrame. Therefore, it will be ignored."
-        #     )
-        
         # check input
-        if (not isinstance(df, DataFrame)):
-            raise TypeError("'df' is not a Pandas DataFrame.")
 
-        if (not isinstance(tessellation, GeoDataFrame)):
-            raise TypeError("'tessellation' is not a Geopandas GeoDataFrame.")
-
-        if (max_trips_per_user is not None) and (not isinstance(max_trips_per_user, int) or (max_trips_per_user < 1)):
-            max_trips_per_user = None
-            logging.warning("'max_trips_per_user' is not an integer greater 0. It is set to default 'None'")
-
-        if not ((privacy_budget is None) or isinstance(privacy_budget, int) or isinstance(privacy_budget, float)):
-            raise TypeError("'privacy_budget' is not a numeric value.")
-
-        if (privacy_budget is not None) and (privacy_budget <= 0):
-            raise ValueError("'privacy_budget' is not greater 0.")
-
-        if (not isinstance(timewindows, list)):
-            raise TypeError("'timewindows' is not a list.")
-        timewindows.sort()
-
-        if not isinstance(user_privacy, bool):
-            raise ValueError("'user_privacy' is not type boolean.")
+        _validate_input(df,
+            tessellation,
+            privacy_budget,
+            max_trips_per_user,
+            analysis_selection,
+            disable_progress_bar,
+            evalu,
+            user_privacy,
+            timewindows,
+            max_travel_time,
+            bin_range_travel_time,
+            max_jump_length,
+            bin_range_jump_length,
+            max_radius_of_gyration,
+            bin_range_radius_of_gyration)
 
         self.user_privacy = user_privacy
         with tqdm(  # progress bar
@@ -120,10 +104,10 @@ class MobilityDataReport:
         self.max_travel_time = max_travel_time
         self.timewindows = timewindows
         self.max_jump_length = max_jump_length
-        self.bin_size_jump_length = bin_size_jump_length
-        self.bin_size_travel_time = bin_size_travel_time
+        self.bin_range_jump_length = bin_range_jump_length
+        self.bin_range_travel_time = bin_range_travel_time
         self.max_radius_of_gyration = max_radius_of_gyration
-        self.bin_size_radius_of_gyration = bin_size_radius_of_gyration
+        self.bin_range_radius_of_gyration = bin_range_radius_of_gyration
         self.top_x_flows = top_x_flows
         self.analysis_selection = analysis_selection
         self.evalu = evalu
@@ -199,3 +183,55 @@ class MobilityDataReport:
 
         output_file.write_text(data, encoding="utf-8")
 
+
+def _validate_input(df,
+            tessellation,
+            privacy_budget,
+            max_trips_per_user,
+            analysis_selection,
+            disable_progress_bar,
+            evalu,
+            user_privacy,
+            timewindows,
+            max_travel_time,
+            bin_range_travel_time,
+            max_jump_length,
+            bin_range_jump_length,
+            max_radius_of_gyration,
+            bin_range_radius_of_gyration):
+    if (not isinstance(df, DataFrame)):
+        raise TypeError("'df' is not a Pandas DataFrame.")
+
+    if (not isinstance(tessellation, GeoDataFrame)):
+        raise TypeError("'tessellation' is not a Geopandas GeoDataFrame.")
+
+    if not ((max_trips_per_user is None) or isinstance(max_trips_per_user, int)):
+        raise TypeError(f"'max_trips_per_user' is not numeric.")
+    if (max_trips_per_user is not None) and (max_trips_per_user < 1):
+        raise ValueError(f"'max_trips_per_user' has to be greater 0.")
+
+    if (not isinstance(timewindows, list)):
+        raise TypeError("'timewindows' is not a list.")
+    timewindows.sort()
+
+    _validate_numeric_greater_zero(privacy_budget, f'{privacy_budget=}'.split('=')[0])
+    _validate_numeric_greater_zero(max_travel_time, f'{max_travel_time=}'.split('=')[0])
+    _validate_numeric_greater_zero(bin_range_travel_time, f'{bin_range_travel_time=}'.split('=')[0])
+    _validate_numeric_greater_zero(max_jump_length, f'{max_jump_length=}'.split('=')[0])
+    _validate_numeric_greater_zero(bin_range_jump_length, f'{bin_range_jump_length=}'.split('=')[0])
+    _validate_numeric_greater_zero(max_radius_of_gyration, f'{max_radius_of_gyration=}'.split('=')[0])
+    _validate_numeric_greater_zero(bin_range_radius_of_gyration, f'{bin_range_radius_of_gyration=}'.split('=')[0])
+    _validate_bool(user_privacy, f'{user_privacy=}'.split('=')[0])
+    _validate_bool(evalu, f'{user_privacy=}'.split('=')[0])
+    _validate_bool(disable_progress_bar, f'{user_privacy=}'.split('=')[0])
+
+def _validate_numeric_greater_zero(var, name):
+    if not ((var is None) or isinstance(var, int) or isinstance(var, float)):
+        raise TypeError(f"{name} is not numeric.")
+    if (var is not None) and (var <= 0):
+        raise ValueError(f"'{name}' has to be greater 0.")
+
+
+def _validate_bool(var, name):
+    if not isinstance(var, bool):
+        raise TypeError(f"'{name}' is not type boolean.")

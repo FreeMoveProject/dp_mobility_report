@@ -1,5 +1,11 @@
 from pyproj import CRS
 
+ALL = "all"
+OVERVIEW = "overview"
+PLACE_ANALYSIS = "place_analysis"
+OD_ANALYSIS = "od_analysis"
+USER_ANALYSIS = "user_analysis"
+
 ID = "id"
 UID = "uid"
 TID = "tid"

@@ -118,7 +118,7 @@ def render_overlapping_trips(n_traj_overlaps):
 
 def render_radius_gyration(radius_gyration_hist):
     hist = plot.histogram(
-        radius_gyration_hist, x_axis_label="radius of gyration", x_axis_type=int
+        radius_gyration_hist, x_axis_label="radius of gyration", x_axis_type=float
     )
     html = utils.fig_to_html(hist)
     plt.close()

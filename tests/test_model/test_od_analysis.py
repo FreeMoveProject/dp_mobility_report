@@ -5,6 +5,7 @@ import pytest
 import numpy as np
 import pandas as pd
 import geopandas as gpd
+from dp_mobility_report import md_report
 from dp_mobility_report.md_report import MobilityDataReport
 from dp_mobility_report.model import od_analysis
 from dp_mobility_report import constants as const
@@ -49,18 +50,38 @@ def test_get_intra_tile_flows():
 
 def test_get_travel_time(test_od_shape, test_mdreport):
     travel_time = od_analysis.get_travel_time(test_od_shape, test_mdreport, None)
-    assert travel_time.data[0].tolist() == [12, 8, 10, 6, 13, 5, 11, 12]
-    assert travel_time.data[1].tolist() == [ 2., 13., 24., 35., 46., 57., 68., 79., 90.]
-    assert len(travel_time.data[0]) == 8
-    assert all(np.diff(travel_time.data[1]) == 11)
-    assert travel_time.quartiles.tolist() == [2.0, 20.0, 48.0, 72.0, 90.0]
-    assert travel_time.n_outliers == 22
+    assert travel_time.data[0].tolist() == [10, 10, 10, 8, 11, 8, 14, 9, 9, 10]
+    assert travel_time.data[1].tolist() == [0.0, 12.0, 24.0, 36.0, 48.0, 60.0, 72.0, 84.0, 96.0, 108.0, 120.0]
+    assert len(travel_time.data[0]) == 10
+    assert all(np.diff(travel_time.data[1]) == 12)
+    assert travel_time.quartiles.tolist() == [2.0, 29.0, 60.0, 86.0, 120.0]
+    assert travel_time.n_outliers == 0
+
+    test_mdreport.max_travel_time=60
+    test_mdreport.bin_range_travel_time=5
+    travel_time = od_analysis.get_travel_time(test_od_shape, test_mdreport, None)
+    assert travel_time.data[0].tolist() == [2, 8, 5, 3, 4, 4, 4, 2, 2, 6, 7, 3]
+    assert travel_time.data[1].tolist() == [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60]
+    assert len(travel_time.data[0]) == 12
+    assert all(np.diff(travel_time.data[1]) == 5)
+    assert travel_time.quartiles.tolist() == [2.0, 13.25, 29.0, 47.0, 60.0]
+    assert travel_time.n_outliers == 49
 
 def test_get_jump_length(test_od_shape, test_mdreport):
     jump_length = od_analysis.get_jump_length(test_od_shape, test_mdreport, None)
-    assert jump_length.data[0].tolist() == [11, 18, 25, 22, 17,  4,  2]
-    assert jump_length.data[1].round().tolist() == [1114.0, 2203.0, 3293.0, 4383.0, 5472.0, 6562.0, 7652.0, 8741.0]
-    assert len(jump_length.data[0]) == 7
-    assert all(np.diff(jump_length.data[1].round(-1)) == 1090)
-    assert jump_length.quartiles.round().tolist() == [1114.0, 3039.0, 4185.0, 5350.0, 8741.0]
+    assert jump_length.data[0].tolist() == [0, 7, 10, 19, 17, 19, 15, 9, 1, 2]
+    assert jump_length.data[1].round(3).tolist() == [0.0, 0.874, 1.748, 2.622, 3.497, 4.371, 5.245, 6.119, 6.993, 7.867, 8.741]
+    assert len(jump_length.data[0]) == 10
+    assert all(np.diff(jump_length.data[1]).round(3) == 0.874)
+    assert jump_length.quartiles.round(3).tolist() == [1.114, 3.039, 4.185, 5.350, 8.741]
     assert jump_length.n_outliers == 0
+
+    test_mdreport.max_jump_length=4
+    test_mdreport.bin_range_jump_length=0.5
+    jump_length = od_analysis.get_jump_length(test_od_shape, test_mdreport, None)
+    assert jump_length.data[0].tolist() == [0, 0, 4, 3, 9, 5, 15, 11]
+    assert jump_length.data[1].tolist() == [0, 0.5, 1, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
+    assert len(jump_length.data[0]) == 8
+    assert all(np.diff(jump_length.data[1]).round(1) == 0.5)
+    assert jump_length.quartiles.round(3).tolist() == [1.114, 2.299, 3.017, 3.470, 3.997]
+    assert jump_length.n_outliers == 52

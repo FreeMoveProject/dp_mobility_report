@@ -57,13 +57,60 @@ def test_wrong_input_params_MobilityDataReport(test_data, test_tessellation):
         md_report.MobilityDataReport(test_data, test_tessellation, privacy_budget = "not a number")
 
     # wrong input for max_trips_per_user
-    mob_report = md_report.MobilityDataReport(test_data, test_tessellation, max_trips_per_user = -1, privacy_budget=None)
-    assert mob_report.max_trips_per_user == test_data.groupby(const.UID).nunique()[const.TID].max()
-    mob_report = md_report.MobilityDataReport(test_data, test_tessellation, max_trips_per_user = "not an int", privacy_budget=None)
-    assert mob_report.max_trips_per_user == test_data.groupby(const.UID).nunique()[const.TID].max()
-    mob_report = md_report.MobilityDataReport(test_data, test_tessellation, max_trips_per_user = 3.1, privacy_budget=None)
-    assert mob_report.max_trips_per_user == test_data.groupby(const.UID).nunique()[const.TID].max()
+    with pytest.raises(ValueError):
+        md_report.MobilityDataReport(test_data, test_tessellation, max_trips_per_user = -1, privacy_budget=None)
+    with pytest.raises(TypeError):
+        md_report.MobilityDataReport(test_data, test_tessellation, max_trips_per_user = "not an int", privacy_budget=None)
+    with pytest.raises(TypeError):
+        md_report.MobilityDataReport(test_data, test_tessellation, max_trips_per_user = 3.1, privacy_budget=None)
 
+    # wrong input for max_travel_time
+    with pytest.raises(ValueError):
+        md_report.MobilityDataReport(test_data, test_tessellation, max_travel_time=-1, privacy_budget=None)
+    with pytest.raises(TypeError):
+        md_report.MobilityDataReport(test_data, test_tessellation, max_travel_time = "not a number", privacy_budget=None)
+
+    # wrong input for bin_range_travel_time
+    with pytest.raises(ValueError):
+        md_report.MobilityDataReport(test_data, test_tessellation, bin_range_travel_time=-1, privacy_budget=None)
+    with pytest.raises(TypeError):
+        md_report.MobilityDataReport(test_data, test_tessellation, bin_range_travel_time = "not a number", privacy_budget=None)
+    
+    # wrong input for max_jump_length
+    with pytest.raises(ValueError):
+        md_report.MobilityDataReport(test_data, test_tessellation, max_jump_length=-1, privacy_budget=None)
+    with pytest.raises(TypeError):
+        md_report.MobilityDataReport(test_data, test_tessellation, max_jump_length = "not a number", privacy_budget=None)
+    
+    # wrong input for bin_range_jump_length
+    with pytest.raises(ValueError):
+        md_report.MobilityDataReport(test_data, test_tessellation, bin_range_jump_length=-1, privacy_budget=None)
+    with pytest.raises(TypeError):
+        md_report.MobilityDataReport(test_data, test_tessellation, bin_range_jump_length = "not a number", privacy_budget=None)
+
+    # wrong input for max_radius_of_gyration
+    with pytest.raises(ValueError):
+        md_report.MobilityDataReport(test_data, test_tessellation, max_radius_of_gyration=-1, privacy_budget=None)
+    with pytest.raises(TypeError):
+        md_report.MobilityDataReport(test_data, test_tessellation, max_radius_of_gyration = "not a number", privacy_budget=None)
+
+    # wrong input for bin_range_radius_of_gyration
+    with pytest.raises(ValueError):
+        md_report.MobilityDataReport(test_data, test_tessellation, bin_range_radius_of_gyration=-1, privacy_budget=None)
+    with pytest.raises(TypeError):
+        md_report.MobilityDataReport(test_data, test_tessellation, bin_range_radius_of_gyration = "not a number", privacy_budget=None)
+
+    # wrong input for user_privacy
+    with pytest.raises(TypeError):
+        md_report.MobilityDataReport(test_data, test_tessellation, user_privacy = "not a bool", privacy_budget=None)
+    
+    # wrong input for evalu
+    with pytest.raises(TypeError):
+        md_report.MobilityDataReport(test_data, test_tessellation, evalu = "not a bool", privacy_budget=None)
+
+    # wrong input for disable_progress_bar
+    with pytest.raises(TypeError):
+        md_report.MobilityDataReport(test_data, test_tessellation, disable_progress_bar = "not a bool", privacy_budget=None)
 
 def test_report_output(test_data, test_tessellation):
     report = md_report.MobilityDataReport(test_data, test_tessellation, privacy_budget=None).report

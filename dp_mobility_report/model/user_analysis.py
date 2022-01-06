@@ -14,10 +14,8 @@ from dp_mobility_report.privacy import diff_privacy
 def get_traj_per_user(mdreport, eps):
     user_nunique = mdreport.df.groupby(const.UID).nunique()[const.TID]
     max_trips = (
-        mdreport.max_trips_per_user if mdreport.user_privacy else user_nunique.max()
+        mdreport.max_trips_per_user if mdreport.user_privacy else None
     )
-    # TODO: define max_bins
-    max_bins = max_trips if max_trips < 10 else 10
 
     return m_utils.hist_section(
         user_nunique,
@@ -25,7 +23,6 @@ def get_traj_per_user(mdreport, eps):
         sensitivity=1,
         min_value=1,
         max_value=max_trips,
-        max_bins=max_bins,
         evalu=mdreport.evalu,
     )
 
@@ -77,7 +74,7 @@ def get_radius_of_gyration(mdreport, eps):
         sensitivity=1,
         min_value=0,
         max_value=mdreport.max_radius_of_gyration,
-        bin_size=mdreport.bin_size_radius_of_gyration,
+        bin_range=mdreport.bin_range_radius_of_gyration,
         evalu=mdreport.evalu,
     )
 
@@ -139,13 +136,11 @@ def get_location_entropy(mdreport, eps):
 
 def get_user_tile_count(mdreport, eps):
     user_tile_count = mdreport.df.groupby(const.UID).nunique()[const.TILE_ID]
+
     return m_utils.hist_section(
         user_tile_count,
         eps,
         sensitivity=1,
-        min_value=None,
-        max_value=None,
-        max_bins=None,
         evalu=mdreport.evalu,
     )
 

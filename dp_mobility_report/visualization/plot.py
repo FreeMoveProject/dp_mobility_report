@@ -18,17 +18,22 @@ grey = "#8A8A8A"
 
 def histogram(hist, x_axis_label=None, rotate_label=False, x_axis_type=None):
     bins = hist[1]
+    counts = hist[0]
+
     if x_axis_type is not None:
         bins = bins.astype(x_axis_type)
-    lower_bound = bins[:-1]
-    upper_bound = bins[1:]
-    labels = np.array(
-        [
-            "[" + str(x1) + "\n - \n " + str(x2) + ")"
-            for x1, x2 in zip(lower_bound, upper_bound)
-        ]
-    )
-    counts = hist[0]
+
+    if (len(bins) == len(counts)):
+        labels = bins
+    else:
+        lower_bound = bins[:-1]
+        upper_bound = bins[1:]
+        labels = np.array(
+            [
+                "[" + str(x1) + "\n - \n " + str(x2) + ")"
+                for x1, x2 in zip(lower_bound, upper_bound)
+            ]
+        )
     return barchart(
         labels, counts, x_axis_label, "Frequency", rotate_label=rotate_label
     )
@@ -126,7 +131,7 @@ def multi_choropleth_map(counts_per_tile_timewindow, tessellation):
     plot_count = counts_per_tile_timewindow.shape[1] - 2
     plots_per_row = 3
     row_count = math.ceil(plot_count / plots_per_row)
-    fig, axes = plt.subplots(row_count, plots_per_row, figsize=(15, 10))
+    fig, axes = plt.subplots(row_count, plots_per_row, figsize=(18, 12))
 
     # upper and lower bound
     vmin = counts_per_tile_timewindow.iloc[:, 2:].min().min()
