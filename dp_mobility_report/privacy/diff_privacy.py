@@ -134,9 +134,9 @@ def entropy_dp(array, epsi, maxcontribution):
     if epsi is None:
         return array
     if maxcontribution > 1:
-        sensitivity = maxcontribution * (
+        sensitivity = 2*maxcontribution * (
             max(
-                np.log(2), np.log(maxcontribution) - np.log(np.log(maxcontribution)) - 1
+                np.log(2), np.log(2*maxcontribution) - np.log(np.log(2*maxcontribution)) - 1
             )
         )
     else:
