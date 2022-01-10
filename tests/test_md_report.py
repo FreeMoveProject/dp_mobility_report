@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import pytest
 import pandas as pd
 import geopandas as gpd
@@ -117,7 +115,7 @@ def test_report_output(test_data, test_tessellation):
     assert isinstance(report, dict)
     assert list(report.keys()) == ['ds_statistics', 'missing_values', 'trips_over_time', 'trips_per_weekday', 
         'trips_per_hour', 'counts_per_tile', 'counts_per_tile_timewindow', 'od_flows', 'travel_time', 'jump_length', 
-        'traj_per_user', 'user_time_delta', 'radius_gyration', 'location_entropy', 'user_tile_count', 
+        'trips_per_user', 'user_time_delta', 'radius_of_gyration', 'location_entropy', 'user_tile_count', 
         'mobility_entropy']
 
 

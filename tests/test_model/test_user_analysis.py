@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import pytest
 
 import numpy as np
@@ -18,14 +16,14 @@ def test_mdreport():
     return MobilityDataReport(test_data, test_tessellation, privacy_budget=None)
 
 
-def test_get_traj_per_user(test_mdreport):
-    traj_per_user = user_analysis.get_traj_per_user(test_mdreport, None)
-    assert traj_per_user.data[0].tolist() == [1, 0, 4, 3, 5, 2, 3, 1, 1]
-    assert traj_per_user.data[1].round().tolist() == [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-    assert len(traj_per_user.data[0]) == 9
-    assert all(np.diff(traj_per_user.data[1]) == 1)
-    assert traj_per_user.quartiles.tolist() == [1.0, 3.75, 5.0, 6.25, 9.0]
-    assert traj_per_user.n_outliers == 0
+def test_get_trips_per_user(test_mdreport):
+    trips_per_user = user_analysis.get_trips_per_user(test_mdreport, None)
+    assert trips_per_user.data[0].tolist() == [1, 0, 4, 3, 5, 2, 3, 1, 1]
+    assert trips_per_user.data[1].round().tolist() == [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+    assert len(trips_per_user.data[0]) == 9
+    assert all(np.diff(trips_per_user.data[1]) == 1)
+    assert trips_per_user.quartiles.tolist() == [1.0, 3.75, 5.0, 6.25, 9.0]
+    assert trips_per_user.n_outliers == 0
 
 def test_get_user_time_delta(test_mdreport):
     user_time_delta = user_analysis.get_user_time_delta(test_mdreport, None)

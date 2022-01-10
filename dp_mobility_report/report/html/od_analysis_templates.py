@@ -3,18 +3,18 @@ import numpy as np
 import pandas as pd
 import skmob
 
-from dp_mobility_report import md_report
+from dp_mobility_report import constants as const
 from dp_mobility_report.model import od_analysis
-from dp_mobility_report.report.html.utils import (
+from dp_mobility_report.report.html.html_utils import (
     fmt,
     get_template,
     render_outlier_info,
     render_summary,
 )
-from dp_mobility_report.visualization import plot, utils
+from dp_mobility_report.visualization import plot, v_utils
 
 
-def render_od_analysis(mdreport):
+def render_od_analysis(mdreport, top_n_flows):
     od_map = None
     intra_tile_flows_info = None
     flows_summary_table = None
@@ -29,33 +29,33 @@ def render_od_analysis(mdreport):
 
     report = mdreport.report
 
-    if "od_flows" in report:
-        od_map = render_origin_destination_flows(report["od_flows"].data, mdreport)
-        intra_tile_flows_info = render_intra_tile_flows(report["od_flows"].data)
-        flows_summary_table = render_summary(report["od_flows"].data.flow.describe())
-        flows_cumsum_linechart = render_flows_cumsum(report["od_flows"].data)
+    if const.OD_FLOWS in report:
+        od_map = render_origin_destination_flows(report[const.OD_FLOWS].data, mdreport, top_n_flows)
+        intra_tile_flows_info = render_intra_tile_flows(report[const.OD_FLOWS].data)
+        flows_summary_table = render_summary(report[const.OD_FLOWS].data.flow.describe())
+        flows_cumsum_linechart = render_flows_cumsum(report[const.OD_FLOWS].data)
         most_freq_flows_ranking = render_most_freq_flows_ranking(
-            report["od_flows"].data, mdreport.tessellation
+            report[const.OD_FLOWS].data, mdreport.tessellation
         )
 
-    if "travel_time" in report:
+    if const.TRAVEL_TIME in report:
         outlier_count_travel_time_info = render_outlier_info(
-            report["travel_time"].n_outliers,
+            report[const.TRAVEL_TIME].n_outliers,
             mdreport.max_travel_time,
         )
-        travel_time_hist = render_travel_time_hist(report["travel_time"].data)
+        travel_time_hist = render_travel_time_hist(report[const.TRAVEL_TIME].data)
         travel_time_summary_table = render_summary(
-            report["travel_time"].quartiles
+            report[const.TRAVEL_TIME].quartiles
         )
 
-    if "jump_length" in report:
+    if const.JUMP_LENGTH in report:
         outlier_count_jump_length_info = render_outlier_info(
-            report["jump_length"].n_outliers,
+            report[const.JUMP_LENGTH].n_outliers,
             mdreport.max_jump_length,
         )
-        jump_length_hist = render_jump_length_hist(report["jump_length"].data)
+        jump_length_hist = render_jump_length_hist(report[const.JUMP_LENGTH].data)
         jump_length_summary_table = render_summary(
-            report["jump_length"].quartiles
+            report[const.JUMP_LENGTH].quartiles
         )
     template_structure = get_template("od_analysis_segment.html")
     return template_structure.render(
@@ -73,12 +73,9 @@ def render_od_analysis(mdreport):
     )
 
 
-### render od analysis functions
-
-
-def render_origin_destination_flows(od_flows, mdreport):
-    n_flows = (
-        mdreport.top_x_flows if mdreport.top_x_flows <= len(od_flows) else len(od_flows)
+def render_origin_destination_flows(od_flows, mdreport, top_n_flows):
+    top_n_flows = (
+        top_n_flows if top_n_flows <= len(od_flows) else len(od_flows)
     )
     innerflow = od_flows[od_flows.origin == od_flows.destination]
 
@@ -86,12 +83,12 @@ def render_origin_destination_flows(od_flows, mdreport):
         mdreport.tessellation,
         innerflow,
         how="left",
-        left_on="tile_id",
+        left_on=const.TILE_ID,
         right_on="origin",
     )
 
     fdf = skmob.FlowDataFrame(
-        od_flows, tessellation=tessellation_innerflow, tile_id="tile_id"
+        od_flows, tessellation=tessellation_innerflow, tile_id=const.TILE_ID
     )
     tessellation_innerflow.loc[tessellation_innerflow.flow.isna(), "flow"] = 0
     innerflow_chropleth = plot.choropleth_map(
@@ -100,7 +97,7 @@ def render_origin_destination_flows(od_flows, mdreport):
 
     od_map = (
         fdf[fdf.origin != fdf.destination]
-        .nlargest(n_flows, "flow")
+        .nlargest(top_n_flows, "flow")
         .plot_flows(flow_color="red", map_f=innerflow_chropleth)
     )
     html = od_map.get_root().render()
@@ -135,26 +132,25 @@ def render_flows_cumsum(od_flows):
         "Cumulated sum of flows between OD tile pairs",
         add_diagonal=True,
     )
-    html = utils.fig_to_html(chart)
+    html = v_utils.fig_to_html(chart)
     plt.close()
     return html
 
 
-# TODO: decide on topx
 def render_most_freq_flows_ranking(od_flows, tessellation, top_x=10):
     topx_flows = od_flows.nlargest(top_x, "flow")
     topx_flows["rank"] = list(range(1, len(topx_flows) + 1))
     topx_flows = topx_flows.merge(
-        tessellation[["tile_id", "tile_name"]],
+        tessellation[[const.TILE_ID, const.TILE_NAME]],
         how="left",
         left_on="origin",
-        right_on="tile_id",
+        right_on=const.TILE_ID,
     )
     topx_flows = topx_flows.merge(
-        tessellation[["tile_id", "tile_name"]],
+        tessellation[[const.TILE_ID, const.TILE_NAME]],
         how="left",
         left_on="destination",
-        right_on="tile_id",
+        right_on=const.TILE_ID,
         suffixes=("_origin", "_destination"),
     )
 
@@ -163,9 +159,9 @@ def render_most_freq_flows_ranking(od_flows, tessellation, top_x=10):
         topx_flows_list.append(
             {
                 "name": row["rank"],
-                "value": str(row["tile_name_origin"])
+                "value": str(row[f"{const.TILE_NAME}_origin"])
                 + " - "
-                + str(row["tile_name_destination"])
+                + str(row[f"{const.TILE_NAME}_origin"])
                 + ": "
                 + str(row["flow"]),
             }
@@ -181,7 +177,7 @@ def render_travel_time_hist(travel_time_hist):
     hist = plot.histogram(
         travel_time_hist, x_axis_label="travel time (min.)", x_axis_type=int
     )
-    html_hist = utils.fig_to_html(hist)
+    html_hist = v_utils.fig_to_html(hist)
     plt.close()
     return html_hist
 
@@ -190,6 +186,6 @@ def render_jump_length_hist(jump_length_hist):
     hist = plot.histogram(
         jump_length_hist, x_axis_label="jump length (kilometers)", x_axis_type=float
     )
-    html_hist = utils.fig_to_html(hist)
+    html_hist = v_utils.fig_to_html(hist)
     plt.close()
     return html_hist

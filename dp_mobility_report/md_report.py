@@ -42,7 +42,6 @@ class MobilityDataReport:
         bin_range_jump_length=None,
         max_radius_of_gyration=None,
         bin_range_radius_of_gyration=None,
-        top_x_flows=100,
     ) -> None:
         """Generate a (differentially private) mobility report from a dataset stored as
     a pandas `DataFrame`. 
@@ -55,9 +54,8 @@ class MobilityDataReport:
             max_trips_per_user(int): maximum number of trips a user shall contribute to the data. Dataset will be sampled accordingly.
             analysis_selection (list, optional): Select only needed analyses. A selection reduces compuation time and leaves more privacy budget 
             for higher accuracy of other analyses.
-            Options are `overview`, `place_analysis`, `od_analysis`, `user_analysis` and `all`. Defaults to ["all"].
+            Options are `overview`, `place_analysis`, `od_analysis`, `user_analysis` and `all`. Defaults to [`all`].
         """
-        # check input
 
         _validate_input(df,
             tessellation,
@@ -94,7 +92,6 @@ class MobilityDataReport:
             self.df = preprocessing.preprocess_data(
                 df.copy(), #copy, to not overwrite users instance of df
                 tessellation,
-            #   self.extra_var,
                 self.max_trips_per_user,
                 self.user_privacy,
             )
@@ -108,7 +105,6 @@ class MobilityDataReport:
         self.bin_range_travel_time = bin_range_travel_time
         self.max_radius_of_gyration = max_radius_of_gyration
         self.bin_range_radius_of_gyration = bin_range_radius_of_gyration
-        self.top_x_flows = top_x_flows
         self.analysis_selection = analysis_selection
         self.evalu = evalu
         self.disable_progress_bar = disable_progress_bar
@@ -129,23 +125,24 @@ class MobilityDataReport:
     @property
     def html(self) -> str:
         if self._html is None:
-            self._html = self._render_html()
+            self._html = self._render_html(self._top_n_flows)
         return self._html
 
-    def _render_html(self) -> str:
-        html = render_html(self)
+    def _render_html(self, top_n_flows) -> str:
+        html = render_html(self, top_n_flows)
         return html
 
-    def to_html(self) -> str:
+    def to_html(self, top_n_flows) -> str:
         """Generate and return complete template as lengthy string
             for using with frameworks.
         Returns:
             HTML output as string.
         """
+        self._top_n_flows = top_n_flows
         return self.html
 
     def to_file(
-        self, output_file: Union[str, Path], disable_progress_bar=None
+        self, output_file: Union[str, Path], disable_progress_bar=None, top_n_flows = 100
     ) -> None:
         """Write the report to a file.
         By default a name is generated.
@@ -178,7 +175,7 @@ class MobilityDataReport:
             with tqdm(  # progress bar
                 total=1, desc="Create HTML Output", disable=disable_progress_bar
             ) as pbar:
-                data = self.to_html()
+                data = self.to_html(top_n_flows)
                 pbar.update()
 
         output_file.write_text(data, encoding="utf-8")

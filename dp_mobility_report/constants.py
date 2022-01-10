@@ -6,6 +6,27 @@ PLACE_ANALYSIS = "place_analysis"
 OD_ANALYSIS = "od_analysis"
 USER_ANALYSIS = "user_analysis"
 
+DS_STATISTICS = 'ds_statistics'
+MISSING_VALUES = 'missing_values'
+TRIPS_OVER_TIME = 'trips_over_time'
+TRIPS_PER_WEEKDAY = 'trips_per_weekday'
+TRIPS_PER_HOUR = 'trips_per_hour'
+COUNTS_PER_TILE = 'counts_per_tile'
+COUNTS_PER_TILE_TIMEWINDOW = 'counts_per_tile_timewindow'
+OD_FLOWS = 'od_flows'
+TRAVEL_TIME = 'travel_time'
+JUMP_LENGTH = 'jump_length'
+TRIPS_PER_USER = 'trips_per_user'
+USER_TIME_DELTA = 'user_time_delta'
+RADIUS_OF_GYRATION = 'radius_of_gyration'
+LOCATION_ENTROPY = "location_entropy"
+USER_TILE_COUNT = 'user_tile_count'
+MOBILITY_ENTROPY = 'mobility_entropy'
+OVERVIEW_ELEMENTS = [DS_STATISTICS, MISSING_VALUES, TRIPS_OVER_TIME, TRIPS_PER_WEEKDAY, TRIPS_PER_HOUR]
+PLACE_ELEMENTS = [COUNTS_PER_TILE, COUNTS_PER_TILE_TIMEWINDOW]
+OD_ELEMENTS = [OD_FLOWS, TRAVEL_TIME, JUMP_LENGTH]
+USER_ELEMENTS = [TRIPS_PER_USER, USER_TIME_DELTA, RADIUS_OF_GYRATION, LOCATION_ENTROPY, USER_TILE_COUNT, MOBILITY_ENTROPY]
+
 ID = "id"
 UID = "uid"
 TID = "tid"
@@ -36,5 +57,3 @@ PREC_DATE = "date"
 PREC_WEEK = "week"
 PREC_MONTH = "month"
 
-RADIUS_OF_GYRATION = "radius_of_gyration"
-LOCATION_ENTROPY = "location_entropy"

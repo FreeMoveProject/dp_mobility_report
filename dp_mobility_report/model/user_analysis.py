@@ -11,7 +11,7 @@ from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
 
 
-def get_traj_per_user(mdreport, eps):
+def get_trips_per_user(mdreport, eps):
     user_nunique = mdreport.df.groupby(const.UID).nunique()[const.TID]
     max_trips = (
         mdreport.max_trips_per_user if mdreport.user_privacy else None

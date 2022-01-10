@@ -1,9 +1,7 @@
-import math
-
-import diffprivlib
 import numpy as np
 import pandas as pd
-from diffprivlib.validation import check_bounds, clip_to_bounds
+import diffprivlib
+from diffprivlib.validation import clip_to_bounds
 
 
 def bounds_dp(array, eps, sensitivity):
@@ -19,7 +17,8 @@ def bounds_dp(array, eps, sensitivity):
         array = array.sort_values().reset_index(drop=True)
     k = array.size
 
-    # TODO: saskia Better way?
+    # min can potentially be larger than max
+    # if so, retry until a result is found where min < max
     while result[1] < result[0]:
         for quant in [0, 1]:
             mech = diffprivlib.mechanisms.exponential.Exponential(
@@ -36,13 +35,13 @@ def bounds_dp(array, eps, sensitivity):
 
 def quartiles_dp(array, eps, sensitivity, bounds=None):
 
-    if array.dtype == "timedelta64[ns]":
+    if np.issubdtype(array.dtype, np.timedelta64):
         array = array.values.astype(np.int64)
         dtyp = "timedelta"
-    elif array.dtype == "datetime64[ns]":
+    elif np.issubdtype(array.dtype, np.datetime64):
         array = array.values.astype(
             np.int64
-        )  # pd.to_datetime(array).astype(np.int64)#array.values.astype(np.int64)
+        ) 
         dtyp = "datetime"
     else:
         dtyp = 0
@@ -127,7 +126,7 @@ def counts_dp(counts, eps, sensitivity, parallel=True, nonzero=True):
         )
         vfunc = np.vectorize(laplacer)
         dpcount = vfunc(counts)
-        dpcount = (abs(dpcount) + dpcount) / 2
+        dpcount = (abs(dpcount) + dpcount) / 2 # make zero if dpcount < 0
 
     if nonzero is True:
         if np.isscalar(dpcount):

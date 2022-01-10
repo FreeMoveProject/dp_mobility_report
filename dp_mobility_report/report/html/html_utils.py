@@ -3,13 +3,6 @@ import numbers
 import jinja2
 
 # Initializing Jinja
-
-# import os
-# script_path = os.path.dirname(os.path.abspath(__file__))
-# template_path = os.path.join(script_path, "html_templates")
-
-# jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_path))
-
 package_loader = jinja2.PackageLoader(
     "dp_mobility_report", "report/html/html_templates"
 )

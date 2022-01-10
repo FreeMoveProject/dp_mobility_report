@@ -1,5 +1,7 @@
 from tqdm.auto import tqdm
 
+from dp_mobility_report import constants as const
+
 from dp_mobility_report.model import (
     od_analysis,
     overview,
@@ -11,31 +13,32 @@ from dp_mobility_report.model import (
 def report_elements(mdreport):
 
     report = dict()
+    is_all_analyses = const.ALL in mdreport.analysis_selection
 
     with tqdm(  # progress bar
         total=4, desc="Create report", disable=mdreport.disable_progress_bar
     ) as pbar:
-        if ("all" in mdreport.analysis_selection) | (
-            "overview" in mdreport.analysis_selection
+        if is_all_analyses | (
+            const.OVERVIEW in mdreport.analysis_selection
         ):
             report = {**report, **add_overview_elements(mdreport)}
         pbar.update()
 
-        if ("all" in mdreport.analysis_selection) | (
-            "place_analysis" in mdreport.analysis_selection
+        if is_all_analyses | (
+            const.PLACE_ANALYSIS in mdreport.analysis_selection
         ):
             report = {**report, **add_place_analysis_elements(mdreport)}
         pbar.update()
 
-        if ("all" in mdreport.analysis_selection) | (
-            "od_analysis" in mdreport.analysis_selection
+        if is_all_analyses | (
+            const.OD_ANALYSIS in mdreport.analysis_selection
         ):
             _od_shape = od_analysis.get_od_shape(mdreport.df, mdreport.tessellation)
             report = {**report, **add_od_analysis_elements(mdreport, _od_shape)}
         pbar.update()
 
-        if ("all" in mdreport.analysis_selection) | (
-            "user_analysis" in mdreport.analysis_selection
+        if is_all_analyses | (
+            const.USER_ANALYSIS in mdreport.analysis_selection
         ):
             report = {**report, **add_user_analysis_elements(mdreport)}
         pbar.update()
@@ -50,11 +53,6 @@ def add_overview_elements(mdreport):
         epsilon = mdreport.privacy_budget / 6
     return dict(
         ds_statistics=overview.get_dataset_statistics(mdreport, epsilon),
-        # extra_var_counts=(
-        #     None
-        #     if mdreport.extra_var is None
-        #     else overview.get_extra_var_counts(mdreport,epsilon)
-        # ),
         missing_values=overview.get_missing_values(mdreport, epsilon),
         trips_over_time=overview.get_trips_over_time(mdreport, epsilon),
         trips_per_weekday=overview.get_trips_per_weekday(mdreport, epsilon),
@@ -67,9 +65,8 @@ def add_place_analysis_elements(mdreport):
         epsilon = mdreport.privacy_budget
     else:
         epsilon = mdreport.privacy_budget / 2
-    counts_per_tile = place_analysis.get_visits_per_tile(mdreport, epsilon)
     return dict(
-        counts_per_tile=counts_per_tile,
+        counts_per_tile=place_analysis.get_visits_per_tile(mdreport, epsilon),
         counts_per_tile_timewindow=place_analysis.get_visits_per_tile_timewindow(
             mdreport, epsilon
         ),
@@ -94,9 +91,9 @@ def add_user_analysis_elements(mdreport):
     else:
         epsilon = mdreport.privacy_budget / 7
     return dict(
-        traj_per_user=user_analysis.get_traj_per_user(mdreport, epsilon),
+        trips_per_user=user_analysis.get_trips_per_user(mdreport, epsilon),
         user_time_delta=user_analysis.get_user_time_delta(mdreport, epsilon),
-        radius_gyration=user_analysis.get_radius_of_gyration(mdreport, epsilon),
+        radius_of_gyration=user_analysis.get_radius_of_gyration(mdreport, epsilon),
         location_entropy=user_analysis.get_location_entropy(mdreport, epsilon),
         user_tile_count=user_analysis.get_user_tile_count(mdreport, epsilon),
         mobility_entropy=user_analysis.get_mobility_entropy(
