@@ -9,9 +9,10 @@ from dp_mobility_report.privacy import diff_privacy
 
 def get_od_shape(df, tessellation):
     ends_od_shape = (
-        df[(df[const.POINT_TYPE] == const.END) & df[const.TILE_ID].isin(tessellation[const.TILE_ID])][
-            [const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]
-        ]
+        df[
+            (df[const.POINT_TYPE] == const.END)
+            & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
+        ][[const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]]
         .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
         .rename(
             columns={
@@ -24,9 +25,10 @@ def get_od_shape(df, tessellation):
     )
 
     od_shape = (
-        df[(df[const.POINT_TYPE] == const.START) & df[const.TILE_ID].isin(tessellation[const.TILE_ID])][
-            [const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]
-        ]
+        df[
+            (df[const.POINT_TYPE] == const.START)
+            & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
+        ][[const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]]
         .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
         .merge(ends_od_shape, on=const.TID, how="inner")
     )
@@ -36,8 +38,7 @@ def get_od_shape(df, tessellation):
 
 def get_od_flows(od_shape, mdreport, eps):
     od_flows = (
-        od_shape
-        .groupby([const.TILE_ID, const.TILE_ID_END])
+        od_shape.groupby([const.TILE_ID, const.TILE_ID_END])
         .aggregate(flow=(const.TID, "count"))
         .reset_index()
         .rename(
@@ -53,7 +54,7 @@ def get_od_flows(od_shape, mdreport, eps):
     full_tile_ids = np.unique(mdreport.tessellation[const.TILE_ID])
     full_combinations = list(map(np.ravel, np.meshgrid(full_tile_ids, full_tile_ids)))
     od_flows = pd.DataFrame(
-        dict(origin=full_combinations[0], destination=full_combinations[1])
+        {"origin": full_combinations[0], "destination": full_combinations[1]}
     ).merge(od_flows, on=["origin", "destination"], how="left")
     od_flows.fillna(0, inplace=True)
 
@@ -63,10 +64,7 @@ def get_od_flows(od_shape, mdreport, eps):
 
     # remove all instances of 0 to reduce storage
     od_flows = od_flows[od_flows["flow"] > 0]
-    return Section(
-        data=od_flows,
-        privacy_budget=eps
-    )
+    return Section(data=od_flows, privacy_budget=eps)
 
 
 def get_intra_tile_flows(od_flows):
@@ -75,7 +73,7 @@ def get_intra_tile_flows(od_flows):
 
 def get_travel_time(od_shape, mdreport, eps):
 
-    travel_time = od_shape[const.DATETIME_END]- od_shape[const.DATETIME]
+    travel_time = od_shape[const.DATETIME_END] - od_shape[const.DATETIME]
     travel_time = (travel_time.dt.seconds / 60).round()  # as minutes
 
     return m_utils.hist_section(
@@ -89,14 +87,12 @@ def get_travel_time(od_shape, mdreport, eps):
     )
 
 
-def get_jump_length(
-    od_shape, mdreport, eps
-):
+def get_jump_length(od_shape, mdreport, eps):
 
     # parallel computation for speed up
-    jump_length = od_shape[[const.LAT, const.LNG, const.LAT_END, const.LNG_END]].parallel_apply(
-        m_utils.haversine_dist, axis=1
-    )
+    jump_length = od_shape[
+        [const.LAT, const.LNG, const.LAT_END, const.LNG_END]
+    ].parallel_apply(m_utils.haversine_dist, axis=1)
     return m_utils.hist_section(
         jump_length,
         eps,

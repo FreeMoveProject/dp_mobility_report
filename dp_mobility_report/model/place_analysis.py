@@ -27,7 +27,9 @@ def get_visits_per_tile(mdreport, eps):
     n_outliers = len(mdreport.df) - counts_per_tile.visit_count.sum()
 
     counts_per_tile = counts_per_tile.merge(
-        mdreport.tessellation[[const.TILE_ID, const.TILE_NAME]], on=const.TILE_ID, how="outer"
+        mdreport.tessellation[[const.TILE_ID, const.TILE_NAME]],
+        on=const.TILE_ID,
+        how="outer",
     )
     counts_per_tile.loc[counts_per_tile.visit_count.isna(), "visit_count"] = 0
 
@@ -47,25 +49,30 @@ def get_visits_per_tile(mdreport, eps):
     ).item()
 
     return Section(
-        data=counts_per_tile, 
+        data=counts_per_tile,
         privacy_budget=eps,
-        n_outliers=n_outliers, 
-        quartiles=dp_quartiles)
+        n_outliers=n_outliers,
+        quartiles=dp_quartiles,
+    )
+
 
 def _get_hour_bin(hour, timewindows):
     timewindows = np.array(timewindows)
     if hour >= timewindows.min() and hour < timewindows.max():
         i = np.argwhere((timewindows) <= hour)[-1][0]
         min_v = timewindows[i]
-        max_v = timewindows[i+1]
+        max_v = timewindows[i + 1]
     else:
-        i = len(timewindows)-1
+        i = len(timewindows) - 1
         min_v = timewindows[-1]
         max_v = timewindows[0]
-    return f'{i + 1}: {min_v}-{max_v}'
+    return f"{i + 1}: {min_v}-{max_v}"
+
 
 def get_visits_per_tile_timewindow(mdreport, eps):
-    mdreport.df["timewindows"] = mdreport.df[const.HOUR].apply(lambda x: _get_hour_bin(x, mdreport.timewindows))
+    mdreport.df["timewindows"] = mdreport.df[const.HOUR].apply(
+        lambda x: _get_hour_bin(x, mdreport.timewindows)
+    )
 
     # only points within tessellation and end points
     counts_per_tile_timewindow = mdreport.df[
@@ -88,7 +95,9 @@ def get_visits_per_tile_timewindow(mdreport, eps):
     counts_per_tile_timewindow = (
         counts_per_tile_timewindow.reset_index()
         .pivot_table(
-            index=const.TILE_ID, columns=[const.IS_WEEKEND, "timewindows"], aggfunc="count"
+            index=const.TILE_ID,
+            columns=[const.IS_WEEKEND, "timewindows"],
+            aggfunc="count",
         )
         .droplevel(level=0, axis=1)
     )
@@ -102,5 +111,5 @@ def get_visits_per_tile_timewindow(mdreport, eps):
         counts_per_tile_timewindow, eps, mdreport.max_trips_per_user, nonzero=False
     )
     return Section(
-        data=dp_counts_per_tile_timewindow.unstack(const.TILE_ID).T, 
-        privacy_budget=eps)
+        data=dp_counts_per_tile_timewindow.unstack(const.TILE_ID).T, privacy_budget=eps
+    )

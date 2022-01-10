@@ -1,11 +1,10 @@
+import geopandas as gpd
+import pandas as pd
 import pytest
 
-import pandas as pd
-import geopandas as gpd
+from dp_mobility_report import constants as const
 from dp_mobility_report.md_report import MobilityDataReport
 from dp_mobility_report.report import report
-from dp_mobility_report import constants as const
-
 
 
 @pytest.fixture
@@ -19,7 +18,13 @@ def test_mdreport():
 def test_report_elements(test_mdreport):
     test_mdreport.analysis_selection = [const.ALL]
     elements = report.report_elements(test_mdreport)
-    assert list(elements.keys()) == const.OVERVIEW_ELEMENTS + const.PLACE_ELEMENTS + const.OD_ELEMENTS + const.USER_ELEMENTS
+    assert (
+        list(elements.keys())
+        == const.OVERVIEW_ELEMENTS
+        + const.PLACE_ELEMENTS
+        + const.OD_ELEMENTS
+        + const.USER_ELEMENTS
+    )
 
     test_mdreport.analysis_selection = [const.OVERVIEW]
     elements = report.report_elements(test_mdreport)

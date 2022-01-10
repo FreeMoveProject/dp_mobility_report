@@ -23,7 +23,7 @@ def histogram(hist, x_axis_label=None, rotate_label=False, x_axis_type=None):
     if x_axis_type is not None:
         bins = bins.astype(x_axis_type)
 
-    if (len(bins) == len(counts)):
+    if len(bins) == len(counts):
         labels = bins
     else:
         lower_bound = bins[:-1]
@@ -96,24 +96,26 @@ def choropleth_map(
         min_scale, counts_per_tile_gdf[fill_color_name].max()
     )
 
-    def get_color(x, fill_color_name):
+    def _get_color(x, fill_color_name):
         if x["properties"][fill_color_name] is None:
             return "#8c8c8c"
         return color_map(x["properties"][fill_color_name])
 
-    style_function = lambda x: {
-        "fillColor": get_color(x, fill_color_name),
-        "color": grey,
-        "weight": 1.5,
-        "fillOpacity": 0.6,
-    }
+    def _style_function(x):
+        return {
+            "fillColor": _get_color(x, fill_color_name),
+            "color": grey,
+            "weight": 1.5,
+            "fillOpacity": 0.6,
+        }
+
     if "tile_name" in counts_per_tile_gdf:
         fields = ["tile_id", "tile_name", fill_color_name]
     else:
         fields = ["tile_id", fill_color_name]
     folium.GeoJson(
         poly_json,
-        style_function=style_function,
+        style_function=_style_function,
         popup=folium.GeoJsonPopup(fields=fields),
     ).add_to(m)
 
@@ -156,9 +158,9 @@ def multi_choropleth_map(counts_per_tile_timewindow, tessellation):
                 linewidth=0.1,
                 ax=ax,
                 edgecolor="#FFFFFF",
-                missing_kwds=dict(
-                    color="lightgrey",
-                ),
+                missing_kwds={
+                    "color": "lightgrey",
+                },
             )
             ax.set_title(column_name)
 

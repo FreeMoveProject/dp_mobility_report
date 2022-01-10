@@ -1,10 +1,11 @@
+import geopandas as gpd
+import pandas as pd
 import pytest
 
-import pandas as pd
-import geopandas as gpd
+from dp_mobility_report import constants as const
 from dp_mobility_report.md_report import MobilityDataReport
 from dp_mobility_report.model import overview
-from dp_mobility_report import constants as const
+
 
 @pytest.fixture
 def test_mdreport():
@@ -39,10 +40,17 @@ def test_get_trips_over_time(test_mdreport):
     """Correct trips over time values without noise."""
     trips_over_time = overview.get_trips_over_time(test_mdreport, None)
     assert trips_over_time.datetime_precision == const.PREC_DATE
-    expected_quartiles = pd.Series(data = {'min':'2020-12-13', '25%':'2020-12-14', '50%':'2020-12-16', '75%':'2020-12-17', 'max':'2020-12-19'})
+    expected_quartiles = pd.Series(
+        data={
+            "min": "2020-12-13",
+            "25%": "2020-12-14",
+            "50%": "2020-12-16",
+            "75%": "2020-12-17",
+            "max": "2020-12-19",
+        }
+    )
     assert trips_over_time.quartiles.astype(str).equals(expected_quartiles)
-    assert  trips_over_time.data.trip_count.tolist() == [15, 15, 11, 16, 22, 18,  3]
-
+    assert trips_over_time.data.trip_count.tolist() == [15, 15, 11, 16, 22, 18, 3]
 
 
 def test_get_trips_per_weekday(test_mdreport):
@@ -57,11 +65,17 @@ def test_get_trips_per_weekday(test_mdreport):
     assert trips_per_weekday["Saturday"] == 3
     assert trips_per_weekday["Sunday"] == 15
 
+
 def test_get_trips_per_hour(test_mdreport):
     """Correct trips per hour values without noise."""
     trips_per_hour = overview.get_trips_per_hour(test_mdreport, None).data
     assert trips_per_hour[const.HOUR].min() == 0
     assert trips_per_hour[const.HOUR].max() == 23
-    assert trips_per_hour[const.TIME_CATEGORY].unique().tolist() == ["weekday_end", "weekday_start", "weekend_end", "weekend_start"]
+    assert trips_per_hour[const.TIME_CATEGORY].unique().tolist() == [
+        "weekday_end",
+        "weekday_start",
+        "weekend_end",
+        "weekend_start",
+    ]
     assert trips_per_hour.columns.tolist() == [const.HOUR, const.TIME_CATEGORY, "count"]
     assert len(trips_per_hour) == 73

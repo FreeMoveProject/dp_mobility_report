@@ -36,9 +36,7 @@ def render_user_analysis(mdreport):
     if const.TRIPS_PER_USER in report:
         trips_per_user_hist = render_trips_per_user(report[const.TRIPS_PER_USER].data)
 
-    if (const.USER_TIME_DELTA in report) & (
-        report[const.USER_TIME_DELTA] is not None
-    ):
+    if (const.USER_TIME_DELTA in report) & (report[const.USER_TIME_DELTA] is not None):
         overlapping_trips_info = render_overlapping_trips(
             report[const.USER_TIME_DELTA].n_outliers
         )

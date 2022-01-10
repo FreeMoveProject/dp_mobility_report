@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 
 from dp_mobility_report import constants as const
-
 from dp_mobility_report.report.html.html_utils import get_template, render_summary
 from dp_mobility_report.visualization import plot, v_utils
 
@@ -52,7 +51,6 @@ def render_place_analysis(report, tessellation):
     )
 
 
-### render place analysis functions
 def render_points_outside_tess(points_outside_tessellation):
     return "Points outside the given tessellation: " + str(points_outside_tessellation)
 

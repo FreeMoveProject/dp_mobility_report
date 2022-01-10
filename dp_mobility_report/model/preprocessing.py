@@ -1,9 +1,9 @@
 import logging
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 from shapely.geometry import Point
-import geopandas as gpd
 
 from dp_mobility_report import constants as const
 
@@ -19,21 +19,19 @@ def preprocess_tessellation(tessellation):
     if type(tessellation) is not gpd.GeoDataFrame:
         try:
             tessellation = gpd.GeoDataFrame(
-                tessellation, geometry="geometry", crs= const.DEFAULT_CRS
+                tessellation, geometry="geometry", crs=const.DEFAULT_CRS
             )
-        except:
-            raise Exception(
-                "Tessellation cannot be cast to a geopandas.GeoDataFrame."
-            )
+        except TypeError:
+            raise TypeError("Tessellation cannot be cast to a geopandas.GeoDataFrame.")
     if tessellation.crs != const.DEFAULT_CRS:
-        tessellation.to_crs(const.DEFAULT_CRS, inplace = True)
+        tessellation.to_crs(const.DEFAULT_CRS, inplace=True)
     return tessellation[[const.TILE_ID, const.TILE_NAME, const.GEOMETRY]]
 
 
 def _validate_columns(df):
     if const.UID not in df.columns:
         raise ValueError("Column 'uid' must be present in data.")
-    df[const.UID] =  df[const.UID].astype(str)
+    df[const.UID] = df[const.UID].astype(str)
     if const.TID not in df.columns:
         raise ValueError("Column 'tid' must be present in data.")
     if const.LAT not in df.columns:
@@ -48,8 +46,8 @@ def _validate_columns(df):
         raise ValueError("Column 'datetime' must be present in data.")
     try:
         df.loc[:, const.DATETIME] = pd.to_datetime(df[const.DATETIME])
-    except:
-        raise TypeError("Column 'datetime' cannot be cast to datetime.")
+    except Exception as ex:
+        raise TypeError("Column 'datetime' cannot be cast to datetime.") from ex
     return df
 
 
@@ -59,12 +57,14 @@ def preprocess_data(df, tessellation, max_trips_per_user, user_privacy):
     df.loc[:, const.ID] = range(0, len(df))
 
     # make sure trip ids are unique and ordered correctly
-    df[const.TID] = df.sort_values([const.UID, const.DATETIME]).groupby([const.UID, const.TID], sort = False).ngroup()
+    df[const.TID] = (
+        df.sort_values([const.UID, const.DATETIME])
+        .groupby([const.UID, const.TID], sort=False)
+        .ngroup()
+    )
 
     # remove unnessessary columns
     columns = [const.ID, const.UID, const.TID, const.DATETIME, const.LAT, const.LNG]
-    # if extra_var is not None:
-    #     columns.append(extra_var)
     if const.TILE_ID in df.columns:
         columns.append(const.TILE_ID)
     df = df.loc[:, columns]
@@ -82,13 +82,17 @@ def preprocess_data(df, tessellation, max_trips_per_user, user_privacy):
     # assign start and end as point_type
     df[const.POINT_TYPE] = "start"
     df.sort_values(const.DATETIME, inplace=True)
-    df.loc[df.groupby(const.TID)[const.POINT_TYPE].tail(1).index, const.POINT_TYPE] = "end"
+    df.loc[
+        df.groupby(const.TID)[const.POINT_TYPE].tail(1).index, const.POINT_TYPE
+    ] = "end"
 
     # if tile assignment isn't already provided, recompute assignment
     if const.TILE_ID not in df.columns:
         df = assign_points_to_tessellation(df, tessellation)
     else:
-        logging.info("'tile_id' present in data. No new assignment of points to tessellation.")
+        logging.info(
+            "'tile_id' present in data. No new assignment of points to tessellation."
+        )
         df.tile_id = df.tile_id.astype(str)
 
     df = sample_trips(df, max_trips_per_user, user_privacy)
@@ -97,19 +101,23 @@ def preprocess_data(df, tessellation, max_trips_per_user, user_privacy):
 
 def assign_points_to_tessellation(df, tessellation):
     gdf = gpd.GeoDataFrame(
-        df, geometry=[Point(xy) for xy in zip(df[const.LNG], df[const.LAT])], crs="EPSG:4326"
+        df,
+        geometry=[Point(xy) for xy in zip(df[const.LNG], df[const.LAT])],
+        crs="EPSG:4326",
     )
 
     # Spatial join points to polygons
     df = gpd.sjoin(
-        tessellation[[const.TILE_ID, const.TILE_NAME, const.GEOMETRY]], gdf, how="right",
-    )  
+        tessellation[[const.TILE_ID, const.TILE_NAME, const.GEOMETRY]],
+        gdf,
+        how="right",
+    )
     df.drop(["index_left", const.GEOMETRY], axis=1, inplace=True)
     return pd.DataFrame(df)
 
 
 def sample_trips(df, max_trips_per_user, user_privacy):
-    if user_privacy == True:
+    if user_privacy:
         tid_sample = (
             df[[const.UID, const.TID]]
             .drop_duplicates(const.TID)

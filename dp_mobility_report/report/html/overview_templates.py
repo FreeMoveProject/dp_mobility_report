@@ -20,9 +20,7 @@ def render_overview(report):
         )
 
     if const.MISSING_VALUES in report:
-        missing_values_table = render_missing_values(
-            report[const.MISSING_VALUES].data
-        )
+        missing_values_table = render_missing_values(report[const.MISSING_VALUES].data)
 
     if const.TRIPS_OVER_TIME in report:
         trips_over_time_linechart = render_trips_over_time(
@@ -38,7 +36,9 @@ def render_overview(report):
         )
 
     if const.TRIPS_PER_HOUR in report:
-        trips_per_hour_linechart = render_trips_per_hour(report[const.TRIPS_PER_HOUR].data)
+        trips_per_hour_linechart = render_trips_per_hour(
+            report[const.TRIPS_PER_HOUR].data
+        )
 
     template_structure = get_template("overview_segment.html")
     return template_structure.render(
@@ -96,11 +96,6 @@ def render_missing_values(missing_values):
 
 
 def render_trips_over_time(trips_over_time):
-    title = (
-        "Date"
-        if trips_over_time.datetime_precision == const.DATE
-        else f"Date (grouped by {trips_over_time.datetime_precision})"
-    )
     if len(trips_over_time.data) <= 20:
         chart = plot.barchart(
             data=trips_over_time.data,

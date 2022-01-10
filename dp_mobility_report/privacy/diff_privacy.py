@@ -1,6 +1,6 @@
+import diffprivlib
 import numpy as np
 import pandas as pd
-import diffprivlib
 from diffprivlib.validation import clip_to_bounds
 
 
@@ -8,7 +8,6 @@ def bounds_dp(array, eps, sensitivity):
     if eps is None:
         return (array.min(), array.max())
     epsi = eps / 2
-    # acc.check(epsi, 0)
     result = [1, 0]
     if isinstance(array, np.ndarray):
         array = np.sort(array)
@@ -29,7 +28,6 @@ def bounds_dp(array, eps, sensitivity):
             idx = mech.randomise()
             output = array[idx]
             result[quant] = output
-    # acc.spend(eps, 0)
     return (result[0], result[1])
 
 
@@ -39,9 +37,7 @@ def quartiles_dp(array, eps, sensitivity, bounds=None):
         array = array.values.astype(np.int64)
         dtyp = "timedelta"
     elif np.issubdtype(array.dtype, np.datetime64):
-        array = array.values.astype(
-            np.int64
-        ) 
+        array = array.values.astype(np.int64)
         dtyp = "datetime"
     else:
         dtyp = 0
@@ -53,11 +49,9 @@ def quartiles_dp(array, eps, sensitivity, bounds=None):
         else:
             epsi = eps
             bound_epsi = epsi
-        # acc.check(epsi, 0)
         bounds = bounds_dp(array, bound_epsi, sensitivity)
     elif eps is not None:
         epsi = eps / 3
-        # acc.check(epsi, 0)
 
     result = []
     result.append(bounds[0])
@@ -80,7 +74,6 @@ def quartiles_dp(array, eps, sensitivity, bounds=None):
             idx = mech.randomise()
             output = array[idx]
             result.append(output)
-            # acc.spend(epsi, 0)
 
     result.append(bounds[1])
 
@@ -98,10 +91,8 @@ def counts_dp(counts, eps, sensitivity, parallel=True, nonzero=True):
 
     if parallel is False:
         epsi = eps / len([counts])
-        # acc.spend(len([series])*epsi, 0)
     else:
         epsi = eps
-        # acc.spend(epsi, 0)
 
     if isinstance(counts, pd.Series):
         dpcount = counts.apply(
@@ -116,17 +107,20 @@ def counts_dp(counts, eps, sensitivity, parallel=True, nonzero=True):
         )
         dpcount = dpcount.apply(lambda x: int(round((abs(x) + x) / 2, 0)))
     else:  # isinstance(series,int #or np.ndarray):
-        laplacer = lambda x: int(
-            round(
-                diffprivlib.mechanisms.laplace.Laplace(
-                    epsilon=epsi, delta=0.0, sensitivity=sensitivity
-                ).randomise(x),
-                0,
+
+        def _laplacer(x):
+            return int(
+                round(
+                    diffprivlib.mechanisms.laplace.Laplace(
+                        epsilon=epsi, delta=0.0, sensitivity=sensitivity
+                    ).randomise(x),
+                    0,
+                )
             )
-        )
-        vfunc = np.vectorize(laplacer)
+
+        vfunc = np.vectorize(_laplacer)
         dpcount = vfunc(counts)
-        dpcount = (abs(dpcount) + dpcount) / 2 # make zero if dpcount < 0
+        dpcount = (abs(dpcount) + dpcount) / 2  # make zero if dpcount < 0
 
     if nonzero is True:
         if np.isscalar(dpcount):
@@ -148,16 +142,17 @@ def entropy_dp(array, epsi, maxcontribution):
     else:
         sensitivity = np.log(2)
 
-    # acc.check(epsi,0)
-    laplacer = lambda x: int(
-        round(
-            diffprivlib.mechanisms.laplace.Laplace(
-                epsilon=epsi, delta=0.0, sensitivity=sensitivity
-            ).randomise(x),
-            0,
+    def _laplacer(x):
+        return int(
+            round(
+                diffprivlib.mechanisms.laplace.Laplace(
+                    epsilon=epsi, delta=0.0, sensitivity=sensitivity
+                ).randomise(x),
+                0,
+            )
         )
-    )
-    vfunc = np.vectorize(laplacer)
+
+    vfunc = np.vectorize(_laplacer)
     entropy = vfunc(array)
     entropy = (abs(entropy) + entropy) / 2
     # entropy >=0 and <= log k with k categories.

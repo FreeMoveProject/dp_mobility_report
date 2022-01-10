@@ -30,9 +30,13 @@ def render_od_analysis(mdreport, top_n_flows):
     report = mdreport.report
 
     if const.OD_FLOWS in report:
-        od_map = render_origin_destination_flows(report[const.OD_FLOWS].data, mdreport, top_n_flows)
+        od_map = render_origin_destination_flows(
+            report[const.OD_FLOWS].data, mdreport, top_n_flows
+        )
         intra_tile_flows_info = render_intra_tile_flows(report[const.OD_FLOWS].data)
-        flows_summary_table = render_summary(report[const.OD_FLOWS].data.flow.describe())
+        flows_summary_table = render_summary(
+            report[const.OD_FLOWS].data.flow.describe()
+        )
         flows_cumsum_linechart = render_flows_cumsum(report[const.OD_FLOWS].data)
         most_freq_flows_ranking = render_most_freq_flows_ranking(
             report[const.OD_FLOWS].data, mdreport.tessellation
@@ -44,9 +48,7 @@ def render_od_analysis(mdreport, top_n_flows):
             mdreport.max_travel_time,
         )
         travel_time_hist = render_travel_time_hist(report[const.TRAVEL_TIME].data)
-        travel_time_summary_table = render_summary(
-            report[const.TRAVEL_TIME].quartiles
-        )
+        travel_time_summary_table = render_summary(report[const.TRAVEL_TIME].quartiles)
 
     if const.JUMP_LENGTH in report:
         outlier_count_jump_length_info = render_outlier_info(
@@ -54,9 +56,7 @@ def render_od_analysis(mdreport, top_n_flows):
             mdreport.max_jump_length,
         )
         jump_length_hist = render_jump_length_hist(report[const.JUMP_LENGTH].data)
-        jump_length_summary_table = render_summary(
-            report[const.JUMP_LENGTH].quartiles
-        )
+        jump_length_summary_table = render_summary(report[const.JUMP_LENGTH].quartiles)
     template_structure = get_template("od_analysis_segment.html")
     return template_structure.render(
         od_map=od_map,
@@ -74,9 +74,7 @@ def render_od_analysis(mdreport, top_n_flows):
 
 
 def render_origin_destination_flows(od_flows, mdreport, top_n_flows):
-    top_n_flows = (
-        top_n_flows if top_n_flows <= len(od_flows) else len(od_flows)
-    )
+    top_n_flows = top_n_flows if top_n_flows <= len(od_flows) else len(od_flows)
     innerflow = od_flows[od_flows.origin == od_flows.destination]
 
     tessellation_innerflow = pd.merge(

@@ -13,9 +13,7 @@ from dp_mobility_report.privacy import diff_privacy
 
 def get_trips_per_user(mdreport, eps):
     user_nunique = mdreport.df.groupby(const.UID).nunique()[const.TID]
-    max_trips = (
-        mdreport.max_trips_per_user if mdreport.user_privacy else None
-    )
+    max_trips = mdreport.max_trips_per_user if mdreport.user_privacy else None
 
     return m_utils.hist_section(
         user_nunique,
@@ -45,7 +43,6 @@ def get_user_time_delta(mdreport, eps):
     user_time_delta = user_time_delta[user_time_delta.notnull()]
     overlaps = len(user_time_delta[user_time_delta < timedelta(seconds=0)])
 
-
     if len(user_time_delta) < 1:
         return None
 
@@ -60,10 +57,9 @@ def get_user_time_delta(mdreport, eps):
         user_time_delta, epsi_quart, mdreport.max_trips_per_user
     )
 
-    return Section(data=None, 
-                  privacy_budget=eps,
-                  n_outliers=n_overlaps, 
-                  quartiles=dp_quartiles)
+    return Section(
+        data=None, privacy_budget=eps, n_outliers=n_overlaps, quartiles=dp_quartiles
+    )
 
 
 def get_radius_of_gyration(mdreport, eps):
@@ -81,57 +77,70 @@ def get_radius_of_gyration(mdreport, eps):
 
 def _radius_of_gyration(df):
     # create a lat_lng array for each individual
-    lats_lngs = df.set_index(const.UID)[[const.LAT, const.LNG]].groupby(level=0).apply(np.array)
+    lats_lngs = (
+        df.set_index(const.UID)[[const.LAT, const.LNG]].groupby(level=0).apply(np.array)
+    )
     # compute the center of mass for each individual
     center_of_masses = np.array([np.mean(x, axis=0) for x in lats_lngs])
     center_of_masses_df = pd.DataFrame(
         data=center_of_masses, index=lats_lngs.index, columns=["com_lat", "com_lng"]
     )
 
-    df_rog = df.merge(center_of_masses_df, how="left", left_on=const.UID, right_index=True)
-    # compute the distance between each location and its according center of mass
-    def _haversine_dist_squared(coords): return m_utils.haversine_dist(coords) ** 2
-    df_rog["com_dist"] = df_rog[[const.LAT, const.LNG, "com_lat", "com_lng"]].parallel_apply(
-        _haversine_dist_squared, axis=1
+    df_rog = df.merge(
+        center_of_masses_df, how="left", left_on=const.UID, right_index=True
     )
 
+    # compute the distance between each location and its according center of mass
+    def _haversine_dist_squared(coords):
+        return m_utils.haversine_dist(coords) ** 2
+
+    df_rog["com_dist"] = df_rog[
+        [const.LAT, const.LNG, "com_lat", "com_lng"]
+    ].parallel_apply(_haversine_dist_squared, axis=1)
+
     # compute radius of gyration
-    def _mean_then_square(x): return np.sqrt(np.mean(x))
+    def _mean_then_square(x):
+        return np.sqrt(np.mean(x))
+
     rog = df_rog.groupby(const.UID).com_dist.apply(_mean_then_square)
     rog.name = const.RADIUS_OF_GYRATION
     return rog
 
 
 def _tile_visits_by_user(df):
-    return df.groupby([const.UID, const.TILE_ID], as_index=False).aggregate(count_by_user=(const.ID, "count"))
+    return df.groupby([const.UID, const.TILE_ID], as_index=False).aggregate(
+        count_by_user=(const.ID, "count")
+    )
 
 
 def get_location_entropy(mdreport, eps):
-    total_visits_by_tile = mdreport.df.groupby(const.TILE_ID).aggregate(total_visits=(const.ID, "count"))
+    total_visits_by_tile = mdreport.df.groupby(const.TILE_ID).aggregate(
+        total_visits=(const.ID, "count")
+    )
     tile_visits_by_user = _tile_visits_by_user(mdreport.df).merge(
-        total_visits_by_tile,
-        left_on=const.TILE_ID,
-        right_index=True
+        total_visits_by_tile, left_on=const.TILE_ID, right_index=True
     )[[const.TILE_ID, "count_by_user", "total_visits"]]
 
     tile_visits_by_user["p"] = (
         tile_visits_by_user.count_by_user / tile_visits_by_user.total_visits
     )
-    tile_visits_by_user["log2p"] = -tile_visits_by_user.p.apply(lambda x: math.log(x, 2))
+    tile_visits_by_user["log2p"] = -tile_visits_by_user.p.apply(
+        lambda x: math.log(x, 2)
+    )
     tile_visits_by_user[const.LOCATION_ENTROPY] = (
         tile_visits_by_user.p * tile_visits_by_user.log2p
     )
 
-    location_entropy = tile_visits_by_user.groupby(const.TILE_ID)[const.LOCATION_ENTROPY].sum()
+    location_entropy = tile_visits_by_user.groupby(const.TILE_ID)[
+        const.LOCATION_ENTROPY
+    ].sum()
     location_entropy_dp = diff_privacy.entropy_dp(
         location_entropy, eps, mdreport.max_trips_per_user
     )
     data = pd.Series(
         location_entropy_dp, index=location_entropy.index, name=location_entropy.name
     )
-    return Section(data=data, 
-                privacy_budget=eps)
-
+    return Section(data=data, privacy_budget=eps)
 
 
 def get_user_tile_count(mdreport, eps):
@@ -146,11 +155,11 @@ def get_user_tile_count(mdreport, eps):
 
 
 def _mobility_entropy(df):
-    total_visits_by_user = df.groupby(const.UID).aggregate(total_visits=(const.ID, "count"))
+    total_visits_by_user = df.groupby(const.UID).aggregate(
+        total_visits=(const.ID, "count")
+    )
     tile_visits_by_user = _tile_visits_by_user(df).merge(
-        total_visits_by_user,
-        left_on=const.UID,
-        right_index=True
+        total_visits_by_user, left_on=const.UID, right_index=True
     )
     tile_visits_by_user["probs"] = (
         1.0 * tile_visits_by_user.count_by_user / tile_visits_by_user.total_visits
@@ -173,8 +182,8 @@ def get_mobility_entropy(mdreport, eps):
         mobility_entropy,
         eps,
         sensitivity=1,
-        min_value = 0,
-        max_value = 1,
+        min_value=0,
+        max_value=1,
         max_bins=10,
         evalu=mdreport.evalu,
     )
