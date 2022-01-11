@@ -1,9 +1,11 @@
 import base64
 import io
 
+from matplotlib.figure import Figure
+
 
 # TODO: better implementation and svg instead of png
-def fig_to_html(fig):
+def fig_to_html(fig: Figure) -> str:
     img = io.BytesIO()
     fig.savefig(img, format="png", bbox_inches="tight")
     img.seek(0)

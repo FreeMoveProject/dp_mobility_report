@@ -1,4 +1,10 @@
+from typing import TYPE_CHECKING
+
+from pandas import DataFrame
 from tqdm.auto import tqdm
+
+if TYPE_CHECKING:
+    from dp_mobility_report.md_report import MobilityDataReport
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import (
@@ -9,9 +15,9 @@ from dp_mobility_report.model import (
 )
 
 
-def report_elements(mdreport):
+def report_elements(mdreport: "MobilityDataReport") -> dict:
 
-    report = {}
+    report: dict = {}
     is_all_analyses = const.ALL in mdreport.analysis_selection
 
     with tqdm(  # progress bar
@@ -37,7 +43,7 @@ def report_elements(mdreport):
     return report
 
 
-def add_overview_elements(mdreport):
+def add_overview_elements(mdreport: "MobilityDataReport") -> dict:
     if mdreport.privacy_budget is None or mdreport.evalu is True:
         epsilon = mdreport.privacy_budget
     else:
@@ -51,7 +57,7 @@ def add_overview_elements(mdreport):
     }
 
 
-def add_place_analysis_elements(mdreport):
+def add_place_analysis_elements(mdreport: "MobilityDataReport") -> dict:
     if mdreport.privacy_budget is None or mdreport.evalu is True:
         epsilon = mdreport.privacy_budget
     else:
@@ -64,7 +70,9 @@ def add_place_analysis_elements(mdreport):
     }
 
 
-def add_od_analysis_elements(mdreport, _od_shape):
+def add_od_analysis_elements(
+    mdreport: "MobilityDataReport", _od_shape: DataFrame
+) -> dict:
     if mdreport.privacy_budget is None or mdreport.evalu is True:
         epsilon = mdreport.privacy_budget
     else:
@@ -76,7 +84,7 @@ def add_od_analysis_elements(mdreport, _od_shape):
     }
 
 
-def add_user_analysis_elements(mdreport):
+def add_user_analysis_elements(mdreport: "MobilityDataReport") -> dict:
     if mdreport.privacy_budget is None or mdreport.evalu is True:
         epsilon = mdreport.privacy_budget
     else:

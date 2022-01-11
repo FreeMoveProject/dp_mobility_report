@@ -1,5 +1,9 @@
 import math
 from datetime import timedelta
+from typing import TYPE_CHECKING, List, Optional
+
+if TYPE_CHECKING:
+    from dp_mobility_report.md_report import MobilityDataReport
 
 import numpy as np
 import pandas as pd
@@ -11,7 +15,7 @@ from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
 
 
-def get_trips_per_user(mdreport, eps):
+def get_trips_per_user(mdreport: "MobilityDataReport", eps: Optional[float]) -> Section:
     user_nunique = mdreport.df.groupby(const.UID).nunique()[const.TID]
     max_trips = mdreport.max_trips_per_user if mdreport.user_privacy else None
 
@@ -25,7 +29,9 @@ def get_trips_per_user(mdreport, eps):
     )
 
 
-def get_user_time_delta(mdreport, eps):
+def get_user_time_delta(
+    mdreport: "MobilityDataReport", eps: Optional[float]
+) -> Section:
     if mdreport.evalu is True or eps is None:
         epsi = eps
         epsi_quart = epsi
@@ -46,12 +52,10 @@ def get_user_time_delta(mdreport, eps):
     if len(user_time_delta) < 1:
         return None
 
-    n_overlaps = diff_privacy.counts_dp(
+    n_overlaps = diff_privacy.count_dp(
         overlaps,
         epsi,
         mdreport.max_trips_per_user,
-        parallel=True,
-        nonzero=False,
     )
     dp_quartiles = diff_privacy.quartiles_dp(
         user_time_delta, epsi_quart, mdreport.max_trips_per_user
@@ -62,7 +66,9 @@ def get_user_time_delta(mdreport, eps):
     )
 
 
-def get_radius_of_gyration(mdreport, eps):
+def get_radius_of_gyration(
+    mdreport: "MobilityDataReport", eps: Optional[float]
+) -> Section:
     rg = _radius_of_gyration(mdreport.df)
     return m_utils.hist_section(
         rg,
@@ -75,7 +81,7 @@ def get_radius_of_gyration(mdreport, eps):
     )
 
 
-def _radius_of_gyration(df):
+def _radius_of_gyration(df: pd.DataFrame) -> pd.Series:
     # create a lat_lng array for each individual
     lats_lngs = (
         df.set_index(const.UID)[[const.LAT, const.LNG]].groupby(level=0).apply(np.array)
@@ -91,7 +97,7 @@ def _radius_of_gyration(df):
     )
 
     # compute the distance between each location and its according center of mass
-    def _haversine_dist_squared(coords):
+    def _haversine_dist_squared(coords: List[float]) -> float:
         return m_utils.haversine_dist(coords) ** 2
 
     df_rog["com_dist"] = df_rog[
@@ -99,7 +105,7 @@ def _radius_of_gyration(df):
     ].parallel_apply(_haversine_dist_squared, axis=1)
 
     # compute radius of gyration
-    def _mean_then_square(x):
+    def _mean_then_square(x: float) -> float:
         return np.sqrt(np.mean(x))
 
     rog = df_rog.groupby(const.UID).com_dist.apply(_mean_then_square)
@@ -107,13 +113,15 @@ def _radius_of_gyration(df):
     return rog
 
 
-def _tile_visits_by_user(df):
+def _tile_visits_by_user(df: pd.DataFrame) -> pd.DataFrame:
     return df.groupby([const.UID, const.TILE_ID], as_index=False).aggregate(
         count_by_user=(const.ID, "count")
     )
 
 
-def get_location_entropy(mdreport, eps):
+def get_location_entropy(
+    mdreport: "MobilityDataReport", eps: Optional[float]
+) -> Section:
     total_visits_by_tile = mdreport.df.groupby(const.TILE_ID).aggregate(
         total_visits=(const.ID, "count")
     )
@@ -143,7 +151,9 @@ def get_location_entropy(mdreport, eps):
     return Section(data=data, privacy_budget=eps)
 
 
-def get_user_tile_count(mdreport, eps):
+def get_user_tile_count(
+    mdreport: "MobilityDataReport", eps: Optional[float]
+) -> Section:
     user_tile_count = mdreport.df.groupby(const.UID).nunique()[const.TILE_ID]
 
     return m_utils.hist_section(
@@ -154,7 +164,7 @@ def get_user_tile_count(mdreport, eps):
     )
 
 
-def _mobility_entropy(df):
+def _mobility_entropy(df: pd.DataFrame) -> np.array:
     total_visits_by_user = df.groupby(const.UID).aggregate(
         total_visits=(const.ID, "count")
     )
@@ -175,7 +185,9 @@ def _mobility_entropy(df):
     return entropy
 
 
-def get_mobility_entropy(mdreport, eps):
+def get_mobility_entropy(
+    mdreport: "MobilityDataReport", eps: Optional[float]
+) -> Section:
     mobility_entropy = _mobility_entropy(mdreport.df)
 
     return m_utils.hist_section(

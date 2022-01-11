@@ -1,13 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from geopandas import GeoDataFrame
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.report.html.html_utils import get_template, render_summary
 from dp_mobility_report.visualization import plot, v_utils
 
 
-def render_place_analysis(report, tessellation):
+def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
     points_outside_tessellation_info = None
     counts_per_tile_map = None
     counts_per_tile_summary_table = None
@@ -51,11 +52,13 @@ def render_place_analysis(report, tessellation):
     )
 
 
-def render_points_outside_tess(points_outside_tessellation):
+def render_points_outside_tess(points_outside_tessellation: int) -> str:
     return "Points outside the given tessellation: " + str(points_outside_tessellation)
 
 
-def render_counts_per_tile(counts_per_tile, tessellation):
+def render_counts_per_tile(
+    counts_per_tile: pd.DataFrame, tessellation: GeoDataFrame
+) -> str:
     # merge count and tessellation
     counts_per_tile_gdf = pd.merge(
         tessellation,
@@ -73,7 +76,7 @@ def render_counts_per_tile(counts_per_tile, tessellation):
     return html
 
 
-def render_counts_per_tile_cumsum(counts_per_tile):
+def render_counts_per_tile_cumsum(counts_per_tile: pd.DataFrame) -> str:
     df_cumsum = pd.DataFrame()
     df_cumsum["cum_perc"] = round(
         counts_per_tile.visit_count.sort_values(ascending=False).cumsum()
@@ -95,7 +98,9 @@ def render_counts_per_tile_cumsum(counts_per_tile):
     return html
 
 
-def render_most_freq_tiles_ranking(counts_per_tile, top_n=10):
+def render_most_freq_tiles_ranking(
+    counts_per_tile: pd.DataFrame, top_n: int = 10
+) -> str:
     topx_tiles = counts_per_tile.nlargest(top_n, "visit_count")
     topx_tiles["rank"] = list(range(1, len(topx_tiles) + 1))
 
@@ -119,7 +124,9 @@ def render_most_freq_tiles_ranking(counts_per_tile, top_n=10):
     return tile_ranking_html
 
 
-def render_counts_per_tile_timewindow(counts_per_tile_timewindow, tessellation):
+def render_counts_per_tile_timewindow(
+    counts_per_tile_timewindow: pd.DataFrame, tessellation: GeoDataFrame
+) -> str:
     output_html = ""
     if "weekday" in counts_per_tile_timewindow.columns:
         absolute_weekday = plot.multi_choropleth_map(

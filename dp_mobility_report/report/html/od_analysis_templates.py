@@ -1,7 +1,13 @@
+from typing import TYPE_CHECKING, Tuple
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import skmob
+from geopandas.geodataframe import GeoDataFrame
+
+if TYPE_CHECKING:
+    from dp_mobility_report.md_report import MobilityDataReport
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import od_analysis
@@ -14,7 +20,7 @@ from dp_mobility_report.report.html.html_utils import (
 from dp_mobility_report.visualization import plot, v_utils
 
 
-def render_od_analysis(mdreport, top_n_flows):
+def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
     od_map = None
     intra_tile_flows_info = None
     flows_summary_table = None
@@ -73,7 +79,9 @@ def render_od_analysis(mdreport, top_n_flows):
     )
 
 
-def render_origin_destination_flows(od_flows, mdreport, top_n_flows):
+def render_origin_destination_flows(
+    od_flows: pd.DataFrame, mdreport: "MobilityDataReport", top_n_flows: int
+) -> str:
     top_n_flows = top_n_flows if top_n_flows <= len(od_flows) else len(od_flows)
     innerflow = od_flows[od_flows.origin == od_flows.destination]
 
@@ -103,7 +111,7 @@ def render_origin_destination_flows(od_flows, mdreport, top_n_flows):
     return html
 
 
-def render_intra_tile_flows(od_flows):
+def render_intra_tile_flows(od_flows: pd.DataFrame) -> str:
     flow_count = od_flows.flow.sum()
     intra_tile_flows = od_analysis.get_intra_tile_flows(od_flows)
     return (
@@ -115,7 +123,7 @@ def render_intra_tile_flows(od_flows):
     )
 
 
-def render_flows_cumsum(od_flows):
+def render_flows_cumsum(od_flows: pd.DataFrame) -> str:
     df_cumsum = pd.DataFrame()
     df_cumsum["cum_perc"] = round(
         od_flows.flow.sort_values(ascending=False).cumsum() / sum(od_flows.flow), 2
@@ -135,7 +143,9 @@ def render_flows_cumsum(od_flows):
     return html
 
 
-def render_most_freq_flows_ranking(od_flows, tessellation, top_x=10):
+def render_most_freq_flows_ranking(
+    od_flows: pd.DataFrame, tessellation: GeoDataFrame, top_x: int = 10
+) -> str:
     topx_flows = od_flows.nlargest(top_x, "flow")
     topx_flows["rank"] = list(range(1, len(topx_flows) + 1))
     topx_flows = topx_flows.merge(
@@ -171,7 +181,7 @@ def render_most_freq_flows_ranking(od_flows, tessellation, top_x=10):
     return tile_ranking_html
 
 
-def render_travel_time_hist(travel_time_hist):
+def render_travel_time_hist(travel_time_hist: Tuple) -> str:
     hist = plot.histogram(
         travel_time_hist, x_axis_label="travel time (min.)", x_axis_type=int
     )
@@ -180,7 +190,7 @@ def render_travel_time_hist(travel_time_hist):
     return html_hist
 
 
-def render_jump_length_hist(jump_length_hist):
+def render_jump_length_hist(jump_length_hist: Tuple) -> str:
     hist = plot.histogram(
         jump_length_hist, x_axis_label="jump length (kilometers)", x_axis_type=float
     )

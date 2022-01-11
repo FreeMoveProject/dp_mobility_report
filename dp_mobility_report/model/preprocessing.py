@@ -8,7 +8,7 @@ from shapely.geometry import Point
 from dp_mobility_report import constants as const
 
 
-def preprocess_tessellation(tessellation):
+def preprocess_tessellation(tessellation: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     if const.TILE_ID not in tessellation.columns:
         raise ValueError("Column tile_id must be present in tesesllation.")
     tessellation.loc[:, const.TILE_ID] = tessellation.tile_id.astype(str)
@@ -21,14 +21,16 @@ def preprocess_tessellation(tessellation):
             tessellation = gpd.GeoDataFrame(
                 tessellation, geometry="geometry", crs=const.DEFAULT_CRS
             )
-        except TypeError:
-            raise TypeError("Tessellation cannot be cast to a geopandas.GeoDataFrame.")
+        except TypeError as ex:
+            raise TypeError(
+                "Tessellation cannot be cast to a geopandas.GeoDataFrame."
+            ) from ex
     if tessellation.crs != const.DEFAULT_CRS:
         tessellation.to_crs(const.DEFAULT_CRS, inplace=True)
     return tessellation[[const.TILE_ID, const.TILE_NAME, const.GEOMETRY]]
 
 
-def _validate_columns(df):
+def _validate_columns(df: pd.DataFrame) -> pd.DataFrame:
     if const.UID not in df.columns:
         raise ValueError("Column 'uid' must be present in data.")
     df[const.UID] = df[const.UID].astype(str)
@@ -51,7 +53,12 @@ def _validate_columns(df):
     return df
 
 
-def preprocess_data(df, tessellation, max_trips_per_user, user_privacy):
+def preprocess_data(
+    df: pd.DataFrame,
+    tessellation: gpd.GeoDataFrame,
+    max_trips_per_user: int,
+    user_privacy: bool,
+) -> pd.DataFrame:
     df = _validate_columns(df)
 
     df.loc[:, const.ID] = range(0, len(df))
@@ -99,7 +106,9 @@ def preprocess_data(df, tessellation, max_trips_per_user, user_privacy):
     return df
 
 
-def assign_points_to_tessellation(df, tessellation):
+def assign_points_to_tessellation(
+    df: pd.DataFrame, tessellation: gpd.GeoDataFrame
+) -> pd.DataFrame:
     gdf = gpd.GeoDataFrame(
         df,
         geometry=[Point(xy) for xy in zip(df[const.LNG], df[const.LAT])],
@@ -116,7 +125,9 @@ def assign_points_to_tessellation(df, tessellation):
     return pd.DataFrame(df)
 
 
-def sample_trips(df, max_trips_per_user, user_privacy):
+def sample_trips(
+    df: pd.DataFrame, max_trips_per_user: int, user_privacy: bool
+) -> pd.DataFrame:
     if user_privacy:
         tid_sample = (
             df[[const.UID, const.TID]]

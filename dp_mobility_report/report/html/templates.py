@@ -1,3 +1,9 @@
+from pathlib import Path
+from typing import TYPE_CHECKING, Union
+
+if TYPE_CHECKING:
+    from dp_mobility_report.md_report import MobilityDataReport
+
 from dp_mobility_report import constants as const
 from dp_mobility_report.report.html import (
     html_utils,
@@ -8,7 +14,7 @@ from dp_mobility_report.report.html import (
 )
 
 
-def render_html(mdreport, top_n_flows=100):
+def render_html(mdreport: "MobilityDataReport", top_n_flows: int = 100) -> str:
     template_structure = html_utils.get_template("structure.html")
 
     overview_segment = ""
@@ -40,5 +46,5 @@ def render_html(mdreport, top_n_flows=100):
     )
 
 
-def create_html_assets(output_file) -> None:
+def create_html_assets(output_file: Union[Path, str]) -> None:
     pass

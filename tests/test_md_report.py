@@ -2,6 +2,7 @@ import geopandas as gpd
 import pandas as pd
 import pytest
 
+from dp_mobility_report import constants as const
 from dp_mobility_report import md_report
 
 
@@ -89,6 +90,22 @@ def test_wrong_input_params_MobilityDataReport(test_data, test_tessellation):
     with pytest.raises(TypeError):
         md_report.MobilityDataReport(
             test_data, test_tessellation, max_trips_per_user=3.1, privacy_budget=None
+        )
+
+    # wrong analysis selection
+    with pytest.raises(TypeError):
+        md_report.MobilityDataReport(
+            test_data,
+            test_tessellation,
+            analysis_selection=const.ALL,
+            privacy_budget=None,
+        )
+    with pytest.raises(ValueError):
+        md_report.MobilityDataReport(
+            test_data,
+            test_tessellation,
+            analysis_selection=[const.OVERVIEW, "wrong input"],
+            privacy_budget=None,
         )
 
     # wrong input for max_travel_time

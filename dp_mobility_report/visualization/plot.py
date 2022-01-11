@@ -1,12 +1,15 @@
-"""Plot functions for the profiling report."""
 import math
+from typing import Optional, Tuple, Type, Union
 
 import folium
+import matplotlib
 import matplotlib as mpl
 import numpy as np
 import seaborn as sns
 from branca.colormap import linear
+from geopandas import GeoDataFrame
 from matplotlib import pyplot as plt
+from pandas import DataFrame
 
 sns.set_theme()
 dark_blue = "#283377"
@@ -16,7 +19,12 @@ light_orange = "#FFAD6F"
 grey = "#8A8A8A"
 
 
-def histogram(hist, x_axis_label=None, rotate_label=False, x_axis_type=None):
+def histogram(
+    hist: Tuple,
+    x_axis_label: str,
+    rotate_label: bool = False,
+    x_axis_type: Optional[Type] = None,
+) -> mpl.figure.Figure:
     bins = hist[1]
     counts = hist[0]
 
@@ -40,11 +48,16 @@ def histogram(hist, x_axis_label=None, rotate_label=False, x_axis_type=None):
 
 
 def barchart(
-    x, y, x_axis_label, y_axis_label, data=None, order_x=None, rotate_label=False
-):
+    x: np.ndarray,
+    y: np.ndarray,
+    x_axis_label: str,
+    y_axis_label: str,
+    order_x: Optional[list] = None,
+    rotate_label: bool = False,
+) -> mpl.figure.Figure:
     fig = plt.figure()
     plot = fig.add_subplot(111)
-    sns.barplot(data=data, x=x, y=y, color=dark_blue, ax=plot, order=order_x)
+    sns.barplot(x=x, y=y, color=dark_blue, ax=plot, order=order_x)
     plot.set_ylabel(y_axis_label)
     plot.set_xlabel(x_axis_label)
 
@@ -53,7 +66,14 @@ def barchart(
     return fig
 
 
-def linechart(data, x, y, x_axis_label, y_axis_label, add_diagonal=False):
+def linechart(
+    data: DataFrame,
+    x: str,
+    y: str,
+    x_axis_label: str,
+    y_axis_label: str,
+    add_diagonal: bool = False,
+) -> mpl.figure.Figure:
     fig = plt.figure()
     plot = fig.add_subplot(111)
     sns.lineplot(data=data, x=x, y=y, ax=plot)
@@ -66,7 +86,9 @@ def linechart(data, x, y, x_axis_label, y_axis_label, add_diagonal=False):
     return fig
 
 
-def multi_linechart(data, x, y, color, hue_order=None):
+def multi_linechart(
+    data: DataFrame, x: str, y: str, color: str, hue_order: Optional[list] = None
+) -> mpl.figure.Figure:
     fig = plt.figure()
     plot = fig.add_subplot(111)
     sns.lineplot(
@@ -83,8 +105,11 @@ def multi_linechart(data, x, y, color, hue_order=None):
 
 
 def choropleth_map(
-    counts_per_tile_gdf, fill_color_name, scale_title="Visit count", min_scale=None
-):
+    counts_per_tile_gdf: GeoDataFrame,
+    fill_color_name: str,
+    scale_title: str = "Visit count",
+    min_scale: Optional[Union[int, float]] = None,
+) -> folium.Map:
     poly_json = counts_per_tile_gdf.to_json()
 
     center_x, center_y = _get_center(counts_per_tile_gdf)
@@ -96,12 +121,12 @@ def choropleth_map(
         min_scale, counts_per_tile_gdf[fill_color_name].max()
     )
 
-    def _get_color(x, fill_color_name):
+    def _get_color(x: dict, fill_color_name: str) -> str:
         if x["properties"][fill_color_name] is None:
             return "#8c8c8c"
         return color_map(x["properties"][fill_color_name])
 
-    def _style_function(x):
+    def _style_function(x: dict) -> dict:
         return {
             "fillColor": _get_color(x, fill_color_name),
             "color": grey,
@@ -124,7 +149,9 @@ def choropleth_map(
     return m
 
 
-def multi_choropleth_map(counts_per_tile_timewindow, tessellation):
+def multi_choropleth_map(
+    counts_per_tile_timewindow: DataFrame, tessellation: GeoDataFrame
+) -> mpl.figure.Figure:
     counts_per_tile_timewindow = tessellation[["tile_id", "geometry"]].merge(
         counts_per_tile_timewindow, left_on="tile_id", right_index=True, how="left"
     )
@@ -174,13 +201,13 @@ def multi_choropleth_map(counts_per_tile_timewindow, tessellation):
     return fig
 
 
-def _get_center(gdf):
+def _get_center(gdf: GeoDataFrame) -> Tuple:
     center_x = (gdf.total_bounds[0] + gdf.total_bounds[2]) / 2
     center_y = (gdf.total_bounds[1] + gdf.total_bounds[3]) / 2
     return (center_x, center_y)
 
 
-def _basemap(center_x, center_y, zoom_start=10):
+def _basemap(center_x: float, center_y: float, zoom_start: int = 10) -> folium.Map:
     return folium.Map(
         tiles="CartoDB positron",
         attr='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',

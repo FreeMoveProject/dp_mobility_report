@@ -1,5 +1,11 @@
+from typing import TYPE_CHECKING, Tuple
+
 import matplotlib.pyplot as plt
 import pandas as pd
+from geopandas import GeoDataFrame
+
+if TYPE_CHECKING:
+    from dp_mobility_report.md_report import MobilityDataReport
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.report.html.html_utils import (
@@ -10,7 +16,7 @@ from dp_mobility_report.report.html.html_utils import (
 from dp_mobility_report.visualization import plot, v_utils
 
 
-def render_user_analysis(mdreport):
+def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     trips_per_user_summary_table = None
     trips_per_user_hist = None
     overlapping_trips_info = None
@@ -97,7 +103,7 @@ def render_user_analysis(mdreport):
     )
 
 
-def render_trips_per_user(trips_per_user_hist):
+def render_trips_per_user(trips_per_user_hist: Tuple) -> str:
     hist = plot.histogram(
         trips_per_user_hist,
         x_axis_label="number of trips per user",
@@ -106,7 +112,7 @@ def render_trips_per_user(trips_per_user_hist):
     return v_utils.fig_to_html(hist)
 
 
-def render_overlapping_trips(n_traj_overlaps):
+def render_overlapping_trips(n_traj_overlaps: int) -> str:
     return (
         "There are "
         + str(n_traj_overlaps)
@@ -114,7 +120,7 @@ def render_overlapping_trips(n_traj_overlaps):
     )
 
 
-def render_radius_of_gyration(radius_of_gyration_hist):
+def render_radius_of_gyration(radius_of_gyration_hist: Tuple) -> str:
     hist = plot.histogram(
         radius_of_gyration_hist, x_axis_label="radius of gyration", x_axis_type=float
     )
@@ -123,7 +129,9 @@ def render_radius_of_gyration(radius_of_gyration_hist):
     return html
 
 
-def render_location_entropy(location_entropy, tessellation):
+def render_location_entropy(
+    location_entropy: pd.Series, tessellation: GeoDataFrame
+) -> str:
     # 0: all trips by a single user
     # large: evenly distributed over different users (2^x possible different users)
     location_entropy_gdf = pd.merge(
@@ -147,7 +155,7 @@ def render_location_entropy(location_entropy, tessellation):
     return html
 
 
-def render_distinct_tiles_user(user_tile_count_hist):
+def render_distinct_tiles_user(user_tile_count_hist: Tuple) -> str:
     hist = plot.histogram(
         user_tile_count_hist,
         x_axis_label="number of distinct tiles a user has visited",
@@ -158,7 +166,7 @@ def render_distinct_tiles_user(user_tile_count_hist):
     return html
 
 
-def render_mobility_entropy(mobility_entropy):
+def render_mobility_entropy(mobility_entropy: Tuple) -> str:
     hist = plot.histogram(
         (mobility_entropy[0], mobility_entropy[1].round(2)),
         x_axis_label="mobility entropy",

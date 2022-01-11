@@ -1,18 +1,23 @@
+from typing import List, Optional, Tuple, Union
+
 import numpy as np
 from haversine import haversine
+from pandas import Series
 
 from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
 
 
-def haversine_dist(coords):
+def haversine_dist(coords: List[float]) -> float:
     # coords: provide coordinates as lat_start, lng_start, lat_end, lng_end
-    return haversine(
-        (float(coords[0]), float(coords[1])), (float(coords[2]), float(coords[3]))
-    )
+    return haversine((coords[0], coords[1]), (coords[2], coords[3]))
 
 
-def cut_outliers(data, min_value=None, max_value=None):
+def cut_outliers(
+    data: Series,
+    min_value: Optional[Union[float, int]] = None,
+    max_value: Optional[Union[float, int]] = None,
+) -> Tuple:
     n = len(data)
     if (min_value is not None) and (max_value is not None) and (min_value > max_value):
         raise ValueError("min_value cannot be larger than max_value")
@@ -25,16 +30,15 @@ def cut_outliers(data, min_value=None, max_value=None):
 
 
 def hist_section(
-    series,
-    eps,
-    sensitivity,
-    min_value=None,
-    max_value=None,
-    bin_range=None,
-    max_bins=None,
-    evalu=False,
-):
-
+    series: Union[np.ndarray, Series],
+    eps: Optional[float],
+    sensitivity: int,
+    min_value: Optional[Union[float, int]] = None,
+    max_value: Optional[Union[float, int]] = None,
+    bin_range: Optional[Union[float, int]] = None,
+    max_bins: Optional[int] = None,
+    evalu: bool = False,
+) -> Section:
     if evalu or eps is None:
         epsi = eps
         epsi_quart = eps
@@ -46,9 +50,7 @@ def hist_section(
         series, n_outliers = cut_outliers(
             series, min_value=min_value, max_value=max_value
         )
-        dp_n_outliers = diff_privacy.counts_dp(
-            n_outliers, epsi, sensitivity, parallel=True, nonzero=False
-        )
+        dp_n_outliers = diff_privacy.count_dp(n_outliers, epsi, sensitivity)
     else:
         dp_n_outliers = None
 
@@ -71,9 +73,7 @@ def hist_section(
         hist = np.histogram(series, bins=max_bins, range=(min_value, max_value))
         counts = hist[0]
         dp_values = hist[1]
-    dp_counts = diff_privacy.counts_dp(
-        counts, epsi, sensitivity, parallel=True, nonzero=False
-    )
+    dp_counts = diff_privacy.counts_dp(counts, epsi, sensitivity, parallel=True)
 
     return Section(
         data=(dp_counts, dp_values),

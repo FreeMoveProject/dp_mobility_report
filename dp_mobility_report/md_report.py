@@ -1,6 +1,6 @@
 import warnings
 from pathlib import Path
-from typing import Union
+from typing import Any, List, Optional, Union
 
 from geopandas import GeoDataFrame
 from pandarallel import pandarallel
@@ -20,26 +20,26 @@ class MobilityDataReport:
        The report will be generated as an HTML file, using the `.to_html()` method.
     """
 
-    _report = None
-    _html = None
+    _report: dict = {}
+    _html: str = ""
 
     def __init__(
         self,
-        df,
-        tessellation,
-        privacy_budget,
-        max_trips_per_user=None,
-        analysis_selection=[const.ALL],
-        disable_progress_bar=False,
-        evalu=False,
-        user_privacy=True,
-        timewindows=[2, 6, 10, 14, 18, 22],
-        max_travel_time=None,
-        bin_range_travel_time=None,
-        max_jump_length=None,
-        bin_range_jump_length=None,
-        max_radius_of_gyration=None,
-        bin_range_radius_of_gyration=None,
+        df: DataFrame,
+        tessellation: GeoDataFrame,
+        privacy_budget: Optional[Union[int, float]],
+        max_trips_per_user: Optional[int] = None,
+        analysis_selection: List[str] = [const.ALL],
+        disable_progress_bar: bool = False,
+        evalu: bool = False,
+        user_privacy: bool = True,
+        timewindows: List[int] = [2, 6, 10, 14, 18, 22],
+        max_travel_time: Optional[int] = None,
+        bin_range_travel_time: Optional[int] = None,
+        max_jump_length: Optional[Union[int, float]] = None,
+        bin_range_jump_length: Optional[Union[int, float]] = None,
+        max_radius_of_gyration: Optional[Union[int, float]] = None,
+        bin_range_radius_of_gyration: Optional[Union[int, float]] = None,
     ) -> None:
         """Generate a (differentially private) mobility report from a dataset stored as
         a pandas `DataFrame`.
@@ -96,7 +96,7 @@ class MobilityDataReport:
             )
             pbar.update()
 
-        self.privacy_budget = privacy_budget
+        self.privacy_budget = None if privacy_budget is None else float(privacy_budget)
         self.max_travel_time = max_travel_time
         self.timewindows = timewindows
         self.max_jump_length = max_jump_length
@@ -117,21 +117,21 @@ class MobilityDataReport:
         Returns:
             A dictionary with all report elements.
         """
-        if self._report is None:
+        if not self._report:
             self._report = report.report_elements(self)
         return self._report
 
     @property
     def html(self) -> str:
-        if self._html is None:
+        if not self._html:
             self._html = self._render_html(self._top_n_flows)
         return self._html
 
-    def _render_html(self, top_n_flows) -> str:
+    def _render_html(self, top_n_flows: int) -> str:
         html = render_html(self, top_n_flows)
         return html
 
-    def to_html(self, top_n_flows) -> str:
+    def to_html(self, top_n_flows: int) -> str:
         """Generate and return complete template as lengthy string
             for using with frameworks.
         Returns:
@@ -141,7 +141,10 @@ class MobilityDataReport:
         return self.html
 
     def to_file(
-        self, output_file: Union[str, Path], disable_progress_bar=None, top_n_flows=100
+        self,
+        output_file: Union[str, Path],
+        disable_progress_bar: Optional[bool] = None,
+        top_n_flows: int = 100,
     ) -> None:
         """Write the report to a file.
         By default a name is generated.
@@ -155,9 +158,6 @@ class MobilityDataReport:
 
         if not isinstance(output_file, Path):
             output_file = Path(str(output_file))
-
-        if output_file.suffix == ".json":
-            data = self.to_json()
 
         else:
             if output_file.suffix != ".html":
@@ -181,22 +181,22 @@ class MobilityDataReport:
 
 
 def _validate_input(
-    df,
-    tessellation,
-    privacy_budget,
-    max_trips_per_user,
-    analysis_selection,
-    disable_progress_bar,
-    evalu,
-    user_privacy,
-    timewindows,
-    max_travel_time,
-    bin_range_travel_time,
-    max_jump_length,
-    bin_range_jump_length,
-    max_radius_of_gyration,
-    bin_range_radius_of_gyration,
-):
+    df: DataFrame,
+    tessellation: GeoDataFrame,
+    privacy_budget: Optional[Union[int, float]],
+    max_trips_per_user: Optional[int],
+    analysis_selection: List[str],
+    disable_progress_bar: bool,
+    evalu: bool,
+    user_privacy: bool,
+    timewindows: List[int],
+    max_travel_time: Optional[int],
+    bin_range_travel_time: Optional[int],
+    max_jump_length: Optional[Union[int, float]],
+    bin_range_jump_length: Optional[Union[int, float]],
+    max_radius_of_gyration: Optional[Union[int, float]],
+    bin_range_radius_of_gyration: Optional[Union[int, float]],
+) -> None:
     if not isinstance(df, DataFrame):
         raise TypeError("'df' is not a Pandas DataFrame.")
 
@@ -208,11 +208,21 @@ def _validate_input(
     if (max_trips_per_user is not None) and (max_trips_per_user < 1):
         raise ValueError("'max_trips_per_user' has to be greater 0.")
 
+    if not ((analysis_selection is None) or isinstance(analysis_selection, list)):
+        raise TypeError("'analysis_selection' is not a list.")
+    if not set(analysis_selection).issubset(const.ANALYSIS_SELECTION):
+        raise ValueError(
+            f"Unknown analysis selection {analysis_selection}. Only elements from {const.ANALYSIS_SELECTION} are valid inputs."
+        )
+
     if not isinstance(timewindows, list):
         raise TypeError("'timewindows' is not a list.")
     timewindows.sort()
 
-    _validate_numeric_greater_zero(privacy_budget, f"{privacy_budget=}".split("=")[0])
+    if privacy_budget is not None:
+        _validate_numeric_greater_zero(
+            privacy_budget, f"{privacy_budget=}".split("=")[0]
+        )
     _validate_numeric_greater_zero(max_travel_time, f"{max_travel_time=}".split("=")[0])
     _validate_numeric_greater_zero(
         bin_range_travel_time, f"{bin_range_travel_time=}".split("=")[0]
@@ -232,13 +242,13 @@ def _validate_input(
     _validate_bool(disable_progress_bar, f"{user_privacy=}".split("=")[0])
 
 
-def _validate_numeric_greater_zero(var, name):
+def _validate_numeric_greater_zero(var: Any, name: str) -> None:
     if not ((var is None) or isinstance(var, (int, float))):
         raise TypeError(f"{name} is not numeric.")
     if (var is not None) and (var <= 0):
         raise ValueError(f"'{name}' has to be greater 0.")
 
 
-def _validate_bool(var, name):
+def _validate_bool(var: Any, name: str) -> None:
     if not isinstance(var, bool):
         raise TypeError(f"'{name}' is not type boolean.")

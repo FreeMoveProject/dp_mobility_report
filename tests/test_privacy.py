@@ -48,21 +48,21 @@ def test_quartiles_dp():
 
 def test_counts_dp():
     count = 10
-    dp_count = diff_privacy.counts_dp(count, eps=None, sensitivity=None)
+    dp_count = diff_privacy.count_dp(count, eps=None, sensitivity=None)
     assert dp_count == count
 
     count = 10
-    dp_count = diff_privacy.counts_dp(count, eps=0.1, sensitivity=1, nonzero=False)
-    assert isinstance(dp_count, float)
+    dp_count = diff_privacy.count_dp(count, eps=0.1, sensitivity=1, nonzero=False)
+    assert isinstance(dp_count, int)
     assert dp_count >= 0
 
-    counts = pd.Series([100, 10, 4, 20])
+    counts = np.array([100, 10, 4, 20])
     dp_counts = diff_privacy.counts_dp(
         counts, eps=None, sensitivity=None, nonzero=False
     )
-    assert counts.equals(dp_counts)
+    assert all(counts == dp_counts)
 
-    counts = pd.Series([100, 10, 4, 20])
+    counts = np.array([100, 10, 4, 20])
     dp_counts = diff_privacy.counts_dp(counts, eps=0.1, sensitivity=1, nonzero=False)
     assert all(dp_counts >= 0)
 

@@ -5,6 +5,7 @@ OVERVIEW = "overview"
 PLACE_ANALYSIS = "place_analysis"
 OD_ANALYSIS = "od_analysis"
 USER_ANALYSIS = "user_analysis"
+ANALYSIS_SELECTION = [ALL, OVERVIEW, PLACE_ANALYSIS, OD_ANALYSIS, USER_ANALYSIS]
 
 DS_STATISTICS = "ds_statistics"
 MISSING_VALUES = "missing_values"

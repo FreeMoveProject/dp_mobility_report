@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
+from pandas import DataFrame, Series
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.report.html.html_utils import fmt, get_template, render_summary
 from dp_mobility_report.visualization import plot, v_utils
 
 
-def render_overview(report):
+def render_overview(report: dict) -> str:
     dataset_stats_table = None
     missing_values_table = None
     trips_over_time_linechart = None
@@ -24,7 +25,7 @@ def render_overview(report):
 
     if const.TRIPS_OVER_TIME in report:
         trips_over_time_linechart = render_trips_over_time(
-            report[const.TRIPS_OVER_TIME]
+            report[const.TRIPS_OVER_TIME].data
         )
         trips_over_time_summary_table = render_summary(
             report[const.TRIPS_OVER_TIME].quartiles
@@ -51,7 +52,7 @@ def render_overview(report):
     )
 
 
-def render_dataset_statistics(dataset_statistics):
+def render_dataset_statistics(dataset_statistics: dict) -> str:
 
     dataset_stats_list = [
         {"name": "Number of records", "value": fmt(dataset_statistics["n_records"])},
@@ -79,7 +80,7 @@ def render_dataset_statistics(dataset_statistics):
     return dataset_stats_html
 
 
-def render_missing_values(missing_values):
+def render_missing_values(missing_values: dict) -> str:
     missing_values_list = [
         {"name": "User ID (uid)", "value": fmt(missing_values[const.UID])},
         {"name": "Trip ID (tid)", "value": fmt(missing_values[const.TID])},
@@ -95,12 +96,11 @@ def render_missing_values(missing_values):
     return missing_values_html
 
 
-def render_trips_over_time(trips_over_time):
-    if len(trips_over_time.data) <= 20:
+def render_trips_over_time(trips_over_time: DataFrame) -> str:
+    if len(trips_over_time) <= 20:
         chart = plot.barchart(
-            data=trips_over_time.data,
-            x=const.DATETIME,
-            y="trip_count",
+            x=trips_over_time[const.DATETIME].to_numpy(),
+            y=trips_over_time["trip_count"].to_numpy(),
             x_axis_label="Date",
             y_axis_label="Frequency",
             rotate_label=True,
@@ -108,18 +108,17 @@ def render_trips_over_time(trips_over_time):
         html = v_utils.fig_to_html(chart)
     else:
         chart = plot.linechart(
-            trips_over_time.data, const.DATETIME, "trip_count", "Date", "Frequency"
+            trips_over_time, const.DATETIME, "trip_count", "Date", "Frequency"
         )
         html = v_utils.fig_to_html(chart)
     plt.close()
     return html
 
 
-def render_trips_per_weekday(trips_per_weekday):
+def render_trips_per_weekday(trips_per_weekday: Series) -> str:
     chart = plot.barchart(
-        data=trips_per_weekday.reset_index(),
-        x=const.DAY_NAME,
-        y=const.TID,
+        x=trips_per_weekday.index.to_numpy(),
+        y=trips_per_weekday.values,
         x_axis_label="Weekday",
         y_axis_label="Average trips per weekday",
         rotate_label=True,
@@ -137,7 +136,7 @@ def render_trips_per_weekday(trips_per_weekday):
     return v_utils.fig_to_html(chart)
 
 
-def render_trips_per_hour(trips_per_hour):
+def render_trips_per_hour(trips_per_hour: DataFrame) -> str:
     chart = plot.multi_linechart(
         trips_per_hour,
         const.HOUR,

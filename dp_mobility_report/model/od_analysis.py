@@ -1,5 +1,11 @@
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from dp_mobility_report.md_report import MobilityDataReport
+
 import numpy as np
 import pandas as pd
+from geopandas import GeoDataFrame
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import m_utils
@@ -7,7 +13,7 @@ from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
 
 
-def get_od_shape(df, tessellation):
+def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame) -> pd.DataFrame:
     ends_od_shape = (
         df[
             (df[const.POINT_TYPE] == const.END)
@@ -36,7 +42,9 @@ def get_od_shape(df, tessellation):
     return od_shape
 
 
-def get_od_flows(od_shape, mdreport, eps):
+def get_od_flows(
+    od_shape: pd.DataFrame, mdreport: "MobilityDataReport", eps: Optional[float]
+) -> Section:
     od_flows = (
         od_shape.groupby([const.TILE_ID, const.TILE_ID_END])
         .aggregate(flow=(const.TID, "count"))
@@ -59,7 +67,7 @@ def get_od_flows(od_shape, mdreport, eps):
     od_flows.fillna(0, inplace=True)
 
     od_flows["flow"] = diff_privacy.counts_dp(
-        od_flows["flow"], eps, mdreport.max_trips_per_user, parallel=True, nonzero=False
+        od_flows["flow"].to_numpy(), eps, mdreport.max_trips_per_user, parallel=True
     )
 
     # remove all instances of 0 to reduce storage
@@ -67,11 +75,13 @@ def get_od_flows(od_shape, mdreport, eps):
     return Section(data=od_flows, privacy_budget=eps)
 
 
-def get_intra_tile_flows(od_flows):
+def get_intra_tile_flows(od_flows: pd.DataFrame) -> int:
     return od_flows[(od_flows.origin == od_flows.destination)].flow.sum()
 
 
-def get_travel_time(od_shape, mdreport, eps):
+def get_travel_time(
+    od_shape: pd.DataFrame, mdreport: "MobilityDataReport", eps: Optional[float]
+) -> Section:
 
     travel_time = od_shape[const.DATETIME_END] - od_shape[const.DATETIME]
     travel_time = (travel_time.dt.seconds / 60).round()  # as minutes
@@ -87,7 +97,9 @@ def get_travel_time(od_shape, mdreport, eps):
     )
 
 
-def get_jump_length(od_shape, mdreport, eps):
+def get_jump_length(
+    od_shape: pd.DataFrame, mdreport: "MobilityDataReport", eps: Optional[float]
+) -> Section:
 
     # parallel computation for speed up
     jump_length = od_shape[

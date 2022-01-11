@@ -1,6 +1,8 @@
 import numbers
+from typing import Any, Union
 
 import jinja2
+from pandas import Series
 
 # Initializing Jinja
 package_loader = jinja2.PackageLoader(
@@ -11,11 +13,11 @@ jinja2_env = jinja2.Environment(
 )
 
 
-def get_template(template_name):
+def get_template(template_name: str) -> jinja2.Template:
     return jinja2_env.get_template(template_name)
 
 
-def render_summary(summary):
+def render_summary(summary: Series) -> str:
     summary_list = [
         {"name": "Min.", "value": fmt(summary["min"])},
         {"name": "25%", "value": fmt(summary["25%"])},
@@ -31,7 +33,7 @@ def render_summary(summary):
     return summary_html
 
 
-def render_outlier_info(outlier_count, max_value=None):
+def render_outlier_info(outlier_count: int, max_value: Union[int, float] = None) -> str:
     outlier = "outlier has" if outlier_count == 1 else "outliers have"
     range_info = (
         "<br>Outliers are values above " + str(max_value)
@@ -49,15 +51,7 @@ def render_outlier_info(outlier_count, max_value=None):
     )
 
 
-def fmt(value):
-    """Format input value
-
-    Args:
-        value ([type]): Value to format
-
-    Returns:
-        [type]: formatted value
-    """
+def fmt(value: Any) -> Any:
     # TODO: check correctly
     if isinstance(value, numbers.Number):
         value = round(value, 2)

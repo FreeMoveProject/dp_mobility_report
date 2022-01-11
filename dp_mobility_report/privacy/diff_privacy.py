@@ -1,10 +1,14 @@
+from typing import Optional, Tuple, Union
+
 import diffprivlib
 import numpy as np
 import pandas as pd
 from diffprivlib.validation import clip_to_bounds
 
 
-def bounds_dp(array, eps, sensitivity):
+def bounds_dp(
+    array: Union[np.ndarray, pd.Series], eps: Optional[float], sensitivity: int
+) -> Tuple:
     if eps is None:
         return (array.min(), array.max())
     epsi = eps / 2
@@ -31,7 +35,12 @@ def bounds_dp(array, eps, sensitivity):
     return (result[0], result[1])
 
 
-def quartiles_dp(array, eps, sensitivity, bounds=None):
+def quartiles_dp(
+    array: Union[np.ndarray, pd.Series],
+    eps: Optional[float],
+    sensitivity: int,
+    bounds: Tuple = None,
+) -> pd.Series:
 
     if np.issubdtype(array.dtype, np.timedelta64):
         array = array.values.astype(np.int64)
@@ -40,7 +49,7 @@ def quartiles_dp(array, eps, sensitivity, bounds=None):
         array = array.values.astype(np.int64)
         dtyp = "datetime"
     else:
-        dtyp = 0
+        dtyp = "0"
 
     if bounds is None:
         if eps is not None:
@@ -85,7 +94,40 @@ def quartiles_dp(array, eps, sensitivity, bounds=None):
     return pd.Series(result, index=["min", "25%", "50%", "75%", "max"])
 
 
-def counts_dp(counts, eps, sensitivity, parallel=True, nonzero=True):
+def _laplacer(x: int, eps: float, sensitivity: int) -> int:
+    return int(
+        round(
+            diffprivlib.mechanisms.laplace.Laplace(
+                epsilon=eps, delta=0.0, sensitivity=sensitivity
+            ).randomise(x),
+            0,
+        )
+    )
+
+
+def count_dp(
+    count: int,
+    eps: Optional[float],
+    sensitivity: int,
+    nonzero: bool = False,
+) -> int:
+    if eps is None:
+        return count
+    dpcount = _laplacer(count, eps, sensitivity)
+    dpcount = int((abs(dpcount) + dpcount) / 2)
+    if nonzero:
+        return dpcount if dpcount > 0 else None
+    else:
+        return dpcount
+
+
+def counts_dp(
+    counts: Union[int, np.ndarray],
+    eps: Optional[float],
+    sensitivity: int,
+    parallel: bool = True,
+    nonzero: bool = False,
+) -> Union[int, np.ndarray]:
     if eps is None:
         return counts
 
@@ -94,55 +136,41 @@ def counts_dp(counts, eps, sensitivity, parallel=True, nonzero=True):
     else:
         epsi = eps
 
-    if isinstance(counts, pd.Series):
-        dpcount = counts.apply(
-            lambda x: int(
-                round(
-                    diffprivlib.mechanisms.laplace.Laplace(
-                        epsilon=epsi, delta=0.0, sensitivity=sensitivity
-                    ).randomise(x),
-                    0,
-                )
-            )
-        )
-        dpcount = dpcount.apply(lambda x: int(round((abs(x) + x) / 2, 0)))
-    else:  # isinstance(series,int #or np.ndarray):
+    def _local_laplacer(x: int):
+        return _laplacer(x, epsi, sensitivity)
 
-        def _laplacer(x):
-            return int(
-                round(
-                    diffprivlib.mechanisms.laplace.Laplace(
-                        epsilon=epsi, delta=0.0, sensitivity=sensitivity
-                    ).randomise(x),
-                    0,
-                )
-            )
+    vfunc = np.vectorize(_local_laplacer)
+    dpcount = vfunc(counts)
+    dpcount = ((abs(dpcount) + dpcount) / 2).astype(int)
 
-        vfunc = np.vectorize(_laplacer)
-        dpcount = vfunc(counts)
-        dpcount = (abs(dpcount) + dpcount) / 2  # make zero if dpcount < 0
-
-    if nonzero is True:
-        if np.isscalar(dpcount):
-            return dpcount if dpcount > 0 else None  # TODO: is this correct?
+    if nonzero:
         return dpcount[dpcount > 0]
     else:
         return dpcount
 
 
-def entropy_dp(array, epsi, maxcontribution):
+def entropy_dp(
+    array: pd.Series, epsi: Optional[float], maxcontribution: int
+) -> np.ndarray:
     if epsi is None:
         return array
     if maxcontribution > 1:
-        sensitivity = 2*maxcontribution * (
-            max(
-                np.log(2), np.log(2*maxcontribution) - np.log(np.log(2*maxcontribution)) - 1
+        sensitivity = (
+            2
+            * maxcontribution
+            * (
+                max(
+                    np.log(2),
+                    np.log(2 * maxcontribution)
+                    - np.log(np.log(2 * maxcontribution))
+                    - 1,
+                )
             )
         )
     else:
         sensitivity = np.log(2)
 
-    def _laplacer(x):
+    def _laplacer(x: int) -> int:
         return int(
             round(
                 diffprivlib.mechanisms.laplace.Laplace(

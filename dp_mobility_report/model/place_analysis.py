@@ -1,12 +1,19 @@
+from typing import TYPE_CHECKING, List, Optional
+
 import numpy as np
 import pandas as pd
+
+if TYPE_CHECKING:
+    from dp_mobility_report.md_report import MobilityDataReport
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
 
 
-def get_visits_per_tile(mdreport, eps):
+def get_visits_per_tile(
+    mdreport: "MobilityDataReport", eps: Optional[float]
+) -> Section:
     if mdreport.evalu is True or eps is None:
         epsi = eps
     else:
@@ -38,14 +45,13 @@ def get_visits_per_tile(mdreport, eps):
     )
 
     counts_per_tile["visit_count"] = diff_privacy.counts_dp(
-        counts_per_tile["visit_count"],
+        counts_per_tile["visit_count"].values,
         epsi,
         mdreport.max_trips_per_user * 2,
         parallel=True,
-        nonzero=False,
     )
-    n_outliers = diff_privacy.counts_dp(
-        n_outliers, epsi, mdreport.max_trips_per_user * 2, parallel=True, nonzero=False
+    n_outliers = diff_privacy.count_dp(
+        n_outliers, epsi, mdreport.max_trips_per_user * 2
     ).item()
 
     return Section(
@@ -56,7 +62,7 @@ def get_visits_per_tile(mdreport, eps):
     )
 
 
-def _get_hour_bin(hour, timewindows):
+def _get_hour_bin(hour: int, timewindows: List[int]) -> str:
     timewindows = np.array(timewindows)
     if hour >= timewindows.min() and hour < timewindows.max():
         i = np.argwhere((timewindows) <= hour)[-1][0]
@@ -69,7 +75,9 @@ def _get_hour_bin(hour, timewindows):
     return f"{i + 1}: {min_v}-{max_v}"
 
 
-def get_visits_per_tile_timewindow(mdreport, eps):
+def get_visits_per_tile_timewindow(
+    mdreport: "MobilityDataReport", eps: Optional[float]
+) -> Section:
     mdreport.df["timewindows"] = mdreport.df[const.HOUR].apply(
         lambda x: _get_hour_bin(x, mdreport.timewindows)
     )
@@ -107,9 +115,12 @@ def get_visits_per_tile_timewindow(mdreport, eps):
     )  # remove instance from full_combination
     counts_per_tile_timewindow = counts_per_tile_timewindow.unstack()
 
-    dp_counts_per_tile_timewindow = diff_privacy.counts_dp(
-        counts_per_tile_timewindow, eps, mdreport.max_trips_per_user, nonzero=False
+    counts_per_tile_timewindow = pd.Series(
+        index=counts_per_tile_timewindow.index,
+        data=diff_privacy.counts_dp(
+            counts_per_tile_timewindow.values, eps, mdreport.max_trips_per_user
+        ),
     )
     return Section(
-        data=dp_counts_per_tile_timewindow.unstack(const.TILE_ID).T, privacy_budget=eps
+        data=counts_per_tile_timewindow.unstack(const.TILE_ID).T, privacy_budget=eps
     )
