@@ -46,6 +46,8 @@ def hist_section(
         epsi = eps / 7
         epsi_quart = epsi * 5
 
+    series = Series(series) if isinstance(series, np.ndarray) else series
+
     if (min_value is not None) or (max_value is not None):
         series, n_outliers = cut_outliers(
             series, min_value=min_value, max_value=max_value

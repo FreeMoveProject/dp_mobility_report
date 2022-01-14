@@ -2,6 +2,7 @@ import warnings
 from pathlib import Path
 from typing import Any, List, Optional, Union
 
+import numpy as np
 from geopandas import GeoDataFrame
 from pandarallel import pandarallel
 from pandas import DataFrame
@@ -33,7 +34,7 @@ class MobilityDataReport:
         disable_progress_bar: bool = False,
         evalu: bool = False,
         user_privacy: bool = True,
-        timewindows: List[int] = [2, 6, 10, 14, 18, 22],
+        timewindows: Union[List[int], np.ndarray] = [2, 6, 10, 14, 18, 22],
         max_travel_time: Optional[int] = None,
         bin_range_travel_time: Optional[int] = None,
         max_jump_length: Optional[Union[int, float]] = None,
@@ -98,7 +99,10 @@ class MobilityDataReport:
 
         self.privacy_budget = None if privacy_budget is None else float(privacy_budget)
         self.max_travel_time = max_travel_time
-        self.timewindows = timewindows
+        timewindows.sort()
+        self.timewindows = (
+            np.array(timewindows) if isinstance(timewindows, list) else timewindows
+        )
         self.max_jump_length = max_jump_length
         self.bin_range_jump_length = bin_range_jump_length
         self.bin_range_travel_time = bin_range_travel_time
@@ -170,7 +174,7 @@ class MobilityDataReport:
 
         # TODO: implement create_html_assets
         create_html_assets(output_file)
-        
+
         with tqdm(  # progress bar
             total=1, desc="Create HTML Output", disable=disable_progress_bar
         ) as pbar:
@@ -189,7 +193,7 @@ def _validate_input(
     disable_progress_bar: bool,
     evalu: bool,
     user_privacy: bool,
-    timewindows: List[int],
+    timewindows: Union[List[int], np.ndarray],
     max_travel_time: Optional[int],
     bin_range_travel_time: Optional[int],
     max_jump_length: Optional[Union[int, float]],
@@ -215,9 +219,14 @@ def _validate_input(
             f"Unknown analysis selection {analysis_selection}. Only elements from {const.ANALYSIS_SELECTION} are valid inputs."
         )
 
-    if not isinstance(timewindows, list):
-        raise TypeError("'timewindows' is not a list.")
-    timewindows.sort()
+    if not isinstance(timewindows, (list, np.ndarray)):
+        raise TypeError("'timewindows' is not a list or a numpy array.")
+
+    timewindows = (
+        np.array(timewindows) if isinstance(timewindows, list) else timewindows
+    )
+    if not all([np.issubdtype(item, int) for item in timewindows]):
+        raise TypeError("not all items of 'timewindows' are integers.")
 
     if privacy_budget is not None:
         _validate_numeric_greater_zero(

@@ -36,7 +36,7 @@ def bounds_dp(
 
 
 def quartiles_dp(
-    array: Union[np.ndarray, pd.Series],
+    array: pd.Series,
     eps: Optional[float],
     sensitivity: int,
     bounds: Tuple = None,
@@ -52,15 +52,11 @@ def quartiles_dp(
         dtyp = "0"
 
     if bounds is None:
-        if eps is not None:
-            epsi = eps / 5
-            bound_epsi = 2 * epsi
-        else:
-            epsi = eps
-            bound_epsi = epsi
+        epsi = eps / 5 if eps is not None else None
+        bound_epsi = 2 * epsi if epsi is not None else None
         bounds = bounds_dp(array, bound_epsi, sensitivity)
-    elif eps is not None:
-        epsi = eps / 3
+    else:
+        epsi = eps / 3 if eps is not None else None
 
     result = []
     result.append(bounds[0])
@@ -110,7 +106,7 @@ def count_dp(
     eps: Optional[float],
     sensitivity: int,
     nonzero: bool = False,
-) -> int:
+) -> Optional[int]:
     if eps is None:
         return count
     dpcount = _laplacer(count, eps, sensitivity)
@@ -128,9 +124,10 @@ def counts_dp(
 ) -> Union[int, np.ndarray]:
     if eps is None:
         return counts
+    eps_local = eps  # woraround for linting error
 
-    def _local_laplacer(x: int):
-        return _laplacer(x, eps, sensitivity)
+    def _local_laplacer(x: int) -> int:
+        return _laplacer(x, eps_local, sensitivity)
 
     vfunc = np.vectorize(_local_laplacer)
     dpcount = vfunc(counts)

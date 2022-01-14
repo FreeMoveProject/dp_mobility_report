@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 import numpy as np
 import pandas as pd
@@ -31,7 +31,7 @@ def get_visits_per_tile(
     )
 
     # number of records outside of the tessellation
-    n_outliers = len(mdreport.df) - counts_per_tile.visit_count.sum()
+    n_outliers = int(len(mdreport.df) - counts_per_tile.visit_count.sum())
 
     counts_per_tile = counts_per_tile.merge(
         mdreport.tessellation[[const.TILE_ID, const.TILE_NAME]],
@@ -49,9 +49,9 @@ def get_visits_per_tile(
         epsi,
         mdreport.max_trips_per_user * 2,
     )
-    n_outliers = diff_privacy.count_dp(
+    n_outliers = diff_privacy.count_dp(  # type: ignore
         n_outliers, epsi, mdreport.max_trips_per_user * 2
-    ).item()
+    )
 
     return Section(
         data=counts_per_tile,
@@ -61,8 +61,7 @@ def get_visits_per_tile(
     )
 
 
-def _get_hour_bin(hour: int, timewindows: List[int]) -> str:
-    timewindows = np.array(timewindows)
+def _get_hour_bin(hour: int, timewindows: np.ndarray) -> str:
     if hour >= timewindows.min() and hour < timewindows.max():
         i = np.argwhere((timewindows) <= hour)[-1][0]
         min_v = timewindows[i]

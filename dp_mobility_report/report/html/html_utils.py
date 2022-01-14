@@ -1,7 +1,7 @@
-import numbers
 from typing import Any, Union
 
 import jinja2
+from numpy import floating
 from pandas import Series
 
 # Initializing Jinja
@@ -52,7 +52,6 @@ def render_outlier_info(outlier_count: int, max_value: Union[int, float] = None)
 
 
 def fmt(value: Any) -> Any:
-    # TODO: check correctly
-    if isinstance(value, numbers.Number):
+    if isinstance(value, (float, floating)):
         value = round(value, 2)
     return value

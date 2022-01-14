@@ -31,7 +31,7 @@ def get_trips_per_user(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
 
 def get_user_time_delta(
     mdreport: "MobilityDataReport", eps: Optional[float]
-) -> Section:
+) -> Optional[Section]:
     if mdreport.evalu is True or eps is None:
         epsi = eps
         epsi_quart = epsi
@@ -164,7 +164,7 @@ def get_user_tile_count(
     )
 
 
-def _mobility_entropy(df: pd.DataFrame) -> np.array:
+def _mobility_entropy(df: pd.DataFrame) -> np.ndarray:
     total_visits_by_user = df.groupby(const.UID).aggregate(
         total_visits=(const.ID, "count")
     )

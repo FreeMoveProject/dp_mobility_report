@@ -63,11 +63,7 @@ def get_dataset_statistics(
 
 def get_missing_values(mdreport: "MobilityDataReport", eps: Optional[float]) -> Section:
     columns = [const.UID, const.TID, const.DATETIME, const.LAT, const.LNG]
-
-    if eps is not None:
-        epsi = eps / len(columns)
-    else:
-        epsi = eps
+    epsi = eps / len(columns) if eps is not None else None
     missings = dict((len(mdreport.df) - mdreport.df.count())[columns])
 
     for col in columns:

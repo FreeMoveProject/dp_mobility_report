@@ -118,7 +118,7 @@ def render_overlapping_trips(n_traj_overlaps: int) -> str:
     return (
         "There are "
         + str(n_traj_overlaps)
-        + " cases where the start time of the following trajectory precedes the previous end time."
+        + " cases where the start time of the following trip precedes the previous end time."
     )
 
 
@@ -143,17 +143,13 @@ def render_location_entropy(
         left_on="tile_id",
         right_on="tile_id",
     )
-    location_entropy_map, location_entropy_legend =  plot.choropleth_map(
-            location_entropy_gdf,
-            const.LOCATION_ENTROPY,
-            "Location entropy (0: all trips by a single user - large: users visit tile evenly)",
-            min_scale=0,
-        )
-    html = (
-        location_entropy_map
-        .get_root()
-        .render()
+    location_entropy_map, location_entropy_legend = plot.choropleth_map(
+        location_entropy_gdf,
+        const.LOCATION_ENTROPY,
+        "Location entropy (0: all trips by a single user - large: users visit tile evenly)",
+        min_scale=0,
     )
+    html = location_entropy_map.get_root().render()
     legend = v_utils.fig_to_html(location_entropy_legend)
     plt.close()
     return html, legend

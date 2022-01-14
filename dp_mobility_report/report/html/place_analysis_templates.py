@@ -1,4 +1,5 @@
 from typing import Tuple
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -47,7 +48,7 @@ def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
     return template_structure.render(
         points_outside_tessellation_info=points_outside_tessellation_info,
         counts_per_tile_map=counts_per_tile_map,
-        counts_per_tile_legend = counts_per_tile_legend,
+        counts_per_tile_legend=counts_per_tile_legend,
         counts_per_tile_summary_table=counts_per_tile_summary_table,
         counts_per_tile_cumsum_linechart=counts_per_tile_cumsum_linechart,
         most_freq_tiles_ranking=most_freq_tiles_ranking,
@@ -70,12 +71,10 @@ def render_counts_per_tile(
         left_on=const.TILE_ID,
         right_on=const.TILE_ID,
     )
-    map, legend = plot.choropleth_map(counts_per_tile_gdf, "visit_count", scale_title = "Number of visits")
-    html = (
-         map
-        .get_root()
-        .render()
+    map, legend = plot.choropleth_map(
+        counts_per_tile_gdf, "visit_count", scale_title="Number of visits"
     )
+    html = map.get_root().render()
     legend_html = v_utils.fig_to_html(legend)
     plt.close()
     return html, legend_html

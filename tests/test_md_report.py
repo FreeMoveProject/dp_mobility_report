@@ -210,6 +210,23 @@ def test_wrong_input_params_MobilityDataReport(test_data, test_tessellation):
             privacy_budget=None,
         )
 
+    # wrong input for timewindows
+    with pytest.raises(TypeError):
+        md_report.MobilityDataReport(
+            test_data,
+            test_tessellation,
+            timewindows="not a list",
+            privacy_budget=None,
+        )
+
+    with pytest.raises(TypeError):
+        md_report.MobilityDataReport(
+            test_data,
+            test_tessellation,
+            timewindows=["not an int", 2, 3],
+            privacy_budget=None,
+        )
+
 
 def test_report_output(test_data, test_tessellation):
     report = md_report.MobilityDataReport(
