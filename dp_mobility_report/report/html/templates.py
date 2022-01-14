@@ -1,5 +1,7 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
+import shutil
+import os
 
 if TYPE_CHECKING:
     from dp_mobility_report.md_report import MobilityDataReport
@@ -46,5 +48,18 @@ def render_html(mdreport: "MobilityDataReport", top_n_flows: int = 100) -> str:
     )
 
 
-def create_html_assets(output_file: Union[Path, str]) -> None:
-    pass
+def create_html_assets(output_file: Path) -> None:
+    path = output_file.with_name("assets")
+    if path.is_dir():
+        shutil.rmtree(path)
+    os.mkdir(path)
+
+    asset_folder = Path("dp_mobility_report/report/html/html_templates/assets/")
+
+    for file_name in os.listdir(asset_folder):
+        # construct full file path
+        source = os.path.join(asset_folder, file_name)
+        destination = os.path.join(path, file_name)
+        # copy only files
+        if os.path.isfile(source):
+            shutil.copy(source, destination)
