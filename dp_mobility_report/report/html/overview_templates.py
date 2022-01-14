@@ -7,13 +7,13 @@ from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_overview(report: dict) -> str:
-    dataset_stats_table = None
-    missing_values_table = None
-    trips_over_time_linechart = None
-    trips_over_time_linechart = None
-    trips_over_time_summary_table = None
-    trips_per_weekday_barchart = None
-    trips_per_hour_linechart = None
+    dataset_stats_table = ""
+    missing_values_table = ""
+    trips_over_time_linechart = ""
+    trips_over_time_linechart = ""
+    trips_over_time_summary_table = ""
+    trips_per_weekday_barchart = ""
+    trips_per_hour_linechart = ""
 
     if const.DS_STATISTICS in report:
         dataset_stats_table = render_dataset_statistics(

@@ -21,22 +21,23 @@ from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
-    od_map = None
-    intra_tile_flows_info = None
-    flows_summary_table = None
-    flows_cumsum_linechart = None
-    most_freq_flows_ranking = None
-    outlier_count_travel_time_info = None
-    travel_time_hist = None
-    travel_time_summary_table = None
-    outlier_count_jump_length_info = None
-    jump_length_hist = None
-    jump_length_summary_table = None
+    od_map = ""
+    od_legend = ""
+    intra_tile_flows_info = ""
+    flows_summary_table = ""
+    flows_cumsum_linechart = ""
+    most_freq_flows_ranking = ""
+    outlier_count_travel_time_info = ""
+    travel_time_hist = ""
+    travel_time_summary_table = ""
+    outlier_count_jump_length_info = ""
+    jump_length_hist = ""
+    jump_length_summary_table = ""
 
     report = mdreport.report
 
     if const.OD_FLOWS in report:
-        od_map = render_origin_destination_flows(
+        od_map, od_legend = render_origin_destination_flows(
             report[const.OD_FLOWS].data, mdreport, top_n_flows
         )
         intra_tile_flows_info = render_intra_tile_flows(report[const.OD_FLOWS].data)
@@ -66,6 +67,7 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
     template_structure = get_template("od_analysis_segment.html")
     return template_structure.render(
         od_map=od_map,
+        od_legend=od_legend,
         intra_tile_flows_info=intra_tile_flows_info,
         flows_summary_table=flows_summary_table,
         flows_cumsum_linechart=flows_cumsum_linechart,
@@ -81,7 +83,7 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
 
 def render_origin_destination_flows(
     od_flows: pd.DataFrame, mdreport: "MobilityDataReport", top_n_flows: int
-) -> str:
+) -> Tuple[str, str]:
     top_n_flows = top_n_flows if top_n_flows <= len(od_flows) else len(od_flows)
     innerflow = od_flows[od_flows.origin == od_flows.destination]
 
@@ -97,7 +99,7 @@ def render_origin_destination_flows(
         od_flows, tessellation=tessellation_innerflow, tile_id=const.TILE_ID
     )
     tessellation_innerflow.loc[tessellation_innerflow.flow.isna(), "flow"] = 0
-    innerflow_chropleth = plot.choropleth_map(
+    innerflow_chropleth, innerflow_legend = plot.choropleth_map(
         tessellation_innerflow, "flow", "Number of intra-tile flows"
     )  # get innerflows as color for choropleth
 
@@ -107,8 +109,9 @@ def render_origin_destination_flows(
         .plot_flows(flow_color="red", map_f=innerflow_chropleth)
     )
     html = od_map.get_root().render()
+    html_legend = v_utils.fig_to_html(innerflow_legend)
     plt.close()
-    return html
+    return html, html_legend
 
 
 def render_intra_tile_flows(od_flows: pd.DataFrame) -> str:

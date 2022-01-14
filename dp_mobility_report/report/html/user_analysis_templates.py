@@ -17,20 +17,21 @@ from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_user_analysis(mdreport: "MobilityDataReport") -> str:
-    trips_per_user_summary_table = None
-    trips_per_user_hist = None
-    overlapping_trips_info = None
-    time_between_traj_summary_table = None
-    outlier_count_radius_of_gyration_info = None
-    radius_of_gyration_summary_table = None
-    radius_of_gyration_hist = None
-    location_entropy_map = None
-    distinct_tiles_user_summary_table = None
-    distinct_tiles_user_hist = None
-    mobility_entropy_summary_table = None
-    mobility_entropy_hist = None
-    real_entropy_summary_table = None
-    real_entropy_hist = None
+    trips_per_user_summary_table = ""
+    trips_per_user_hist = ""
+    overlapping_trips_info = ""
+    time_between_traj_summary_table = ""
+    outlier_count_radius_of_gyration_info = ""
+    radius_of_gyration_summary_table = ""
+    radius_of_gyration_hist = ""
+    location_entropy_map = ""
+    location_entropy_legend = ""
+    distinct_tiles_user_summary_table = ""
+    distinct_tiles_user_hist = ""
+    mobility_entropy_summary_table = ""
+    mobility_entropy_hist = ""
+    real_entropy_summary_table = ""
+    real_entropy_hist = ""
 
     report = mdreport.report
 
@@ -63,7 +64,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         )
 
     if const.LOCATION_ENTROPY in report:
-        location_entropy_map = render_location_entropy(
+        location_entropy_map, location_entropy_legend = render_location_entropy(
             report[const.LOCATION_ENTROPY].data, mdreport.tessellation
         )
 
@@ -94,6 +95,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         radius_of_gyration_summary_table=radius_of_gyration_summary_table,
         radius_of_gyration_hist=radius_of_gyration_hist,
         location_entropy_map=location_entropy_map,
+        location_entropy_legend=location_entropy_legend,
         distinct_tiles_user_hist=distinct_tiles_user_hist,
         distinct_tiles_user_summary_table=distinct_tiles_user_summary_table,
         mobility_entropy_hist=mobility_entropy_hist,
@@ -131,7 +133,7 @@ def render_radius_of_gyration(radius_of_gyration_hist: Tuple) -> str:
 
 def render_location_entropy(
     location_entropy: pd.Series, tessellation: GeoDataFrame
-) -> str:
+) -> Tuple[str, str]:
     # 0: all trips by a single user
     # large: evenly distributed over different users (2^x possible different users)
     location_entropy_gdf = pd.merge(
@@ -141,18 +143,20 @@ def render_location_entropy(
         left_on="tile_id",
         right_on="tile_id",
     )
-    html = (
-        plot.choropleth_map(
+    location_entropy_map, location_entropy_legend =  plot.choropleth_map(
             location_entropy_gdf,
             const.LOCATION_ENTROPY,
-            "Location entropy (0: all trips by a single user - large: users visit tile evenly",
+            "Location entropy (0: all trips by a single user - large: users visit tile evenly)",
             min_scale=0,
         )
+    html = (
+        location_entropy_map
         .get_root()
         .render()
     )
+    legend = v_utils.fig_to_html(location_entropy_legend)
     plt.close()
-    return html
+    return html, legend
 
 
 def render_distinct_tiles_user(user_tile_count_hist: Tuple) -> str:

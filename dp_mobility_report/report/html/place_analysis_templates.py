@@ -1,3 +1,4 @@
+from typing import Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -9,12 +10,13 @@ from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
-    points_outside_tessellation_info = None
-    counts_per_tile_map = None
-    counts_per_tile_summary_table = None
-    counts_per_tile_cumsum_linechart = None
-    most_freq_tiles_ranking = None
-    counts_per_tile_time_map = None
+    points_outside_tessellation_info = ""
+    counts_per_tile_map = ""
+    counts_per_tile_legend = ""
+    counts_per_tile_summary_table = ""
+    counts_per_tile_cumsum_linechart = ""
+    most_freq_tiles_ranking = ""
+    counts_per_tile_time_map = ""
 
     if const.COUNTS_PER_TILE in report:
         points_outside_tessellation_info = render_points_outside_tess(
@@ -22,7 +24,7 @@ def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
         )
 
     if const.COUNTS_PER_TILE in report:
-        counts_per_tile_map = render_counts_per_tile(
+        counts_per_tile_map, counts_per_tile_legend = render_counts_per_tile(
             report[const.COUNTS_PER_TILE].data, tessellation
         )
         counts_per_tile_summary_table = render_summary(
@@ -45,6 +47,7 @@ def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
     return template_structure.render(
         points_outside_tessellation_info=points_outside_tessellation_info,
         counts_per_tile_map=counts_per_tile_map,
+        counts_per_tile_legend = counts_per_tile_legend,
         counts_per_tile_summary_table=counts_per_tile_summary_table,
         counts_per_tile_cumsum_linechart=counts_per_tile_cumsum_linechart,
         most_freq_tiles_ranking=most_freq_tiles_ranking,
@@ -58,7 +61,7 @@ def render_points_outside_tess(points_outside_tessellation: int) -> str:
 
 def render_counts_per_tile(
     counts_per_tile: pd.DataFrame, tessellation: GeoDataFrame
-) -> str:
+) -> Tuple[str, str]:
     # merge count and tessellation
     counts_per_tile_gdf = pd.merge(
         tessellation,
@@ -67,13 +70,15 @@ def render_counts_per_tile(
         left_on=const.TILE_ID,
         right_on=const.TILE_ID,
     )
+    map, legend = plot.choropleth_map(counts_per_tile_gdf, "visit_count", scale_title = "Number of visits")
     html = (
-        plot.choropleth_map(counts_per_tile_gdf, "visit_count", "Number of visits")
+         map
         .get_root()
         .render()
     )
+    legend_html = v_utils.fig_to_html(legend)
     plt.close()
-    return html
+    return html, legend_html
 
 
 def render_counts_per_tile_cumsum(counts_per_tile: pd.DataFrame) -> str:

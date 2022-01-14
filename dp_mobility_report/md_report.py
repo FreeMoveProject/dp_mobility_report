@@ -168,14 +168,14 @@ class MobilityDataReport:
                     f"To remove this warning, please use .html or .json."
                 )
 
-            # TODO: implement create_html_assets
-
-            create_html_assets(output_file)
-            with tqdm(  # progress bar
-                total=1, desc="Create HTML Output", disable=disable_progress_bar
-            ) as pbar:
-                data = self.to_html(top_n_flows)
-                pbar.update()
+        # TODO: implement create_html_assets
+        create_html_assets(output_file)
+        
+        with tqdm(  # progress bar
+            total=1, desc="Create HTML Output", disable=disable_progress_bar
+        ) as pbar:
+            data = self.to_html(top_n_flows)
+            pbar.update()
 
         output_file.write_text(data, encoding="utf-8")
 

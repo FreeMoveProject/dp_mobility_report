@@ -6,7 +6,6 @@ import matplotlib
 import matplotlib as mpl
 import numpy as np
 import seaborn as sns
-from branca.colormap import linear
 from geopandas import GeoDataFrame
 from matplotlib import pyplot as plt
 from pandas import DataFrame
@@ -117,14 +116,19 @@ def choropleth_map(
     min_scale = (
         counts_per_tile_gdf[fill_color_name].min() if min_scale is None else min_scale
     )
-    color_map = linear.YlGnBu_09.scale(
-        min_scale, counts_per_tile_gdf[fill_color_name].max()
-    )
+    
+    # color
+    cmap = mpl.cm.viridis_r
+    norm = mpl.colors.Normalize(vmin=min_scale, vmax=counts_per_tile_gdf[fill_color_name].max())
+    def _hex_color(x):
+        rgb = norm(x)
+        return matplotlib.colors.rgb2hex(cmap(rgb))
 
+                
     def _get_color(x: dict, fill_color_name: str) -> str:
         if x["properties"][fill_color_name] is None:
             return "#8c8c8c"
-        return color_map(x["properties"][fill_color_name])
+        return _hex_color(x["properties"][fill_color_name])
 
     def _style_function(x: dict) -> dict:
         return {
@@ -144,9 +148,12 @@ def choropleth_map(
         popup=folium.GeoJsonPopup(fields=fields),
     ).add_to(m)
 
-    color_map.caption = scale_title
-    color_map.add_to(m, name=fill_color_name)
-    return m
+    # colorbar object to create custom legend
+    colorbar, ax = plt.subplots(figsize=(6, 1))
+    colorbar.subplots_adjust(bottom=0.5)
+    colorbar.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap),
+                cax=ax, orientation='horizontal', label=scale_title)
+    return m, colorbar
 
 
 def multi_choropleth_map(
