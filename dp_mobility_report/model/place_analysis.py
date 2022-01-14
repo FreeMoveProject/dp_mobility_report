@@ -48,7 +48,6 @@ def get_visits_per_tile(
         counts_per_tile["visit_count"].values,
         epsi,
         mdreport.max_trips_per_user * 2,
-        parallel=True,
     )
     n_outliers = diff_privacy.count_dp(
         n_outliers, epsi, mdreport.max_trips_per_user * 2

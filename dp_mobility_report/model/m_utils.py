@@ -73,7 +73,7 @@ def hist_section(
         hist = np.histogram(series, bins=max_bins, range=(min_value, max_value))
         counts = hist[0]
         dp_values = hist[1]
-    dp_counts = diff_privacy.counts_dp(counts, epsi, sensitivity, parallel=True)
+    dp_counts = diff_privacy.counts_dp(counts, epsi, sensitivity)
 
     return Section(
         data=(dp_counts, dp_values),

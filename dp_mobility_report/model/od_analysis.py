@@ -67,7 +67,7 @@ def get_od_flows(
     od_flows.fillna(0, inplace=True)
 
     od_flows["flow"] = diff_privacy.counts_dp(
-        od_flows["flow"].to_numpy(), eps, mdreport.max_trips_per_user, parallel=True
+        od_flows["flow"].to_numpy(), eps, mdreport.max_trips_per_user
     )
 
     # remove all instances of 0 to reduce storage

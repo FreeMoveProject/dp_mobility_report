@@ -129,7 +129,6 @@ def get_trips_over_time(
         trip_count["trip_count"].values,
         epsi,
         mdreport.max_trips_per_user,
-        parallel=True,
     )
 
     return Section(
@@ -160,7 +159,6 @@ def get_trips_per_weekday(
             trips_per_weekday.values,
             eps,
             mdreport.max_trips_per_user,
-            parallel=True,
         ),
     )
 
@@ -175,7 +173,7 @@ def get_trips_per_hour(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
 
     hour_weekday = hour_weekday.reset_index()
     hour_weekday["count"] = diff_privacy.counts_dp(
-        hour_weekday["count"], eps, mdreport.max_trips_per_user, parallel=True
+        hour_weekday["count"], eps, mdreport.max_trips_per_user
     )
 
     hour_weekday[const.TIME_CATEGORY] = (

@@ -125,28 +125,18 @@ def counts_dp(
     counts: Union[int, np.ndarray],
     eps: Optional[float],
     sensitivity: int,
-    parallel: bool = True,
-    nonzero: bool = False,
 ) -> Union[int, np.ndarray]:
     if eps is None:
         return counts
 
-    if parallel is False:
-        epsi = eps / len([counts])
-    else:
-        epsi = eps
-
     def _local_laplacer(x: int):
-        return _laplacer(x, epsi, sensitivity)
+        return _laplacer(x, eps, sensitivity)
 
     vfunc = np.vectorize(_local_laplacer)
     dpcount = vfunc(counts)
     dpcount = ((abs(dpcount) + dpcount) / 2).astype(int)
 
-    if nonzero:
-        return dpcount[dpcount > 0]
-    else:
-        return dpcount
+    return dpcount
 
 
 def entropy_dp(
