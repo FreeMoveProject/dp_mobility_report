@@ -57,13 +57,11 @@ def test_counts_dp():
     assert dp_count >= 0
 
     counts = np.array([100, 10, 4, 20])
-    dp_counts = diff_privacy.counts_dp(
-        counts, eps=None, sensitivity=None, nonzero=False
-    )
+    dp_counts = diff_privacy.counts_dp(counts, eps=None, sensitivity=None)
     assert all(counts == dp_counts)
 
     counts = np.array([100, 10, 4, 20])
-    dp_counts = diff_privacy.counts_dp(counts, eps=0.1, sensitivity=1, nonzero=False)
+    dp_counts = diff_privacy.counts_dp(counts, eps=0.1, sensitivity=1)
     assert all(dp_counts >= 0)
 
 
