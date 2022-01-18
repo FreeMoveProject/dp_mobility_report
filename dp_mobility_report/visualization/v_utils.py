@@ -4,8 +4,14 @@ import io
 from matplotlib.figure import Figure
 
 
-# TODO: better implementation and svg instead of png
 def fig_to_html(fig: Figure) -> str:
+    img = io.StringIO()
+    fig.savefig(img, format="svg", bbox_inches="tight")
+    img_string = img.getvalue()
+    return img_string
+
+
+def fig_to_html_as_png(fig: Figure) -> str:
     img = io.BytesIO()
     fig.savefig(img, format="png", bbox_inches="tight")
     img.seek(0)
