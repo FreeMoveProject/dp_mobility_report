@@ -45,12 +45,10 @@ Create a mobility report as HTML:
         tessellation = gpd.read_file("tessellation.gpkg")
 
         report = md_report.MobilityDataReport(
-                        df, 
-                        tessellation,
-                        privacy_budget = 1, 
-                        max_trips_per_user = 4)
+            df, tessellation, privacy_budget=1, max_trips_per_user=4
+        )
 
-        report.to_file("my_mobility_report.html")       
+        report.to_file("my_mobility_report.html")
 
 
 Example HTMLs can be found in the examples_ folder.

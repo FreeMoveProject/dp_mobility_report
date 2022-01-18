@@ -1,7 +1,7 @@
+import os
+import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING
-import shutil
-import os
 
 if TYPE_CHECKING:
     from dp_mobility_report.md_report import MobilityDataReport

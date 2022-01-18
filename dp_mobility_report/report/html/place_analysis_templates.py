@@ -144,9 +144,9 @@ def render_counts_per_tile_timewindow(
         relative_weekday = plot.multi_choropleth_map(dev_from_avg, tessellation)
         output_html += (
             "<h4>Weekday: absolute count</h4>"
-            + v_utils.fig_to_html_as_png(absolute_weekday) #svg might get too large
+            + v_utils.fig_to_html_as_png(absolute_weekday)  # svg might get too large
             + "<h4>Weekday: deviation from average</h4>"
-            + v_utils.fig_to_html_as_png(relative_weekday) #svg might get too large
+            + v_utils.fig_to_html_as_png(relative_weekday)  # svg might get too large
         )
 
     if "weekend" in counts_per_tile_timewindow.columns:
