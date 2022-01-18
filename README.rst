@@ -1,6 +1,6 @@
-====================
+============================================================
 Differentially Private Mobility Data Report
-====================
+============================================================
 
 
 .. image:: https://img.shields.io/pypi/v/dp_mobility_report.svg
@@ -31,8 +31,15 @@ Install
 
         pip install git+https://github.com/FreeMoveProject/dp_mobility_report
 
-Create a mobility report as HTML:
+
+Data preparation:
 **********************
+
+- **df**: a pandas ``DataFrame``. Expected columns: User ID ``uid``, Trip ID ``tid``, Timestamp ``datetime``, latitude and longitude in CRS EPSG:4326 ``lat`` and ``lng``.
+- **tessellation**: a geopandas ``GeoDataFrame`` with polygons. Expected columns ``tile_id``. The tessellation is used for spatial aggregations of the data.
+
+Create a mobility report as HTML:
+**************************************
 
 .. code-block:: python
 
@@ -50,6 +57,10 @@ Create a mobility report as HTML:
 
         report.to_file("my_mobility_report.html")
 
+
+The parameter ``privacy_budget`` (in term of :math:`{\epsilon}`-differential privacy) determines how much noise is added to the data. The budget is split between all analyses of the report.
+
+The parameter ``max_trips_per_user`` specifies how many trips a user can contribute to the dataset at most. If a user is represented with more trips, a random sample is drawn according to ``max_trips_per_user``.
 
 Example HTMLs can be found in the examples_ folder.
 

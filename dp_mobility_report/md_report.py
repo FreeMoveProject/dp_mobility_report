@@ -21,10 +21,8 @@ class MobilityDataReport:
        The report will be generated as an HTML file, using the `.to_html()` method.
 
     Args:
-        df: pandas `DataFrame` containing the mobility data. Expected columns: User ID `uid`, Trip ID `tid`, Timestamp `datetime`,
-            Latitude and Longitude in CRS EPSG:4326 `lat` and `lng`.
-        tessellation: Geopandas `GeoDataFrame` containing the tessellation for spatial aggregations. If tessellation is not provided
-            in the expected default CRS EPSG:4326 it will automatically be transformed.
+        df: pandas `DataFrame` containing the mobility data. Expected columns: User ID `uid`, trip ID `tid`, timestamp `datetime`, latitude and longitude in CRS EPSG:4326 `lat` and `lng`.
+        tessellation: Geopandas `GeoDataFrame` containing the tessellation for spatial aggregations. Expected columns: `tile_id`. If tessellation is not provided in the expected default CRS EPSG:4326 it will automatically be transformed.
         privacy_budget: privacy_budget for the differentially private report
         user_privacy: Whether item-level or user-level privacy is applied. Defaults to True (user-level privacy).
         max_trips_per_user: maximum number of trips a user shall contribute to the data. Dataset will be sampled accordingly.
@@ -39,7 +37,7 @@ class MobilityDataReport:
         max_radius_of_gyration: Upper bound for radius of gyration analysis to cut outliers based on domain knowledge. If None is given, no upper bound is set. Defaults to None.
         bin_range_radius_of_gyration The range a single histogram bin spans for the radius of gyration (e.g., 1 for 1 km bins). If None is given, the histogram bins will be determined automatically. Defaults to None.
         evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to False.
-        """
+    """
 
     _report: dict = {}
     _html: str = ""
