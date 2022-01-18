@@ -21,7 +21,7 @@ Differentially Private Mobility Data Report
 * Documentation: https://mobility-data-report.readthedocs.io.
 
 
-``dp_mobility_report``: A python package to create a standardized mobility report for with differential privacy guarentees, especially for urban human mobility data.
+``dp_mobility_report``: A python package to create a standardized mobility report with differential privacy guarentees, especially for urban human mobility data.
 
 
 Install
@@ -40,38 +40,31 @@ Create a mobility report as HTML:
         import geopandas as gpd
         from dp_mobility_report import md_report
 
-        # -- insert paths to data --
+        # -- insert paths --
         df = pd.read_csv("mobility_dataset.csv")
         tessellation = gpd.read_file("tessellation.gpkg")
 
         report = md_report.MobilityDataReport(
                         df, 
                         tessellation,
-                        privacy_budget = 10, 
+                        privacy_budget = 1, 
                         max_trips_per_user = 4)
 
-        report.to_file("my_mobility_report.html"))
+        report.to_file("my_mobility_report.html")       
 
-
-
-Create a mobility report as HTML:
-**********************
 
 Example HTMLs can be found in the examples_ folder.
 
-Features
---------
-
-* TODO
 
 Credits
 -------
 
-This package was highly inspired by the `pandas-profiling/pandas-profiling`_ package.
+This package was highly inspired by the `pandas-profiling/pandas-profiling`_ and `scikit-mobility`_ packages.
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
  
 .. _examples: https://github.com/FreeMoveProject/dp_mobility_report/tree/main/examples/html
 .. _`pandas-profiling/pandas-profiling`: https://github.com/pandas-profiling/pandas-profiling
+.. _`scikit-mobility`: https://github.com/scikit-mobility
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage

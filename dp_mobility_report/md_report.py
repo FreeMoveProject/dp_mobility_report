@@ -29,11 +29,10 @@ class MobilityDataReport:
         df: DataFrame,
         tessellation: GeoDataFrame,
         privacy_budget: Optional[Union[int, float]],
+        user_privacy: bool = True,
         max_trips_per_user: Optional[int] = None,
         analysis_selection: List[str] = [const.ALL],
         disable_progress_bar: bool = False,
-        evalu: bool = False,
-        user_privacy: bool = True,
         timewindows: Union[List[int], np.ndarray] = [2, 6, 10, 14, 18, 22],
         max_travel_time: Optional[int] = None,
         bin_range_travel_time: Optional[int] = None,
@@ -41,21 +40,31 @@ class MobilityDataReport:
         bin_range_jump_length: Optional[Union[int, float]] = None,
         max_radius_of_gyration: Optional[Union[int, float]] = None,
         bin_range_radius_of_gyration: Optional[Union[int, float]] = None,
+        evalu: bool = False,
     ) -> None:
         """Generate a (differentially private) mobility report from a dataset stored as
         a pandas `DataFrame`.
-            Args:
-                df (DataFrame): Pandas DataFrame containing the mobility data. Expected columns: User ID `uid`, Trip ID `tid`, Timestamp `datetime`,
-                Latitude and Longitude in CRS EPSG:4326 `lat` and `lng`.
-                tessellation(GeoDataFrame): Geopandas GeoDataFrame containing the tessellation for spatial aggregations. If tessellation is not provided
-                in the expected default CRS EPSG:4326 it will automatically be transformed.
-                privacy_budget (float): privacy_budget for the differentially private report.
-                max_trips_per_user(int): maximum number of trips a user shall contribute to the data. Dataset will be sampled accordingly.
-                analysis_selection (list, optional): Select only needed analyses. A selection reduces compuation time and leaves more privacy budget
-                for higher accuracy of other analyses.
-                Options are `overview`, `place_analysis`, `od_analysis`, `user_analysis` and `all`. Defaults to [`all`].
-        """
 
+        Args:
+            df: pandas `DataFrame` containing the mobility data. Expected columns: User ID `uid`, Trip ID `tid`, Timestamp `datetime`,
+                Latitude and Longitude in CRS EPSG:4326 `lat` and `lng`.
+            tessellation: Geopandas `GeoDataFrame` containing the tessellation for spatial aggregations. If tessellation is not provided
+                in the expected default CRS EPSG:4326 it will automatically be transformed.
+            privacy_budget: privacy_budget for the differentially private report
+            user_privacy: Whether item-level or user-level privacy is applied. Defaults to True (user-level privacy).
+            max_trips_per_user: maximum number of trips a user shall contribute to the data. Dataset will be sampled accordingly.
+            analysis_selection: Select only needed analyses. A selection reduces computation time and leaves more privacy budget
+                for higher accuracy of other analyses. Options are `overview`, `place_analysis`, `od_analysis`, `user_analysis` and `all`. Defaults to [`all`].
+            disable_progress_bar: Whether progress bars should be shown. Defaults to False.
+            timewindows: List of hours as `int` that define the timewindows for the spatial analysis for single time windows. Defaults to [2, 6, 10, 14, 18, 22].
+            max_travel_time: Upper bound for travel time analysis to cut outliers based on domain knowledge. If None is given, no upper bound is set. Defaults to None.
+            bin_range_travel_time: The range a single histogram bin spans for travel time (e.g., 5 for 5 min bins). If None is given, the histogram bins will be determined automatically. Defaults to None.
+            max_jump_length: Upper bound for jump length analysis to cut outliers based on domain knowledge. If None is given, no upper bound is set. Defaults to None.
+            bin_range_jump_length: The range a single histogram bin spans for jump length (e.g., 1 for 1 km bins). If None is given, the histogram bins will be determined automatically. Defaults to None.
+            max_radius_of_gyration: Upper bound for radius of gyration analysis to cut outliers based on domain knowledge. If None is given, no upper bound is set. Defaults to None.
+            bin_range_radius_of_gyration The range a single histogram bin spans for the radius of gyration (e.g., 1 for 1 km bins). If None is given, the histogram bins will be determined automatically. Defaults to None.
+            evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to False.
+        """
         _validate_input(
             df,
             tessellation,
@@ -172,7 +181,6 @@ class MobilityDataReport:
                     f"To remove this warning, please use .html or .json."
                 )
 
-        # TODO: implement create_html_assets
         create_html_assets(output_file)
 
         with tqdm(  # progress bar

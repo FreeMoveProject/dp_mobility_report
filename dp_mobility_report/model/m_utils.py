@@ -57,7 +57,7 @@ def hist_section(
         dp_n_outliers = None
 
     quartiles = diff_privacy.quartiles_dp(series, epsi_quart, sensitivity)
-    # TODO: or always diff private min and max values? (outliers are already cut)
+    # TODO:rather always diff private min and max values? (outliers are already cut) but then bins are not "clean"
     min_value = quartiles["min"] if min_value is None else min_value
     max_value = quartiles["max"] if max_value is None else max_value
 
