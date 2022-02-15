@@ -35,15 +35,20 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
 
     report = mdreport.report
 
-    if const.TRIPS_PER_USER in report:
+    if (const.TRIPS_PER_USER in report) and (
+        report[const.TRIPS_PER_USER].data is not None
+    ):
         trips_per_user_summary_table = render_summary(
             report[const.TRIPS_PER_USER].quartiles
         )
 
-    if const.TRIPS_PER_USER in report:
         trips_per_user_hist = render_trips_per_user(report[const.TRIPS_PER_USER].data)
 
-    if (const.USER_TIME_DELTA in report) & (report[const.USER_TIME_DELTA] is not None):
+    if (
+        (const.USER_TIME_DELTA in report)
+        and (report[const.USER_TIME_DELTA] is not None)
+        and (report[const.USER_TIME_DELTA].quartiles is not None)
+    ):
         overlapping_trips_info = render_overlapping_trips(
             report[const.USER_TIME_DELTA].n_outliers
         )
@@ -51,7 +56,9 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
             report[const.USER_TIME_DELTA].quartiles
         )
 
-    if const.RADIUS_OF_GYRATION in report:
+    if (const.RADIUS_OF_GYRATION in report) and (
+        report[const.RADIUS_OF_GYRATION].data is not None
+    ):
         outlier_count_radius_of_gyration_info = render_outlier_info(
             report[const.RADIUS_OF_GYRATION].n_outliers,
             mdreport.max_jump_length,
@@ -63,12 +70,16 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
             report[const.RADIUS_OF_GYRATION].data
         )
 
-    if const.LOCATION_ENTROPY in report:
+    if (const.LOCATION_ENTROPY in report) and (
+        report[const.LOCATION_ENTROPY].data is not None
+    ):
         location_entropy_map, location_entropy_legend = render_location_entropy(
             report[const.LOCATION_ENTROPY].data, mdreport.tessellation
         )
 
-    if const.USER_TILE_COUNT in report:
+    if (const.USER_TILE_COUNT in report) and (
+        report[const.USER_TILE_COUNT].data is not None
+    ):
         distinct_tiles_user_summary_table = render_summary(
             report[const.USER_TILE_COUNT].quartiles
         )
@@ -76,7 +87,9 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
             report[const.USER_TILE_COUNT].data
         )
 
-    if const.MOBILITY_ENTROPY in report:
+    if (const.MOBILITY_ENTROPY in report) and (
+        report[const.MOBILITY_ENTROPY].data is not None
+    ):
         mobility_entropy_summary_table = render_summary(
             report[const.MOBILITY_ENTROPY].quartiles
         )

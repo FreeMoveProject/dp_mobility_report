@@ -13,8 +13,8 @@ class Section:
     Potential further attributes: `quartiles`, `datetime_precision`.
     """
 
-    data: Optional[Union[Tuple, dict, pd.Series, pd.DataFrame]]
-    privacy_budget: Optional[float]
+    data: Optional[Union[Tuple, dict, pd.Series, pd.DataFrame]] = None
+    privacy_budget: Optional[float] = None
     n_outliers: Optional[int] = None
     quartiles: Optional[np.ndarray] = None
     datetime_precision: Optional[str] = None

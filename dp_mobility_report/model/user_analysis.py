@@ -32,12 +32,8 @@ def get_trips_per_user(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
 def get_user_time_delta(
     mdreport: "MobilityDataReport", eps: Optional[float]
 ) -> Optional[Section]:
-    if mdreport.evalu is True or eps is None:
-        epsi = eps
-        epsi_quart = epsi
-    else:
-        epsi = eps / 6
-        epsi_quart = 5 * epsi
+    epsi = m_utils.get_epsi(mdreport.evalu, eps, 6)
+    epsi_quant = epsi * 5 if epsi is not None else None
 
     mdreport.df = mdreport.df.sort_values(
         [const.UID, const.TID, const.DATETIME]
@@ -58,7 +54,7 @@ def get_user_time_delta(
         mdreport.max_trips_per_user,
     )
     dp_quartiles = diff_privacy.quartiles_dp(
-        user_time_delta, epsi_quart, mdreport.max_trips_per_user
+        user_time_delta, epsi_quant, mdreport.max_trips_per_user
     )
 
     return Section(

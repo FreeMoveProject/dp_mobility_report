@@ -19,12 +19,12 @@ def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
     most_freq_tiles_ranking = ""
     counts_per_tile_time_map = ""
 
-    if const.COUNTS_PER_TILE in report:
+    if (const.COUNTS_PER_TILE in report) and (
+        report[const.COUNTS_PER_TILE].data is not None
+    ):
         points_outside_tessellation_info = render_points_outside_tess(
             report[const.COUNTS_PER_TILE].n_outliers
         )
-
-    if const.COUNTS_PER_TILE in report:
         counts_per_tile_map, counts_per_tile_legend = render_counts_per_tile(
             report[const.COUNTS_PER_TILE].data, tessellation
         )
@@ -38,7 +38,9 @@ def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
             report[const.COUNTS_PER_TILE].data
         )
 
-    if const.COUNTS_PER_TILE_TIMEWINDOW in report:
+    if (const.COUNTS_PER_TILE_TIMEWINDOW in report) and (
+        report[const.COUNTS_PER_TILE_TIMEWINDOW].data is not None
+    ):
         counts_per_tile_time_map = render_counts_per_tile_timewindow(
             report[const.COUNTS_PER_TILE_TIMEWINDOW].data, tessellation
         )
@@ -105,6 +107,8 @@ def render_counts_per_tile_cumsum(counts_per_tile: pd.DataFrame) -> str:
 def render_most_freq_tiles_ranking(
     counts_per_tile: pd.DataFrame, top_n: int = 10
 ) -> str:
+    if counts_per_tile is None:
+        return None
     topx_tiles = counts_per_tile.nlargest(top_n, "visit_count")
     topx_tiles["rank"] = list(range(1, len(topx_tiles) + 1))
 
@@ -131,6 +135,8 @@ def render_most_freq_tiles_ranking(
 def render_counts_per_tile_timewindow(
     counts_per_tile_timewindow: pd.DataFrame, tessellation: GeoDataFrame
 ) -> str:
+    if counts_per_tile_timewindow is None:
+        return None
     output_html = ""
     if "weekday" in counts_per_tile_timewindow.columns:
         absolute_weekday = plot.multi_choropleth_map(

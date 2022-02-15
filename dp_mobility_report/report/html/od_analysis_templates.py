@@ -36,7 +36,7 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
 
     report = mdreport.report
 
-    if const.OD_FLOWS in report:
+    if const.OD_FLOWS in report and report[const.OD_FLOWS].data is not None:
         od_map, od_legend = render_origin_destination_flows(
             report[const.OD_FLOWS].data, mdreport, top_n_flows
         )
@@ -49,7 +49,7 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
             report[const.OD_FLOWS].data, mdreport.tessellation
         )
 
-    if const.TRAVEL_TIME in report:
+    if const.TRAVEL_TIME in report and report[const.TRAVEL_TIME].data is not None:
         outlier_count_travel_time_info = render_outlier_info(
             report[const.TRAVEL_TIME].n_outliers,
             mdreport.max_travel_time,
@@ -57,13 +57,14 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
         travel_time_hist = render_travel_time_hist(report[const.TRAVEL_TIME].data)
         travel_time_summary_table = render_summary(report[const.TRAVEL_TIME].quartiles)
 
-    if const.JUMP_LENGTH in report:
+    if const.JUMP_LENGTH in report and report[const.JUMP_LENGTH].data is not None:
         outlier_count_jump_length_info = render_outlier_info(
             report[const.JUMP_LENGTH].n_outliers,
             mdreport.max_jump_length,
         )
         jump_length_hist = render_jump_length_hist(report[const.JUMP_LENGTH].data)
         jump_length_summary_table = render_summary(report[const.JUMP_LENGTH].quartiles)
+
     template_structure = get_template("od_analysis_segment.html")
     return template_structure.render(
         od_map=od_map,

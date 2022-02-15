@@ -15,15 +15,18 @@ def render_overview(report: dict) -> str:
     trips_per_weekday_barchart = ""
     trips_per_hour_linechart = ""
 
-    if const.DS_STATISTICS in report:
+    if const.DS_STATISTICS in report and report[const.DS_STATISTICS].data is not None:
         dataset_stats_table = render_dataset_statistics(
             report[const.DS_STATISTICS].data
         )
 
-    if const.MISSING_VALUES in report:
+    if const.MISSING_VALUES in report and report[const.MISSING_VALUES].data is not None:
         missing_values_table = render_missing_values(report[const.MISSING_VALUES].data)
 
-    if const.TRIPS_OVER_TIME in report:
+    if (
+        const.TRIPS_OVER_TIME in report
+        and report[const.TRIPS_OVER_TIME].data is not None
+    ):
         trips_over_time_linechart = render_trips_over_time(
             report[const.TRIPS_OVER_TIME].data
         )
@@ -31,12 +34,15 @@ def render_overview(report: dict) -> str:
             report[const.TRIPS_OVER_TIME].quartiles
         )
 
-    if const.TRIPS_PER_WEEKDAY in report:
+    if (
+        const.TRIPS_PER_WEEKDAY in report
+        and report[const.TRIPS_PER_WEEKDAY].data is not None
+    ):
         trips_per_weekday_barchart = render_trips_per_weekday(
             report[const.TRIPS_PER_WEEKDAY].data
         )
 
-    if const.TRIPS_PER_HOUR in report:
+    if const.TRIPS_PER_HOUR in report and report[const.TRIPS_PER_HOUR].data is not None:
         trips_per_hour_linechart = render_trips_per_hour(
             report[const.TRIPS_PER_HOUR].data
         )
@@ -53,7 +59,6 @@ def render_overview(report: dict) -> str:
 
 
 def render_dataset_statistics(dataset_statistics: dict) -> str:
-
     dataset_stats_list = [
         {"name": "Number of records", "value": fmt(dataset_statistics["n_records"])},
         {"name": "Distinct trips", "value": fmt(dataset_statistics["n_trips"])},

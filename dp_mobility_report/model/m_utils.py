@@ -39,12 +39,8 @@ def hist_section(
     max_bins: Optional[int] = None,
     evalu: bool = False,
 ) -> Section:
-    if evalu or eps is None:
-        epsi = eps
-        epsi_quart = eps
-    else:
-        epsi = eps / 7
-        epsi_quart = epsi * 5
+    epsi = get_epsi(evalu, eps, 7)
+    epsi_quant = epsi * 5 if epsi is not None else None
 
     series = Series(series) if isinstance(series, np.ndarray) else series
 
@@ -56,7 +52,7 @@ def hist_section(
     else:
         dp_n_outliers = None
 
-    quartiles = diff_privacy.quartiles_dp(series, epsi_quart, sensitivity)
+    quartiles = diff_privacy.quartiles_dp(series, epsi_quant, sensitivity)
     # TODO:rather always diff private min and max values? (outliers are already cut) but then bins are not "clean"
     min_value = quartiles["min"] if min_value is None else min_value
     max_value = quartiles["max"] if max_value is None else max_value
@@ -83,3 +79,10 @@ def hist_section(
         n_outliers=dp_n_outliers,
         quartiles=quartiles,
     )
+
+
+def get_epsi(evalu: bool, eps: Optional[float], elements: int) -> Optional[float]:
+    if evalu or eps is None:
+        return eps
+    else:
+        return eps / elements

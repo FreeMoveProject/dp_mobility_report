@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from dp_mobility_report.md_report import MobilityDataReport
 
 from dp_mobility_report import constants as const
+from dp_mobility_report.model import m_utils
 from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
 
@@ -14,10 +15,7 @@ from dp_mobility_report.privacy import diff_privacy
 def get_visits_per_tile(
     mdreport: "MobilityDataReport", eps: Optional[float]
 ) -> Section:
-    if mdreport.evalu is True or eps is None:
-        epsi = eps
-    else:
-        epsi = eps / 3
+    epsi = m_utils.get_epsi(mdreport.evalu, eps, 3)
 
     # count number of visits for each location
     counts_per_tile = (

@@ -118,13 +118,13 @@ def count_dp(
 
 
 def counts_dp(
-    counts: Union[int, np.ndarray],
+    counts: Union[int, np.ndarray],  # TODO: only array?
     eps: Optional[float],
     sensitivity: int,
 ) -> Union[int, np.ndarray]:
     if eps is None:
         return counts
-    eps_local = eps  # woraround for linting error
+    eps_local = eps  # workaround for linting error
 
     def _local_laplacer(x: int) -> int:
         return _laplacer(x, eps_local, sensitivity)

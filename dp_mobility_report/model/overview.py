@@ -15,10 +15,7 @@ from dp_mobility_report.privacy import diff_privacy
 def get_dataset_statistics(
     mdreport: "MobilityDataReport", eps: Optional[float]
 ) -> Section:
-    if mdreport.evalu or eps is None:
-        epsi = eps
-    else:
-        epsi = eps / 5
+    epsi = m_utils.get_epsi(mdreport.evalu, eps, 5)
 
     # counts for complete and incomplete trips
     points_per_trip = (
@@ -63,7 +60,8 @@ def get_dataset_statistics(
 
 def get_missing_values(mdreport: "MobilityDataReport", eps: Optional[float]) -> Section:
     columns = [const.UID, const.TID, const.DATETIME, const.LAT, const.LNG]
-    epsi = eps / len(columns) if eps is not None else None
+    epsi = m_utils.get_epsi(mdreport.evalu, eps, len(columns))
+
     missings = dict((len(mdreport.df) - mdreport.df.count())[columns])
 
     for col in columns:
@@ -77,12 +75,9 @@ def get_missing_values(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
 def get_trips_over_time(
     mdreport: "MobilityDataReport", eps: Optional[float]
 ) -> Section:
-    if mdreport.evalu or eps is None:
-        epsi = eps
-        epsi_quant = epsi
-    else:
-        epsi = eps / 6
-        epsi_quant = 5 * epsi
+    epsi = m_utils.get_epsi(mdreport.evalu, eps, 6)
+    epsi_quant = epsi * 5 if epsi is not None else None
+
     df_trip = mdreport.df[
         (mdreport.df[const.POINT_TYPE] == const.END)
     ]  # only count each trip once
