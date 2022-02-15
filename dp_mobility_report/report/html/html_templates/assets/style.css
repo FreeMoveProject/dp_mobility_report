@@ -3,6 +3,14 @@ body {
   padding-top: 80px;
 }
 {% endif %}
+
+.container {
+    padding: 40px 80px 80px 40px;
+}
+
+.segment {
+    padding-top: 20px;
+}
 .content .container-fluid{
     margin-left: 20px !important;
     margin-right: 20px !important;

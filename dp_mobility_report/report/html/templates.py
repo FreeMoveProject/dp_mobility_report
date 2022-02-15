@@ -8,6 +8,7 @@ if TYPE_CHECKING:
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.report.html import (
+    config_templates,
     html_utils,
     od_analysis_templates,
     overview_templates,
@@ -26,6 +27,8 @@ def render_html(mdreport: "MobilityDataReport", top_n_flows: int = 100) -> str:
 
     is_all_analyses = const.ALL in mdreport.analysis_selection
 
+    config_segment = config_templates.render_config(mdreport)
+
     if is_all_analyses | (const.OVERVIEW in mdreport.analysis_selection):
         overview_segment = overview_templates.render_overview(mdreport.report)
 
@@ -41,6 +44,7 @@ def render_html(mdreport: "MobilityDataReport", top_n_flows: int = 100) -> str:
         user_analysis_segment = user_analysis_templates.render_user_analysis(mdreport)
 
     return template_structure.render(
+        config_segment=config_segment,
         overview_segment=overview_segment,
         place_analysis_segment=place_analysis_segment,
         od_analysis_segment=od_analysis_segment,
