@@ -234,22 +234,45 @@ def test_report_output(test_data, test_tessellation):
     ).report
     assert isinstance(report, dict)
     assert list(report.keys()) == [
-        "ds_statistics",
-        "missing_values",
-        "trips_over_time",
-        "trips_per_weekday",
-        "trips_per_hour",
-        "counts_per_tile",
-        "counts_per_tile_timewindow",
-        "od_flows",
-        "travel_time",
-        "jump_length",
-        "trips_per_user",
-        "user_time_delta",
-        "radius_of_gyration",
-        "location_entropy",
-        "user_tile_count",
-        "mobility_entropy",
+        const.DS_STATISTICS,
+        const.MISSING_VALUES,
+        const.TRIPS_OVER_TIME,
+        const.TRIPS_PER_WEEKDAY,
+        const.TRIPS_PER_HOUR,
+        const.COUNTS_PER_TILE,
+        const.COUNTS_PER_TILE_TIMEWINDOW,
+        const.OD_FLOWS,
+        const.TRAVEL_TIME,
+        const.JUMP_LENGTH,
+        const.TRIPS_PER_USER,
+        const.USER_TIME_DELTA,
+        const.RADIUS_OF_GYRATION,
+        const.LOCATION_ENTROPY,
+        const.USER_TILE_COUNT,
+        const.MOBILITY_ENTROPY,
+    ]
+
+    report = md_report.MobilityDataReport(
+        test_data, test_tessellation, privacy_budget=1
+    ).report
+    assert isinstance(report, dict)
+    assert list(report.keys()) == [
+        const.DS_STATISTICS,
+        const.MISSING_VALUES,
+        const.TRIPS_OVER_TIME,
+        const.TRIPS_PER_WEEKDAY,
+        const.TRIPS_PER_HOUR,
+        const.COUNTS_PER_TILE,
+        const.COUNTS_PER_TILE_TIMEWINDOW,
+        const.OD_FLOWS,
+        const.TRAVEL_TIME,
+        const.JUMP_LENGTH,
+        const.TRIPS_PER_USER,
+        const.USER_TIME_DELTA,
+        const.RADIUS_OF_GYRATION,
+        const.LOCATION_ENTROPY,
+        const.USER_TILE_COUNT,
+        const.MOBILITY_ENTROPY,
     ]
 
 
