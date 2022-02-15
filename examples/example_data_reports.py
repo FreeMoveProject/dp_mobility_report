@@ -35,6 +35,8 @@ report.to_file(
     os.path.join(path_html_output, "geolife_no_privacy.html"), top_n_flows=100
 )
 
+# diff. privacy
+report = md_report.MobilityDataReport(
 
 # MADRID
 df = pd.read_csv(os.path.join(path_data, "madrid.csv"))
