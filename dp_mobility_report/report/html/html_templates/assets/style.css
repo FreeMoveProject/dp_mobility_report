@@ -82,6 +82,9 @@ table.example_values {
 /* STATS */
 table.stats, table.sample, table.duplicate{
     border: 0;
+    margin-left:0px;
+    width: 60%;
+    max-width: 100%;
 }
 
 .stats tr, .sample tr, .duplicate tr {
@@ -96,10 +99,12 @@ table.stats, table.sample, table.duplicate{
 .stats th {
     padding: 0 2em 0 0;
     font-weight: 600;
+    text-align: left;
 }
 
 .stats td {
     padding: 1px;
+    text-align: right;
 }
 
 
