@@ -72,12 +72,14 @@ def hist_section(
         counts = hist[0]
         dp_values = hist[1]
     dp_counts = diff_privacy.counts_dp(counts, epsi, sensitivity)
+    moe = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
 
     return Section(
         data=(dp_counts, dp_values),
         privacy_budget=eps,
         n_outliers=dp_n_outliers,
         quartiles=quartiles,
+        margin_of_error = moe
     )
 
 

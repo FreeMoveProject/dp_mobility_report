@@ -7,6 +7,7 @@ from geopandas import GeoDataFrame
 if TYPE_CHECKING:
     from dp_mobility_report.md_report import MobilityDataReport
 
+from dp_mobility_report.model.section import Section
 from dp_mobility_report import constants as const
 from dp_mobility_report.report.html.html_utils import (
     get_template,
@@ -42,7 +43,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
             report[const.TRIPS_PER_USER].quartiles
         )
 
-        trips_per_user_hist = render_trips_per_user(report[const.TRIPS_PER_USER].data)
+        trips_per_user_hist = render_trips_per_user(report[const.TRIPS_PER_USER])
 
     if (
         (const.USER_TIME_DELTA in report)
@@ -67,7 +68,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
             report[const.RADIUS_OF_GYRATION].quartiles
         )
         radius_of_gyration_hist = render_radius_of_gyration(
-            report[const.RADIUS_OF_GYRATION].data
+            report[const.RADIUS_OF_GYRATION]
         )
 
     if (const.LOCATION_ENTROPY in report) and (
@@ -84,7 +85,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
             report[const.USER_TILE_COUNT].quartiles
         )
         distinct_tiles_user_hist = render_distinct_tiles_user(
-            report[const.USER_TILE_COUNT].data
+            report[const.USER_TILE_COUNT]
         )
 
     if (const.MOBILITY_ENTROPY in report) and (
@@ -94,7 +95,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
             report[const.MOBILITY_ENTROPY].quartiles
         )
         mobility_entropy_hist = render_mobility_entropy(
-            report[const.MOBILITY_ENTROPY].data
+            report[const.MOBILITY_ENTROPY]
         )
 
     template_structure = get_template("user_analysis_segment.html")
@@ -118,11 +119,12 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     )
 
 
-def render_trips_per_user(trips_per_user_hist: Tuple) -> str:
+def render_trips_per_user(trips_per_user_hist: Section) -> str:
     hist = plot.histogram(
-        trips_per_user_hist,
+        trips_per_user_hist.data,
         x_axis_label="number of trips per user",
         x_axis_type=int,
+        margin_of_error=trips_per_user_hist.margin_of_error
     )
     return v_utils.fig_to_html(hist)
 
@@ -135,9 +137,10 @@ def render_overlapping_trips(n_traj_overlaps: int) -> str:
     )
 
 
-def render_radius_of_gyration(radius_of_gyration_hist: Tuple) -> str:
+def render_radius_of_gyration(radius_of_gyration_hist: Section) -> str:
     hist = plot.histogram(
-        radius_of_gyration_hist, x_axis_label="radius of gyration", x_axis_type=float
+        radius_of_gyration_hist.data, x_axis_label="radius of gyration", x_axis_type=float,
+        margin_of_error=radius_of_gyration_hist.margin_of_error
     )
     html = v_utils.fig_to_html(hist)
     plt.close()
@@ -168,21 +171,23 @@ def render_location_entropy(
     return html, legend
 
 
-def render_distinct_tiles_user(user_tile_count_hist: Tuple) -> str:
+def render_distinct_tiles_user(user_tile_count_hist: Section) -> str:
     hist = plot.histogram(
-        user_tile_count_hist,
+        user_tile_count_hist.data,
         x_axis_label="number of distinct tiles a user has visited",
         x_axis_type=int,
+        margin_of_error=user_tile_count_hist.margin_of_error
     )
     html = v_utils.fig_to_html(hist)
     plt.close()
     return html
 
 
-def render_mobility_entropy(mobility_entropy: Tuple) -> str:
+def render_mobility_entropy(mobility_entropy: Section) -> str:
     hist = plot.histogram(
-        (mobility_entropy[0], mobility_entropy[1].round(2)),
+        (mobility_entropy.data[0], mobility_entropy.data[1].round(2)),
         x_axis_label="mobility entropy",
+        margin_of_error=mobility_entropy.margin_of_error
     )
     html = v_utils.fig_to_html(hist)
     plt.close()

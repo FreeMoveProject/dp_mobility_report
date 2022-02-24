@@ -50,12 +50,17 @@ def get_visits_per_tile(
     n_outliers = diff_privacy.count_dp(  # type: ignore
         n_outliers, epsi, mdreport.max_trips_per_user * 2
     )
+    
+    moe = diff_privacy.laplace_margin_of_error(0.95, epsi, 2*mdreport.max_trips_per_user)
+    counts_per_tile["moe_deviation"] = moe / counts_per_tile["visit_count"] 
+
 
     return Section(
         data=counts_per_tile,
         privacy_budget=eps,
         n_outliers=n_outliers,
         quartiles=dp_quartiles,
+        margin_of_error=moe
     )
 
 
@@ -117,6 +122,10 @@ def get_visits_per_tile_timewindow(
             counts_per_tile_timewindow.values, eps, mdreport.max_trips_per_user
         ),
     )
+
+    moe = diff_privacy.laplace_margin_of_error(0.95, eps, mdreport.max_trips_per_user)
+    
     return Section(
-        data=counts_per_tile_timewindow.unstack(const.TILE_ID).T, privacy_budget=eps
+        data=counts_per_tile_timewindow.unstack(const.TILE_ID).T, privacy_budget=eps,
+        margin_of_error=moe
     )

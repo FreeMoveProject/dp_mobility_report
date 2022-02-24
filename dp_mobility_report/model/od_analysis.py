@@ -72,7 +72,12 @@ def get_od_flows(
 
     # remove all instances of 0 to reduce storage
     od_flows = od_flows[od_flows["flow"] > 0]
-    return Section(data=od_flows, privacy_budget=eps)
+
+    moe = diff_privacy.laplace_margin_of_error(0.95, eps, mdreport.max_trips_per_user)
+    od_flows["moe_deviation"] = moe / od_flows["flow"] 
+
+
+    return Section(data=od_flows, privacy_budget=eps, margin_of_error = moe )
 
 
 def get_intra_tile_flows(od_flows: pd.DataFrame) -> int:

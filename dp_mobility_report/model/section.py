@@ -18,3 +18,5 @@ class Section:
     n_outliers: Optional[int] = None
     quartiles: Optional[np.ndarray] = None
     datetime_precision: Optional[str] = None
+    conf_interval: Union[Tuple, dict] = None
+    margin_of_error: Optional[float] = None

@@ -4,6 +4,8 @@ import diffprivlib
 import numpy as np
 import pandas as pd
 from diffprivlib.validation import clip_to_bounds
+from scipy.stats import laplace
+
 
 
 def bounds_dp(
@@ -100,6 +102,19 @@ def _laplacer(x: int, eps: float, sensitivity: int) -> int:
         )
     )
 
+def laplace_margin_of_error(conf_interval_perc: float, eps: Optional[float], sensitivity: int) -> float:
+    if eps is None:
+        return 0
+    delta = 0
+    q = conf_interval_perc + 0.5*(1 - conf_interval_perc)
+    scale = sensitivity / (eps - np.log(1 - delta))
+    return laplace.ppf(q, loc = 0, scale = scale)
+
+def conf_interval(value: Optional[Union[float, int]], margin_of_error: float) -> Tuple:
+    if value is None:
+        return (None, None)
+    lower_bound = (value - margin_of_error) if (margin_of_error < value) else 0
+    return (lower_bound, value + margin_of_error)
 
 def count_dp(
     count: int,

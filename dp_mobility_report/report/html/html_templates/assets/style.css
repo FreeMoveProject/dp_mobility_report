@@ -341,3 +341,30 @@ select.multiple{
     min-width: 200px;
     opacity: .1;
 }
+
+.warning {
+    width: 60%;
+    background-color: #FFCCCB;
+    padding: 8px;
+    border: solid #a94442;
+    border-width: 3px;
+}
+
+.estimate{
+    font-weight: bold
+}
+
+.h3{
+    padding: 10px 0px 10px 0px;
+    font-weight: bold
+
+}
+
+.h4{
+    padding: 10px 0px 10px 0px;
+
+}
+
+.table-header{
+    text-align: right;
+}
