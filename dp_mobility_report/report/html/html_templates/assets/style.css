@@ -83,8 +83,8 @@ table.example_values {
 table.stats, table.sample, table.duplicate{
     border: 0;
     margin-left:0px;
-    width: 60%;
-    max-width: 100%;
+    margin:auto;
+    max-width: 80%;
 }
 
 .stats tr, .sample tr, .duplicate tr {
@@ -99,7 +99,6 @@ table.stats, table.sample, table.duplicate{
 .stats th {
     padding: 0 2em 0 0;
     font-weight: 600;
-    text-align: left;
 }
 
 .stats td {
@@ -367,4 +366,8 @@ select.multiple{
 
 .table-header{
     text-align: right;
+}
+
+.table-rowheader{
+    text-align: left;
 }
