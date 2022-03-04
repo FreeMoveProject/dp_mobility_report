@@ -94,7 +94,7 @@ def test_get_travel_time(test_od_shape, test_mdreport):
     assert len(travel_time.data[0]) == 10
     assert all(np.diff(travel_time.data[1]) == 12)
     assert travel_time.quartiles.tolist() == [2.0, 29.0, 60.0, 86.0, 120.0]
-    assert travel_time.n_outliers == 0
+    assert travel_time.n_outliers is None
 
     test_mdreport.max_travel_time = 60
     test_mdreport.bin_range_travel_time = 5
@@ -146,14 +146,14 @@ def test_get_jump_length(test_od_shape, test_mdreport):
         5.350,
         8.741,
     ]
-    assert jump_length.n_outliers == 0
+    assert jump_length.n_outliers is None
 
     test_mdreport.max_jump_length = 4
     test_mdreport.bin_range_jump_length = 0.5
     jump_length = od_analysis.get_jump_length(test_od_shape, test_mdreport, None)
-    assert jump_length.data[0].tolist() == [0, 0, 4, 3, 9, 5, 15, 11]
-    assert jump_length.data[1].tolist() == [0, 0.5, 1, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
-    assert len(jump_length.data[0]) == 8
+    assert jump_length.data[0].tolist() == [4, 3, 9, 5, 15, 11]
+    assert jump_length.data[1].tolist() == [1, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
+    assert len(jump_length.data[0]) == 6
     assert all(np.diff(jump_length.data[1]).round(1) == 0.5)
     assert jump_length.quartiles.round(3).tolist() == [
         1.114,

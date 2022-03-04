@@ -64,7 +64,7 @@ def test_get_radius_of_gyration(test_mdreport):
     assert len(rog.data[0]) == 10
     assert all(np.diff(rog.data[1]).round(3) == 0.457)
     assert rog.quartiles.round(3).tolist() == [2.200, 3.325, 3.529, 3.881, 4.568]
-    assert rog.n_outliers == 0
+    assert rog.n_outliers is None
 
 
 def test_get_location_entropy(test_mdreport):
@@ -85,21 +85,13 @@ def test_get_user_tile_count(test_mdreport):
 
 def test_get_mobility_entropy(test_mdreport):
     mobility_entropy = user_analysis.get_mobility_entropy(test_mdreport, None)
-    assert mobility_entropy.data[0].tolist() == [0, 0, 0, 0, 0, 0, 0, 0, 2, 18]
+    assert mobility_entropy.data[0].tolist() == [2, 18]
     assert mobility_entropy.data[1].round(2).tolist() == [
-        0.0,
-        0.1,
-        0.2,
-        0.3,
-        0.4,
-        0.5,
-        0.6,
-        0.7,
         0.8,
         0.9,
         1.0,
     ]
-    assert len(mobility_entropy.data[0]) == 10
+    assert len(mobility_entropy.data[0]) == 2
     assert all(np.diff(mobility_entropy.data[1]).round(1) == 0.1)
     assert mobility_entropy.quartiles.round(2).tolist() == [
         0.83,
