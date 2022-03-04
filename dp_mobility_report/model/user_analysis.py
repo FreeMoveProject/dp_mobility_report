@@ -23,7 +23,6 @@ def get_trips_per_user(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
         user_nunique,
         eps,
         sensitivity=1,
-        min_value=1,
         max_value=max_trips,
         evalu=mdreport.evalu,
     )
@@ -57,8 +56,14 @@ def get_user_time_delta(
         user_time_delta, epsi_quant, mdreport.max_trips_per_user
     )
 
+    moe = diff_privacy.laplace_margin_of_error(0.95, epsi, mdreport.max_trips_per_user)
+
     return Section(
-        data=None, privacy_budget=eps, n_outliers=n_overlaps, quartiles=dp_quartiles
+        data=None,
+        privacy_budget=eps,
+        n_outliers=n_overlaps,
+        quartiles=dp_quartiles,
+        margin_of_error=moe,
     )
 
 
@@ -144,7 +149,21 @@ def get_location_entropy(
     data = pd.Series(
         location_entropy_dp, index=location_entropy.index, name=location_entropy.name
     )
-    return Section(data=data, privacy_budget=eps)
+
+    sensitivity = (
+        2
+        * mdreport.max_trips_per_user
+        * (
+            max(
+                np.log(2),
+                np.log(2 * mdreport.max_trips_per_user)
+                - np.log(np.log(2 * mdreport.max_trips_per_user))
+                - 1,
+            )
+        )
+    )
+    moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
+    return Section(data=data, privacy_budget=eps, margin_of_error=moe)
 
 
 def get_user_tile_count(
@@ -168,8 +187,9 @@ def _mobility_entropy(df: pd.DataFrame) -> np.ndarray:
         total_visits_by_user, left_on=const.UID, right_index=True
     )
     tile_visits_by_user["probs"] = (
-        1.0 * tile_visits_by_user.count_by_user / tile_visits_by_user.total_visits
+        tile_visits_by_user.count_by_user / tile_visits_by_user.total_visits
     )
+
     entropy = tile_visits_by_user.groupby(const.UID).probs.apply(
         lambda x: stats.entropy(x, base=2)
     )
@@ -190,8 +210,8 @@ def get_mobility_entropy(
         mobility_entropy,
         eps,
         sensitivity=1,
+        bin_range=0.1,
         min_value=0,
         max_value=1,
-        max_bins=10,
         evalu=mdreport.evalu,
     )

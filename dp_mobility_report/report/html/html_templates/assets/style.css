@@ -4,12 +4,24 @@ body {
 }
 {% endif %}
 
+div {
+    padding: 16px 0px 16px 0px;
+}
+
+p{
+    max-width: 80%;
+    margin: 6px 0px 6px 0px;
+}
+
 .container {
     padding: 40px 80px 80px 40px;
 }
 
 .segment {
-    padding-top: 20px;
+    margin-top: 20px;
+    padding: 10px;
+    box-shadow: 5px 5px 15px silver;
+	border-radius: 5px;
 }
 .content .container-fluid{
     margin-left: 20px !important;
@@ -83,7 +95,6 @@ table.example_values {
 table.stats, table.sample, table.duplicate{
     border: 0;
     margin-left:0px;
-    margin:auto;
     max-width: 80%;
 }
 
@@ -342,7 +353,7 @@ select.multiple{
 }
 
 .warning {
-    width: 60%;
+    width: 80%;
     background-color: #FFCCCB;
     padding: 8px;
     border: solid #a94442;
@@ -353,21 +364,31 @@ select.multiple{
     font-weight: bold
 }
 
-.h3{
-    padding: 10px 0px 10px 0px;
-    font-weight: bold
-
-}
-
-.h4{
-    padding: 10px 0px 10px 0px;
-
-}
-
 .table-header{
     text-align: right;
 }
 
 .table-rowheader{
     text-align: left;
+}
+
+.map{
+    width: 80%; 
+    height: 600px;
+}
+
+.map_png{
+    width: 80%;
+}
+
+img {
+    max-width: 100%;
+}
+
+.info{
+    font-style:italic;
+}
+
+.grey{
+    background-color: #ccc;
 }

@@ -1,18 +1,18 @@
 from typing import TYPE_CHECKING, Tuple
-from scipy.stats import laplace
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import skmob
 from geopandas.geodataframe import GeoDataFrame
+from scipy.stats import laplace
 
 if TYPE_CHECKING:
     from dp_mobility_report.md_report import MobilityDataReport
 
-from dp_mobility_report.model.section import Section
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import od_analysis
+from dp_mobility_report.model.section import Section
 from dp_mobility_report.report.html.html_utils import (
     fmt,
     get_template,
@@ -41,11 +41,12 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
 
     if const.OD_FLOWS in report and report[const.OD_FLOWS].data is not None:
         od_map, od_legend = render_origin_destination_flows(
-            report[const.OD_FLOWS].data.copy(), mdreport.tessellation, top_n_flows
+            report[const.OD_FLOWS], mdreport.tessellation, top_n_flows
         )
-        intra_tile_flows_info = render_intra_tile_flows(report[const.OD_FLOWS].data)
+        intra_tile_flows_info = render_intra_tile_flows(report[const.OD_FLOWS])
         flows_summary_table = render_summary(
-            report[const.OD_FLOWS].data.flow.describe()
+            report[const.OD_FLOWS].quartiles,
+            "Distribution of flow counts per OD pair",
         )
         flows_cumsum_linechart = render_flows_cumsum(report[const.OD_FLOWS].data)
         most_freq_flows_ranking = render_most_freq_flows_ranking(
@@ -53,20 +54,24 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
         )
 
     if const.TRAVEL_TIME in report and report[const.TRAVEL_TIME].data is not None:
-        outlier_count_travel_time_info = render_outlier_info(
-            report[const.TRAVEL_TIME].n_outliers,
-            mdreport.max_travel_time,
-        )
         travel_time_hist = render_travel_time_hist(report[const.TRAVEL_TIME])
         travel_time_summary_table = render_summary(report[const.TRAVEL_TIME].quartiles)
+        if report[const.TRAVEL_TIME].n_outliers is not None:
+            outlier_count_travel_time_info = render_outlier_info(
+                report[const.TRAVEL_TIME].n_outliers,
+                report[const.TRAVEL_TIME].margin_of_error,
+                mdreport.max_travel_time,
+            )
 
     if const.JUMP_LENGTH in report and report[const.JUMP_LENGTH].data is not None:
-        outlier_count_jump_length_info = render_outlier_info(
-            report[const.JUMP_LENGTH].n_outliers,
-            mdreport.max_jump_length,
-        )
         jump_length_hist = render_jump_length_hist(report[const.JUMP_LENGTH])
         jump_length_summary_table = render_summary(report[const.JUMP_LENGTH].quartiles)
+        if report[const.JUMP_LENGTH].n_outliers is not None:
+            outlier_count_jump_length_info = render_outlier_info(
+                report[const.JUMP_LENGTH].n_outliers,
+                report[const.JUMP_LENGTH].margin_of_error,
+                mdreport.max_jump_length,
+            )
 
     template_structure = get_template("od_analysis_segment.html")
     return template_structure.render(
@@ -87,12 +92,16 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
 
 
 def render_origin_destination_flows(
-    od_flows: pd.DataFrame, tessellation: GeoDataFrame, top_n_flows: int, threshold: float = 0.1
+    od_flows: Section,
+    tessellation: GeoDataFrame,
+    top_n_flows: int,
+    threshold: float = 0.1,
 ) -> Tuple[str, str]:
-
-    od_flows.loc[od_flows.moe_deviation > threshold, "flow"] = None
-    top_n_flows = top_n_flows if top_n_flows <= len(od_flows) else len(od_flows)
-    innerflow = od_flows[od_flows.origin == od_flows.destination]
+    data = od_flows.data.copy()
+    moe_deviation = od_flows.margin_of_error / data["flow"]
+    data.loc[moe_deviation > threshold, "flow"] = None
+    top_n_flows = top_n_flows if top_n_flows <= len(data) else len(data)
+    innerflow = data[data.origin == data.destination]
 
     tessellation_innerflow = pd.merge(
         tessellation,
@@ -103,10 +112,10 @@ def render_origin_destination_flows(
     )
 
     fdf = skmob.FlowDataFrame(
-        od_flows, tessellation=tessellation_innerflow, tile_id=const.TILE_ID
+        data, tessellation=tessellation_innerflow, tile_id=const.TILE_ID
     )
-    
-    #tessellation_innerflow.loc[tessellation_innerflow.flow.isna(), "flow"] = 0
+
+    # tessellation_innerflow.loc[tessellation_innerflow.flow.isna(), "flow"] = 0
     innerflow_chropleth, innerflow_legend = plot.choropleth_map(
         tessellation_innerflow, "flow", "Number of intra-tile flows"
     )  # get innerflows as color for choropleth
@@ -122,16 +131,16 @@ def render_origin_destination_flows(
     return html, html_legend
 
 
-def render_intra_tile_flows(od_flows: pd.DataFrame) -> str:
-    flow_count = od_flows.flow.sum()
-    intra_tile_flows = od_analysis.get_intra_tile_flows(od_flows)
-    return (
-        str(intra_tile_flows)
-        + " ("
-        + str(fmt(intra_tile_flows / flow_count * 100))
-        + " %)"
-        + " of flows start and end within the same cell."
+def render_intra_tile_flows(od_flows: Section) -> str:
+    flow_count = od_flows.data.flow.sum()
+    intra_tile_flows = od_analysis.get_intra_tile_flows(od_flows.data)
+    ci_interval_info = (
+        f"(95% confidence interval ± {round(od_flows.margin_of_error)})"
+        if od_flows.margin_of_error is not None
+        else ""
     )
+
+    return f"{intra_tile_flows} ({(fmt(intra_tile_flows / flow_count * 100))} %) of flows start and end within the same cell {ci_interval_info}."
 
 
 def render_flows_cumsum(od_flows: pd.DataFrame) -> str:
@@ -146,7 +155,7 @@ def render_flows_cumsum(od_flows: pd.DataFrame) -> str:
         "n",
         "cum_perc",
         "Number of OD tile pairs",
-        "Cumulated sum of flows between OD tile pairs",
+        "Cumulated sum of flows between OD pairs",
         add_diagonal=True,
     )
     html = v_utils.fig_to_html(chart)
@@ -157,8 +166,15 @@ def render_flows_cumsum(od_flows: pd.DataFrame) -> str:
 def render_most_freq_flows_ranking(
     od_flows: Section, tessellation: GeoDataFrame, top_x: int = 10
 ) -> str:
+    moe = round(od_flows.margin_of_error)
+
     topx_flows = od_flows.data.nlargest(top_x, "flow")
     topx_flows["rank"] = list(range(1, len(topx_flows) + 1))
+    topx_flows["lower_limit"] = topx_flows["flow"].apply(
+        lambda x: (x - moe) if (moe < x) else 0
+    )
+    topx_flows["upper_limit"] = topx_flows["flow"] + moe
+
     topx_flows = topx_flows.merge(
         tessellation[[const.TILE_ID, const.TILE_NAME]],
         how="left",
@@ -178,25 +194,26 @@ def render_most_freq_flows_ranking(
         topx_flows_list.append(
             {
                 "rank": row["rank"],
-                "name": str(row[f"{const.TILE_NAME}_origin"])
-                + " - "
-                + str(row[f"{const.TILE_NAME}_origin"]),
-                "lower_bound": str(fmt(round(row["flow"] - od_flows.margin_of_error))),
+                "name": f'{row[f"{const.TILE_NAME}_origin"]} - {row[f"{const.TILE_NAME}_origin"]}',
+                "lower_limit": str(fmt(row["lower_limit"])),
                 "estimate": str(fmt(row["flow"])),
-                "upper_bound": str(fmt(round(row["flow"] + od_flows.margin_of_error))),
+                "upper_limit": str(fmt(row["upper_limit"])),
             }
         )
+
     template_table = get_template("table_conf_interval.html")
     tile_ranking_html = template_table.render(
-        name="Ranking most frequent OD connections", rows=topx_flows_list
+        name="Ranking of most frequent OD connections", rows=topx_flows_list
     )
     return tile_ranking_html
 
 
 def render_travel_time_hist(travel_time_hist: Section) -> str:
     hist = plot.histogram(
-        travel_time_hist.data, x_axis_label="travel time (min.)", x_axis_type=int, 
-        margin_of_error = travel_time_hist.margin_of_error
+        travel_time_hist.data,
+        x_axis_label="travel time (min.)",
+        x_axis_type=int,
+        margin_of_error=travel_time_hist.margin_of_error,
     )
     html_hist = v_utils.fig_to_html(hist)
     plt.close()
@@ -205,8 +222,10 @@ def render_travel_time_hist(travel_time_hist: Section) -> str:
 
 def render_jump_length_hist(jump_length_hist: Section) -> str:
     hist = plot.histogram(
-        jump_length_hist.data, x_axis_label="jump length (kilometers)", x_axis_type=float,
-        margin_of_error=jump_length_hist.margin_of_error
+        jump_length_hist.data,
+        x_axis_label="jump length (kilometers)",
+        x_axis_type=float,
+        margin_of_error=jump_length_hist.margin_of_error,
     )
     html_hist = v_utils.fig_to_html(hist)
     plt.close()

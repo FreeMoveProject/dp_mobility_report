@@ -7,8 +7,8 @@ from geopandas import GeoDataFrame
 if TYPE_CHECKING:
     from dp_mobility_report.md_report import MobilityDataReport
 
-from dp_mobility_report.model.section import Section
 from dp_mobility_report import constants as const
+from dp_mobility_report.model.section import Section
 from dp_mobility_report.report.html.html_utils import (
     get_template,
     render_outlier_info,
@@ -50,9 +50,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         and (report[const.USER_TIME_DELTA] is not None)
         and (report[const.USER_TIME_DELTA].quartiles is not None)
     ):
-        overlapping_trips_info = render_overlapping_trips(
-            report[const.USER_TIME_DELTA].n_outliers
-        )
+        overlapping_trips_info = render_overlapping_trips(report[const.USER_TIME_DELTA])
         time_between_traj_summary_table = render_summary(
             report[const.USER_TIME_DELTA].quartiles
         )
@@ -60,22 +58,24 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     if (const.RADIUS_OF_GYRATION in report) and (
         report[const.RADIUS_OF_GYRATION].data is not None
     ):
-        outlier_count_radius_of_gyration_info = render_outlier_info(
-            report[const.RADIUS_OF_GYRATION].n_outliers,
-            mdreport.max_jump_length,
-        )
         radius_of_gyration_summary_table = render_summary(
             report[const.RADIUS_OF_GYRATION].quartiles
         )
         radius_of_gyration_hist = render_radius_of_gyration(
             report[const.RADIUS_OF_GYRATION]
         )
+        if mdreport.max_radius_of_gyration is not None:
+            outlier_count_radius_of_gyration_info = render_outlier_info(
+                report[const.RADIUS_OF_GYRATION].n_outliers,
+                report[const.RADIUS_OF_GYRATION].margin_of_error,
+                mdreport.max_jump_length,
+            )
 
     if (const.LOCATION_ENTROPY in report) and (
         report[const.LOCATION_ENTROPY].data is not None
     ):
         location_entropy_map, location_entropy_legend = render_location_entropy(
-            report[const.LOCATION_ENTROPY].data, mdreport.tessellation
+            report[const.LOCATION_ENTROPY], mdreport.tessellation
         )
 
     if (const.USER_TILE_COUNT in report) and (
@@ -94,9 +94,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         mobility_entropy_summary_table = render_summary(
             report[const.MOBILITY_ENTROPY].quartiles
         )
-        mobility_entropy_hist = render_mobility_entropy(
-            report[const.MOBILITY_ENTROPY]
-        )
+        mobility_entropy_hist = render_mobility_entropy(report[const.MOBILITY_ENTROPY])
 
     template_structure = get_template("user_analysis_segment.html")
 
@@ -122,25 +120,29 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
 def render_trips_per_user(trips_per_user_hist: Section) -> str:
     hist = plot.histogram(
         trips_per_user_hist.data,
-        x_axis_label="number of trips per user",
+        x_axis_label="Number of trips per user",
         x_axis_type=int,
-        margin_of_error=trips_per_user_hist.margin_of_error
+        margin_of_error=trips_per_user_hist.margin_of_error,
     )
     return v_utils.fig_to_html(hist)
 
 
-def render_overlapping_trips(n_traj_overlaps: int) -> str:
-    return (
-        "There are "
-        + str(n_traj_overlaps)
-        + " cases where the start time of the following trip precedes the previous end time."
+def render_overlapping_trips(n_traj_overlaps: Section) -> str:
+    ci_interval_info = (
+        f"(95% confidence interval ± {round(n_traj_overlaps.margin_of_error)})"
+        if n_traj_overlaps.margin_of_error is not None
+        else ""
     )
+
+    return f"There are {n_traj_overlaps.n_outliers}  cases where the start time of the following trip precedes the previous end time {ci_interval_info}."
 
 
 def render_radius_of_gyration(radius_of_gyration_hist: Section) -> str:
     hist = plot.histogram(
-        radius_of_gyration_hist.data, x_axis_label="radius of gyration", x_axis_type=float,
-        margin_of_error=radius_of_gyration_hist.margin_of_error
+        radius_of_gyration_hist.data,
+        x_axis_label="radius of gyration",
+        x_axis_type=float,
+        margin_of_error=radius_of_gyration_hist.margin_of_error,
     )
     html = v_utils.fig_to_html(hist)
     plt.close()
@@ -148,17 +150,23 @@ def render_radius_of_gyration(radius_of_gyration_hist: Section) -> str:
 
 
 def render_location_entropy(
-    location_entropy: pd.Series, tessellation: GeoDataFrame
+    location_entropy: Section, tessellation: GeoDataFrame, threshold: float = 0.1
 ) -> Tuple[str, str]:
     # 0: all trips by a single user
     # large: evenly distributed over different users (2^x possible different users)
+    data = location_entropy.data
+
     location_entropy_gdf = pd.merge(
         tessellation,
-        location_entropy,
+        data,
         how="left",
         left_on="tile_id",
         right_on="tile_id",
     )
+    moe_deviation = (
+        location_entropy.margin_of_error / location_entropy_gdf[const.LOCATION_ENTROPY]
+    )
+    location_entropy_gdf.loc[moe_deviation > threshold, const.LOCATION_ENTROPY] = None
     location_entropy_map, location_entropy_legend = plot.choropleth_map(
         location_entropy_gdf,
         const.LOCATION_ENTROPY,
@@ -176,7 +184,7 @@ def render_distinct_tiles_user(user_tile_count_hist: Section) -> str:
         user_tile_count_hist.data,
         x_axis_label="number of distinct tiles a user has visited",
         x_axis_type=int,
-        margin_of_error=user_tile_count_hist.margin_of_error
+        margin_of_error=user_tile_count_hist.margin_of_error,
     )
     html = v_utils.fig_to_html(hist)
     plt.close()
@@ -187,7 +195,7 @@ def render_mobility_entropy(mobility_entropy: Section) -> str:
     hist = plot.histogram(
         (mobility_entropy.data[0], mobility_entropy.data[1].round(2)),
         x_axis_label="mobility entropy",
-        margin_of_error=mobility_entropy.margin_of_error
+        margin_of_error=mobility_entropy.margin_of_error,
     )
     html = v_utils.fig_to_html(hist)
     plt.close()

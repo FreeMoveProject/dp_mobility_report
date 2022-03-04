@@ -89,7 +89,7 @@ def report_elements(mdreport: "MobilityDataReport") -> dict:
 
 
 def add_overview_elements(mdreport: "MobilityDataReport", epsilon: float) -> dict:
-    return {                
+    return {
         const.DS_STATISTICS: overview.get_dataset_statistics(mdreport, epsilon)
         if const.DS_STATISTICS in const.OVERVIEW_ELEMENTS
         else Section(),

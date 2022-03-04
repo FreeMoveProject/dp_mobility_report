@@ -34,16 +34,24 @@ def histogram(
     if len(bins) == len(counts):
         labels = bins
     else:
-        lower_bound = bins[:-1]
-        upper_bound = bins[1:]
+        lower_limit = bins[:-1]
+        upper_limit = bins[1:]
         labels = np.array(
             [
-                "[" + str(x1) + "\n - \n " + str(x2) + ")"
-                for x1, x2 in zip(lower_bound, upper_bound)
+                f"[{round(x1,2)}\n - \n{round(x2, 2)})"
+                for x1, x2 in zip(lower_limit, upper_limit)
             ]
         )
+        labels[-1] = (
+            labels[-1][:-1] + "]"
+        )  # fix label string of last bin to include last value
     return barchart(
-        labels, counts, x_axis_label, "Frequency", margin_of_error = margin_of_error, rotate_label=rotate_label
+        labels,
+        counts,
+        x_axis_label,
+        "Frequency",
+        margin_of_error=margin_of_error,
+        rotate_label=rotate_label,
     )
 
 
@@ -53,18 +61,18 @@ def barchart(
     x_axis_label: str,
     y_axis_label: str,
     margin_of_error: Optional[float] = None,
-    #order_x: Optional[list] = None,
+    # order_x: Optional[list] = None,
     rotate_label: bool = False,
 ) -> mpl.figure.Figure:
     fig, ax = plt.subplots()
-    ax.bar(x, y, yerr=margin_of_error, align='center', alpha=0.5, capsize=10)
-    #plot = fig.add_subplot(111)
-    #sns.barplot(x=x, y=y, color=dark_blue, ax=plot, order=order_x)
+    ax.bar(x, y, yerr=margin_of_error, align="center", alpha=0.5, capsize=10)
+    # plot = fig.add_subplot(111)
+    # sns.barplot(x=x, y=y, color=dark_blue, ax=plot, order=order_x)
     ax.set_ylabel(y_axis_label)
     ax.set_xlabel(x_axis_label)
     plt.xticks(x)
     plt.ylim(bottom=0)
-    
+
     if rotate_label:
         plt.xticks(rotation=90)
     return fig
@@ -79,30 +87,38 @@ def linechart(
     margin_of_error: float = None,
     add_diagonal: bool = False,
 ) -> mpl.figure.Figure:
-    #fig = plt.figure()
-    #plot = fig.add_subplot(111)
-    #sns.lineplot(data=data, x=x, y=y, ax=plot)
-    #plot.set_ylabel(y_axis_label)
-    #plot.set_xlabel(x_axis_label)
-    #plot.set_ylim(bottom=0)
+    # fig = plt.figure()
+    # plot = fig.add_subplot(111)
+    # sns.lineplot(data=data, x=x, y=y, ax=plot)
+    # plot.set_ylabel(y_axis_label)
+    # plot.set_xlabel(x_axis_label)
+    # plot.set_ylim(bottom=0)
     fig, ax = plt.subplots()
     ax.plot(data[x], data[y])
     ax.set_ylabel(y_axis_label)
     ax.set_xlabel(x_axis_label)
     ax.set_ylim(bottom=0)
     if margin_of_error is not None:
-        ax.fill_between(data[x], (data[y]-margin_of_error), (data[y]+margin_of_error), 
-        color='blue', alpha=0.1)
+        ax.fill_between(
+            data[x],
+            (data[y] - margin_of_error),
+            (data[y] + margin_of_error),
+            color="blue",
+            alpha=0.1,
+        )
     if add_diagonal:
         ax.plot([0, data[x].max()], [0, data[y].max()], grey)
-
 
     return fig
 
 
 def multi_linechart(
-    data: DataFrame, x: str, y: str, color: str, hue_order: Optional[list] = None,
-    margin_of_error: Optional[float] = None
+    data: DataFrame,
+    x: str,
+    y: str,
+    color: str,
+    hue_order: Optional[list] = None,
+    margin_of_error: Optional[float] = None,
 ) -> mpl.figure.Figure:
     fig = plt.figure()
     plot = fig.add_subplot(111)
@@ -118,12 +134,17 @@ def multi_linechart(
         palette=palette,
     )
     plot.set_ylim(bottom=0)
-    
+
     if margin_of_error is not None:
         for i in range(0, len(hue_order)):
             hue_data = data[data[color] == hue_order[i]]
-            plot.fill_between(hue_data[x], (hue_data[y]-margin_of_error), (hue_data[y]+margin_of_error), 
-        color=palette[i], alpha=0.1)
+            plot.fill_between(
+                hue_data[x],
+                (hue_data[y] - margin_of_error),
+                (hue_data[y] + margin_of_error),
+                color=palette[i],
+                alpha=0.1,
+            )
     return fig
 
 

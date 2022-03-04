@@ -36,7 +36,6 @@ def hist_section(
     min_value: Optional[Union[float, int]] = None,
     max_value: Optional[Union[float, int]] = None,
     bin_range: Optional[Union[float, int]] = None,
-    max_bins: Optional[int] = None,
     evalu: bool = False,
 ) -> Section:
     epsi = get_epsi(evalu, eps, 7)
@@ -44,29 +43,46 @@ def hist_section(
 
     series = Series(series) if isinstance(series, np.ndarray) else series
 
-    if (min_value is not None) or (max_value is not None):
-        series, n_outliers = cut_outliers(
-            series, min_value=min_value, max_value=max_value
-        )
+    if max_value is not None:
+        series, n_outliers = cut_outliers(series, max_value=max_value)
         dp_n_outliers = diff_privacy.count_dp(n_outliers, epsi, sensitivity)
     else:
         dp_n_outliers = None
 
     quartiles = diff_privacy.quartiles_dp(series, epsi_quant, sensitivity)
-    # TODO:rather always diff private min and max values? (outliers are already cut) but then bins are not "clean"
-    min_value = quartiles["min"] if min_value is None else min_value
-    max_value = quartiles["max"] if max_value is None else max_value
+    # cut series again according to diff. priv. quartiles to that min and max values match the histogram
+    series, _ = cut_outliers(
+        series, min_value=quartiles["min"], max_value=quartiles["max"]
+    )
 
-    if np.issubdtype(series.dtype, np.integer) and (max_value - min_value < 10):
-        min_value = int(min_value)
-        max_value = int(max_value)
+    if np.issubdtype(series.dtype, np.integer) and (
+        quartiles["max"] - quartiles["min"] < 10
+    ):
+        min_value = int(quartiles["min"])
+        max_value = int(quartiles["max"])
         dp_values = np.array(range(min_value, max_value + 1))
-        counts = np.bincount(series)[min_value : max_value + 1]
+        counts = np.bincount(series, minlength=len(dp_values))[
+            min_value : max_value + 1
+        ]
     else:
+        # if bounds are given by user, use those for clean bin sizes (but cut off according to dp_min and dp_max values)
+        min_value = quartiles["min"] if min_value is None else min_value
+        max_value = quartiles["max"] if max_value is None else max_value
+
+        # if range is small set bin_range to 0.1 to prevent too fine-granular bins
+        if bin_range is None and (max_value - min_value) < 1:
+            bin_range = 0.1
+
         if bin_range is not None:
+            min_value = (
+                int((quartiles["min"] - min_value) / bin_range) * bin_range + min_value
+            )
+            max_value = (
+                max_value - int((max_value - quartiles["max"]) / bin_range) * bin_range
+            )
             max_bins = int((max_value - min_value) / bin_range)
             max_bins = max_bins if max_bins > 2 else 2
-        elif max_bins is None:
+        else:
             max_bins = 10  # set default of 10
         hist = np.histogram(series, bins=max_bins, range=(min_value, max_value))
         counts = hist[0]
@@ -79,7 +95,7 @@ def hist_section(
         privacy_budget=eps,
         n_outliers=dp_n_outliers,
         quartiles=quartiles,
-        margin_of_error = moe
+        margin_of_error=moe,
     )
 
 

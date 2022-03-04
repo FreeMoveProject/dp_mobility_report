@@ -1,5 +1,5 @@
 {% if name %}
-    <p class="h3">{{ name }}</p>
+    <h4>{{ name }}</h3>
 {% endif %}
 <table class="table table-condensed stats">
     <tbody>
@@ -18,9 +18,9 @@
                 <th class="table-rowheader">{{ row['rank'] }}</th>
             {% endif %}
             <th class = "table-rowheader">{{ row['name'] }}</th>
-            <td>{{ row['lower_bound'] }}</td>
+            <td>{{ row['lower_limit'] }}</td>
             <td class="estimate">{{ row['estimate'] }}</td>
-            <td>{{ row['upper_bound'] }}</td>
+            <td>{{ row['upper_limit'] }}</td>
         </tr>
         {% endfor %}
     </tbody>
