@@ -38,7 +38,9 @@ def hist_section(
     bin_range: Optional[Union[float, int]] = None,
     evalu: bool = False,
 ) -> Section:
-    epsi = get_epsi(evalu, eps, 7) # TODO: does eps need to be split between counts and outliers? (As outliers is like an extra bin)
+    epsi = get_epsi(
+        evalu, eps, 7
+    )  # TODO: does eps need to be split between counts and outliers? (As outliers is like an extra bin)
     epsi_quant = epsi * 5 if epsi is not None else None
 
     series = Series(series) if isinstance(series, np.ndarray) else series
@@ -74,7 +76,7 @@ def hist_section(
             bin_range = 0.1
 
         if bin_range is not None:
-        # if bin range and bounds are provided by user, use those for clean bin sizes (but remove bins according to dp_min and dp_max values)
+            # if bin range and bounds are provided by user, use those for clean bin sizes (but remove bins according to dp_min and dp_max values)
             min_value = (
                 int((quartiles["min"] - min_value) / bin_range) * bin_range + min_value
             )
@@ -100,7 +102,7 @@ def hist_section(
         n_outliers=dp_n_outliers,
         quartiles=quartiles,
         margin_of_error_laplace=moe_laplace,
-        margin_of_error_expmech=moe_expmech
+        margin_of_error_expmech=moe_expmech,
     )
 
 

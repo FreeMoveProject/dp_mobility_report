@@ -70,7 +70,6 @@ def get_od_flows(
         od_flows["flow"].to_numpy(), eps, mdreport.max_trips_per_user
     )
 
-
     # remove all instances of 0 to reduce storage
     od_flows = od_flows[od_flows["flow"] > 0]
 
@@ -79,7 +78,12 @@ def get_od_flows(
 
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, mdreport.max_trips_per_user)
 
-    return Section(data=od_flows, quartiles = dp_quartiles, privacy_budget=eps, margin_of_error_laplace=moe)
+    return Section(
+        data=od_flows,
+        quartiles=dp_quartiles,
+        privacy_budget=eps,
+        margin_of_error_laplace=moe,
+    )
 
 
 def get_intra_tile_flows(od_flows: pd.DataFrame) -> int:

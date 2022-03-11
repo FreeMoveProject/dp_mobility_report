@@ -24,7 +24,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     trips_per_user_moe_info = ""
     overlapping_trips_info = ""
     time_between_traj_summary_table = ""
-    time_between_traj_moe_info =""
+    time_between_traj_moe_info = ""
     outlier_count_radius_of_gyration_info = ""
     radius_of_gyration_hist = ""
     radius_of_gyration_summary_table = ""
@@ -33,7 +33,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     location_entropy_legend = ""
     distinct_tiles_user_hist = ""
     distinct_tiles_user_summary_table = ""
-    distinct_tiles_moe_info =""
+    distinct_tiles_moe_info = ""
     mobility_entropy_hist = ""
     mobility_entropy_summary_table = ""
     mobility_entropy_moe_info = ""
@@ -47,7 +47,9 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         trips_per_user_summary_table = render_summary(
             report[const.TRIPS_PER_USER].quartiles
         )
-        trips_per_user_moe_info = render_moe_info(report[const.TRIPS_PER_USER].margin_of_error_expmech)
+        trips_per_user_moe_info = render_moe_info(
+            report[const.TRIPS_PER_USER].margin_of_error_expmech
+        )
 
     if (
         (const.USER_TIME_DELTA in report)
@@ -57,7 +59,9 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         time_between_traj_summary_table = render_summary(
             report[const.USER_TIME_DELTA].quartiles
         )
-        time_between_traj_moe_info = render_moe_info(report[const.USER_TIME_DELTA].margin_of_error_expmech)
+        time_between_traj_moe_info = render_moe_info(
+            report[const.USER_TIME_DELTA].margin_of_error_expmech
+        )
         overlapping_trips_info = render_overlapping_trips(report[const.USER_TIME_DELTA])
 
     if (const.RADIUS_OF_GYRATION in report) and (
@@ -69,7 +73,9 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         radius_of_gyration_summary_table = render_summary(
             report[const.RADIUS_OF_GYRATION].quartiles
         )
-        radius_of_gyration_moe_info = render_moe_info(report[const.RADIUS_OF_GYRATION].margin_of_error_expmech)
+        radius_of_gyration_moe_info = render_moe_info(
+            report[const.RADIUS_OF_GYRATION].margin_of_error_expmech
+        )
 
         if mdreport.max_radius_of_gyration is not None:
             outlier_count_radius_of_gyration_info = render_outlier_info(
@@ -94,8 +100,9 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         distinct_tiles_user_summary_table = render_summary(
             report[const.USER_TILE_COUNT].quartiles
         )
-        distinct_tiles_moe_info=render_moe_info(report[const.USER_TILE_COUNT].margin_of_error_expmech)
-
+        distinct_tiles_moe_info = render_moe_info(
+            report[const.USER_TILE_COUNT].margin_of_error_expmech
+        )
 
     if (const.MOBILITY_ENTROPY in report) and (
         report[const.MOBILITY_ENTROPY].data is not None
@@ -104,7 +111,9 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         mobility_entropy_summary_table = render_summary(
             report[const.MOBILITY_ENTROPY].quartiles
         )
-        mobility_entropy_moe_info=render_moe_info(report[const.MOBILITY_ENTROPY].margin_of_error_expmech)
+        mobility_entropy_moe_info = render_moe_info(
+            report[const.MOBILITY_ENTROPY].margin_of_error_expmech
+        )
 
     template_structure = get_template("user_analysis_segment.html")
 
@@ -126,8 +135,8 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         distinct_tiles_moe_info=distinct_tiles_moe_info,
         mobility_entropy_hist=mobility_entropy_hist,
         mobility_entropy_summary_table=mobility_entropy_summary_table,
-        mobility_entropy_moe_info=mobility_entropy_moe_info
-        )
+        mobility_entropy_moe_info=mobility_entropy_moe_info,
+    )
 
 
 def render_trips_per_user(trips_per_user_hist: Section) -> str:
@@ -187,7 +196,8 @@ def render_location_entropy(
         right_on="tile_id",
     )
     moe_deviation = (
-        location_entropy.margin_of_error_laplace / location_entropy_gdf[const.LOCATION_ENTROPY]
+        location_entropy.margin_of_error_laplace
+        / location_entropy_gdf[const.LOCATION_ENTROPY]
     )
     location_entropy_gdf.loc[moe_deviation > threshold, const.LOCATION_ENTROPY] = None
     location_entropy_map, location_entropy_legend = plot.choropleth_map(

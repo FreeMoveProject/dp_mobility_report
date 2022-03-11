@@ -79,7 +79,9 @@ def render_counts_per_tile(
     )
 
     # filter visit counts above error threshold
-    moe_deviation = counts_per_tile.margin_of_error_laplace / counts_per_tile_gdf["visit_count"]
+    moe_deviation = (
+        counts_per_tile.margin_of_error_laplace / counts_per_tile_gdf["visit_count"]
+    )
     counts_per_tile_gdf.loc[moe_deviation > threshold, "visit_count"] = None
     map, legend = plot.choropleth_map(
         counts_per_tile_gdf, "visit_count", scale_title="Number of visits"
@@ -112,18 +114,24 @@ def render_counts_per_tile_cumsum(counts_per_tile: pd.DataFrame) -> str:
     return html
 
 
-def render_most_freq_tiles_ranking(
-    counts_per_tile: Section, top_x: int = 10
-) -> str:
+def render_most_freq_tiles_ranking(counts_per_tile: Section, top_x: int = 10) -> str:
     topx_tiles = counts_per_tile.data.nlargest(top_x, "visit_count")
     topx_tiles["rank"] = list(range(1, len(topx_tiles) + 1))
-    labels = topx_tiles["rank"].astype(str) + ": " + topx_tiles[const.TILE_NAME] + "(Id: " + topx_tiles[const.TILE_ID] + ")"
-  
+    labels = (
+        topx_tiles["rank"].astype(str)
+        + ": "
+        + topx_tiles[const.TILE_NAME]
+        + "(Id: "
+        + topx_tiles[const.TILE_ID]
+        + ")"
+    )
+
     ranking = plot.ranking(
-        topx_tiles.visit_count, 
+        topx_tiles.visit_count,
         "Number of visits per tile",
-        y_labels = labels,
-        margin_of_error = counts_per_tile.margin_of_error_laplace)
+        y_labels=labels,
+        margin_of_error=counts_per_tile.margin_of_error_laplace,
+    )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close()
     return html_ranking
@@ -136,7 +144,9 @@ def render_counts_per_tile_timewindow(
     if data is None:
         return None
 
-    moe_counts_per_tile_timewindow = counts_per_tile_timewindow.margin_of_error_laplace / data
+    moe_counts_per_tile_timewindow = (
+        counts_per_tile_timewindow.margin_of_error_laplace / data
+    )
     data[moe_counts_per_tile_timewindow > threshold] = None
 
     output_html = ""

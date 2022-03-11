@@ -171,7 +171,9 @@ def get_trips_over_time(
         epsi,
         mdreport.max_trips_per_user,
     )
-    moe_laplace = diff_privacy.laplace_margin_of_error(0.95, epsi, mdreport.max_trips_per_user)
+    moe_laplace = diff_privacy.laplace_margin_of_error(
+        0.95, epsi, mdreport.max_trips_per_user
+    )
 
     return Section(
         data=trip_count,
@@ -209,7 +211,9 @@ def get_trips_per_weekday(
     )
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, mdreport.max_trips_per_user)
 
-    return Section(data=trips_per_weekday, privacy_budget=eps, margin_of_error_laplace=moe)
+    return Section(
+        data=trips_per_weekday, privacy_budget=eps, margin_of_error_laplace=moe
+    )
 
 
 def get_trips_per_hour(mdreport: "MobilityDataReport", eps: Optional[float]) -> Section:

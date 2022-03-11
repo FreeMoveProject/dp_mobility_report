@@ -18,4 +18,3 @@ def fig_to_html_as_png(fig: Figure) -> str:
     img_string = base64.b64encode(img.getvalue()).decode("utf-8")
     html = f"<img src='data:image/png;base64,{img_string}'>"
     return html
-

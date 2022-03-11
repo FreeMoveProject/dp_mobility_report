@@ -274,17 +274,25 @@ def _basemap(center_x: float, center_y: float, zoom_start: int = 10) -> folium.M
         control_scale=True,
     )
 
+
 def ranking(
     x: np.ndarray,
     x_axis_label: str,
     y_labels: list = None,
     margin_of_error: Optional[float] = None,
 ) -> mpl.figure.Figure:
-    y = list(range(1, len(x)+1))[::-1]
+    y = list(range(1, len(x) + 1))[::-1]
     y_labels = y if y_labels is None else y_labels
     fig, ax = plt.subplots()
-    ax.errorbar(x, y, xerr = margin_of_error, fmt = 'o', ecolor = 'lightblue', 
-     elinewidth = 5, capsize=10)
+    ax.errorbar(
+        x,
+        y,
+        xerr=margin_of_error,
+        fmt="o",
+        ecolor="lightblue",
+        elinewidth=5,
+        capsize=10,
+    )
     ax.set_yticks(y)
     ax.set_yticklabels(y_labels)
     ax.set_ylabel("Rank")

@@ -5,7 +5,12 @@ from pandas import DataFrame, Series
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model.section import Section
-from dp_mobility_report.report.html.html_utils import fmt, get_template, render_moe_info, render_summary
+from dp_mobility_report.report.html.html_utils import (
+    fmt,
+    get_template,
+    render_moe_info,
+    render_summary,
+)
 from dp_mobility_report.visualization import plot, v_utils
 
 
@@ -37,7 +42,9 @@ def render_overview(report: dict) -> str:
         trips_over_time_summary_table = render_summary(
             report[const.TRIPS_OVER_TIME].quartiles
         )
-        trips_over_time_moe_info = render_moe_info(report[const.TRIPS_OVER_TIME].margin_of_error_expmech)
+        trips_over_time_moe_info = render_moe_info(
+            report[const.TRIPS_OVER_TIME].margin_of_error_expmech
+        )
 
     if (
         const.TRIPS_PER_WEEKDAY in report

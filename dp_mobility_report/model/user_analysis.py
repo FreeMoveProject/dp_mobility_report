@@ -68,7 +68,7 @@ def get_user_time_delta(
         n_outliers=n_overlaps,
         quartiles=dp_quartiles,
         margin_of_error_laplace=moe,
-        margin_of_error_expmech=moe_expmech
+        margin_of_error_expmech=moe_expmech,
     )
 
 

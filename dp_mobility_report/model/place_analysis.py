@@ -15,7 +15,9 @@ from dp_mobility_report.privacy import diff_privacy
 def get_visits_per_tile(
     mdreport: "MobilityDataReport", eps: Optional[float]
 ) -> Section:
-    epsi = m_utils.get_epsi(mdreport.evalu, eps, 2) # TODO: is this really eps / 2? bc outliers are like an own tile?
+    epsi = m_utils.get_epsi(
+        mdreport.evalu, eps, 2
+    )  # TODO: is this really eps / 2? bc outliers are like an own tile?
 
     # count number of visits for each location
     counts_per_tile = (

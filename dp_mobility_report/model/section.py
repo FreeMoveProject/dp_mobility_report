@@ -18,7 +18,7 @@ class Section:
     n_outliers: Optional[int] = None
     quartiles: Optional[np.ndarray] = None
     datetime_precision: Optional[str] = None
-    conf_interval: Union[Tuple, dict] = None
+    # TODO: better solution for conf_interval
+    conf_interval: dict = None
     margin_of_error_laplace: Optional[float] = None
     margin_of_error_expmech: Optional[int] = None
-

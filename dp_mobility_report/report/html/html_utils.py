@@ -35,7 +35,7 @@ def render_summary(summary: Series, title: str = "Distribution") -> str:
 
 def render_outlier_info(
     outlier_count: int,
-    margin_of_error=Optional[float],
+    margin_of_error: Optional[float],
     max_value: Union[int, float] = None,
 ) -> str:
     margin_of_error = round(margin_of_error) if margin_of_error is not None else None
@@ -56,12 +56,14 @@ def render_outlier_info(
     )
     return f"{outlier_count} {outlier} been excluded. {range_info}"
 
-def render_moe_info(margin_of_error:int) -> str:
+
+def render_moe_info(margin_of_error: int) -> str:
     return f"""To provide privacy, quartile values are not necessarily the true values but, e.g., instead of the true maximum value the 
         second or third highest value is displayed.
         This is achieved by the so-called exponential mechanism, where a value is drawn based on probabilites defined by the privacy budget. 
         Generally, a value closer to the true value has a higher chance of being drawn.
         The true quartile values lie with a <b>95% chance ± {margin_of_error} records</b> away from the true values."""
+
 
 def fmt(value: Any) -> Any:
     if isinstance(value, (float, np.floating)):
