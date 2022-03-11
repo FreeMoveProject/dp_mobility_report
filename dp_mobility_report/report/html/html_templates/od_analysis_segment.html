@@ -40,6 +40,7 @@
     </div>  
     
     <div>
+        <h4>Ranking of most frequent OD connections</h4>
         {{most_freq_flows_ranking}}
     </div>
 </div>
@@ -54,6 +55,9 @@
         </p>
             {{travel_time_hist}}
             {{travel_time_summary_table}}
+            <p class="info">
+                {{travel_time_moe_info}}
+            </p>
     </div>
     <div>
         <h4>Jump length (in kilometers)</h4>
@@ -63,5 +67,8 @@
 
             {{jump_length_hist}}
             {{jump_length_summary_table}}
+            <p class="info">
+                {{jump_length_moe_info}}
+            </p>
     </div>
 </div>

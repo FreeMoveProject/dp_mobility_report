@@ -41,7 +41,8 @@ def quartiles_dp(
     eps: Optional[float],
     sensitivity: int,
     bounds: Tuple = None,
-) -> pd.Series:
+    conf_interval_perc=0.95,
+) -> Tuple:
 
     if np.issubdtype(array.dtype, np.timedelta64):
         array = array.values.astype(np.int64)
@@ -66,6 +67,9 @@ def quartiles_dp(
     array = array.sort_values().reset_index(drop=True)
     k = array.size
 
+    def utility(quant, k):
+        return list(-np.abs(np.arange(0, k) - quant * k))
+
     if eps is None:
         result.append(array.quantile(0.25))
         result.append(array.quantile(0.5))
@@ -75,7 +79,7 @@ def quartiles_dp(
             mech = diffprivlib.mechanisms.exponential.Exponential(
                 epsilon=epsi,
                 sensitivity=sensitivity,
-                utility=list(-np.abs(np.arange(0, k) - quant * k)),
+                utility=utility(quant, k),
             )
             idx = mech.randomise()
             output = array[idx]
@@ -88,7 +92,25 @@ def quartiles_dp(
     elif dtyp == "datetime":
         result = pd.to_datetime(result)
 
-    return pd.Series(result, index=["min", "25%", "50%", "75%", "max"])
+
+    # get margin of error
+
+    # Calculate the probability for each element, based on its score
+    probabilities = [np.exp(eps * u / (2 * sensitivity)) for u in utility(0.5, k)]
+    # Normalize the probabilties so they sum to 1
+    probabilities = probabilities / np.linalg.norm(probabilities, ord=1)
+
+    max_index = np.argmax(probabilities)
+    conf = probabilities[max_index]
+    counter = 0
+    while conf < conf_interval_perc:
+        counter += 1
+        if max_index+counter < len(probabilities):
+            conf += probabilities[max_index + counter]
+        if max_index - counter >= 0:
+            conf += probabilities[max_index - counter]
+
+    return (pd.Series(result, index=["min", "25%", "50%", "75%", "max"]), counter)
 
 
 def _laplacer(x: int, eps: float, sensitivity: int) -> int:
@@ -113,6 +135,8 @@ def laplace_margin_of_error(
     return laplace.ppf(q, loc=0, scale=scale)
 
 
+
+    
 def conf_interval(value: Optional[Union[float, int]], margin_of_error: float) -> Tuple:
     if value is None:
         return (None, None)

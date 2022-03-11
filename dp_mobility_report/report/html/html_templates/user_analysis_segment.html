@@ -4,34 +4,25 @@
     <h3>Number of trips per user</h3>
     
     {{trips_per_user_hist}}
-    
+    <p class="info">
+        {{trips_per_user_moe_info}}
+    </p>
+
     {{trips_per_user_summary_table}}
+    <p class="info">
+        {{trips_per_user_moe_info}}
+    </p>
 </div>
 
 <div>
     <h3>Time between consecutive trips of a user</h3>
-    
-    <p class="info">
-        The time between consecutive trips gives insights into the completeness of 
-        user movements. This analysis is based on the assumption that trips of a user follow 
-        each other consecutively and do not overlap, 
-        i.e., a trip cannot start before the previous one has ended.
-        Therefore, a plausibility check is performed first to ensure that user trips do not overlap. 
-        Otherwise, this might be an indication of a faulty dataset.
-    </p>
-        
-    <h4>Plausibility check: overlapping user trips</h4>
-    
-    <p>
-        {{overlapping_trips_info}}
-    </p>
-    
-    <p class="info">
-        If there are overlapping trips present in the dataset the minimum time 
-        between trips is negative.
-    </p>
-    
+
     {{time_between_traj_summary_table}}
+    <p class="info">
+        {{time_between_traj_moe_info}}
+    </p>
+    {{plausi_check_info}}
+
 </div>
     
 <div>
@@ -46,6 +37,9 @@
     
     {{radius_of_gyration_hist}}
     {{radius_of_gyration_summary_table}}
+    <p class="info">
+        {{radius_of_gyration_moe_info}}
+    </p>
 </div>
     
 <div>
@@ -69,6 +63,9 @@
     
     {{distinct_tiles_user_hist}}
     {{distinct_tiles_user_summary_table}}
+    <p class="info">
+        {{distinct_tiles_moe_info}}
+    </p>
 </div>
 
 <div>
@@ -85,4 +82,7 @@
     
     {{mobility_entropy_hist}}
     {{mobility_entropy_summary_table}}
+    <p class="info">
+        {{mobility_entropy_moe_info}}
+    </p>
 </div>

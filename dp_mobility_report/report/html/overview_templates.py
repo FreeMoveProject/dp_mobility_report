@@ -5,7 +5,7 @@ from pandas import DataFrame, Series
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model.section import Section
-from dp_mobility_report.report.html.html_utils import fmt, get_template, render_summary
+from dp_mobility_report.report.html.html_utils import fmt, get_template, render_moe_info, render_summary
 from dp_mobility_report.visualization import plot, v_utils
 
 
@@ -13,8 +13,8 @@ def render_overview(report: dict) -> str:
     dataset_stats_table = ""
     missing_values_table = ""
     trips_over_time_linechart = ""
-    trips_over_time_linechart = ""
     trips_over_time_summary_table = ""
+    trips_over_time_moe_info = ""
     trips_per_weekday_barchart = ""
     trips_per_hour_linechart = ""
 
@@ -37,6 +37,7 @@ def render_overview(report: dict) -> str:
         trips_over_time_summary_table = render_summary(
             report[const.TRIPS_OVER_TIME].quartiles
         )
+        trips_over_time_moe_info = render_moe_info(report[const.TRIPS_OVER_TIME].margin_of_error_expmech)
 
     if (
         const.TRIPS_PER_WEEKDAY in report
@@ -55,6 +56,7 @@ def render_overview(report: dict) -> str:
         missing_values_table=missing_values_table,
         trips_over_time_info=trips_over_time_info,
         trips_over_time_linechart=trips_over_time_linechart,
+        trips_over_time_moe_info=trips_over_time_moe_info,
         trips_over_time_summary_table=trips_over_time_summary_table,
         trips_per_weekday_barchart=trips_per_weekday_barchart,
         trips_per_hour_linechart=trips_per_hour_linechart,
@@ -163,7 +165,7 @@ def render_trips_over_time(trips_over_time: Section) -> str:
         chart = plot.barchart(
             x=trips_over_time.data[const.DATETIME].to_numpy(),
             y=trips_over_time.data["trip_count"].to_numpy(),
-            margin_of_error=trips_over_time.margin_of_error,
+            margin_of_error=trips_over_time.margin_of_error_laplace,
             x_axis_label="Date",
             y_axis_label="Frequency",
             rotate_label=True,
@@ -176,7 +178,7 @@ def render_trips_over_time(trips_over_time: Section) -> str:
             "trip_count",
             "Date",
             "Frequency",
-            margin_of_error=trips_over_time.margin_of_error,
+            margin_of_error=trips_over_time.margin_of_error_laplace,
         )
         html = v_utils.fig_to_html(chart)
     plt.close()
@@ -187,7 +189,7 @@ def render_trips_per_weekday(trips_per_weekday: Section) -> str:
     chart = plot.barchart(
         x=trips_per_weekday.data.index.to_numpy(),
         y=trips_per_weekday.data.values,
-        margin_of_error=trips_per_weekday.margin_of_error,
+        margin_of_error=trips_per_weekday.margin_of_error_laplace,
         x_axis_label="Weekday",
         y_axis_label="Average trips per weekday",
         rotate_label=True,
@@ -212,7 +214,7 @@ def render_trips_per_hour(trips_per_hour: Section) -> str:
         "count",
         const.TIME_CATEGORY,
         hue_order=["weekday_start", "weekday_end", "weekend_start", "weekend_end"],
-        margin_of_error=trips_per_hour.margin_of_error,
+        margin_of_error=trips_per_hour.margin_of_error_laplace,
     )
     html = v_utils.fig_to_html(chart)
     plt.close()

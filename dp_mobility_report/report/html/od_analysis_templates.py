@@ -18,6 +18,7 @@ from dp_mobility_report.report.html.html_utils import (
     get_template,
     render_outlier_info,
     render_summary,
+    render_moe_info
 )
 from dp_mobility_report.visualization import plot, v_utils
 
@@ -33,9 +34,11 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
     outlier_count_travel_time_info = ""
     travel_time_hist = ""
     travel_time_summary_table = ""
+    travel_time_moe_info=""
     outlier_count_jump_length_info = ""
     jump_length_hist = ""
     jump_length_summary_table = ""
+    jump_length_moe_info =""
 
     report = mdreport.report
 
@@ -62,6 +65,7 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
                 report[const.TRAVEL_TIME].margin_of_error,
                 mdreport.max_travel_time,
             )
+        travel_time_moe_info = render_moe_info(report[const.TRAVEL_TIME].margin_of_error_expmech)
 
     if const.JUMP_LENGTH in report and report[const.JUMP_LENGTH].data is not None:
         jump_length_hist = render_jump_length_hist(report[const.JUMP_LENGTH])
@@ -72,6 +76,7 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
                 report[const.JUMP_LENGTH].margin_of_error,
                 mdreport.max_jump_length,
             )
+        jump_length_moe_info = render_moe_info(report[const.JUMP_LENGTH].margin_of_error_expmech)
 
     template_structure = get_template("od_analysis_segment.html")
     return template_structure.render(
@@ -84,9 +89,11 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
         most_freq_flows_ranking=most_freq_flows_ranking,
         outlier_count_travel_time_info=outlier_count_travel_time_info,
         travel_time_hist=travel_time_hist,
+        travel_time_moe_info = travel_time_moe_info,
         travel_time_summary_table=travel_time_summary_table,
         outlier_count_jump_length_info=outlier_count_jump_length_info,
         jump_length_hist=jump_length_hist,
+        jump_length_moe_info=jump_length_moe_info,
         jump_length_summary_table=jump_length_summary_table,
     )
 
@@ -98,7 +105,7 @@ def render_origin_destination_flows(
     threshold: float = 0.1,
 ) -> Tuple[str, str]:
     data = od_flows.data.copy()
-    moe_deviation = od_flows.margin_of_error / data["flow"]
+    moe_deviation = od_flows.margin_of_error_laplace / data["flow"]
     data.loc[moe_deviation > threshold, "flow"] = None
     top_n_flows = top_n_flows if top_n_flows <= len(data) else len(data)
     innerflow = data[data.origin == data.destination]
@@ -135,8 +142,8 @@ def render_intra_tile_flows(od_flows: Section) -> str:
     flow_count = od_flows.data.flow.sum()
     intra_tile_flows = od_analysis.get_intra_tile_flows(od_flows.data)
     ci_interval_info = (
-        f"(95% confidence interval ± {round(od_flows.margin_of_error)})"
-        if od_flows.margin_of_error is not None
+        f"(95% confidence interval ± {round(od_flows.margin_of_error_laplace)})"
+        if od_flows.margin_of_error_laplace is not None
         else ""
     )
 
@@ -166,15 +173,8 @@ def render_flows_cumsum(od_flows: pd.DataFrame) -> str:
 def render_most_freq_flows_ranking(
     od_flows: Section, tessellation: GeoDataFrame, top_x: int = 10
 ) -> str:
-    moe = round(od_flows.margin_of_error)
-
     topx_flows = od_flows.data.nlargest(top_x, "flow")
     topx_flows["rank"] = list(range(1, len(topx_flows) + 1))
-    topx_flows["lower_limit"] = topx_flows["flow"].apply(
-        lambda x: (x - moe) if (moe < x) else 0
-    )
-    topx_flows["upper_limit"] = topx_flows["flow"] + moe
-
     topx_flows = topx_flows.merge(
         tessellation[[const.TILE_ID, const.TILE_NAME]],
         how="left",
@@ -188,24 +188,16 @@ def render_most_freq_flows_ranking(
         right_on=const.TILE_ID,
         suffixes=("_origin", "_destination"),
     )
-
-    topx_flows_list = []
-    for _, row in topx_flows.iterrows():
-        topx_flows_list.append(
-            {
-                "rank": row["rank"],
-                "name": f'{row[f"{const.TILE_NAME}_origin"]} - {row[f"{const.TILE_NAME}_origin"]}',
-                "lower_limit": str(fmt(row["lower_limit"])),
-                "estimate": str(fmt(row["flow"])),
-                "upper_limit": str(fmt(row["upper_limit"])),
-            }
-        )
-
-    template_table = get_template("table_conf_interval.html")
-    tile_ranking_html = template_table.render(
-        name="Ranking of most frequent OD connections", rows=topx_flows_list
-    )
-    return tile_ranking_html
+    labels = topx_flows["rank"].astype(str) + ": " + topx_flows[f"{const.TILE_NAME}_origin"] +  " - " + topx_flows[f"{const.TILE_NAME}_destination"]
+  
+    ranking = plot.ranking(
+        topx_flows.flow, 
+        "flow counts per OD pair",
+        y_labels = labels,
+        margin_of_error = od_flows.margin_of_error_laplace)
+    html_ranking = v_utils.fig_to_html(ranking)
+    plt.close()
+    return html_ranking
 
 
 def render_travel_time_hist(travel_time_hist: Section) -> str:
@@ -213,7 +205,7 @@ def render_travel_time_hist(travel_time_hist: Section) -> str:
         travel_time_hist.data,
         x_axis_label="travel time (min.)",
         x_axis_type=int,
-        margin_of_error=travel_time_hist.margin_of_error,
+        margin_of_error=travel_time_hist.margin_of_error_laplace,
     )
     html_hist = v_utils.fig_to_html(hist)
     plt.close()
@@ -225,7 +217,7 @@ def render_jump_length_hist(jump_length_hist: Section) -> str:
         jump_length_hist.data,
         x_axis_label="jump length (kilometers)",
         x_axis_type=float,
-        margin_of_error=jump_length_hist.margin_of_error,
+        margin_of_error=jump_length_hist.margin_of_error_laplace,
     )
     html_hist = v_utils.fig_to_html(hist)
     plt.close()

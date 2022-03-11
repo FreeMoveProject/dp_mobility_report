@@ -38,7 +38,7 @@ def hist_section(
     bin_range: Optional[Union[float, int]] = None,
     evalu: bool = False,
 ) -> Section:
-    epsi = get_epsi(evalu, eps, 7)
+    epsi = get_epsi(evalu, eps, 7) # TODO: does eps need to be split between counts and outliers? (As outliers is like an extra bin)
     epsi_quant = epsi * 5 if epsi is not None else None
 
     series = Series(series) if isinstance(series, np.ndarray) else series
@@ -49,7 +49,7 @@ def hist_section(
     else:
         dp_n_outliers = None
 
-    quartiles = diff_privacy.quartiles_dp(series, epsi_quant, sensitivity)
+    quartiles, moe_expmech = diff_privacy.quartiles_dp(series, epsi_quant, sensitivity)
     # cut series again according to diff. priv. quartiles to that min and max values match the histogram
     series, _ = cut_outliers(
         series, min_value=quartiles["min"], max_value=quartiles["max"]
@@ -65,7 +65,7 @@ def hist_section(
             min_value : max_value + 1
         ]
     else:
-        # if bounds are given by user, use those for clean bin sizes (but cut off according to dp_min and dp_max values)
+        # make sure min and max_value are not None
         min_value = quartiles["min"] if min_value is None else min_value
         max_value = quartiles["max"] if max_value is None else max_value
 
@@ -74,6 +74,7 @@ def hist_section(
             bin_range = 0.1
 
         if bin_range is not None:
+        # if bin range and bounds are provided by user, use those for clean bin sizes (but remove bins according to dp_min and dp_max values)
             min_value = (
                 int((quartiles["min"] - min_value) / bin_range) * bin_range + min_value
             )
@@ -83,19 +84,23 @@ def hist_section(
             max_bins = int((max_value - min_value) / bin_range)
             max_bins = max_bins if max_bins > 2 else 2
         else:
+            # else if no defined bin range, set bounds of hist according to dp_min and dp_max
+            min_value = quartiles["min"]
+            max_value = quartiles["max"]
             max_bins = 10  # set default of 10
         hist = np.histogram(series, bins=max_bins, range=(min_value, max_value))
         counts = hist[0]
         dp_values = hist[1]
     dp_counts = diff_privacy.counts_dp(counts, epsi, sensitivity)
-    moe = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
+    moe_laplace = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
 
     return Section(
         data=(dp_counts, dp_values),
         privacy_budget=eps,
         n_outliers=dp_n_outliers,
         quartiles=quartiles,
-        margin_of_error=moe,
+        margin_of_error_laplace=moe_laplace,
+        margin_of_error_expmech=moe_expmech
     )
 
 

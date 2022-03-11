@@ -17,7 +17,7 @@ def test_mdreport():
 def test_get_visits_per_tile(test_mdreport):
     """Correct visits per tile values without noise."""
     visits_per_location = place_analysis.get_visits_per_tile(test_mdreport, None)
-    assert visits_per_location.quartiles.tolist() == [49.0, 49.75, 50.0, 50.0, 50.0]
+    assert visits_per_location.quartiles[["min", "25%", "50%","75%", "max"]].tolist() == [49.0, 49.75, 50.0, 50.0, 50.0]
     assert visits_per_location.data.visit_count.tolist() == [50, 50, 50, 49]
     assert visits_per_location.data.visit_count.sum() == 199
     assert visits_per_location.n_outliers == 1

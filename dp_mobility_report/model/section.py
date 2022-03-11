@@ -19,4 +19,6 @@ class Section:
     quartiles: Optional[np.ndarray] = None
     datetime_precision: Optional[str] = None
     conf_interval: Union[Tuple, dict] = None
-    margin_of_error: Optional[float] = None
+    margin_of_error_laplace: Optional[float] = None
+    margin_of_error_expmech: Optional[int] = None
+

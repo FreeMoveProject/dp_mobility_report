@@ -131,7 +131,7 @@ def get_trips_over_time(
     df_trip = mdreport.df[
         (mdreport.df[const.POINT_TYPE] == const.END)
     ]  # only count each trip once
-    dp_quartiles = diff_privacy.quartiles_dp(
+    dp_quartiles, moe_expmech = diff_privacy.quartiles_dp(
         df_trip[const.DATETIME], epsi_quant, mdreport.max_trips_per_user
     )
 
@@ -171,14 +171,15 @@ def get_trips_over_time(
         epsi,
         mdreport.max_trips_per_user,
     )
-    moe = diff_privacy.laplace_margin_of_error(0.95, epsi, mdreport.max_trips_per_user)
+    moe_laplace = diff_privacy.laplace_margin_of_error(0.95, epsi, mdreport.max_trips_per_user)
 
     return Section(
         data=trip_count,
         privacy_budget=eps,
         datetime_precision=datetime_precision,
         quartiles=dp_quartiles,
-        margin_of_error=moe,
+        margin_of_error_laplace=moe_laplace,
+        margin_of_error_expmech=moe_expmech,
     )
 
 
@@ -208,7 +209,7 @@ def get_trips_per_weekday(
     )
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, mdreport.max_trips_per_user)
 
-    return Section(data=trips_per_weekday, privacy_budget=eps, margin_of_error=moe)
+    return Section(data=trips_per_weekday, privacy_budget=eps, margin_of_error_laplace=moe)
 
 
 def get_trips_per_hour(mdreport: "MobilityDataReport", eps: Optional[float]) -> Section:
@@ -230,5 +231,5 @@ def get_trips_per_hour(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
     return Section(
         data=hour_weekday[[const.HOUR, const.TIME_CATEGORY, "count"]],
         privacy_budget=eps,
-        margin_of_error=moe,
+        margin_of_error_laplace=moe,
     )

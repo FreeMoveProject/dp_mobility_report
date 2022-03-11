@@ -47,14 +47,18 @@ def get_user_time_delta(
     if len(user_time_delta) < 1:
         return None
 
-    n_overlaps = diff_privacy.count_dp(
-        overlaps,
-        epsi,
-        mdreport.max_trips_per_user,
-    )
-    dp_quartiles = diff_privacy.quartiles_dp(
+    dp_quartiles, moe_expmech = diff_privacy.quartiles_dp(
         user_time_delta, epsi_quant, mdreport.max_trips_per_user
     )
+
+    if dp_quartiles["min"] < timedelta(seconds=0):
+        n_overlaps = diff_privacy.count_dp(
+            overlaps,
+            epsi,
+            mdreport.max_trips_per_user,
+        )
+    else:
+        n_overlaps = None
 
     moe = diff_privacy.laplace_margin_of_error(0.95, epsi, mdreport.max_trips_per_user)
 
@@ -63,7 +67,8 @@ def get_user_time_delta(
         privacy_budget=eps,
         n_outliers=n_overlaps,
         quartiles=dp_quartiles,
-        margin_of_error=moe,
+        margin_of_error_laplace=moe,
+        margin_of_error_expmech=moe_expmech
     )
 
 
@@ -163,7 +168,7 @@ def get_location_entropy(
         )
     )
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
-    return Section(data=data, privacy_budget=eps, margin_of_error=moe)
+    return Section(data=data, privacy_budget=eps, margin_of_error_laplace=moe)
 
 
 def get_user_tile_count(
