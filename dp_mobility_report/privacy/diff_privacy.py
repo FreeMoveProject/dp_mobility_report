@@ -174,19 +174,3 @@ def counts_dp(
     dpcount = ((abs(dpcount) + dpcount) / 2).astype(int)
 
     return dpcount
-
-    def _laplacer(x: int) -> int:
-        return int(
-            round(
-                diffprivlib.mechanisms.laplace.Laplace(
-                    epsilon=epsi, delta=0.0, sensitivity=sensitivity
-                ).randomise(x),
-                0,
-            )
-        )
-
-    vfunc = np.vectorize(_laplacer)
-    entropy = vfunc(array)
-    entropy = (abs(entropy) + entropy) / 2
-    # entropy >=0 and <= log k with k categories.
-    return entropy
