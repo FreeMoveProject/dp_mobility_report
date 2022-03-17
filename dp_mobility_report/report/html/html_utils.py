@@ -2,7 +2,9 @@ from typing import Any, Optional, Union
 
 import jinja2
 import numpy as np
-from pandas import Series
+from pandas import DataFrame, Series
+from dp_mobility_report.privacy.diff_privacy import _laplacer
+
 
 # Initializing Jinja
 package_loader = jinja2.PackageLoader(
@@ -73,3 +75,24 @@ def fmt(value: Any) -> Any:
     ):
         value = f"{value:,}"
     return value
+
+
+def _cumsum(series: Series):
+    return round(
+        series.sort_values(ascending=False).cumsum()
+        / sum(series),
+        2,
+    ).reset_index(drop=True)
+
+def cumsum_simulations(series: DataFrame, eps: float, sensitivity: int):
+    df_cumsum = DataFrame()
+    df_cumsum["n"] = np.arange(1, len(series) + 1)
+    df_cumsum["cum_perc"] = _cumsum(series)
+
+    for i in range(1, 50):
+            sim_counts = series.apply(lambda x: _laplacer(x, eps = eps, sensitivity=sensitivity))
+            sim_counts = sim_counts.apply(lambda x: int((abs(x) + x) / 2))
+            df_cumsum["cum_perc_" + str(i)] = _cumsum(sim_counts)
+
+    df_cumsum.reset_index(drop=True, inplace=True)
+    return df_cumsum

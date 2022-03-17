@@ -16,6 +16,7 @@ light_blue = "#5D6FFF"
 orange = "#D9642C"
 light_orange = "#FFAD6F"
 grey = "#8A8A8A"
+light_grey = "#d3d3d3"
 
 
 def histogram(
@@ -61,13 +62,10 @@ def barchart(
     x_axis_label: str,
     y_axis_label: str,
     margin_of_error: Optional[float] = None,
-    # order_x: Optional[list] = None,
     rotate_label: bool = False,
 ) -> mpl.figure.Figure:
     fig, ax = plt.subplots()
     ax.bar(x, y, yerr=margin_of_error, align="center", alpha=0.5, capsize=10)
-    # plot = fig.add_subplot(111)
-    # sns.barplot(x=x, y=y, color=dark_blue, ax=plot, order=order_x)
     ax.set_ylabel(y_axis_label)
     ax.set_xlabel(x_axis_label)
     plt.xticks(x)
@@ -84,20 +82,13 @@ def linechart(
     y: str,
     x_axis_label: str,
     y_axis_label: str,
+    simulations: list = None,
     margin_of_error: float = None,
     add_diagonal: bool = False,
 ) -> mpl.figure.Figure:
-    # fig = plt.figure()
-    # plot = fig.add_subplot(111)
-    # sns.lineplot(data=data, x=x, y=y, ax=plot)
-    # plot.set_ylabel(y_axis_label)
-    # plot.set_xlabel(x_axis_label)
-    # plot.set_ylim(bottom=0)
     fig, ax = plt.subplots()
-    ax.plot(data[x], data[y])
-    ax.set_ylabel(y_axis_label)
-    ax.set_xlabel(x_axis_label)
-    ax.set_ylim(bottom=0)
+    if simulations is not None:
+        ax.plot(data[x], data[simulations], light_grey)
     if margin_of_error is not None:
         ax.fill_between(
             data[x],
@@ -106,6 +97,10 @@ def linechart(
             color="blue",
             alpha=0.1,
         )
+    ax.plot(data[x], data[y])
+    ax.set_ylabel(y_axis_label)
+    ax.set_xlabel(x_axis_label)
+    ax.set_ylim(bottom=0)
     if add_diagonal:
         ax.plot([0, data[x].max()], [0, data[y].max()], grey)
 

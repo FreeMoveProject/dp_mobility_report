@@ -15,6 +15,7 @@ class Section:
 
     data: Optional[Union[Tuple, dict, pd.Series, pd.DataFrame]] = None
     privacy_budget: Optional[float] = None
+    sensitivity: Optional[Union[int, float]] = None
     n_outliers: Optional[int] = None
     quartiles: Optional[np.ndarray] = None
     datetime_precision: Optional[str] = None

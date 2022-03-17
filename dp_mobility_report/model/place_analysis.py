@@ -19,6 +19,7 @@ def get_visits_per_tile(
         mdreport.evalu, eps, 2
     )  # TODO: is this really eps / 2? bc outliers are like an own tile?
 
+    sensitivity = 2 * mdreport.max_trips_per_user
     # count number of visits for each location
     counts_per_tile = (
         mdreport.df[
@@ -43,22 +44,19 @@ def get_visits_per_tile(
     counts_per_tile["visit_count"] = diff_privacy.counts_dp(
         counts_per_tile["visit_count"].values,
         epsi,
-        mdreport.max_trips_per_user * 2,
+        sensitivity,
     )
-    n_outliers = diff_privacy.count_dp(  # type: ignore
-        n_outliers, epsi, mdreport.max_trips_per_user * 2
-    )
+    n_outliers = diff_privacy.count_dp(n_outliers, epsi, sensitivity)  # type: ignore
 
     # as counts are already dp, no further privacy mechanism needed
     dp_quartiles = counts_per_tile.visit_count.describe()
 
-    moe = diff_privacy.laplace_margin_of_error(
-        0.95, epsi, 2 * mdreport.max_trips_per_user
-    )
+    moe = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
 
     return Section(
         data=counts_per_tile,
         privacy_budget=eps,
+        sensitivity=sensitivity,
         n_outliers=n_outliers,
         quartiles=dp_quartiles,
         margin_of_error_laplace=moe,

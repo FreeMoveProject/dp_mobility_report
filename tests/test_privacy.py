@@ -17,11 +17,11 @@ def test_bounds_dp():
 
 def test_quartiles_dp():
     array = np.array([1, 1, 2, 2, 4, 4, 5, 5])
-    quartiles = diff_privacy.quartiles_dp(array, eps=None, sensitivity=None)
+    quartiles, _ = diff_privacy.quartiles_dp(array, eps=None, sensitivity=None)
     assert quartiles.index.tolist() == ["min", "25%", "50%", "75%", "max"]
     assert quartiles.tolist() == [1, 1.75, 3, 4.25, 5]
 
-    quartiles = diff_privacy.quartiles_dp(array, eps=0.1, sensitivity=1)
+    quartiles, _ = diff_privacy.quartiles_dp(array, eps=0.1, sensitivity=1)
     assert quartiles.min() >= array.min()
     assert quartiles.max() <= array.max()
 
@@ -32,7 +32,7 @@ def test_quartiles_dp():
             np.datetime64("2021-07-03"),
         ]
     )
-    quartiles = diff_privacy.quartiles_dp(array, eps=0.1, sensitivity=1)
+    quartiles, _ = diff_privacy.quartiles_dp(array, eps=0.1, sensitivity=1)
     assert quartiles.min() >= array.min()
     assert quartiles.max() <= array.max()
     assert np.issubdtype(quartiles.dtype, np.datetime64)
@@ -40,7 +40,7 @@ def test_quartiles_dp():
     array = pd.Series(
         [np.timedelta64(1, "D"), np.timedelta64(1, "D"), np.timedelta64(10, "h")]
     )
-    quartiles = diff_privacy.quartiles_dp(array, eps=0.1, sensitivity=1)
+    quartiles, _ = diff_privacy.quartiles_dp(array, eps=0.1, sensitivity=1)
     assert quartiles.min() >= array.min()
     assert quartiles.max() <= array.max()
     assert np.issubdtype(quartiles.dtype, np.timedelta64)
@@ -72,3 +72,7 @@ def test_entropy_dp():
 
     dp_entropy = diff_privacy.entropy_dp(entropy, epsi=0.1, maxcontribution=10)
     assert all(dp_entropy >= 0)
+
+
+def test_confidence_interval():
+    pass

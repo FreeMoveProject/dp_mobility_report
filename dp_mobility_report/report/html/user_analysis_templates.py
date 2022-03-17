@@ -80,7 +80,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         if mdreport.max_radius_of_gyration is not None:
             outlier_count_radius_of_gyration_info = render_outlier_info(
                 report[const.RADIUS_OF_GYRATION].n_outliers,
-                report[const.RADIUS_OF_GYRATION].margin_of_error,
+                report[const.RADIUS_OF_GYRATION].margin_of_error_laplace,
                 mdreport.max_jump_length,
             )
 

@@ -45,6 +45,7 @@ def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame) -> pd.DataFrame:
 def get_od_flows(
     od_shape: pd.DataFrame, mdreport: "MobilityDataReport", eps: Optional[float]
 ) -> Section:
+    sensitivity = mdreport.max_trips_per_user
     od_flows = (
         od_shape.groupby([const.TILE_ID, const.TILE_ID_END])
         .aggregate(flow=(const.TID, "count"))
@@ -67,7 +68,7 @@ def get_od_flows(
     od_flows.fillna(0, inplace=True)
 
     od_flows["flow"] = diff_privacy.counts_dp(
-        od_flows["flow"].to_numpy(), eps, mdreport.max_trips_per_user
+        od_flows["flow"].to_numpy(), eps, sensitivity
     )
 
     # remove all instances of 0 to reduce storage
@@ -76,13 +77,14 @@ def get_od_flows(
     # as counts are already dp, no further privacy mechanism needed
     dp_quartiles = od_flows.flow.describe()
 
-    moe = diff_privacy.laplace_margin_of_error(0.95, eps, mdreport.max_trips_per_user)
+    moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
 
     return Section(
         data=od_flows,
         quartiles=dp_quartiles,
         privacy_budget=eps,
         margin_of_error_laplace=moe,
+        sensitivity=sensitivity
     )
 
 
