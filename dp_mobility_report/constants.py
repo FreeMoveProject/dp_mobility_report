@@ -20,7 +20,6 @@ JUMP_LENGTH = "jump_length"
 TRIPS_PER_USER = "trips_per_user"
 USER_TIME_DELTA = "user_time_delta"
 RADIUS_OF_GYRATION = "radius_of_gyration"
-LOCATION_ENTROPY = "location_entropy"
 USER_TILE_COUNT = "user_tile_count"
 MOBILITY_ENTROPY = "mobility_entropy"
 OVERVIEW_ELEMENTS = [
@@ -36,7 +35,6 @@ USER_ELEMENTS = [
     TRIPS_PER_USER,
     USER_TIME_DELTA,
     RADIUS_OF_GYRATION,
-    LOCATION_ENTROPY,
     USER_TILE_COUNT,
     MOBILITY_ENTROPY,
 ]

@@ -67,12 +67,6 @@ def test_get_radius_of_gyration(test_mdreport):
     assert rog.n_outliers is None
 
 
-def test_get_location_entropy(test_mdreport):
-    location_entropy = user_analysis.get_location_entropy(test_mdreport, None)
-    assert location_entropy.data.round(4).tolist() == [4.0455, 4.0588, 4.0455, 4.0791]
-    assert len(location_entropy.data) == 4
-
-
 def test_get_user_tile_count(test_mdreport):
     user_tile_count = user_analysis.get_user_tile_count(test_mdreport, None)
     assert user_tile_count.data[0].tolist() == [2, 0, 18]

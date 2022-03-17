@@ -63,16 +63,7 @@ def test_counts_dp():
     counts = np.array([100, 10, 4, 20])
     dp_counts = diff_privacy.counts_dp(counts, eps=0.1, sensitivity=1)
     assert all(dp_counts >= 0)
-
-
-def test_entropy_dp():
-    entropy = pd.Series([0.2, 1.4, 3.9, 2.1])
-    dp_entropy = diff_privacy.entropy_dp(entropy, epsi=None, maxcontribution=10)
-    assert dp_entropy.equals(entropy)
-
-    dp_entropy = diff_privacy.entropy_dp(entropy, epsi=0.1, maxcontribution=10)
-    assert all(dp_entropy >= 0)
-
+    
 
 def test_confidence_interval():
     pass

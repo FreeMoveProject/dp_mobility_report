@@ -175,28 +175,6 @@ def counts_dp(
 
     return dpcount
 
-
-def entropy_dp(
-    array: pd.Series, epsi: Optional[float], maxcontribution: int
-) -> np.ndarray:
-    if epsi is None:
-        return array
-    if maxcontribution > 1:
-        sensitivity = (
-            2
-            * maxcontribution
-            * (
-                max(
-                    np.log(2),
-                    np.log(2 * maxcontribution)
-                    - np.log(np.log(2 * maxcontribution))
-                    - 1,
-                )
-            )
-        )
-    else:
-        sensitivity = np.log(2)
-
     def _laplacer(x: int) -> int:
         return int(
             round(

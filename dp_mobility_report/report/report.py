@@ -150,9 +150,6 @@ def add_user_analysis_elements(mdreport: "MobilityDataReport", epsilon: float) -
         )
         if const.RADIUS_OF_GYRATION in const.USER_ELEMENTS
         else Section(),
-        const.LOCATION_ENTROPY: user_analysis.get_location_entropy(mdreport, epsilon)
-        if const.LOCATION_ENTROPY in const.USER_ELEMENTS
-        else Section(),
         const.USER_TILE_COUNT: user_analysis.get_user_tile_count(mdreport, epsilon)
         if const.USER_TILE_COUNT in const.USER_ELEMENTS
         else Section(),

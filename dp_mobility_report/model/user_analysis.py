@@ -125,52 +125,6 @@ def _tile_visits_by_user(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def get_location_entropy(
-    mdreport: "MobilityDataReport", eps: Optional[float]
-) -> Section:
-    total_visits_by_tile = mdreport.df.groupby(const.TILE_ID).aggregate(
-        total_visits=(const.ID, "count")
-    )
-    tile_visits_by_user = _tile_visits_by_user(mdreport.df).merge(
-        total_visits_by_tile, left_on=const.TILE_ID, right_index=True
-    )[[const.TILE_ID, "count_by_user", "total_visits"]]
-
-    tile_visits_by_user["p"] = (
-        tile_visits_by_user.count_by_user / tile_visits_by_user.total_visits
-    )
-    tile_visits_by_user["log2p"] = -tile_visits_by_user.p.apply(
-        lambda x: math.log(x, 2)
-    )
-    tile_visits_by_user[const.LOCATION_ENTROPY] = (
-        tile_visits_by_user.p * tile_visits_by_user.log2p
-    )
-
-    location_entropy = tile_visits_by_user.groupby(const.TILE_ID)[
-        const.LOCATION_ENTROPY
-    ].sum()
-    location_entropy_dp = diff_privacy.entropy_dp(
-        location_entropy, eps, mdreport.max_trips_per_user
-    )
-    data = pd.Series(
-        location_entropy_dp, index=location_entropy.index, name=location_entropy.name
-    )
-
-    sensitivity = (
-        2
-        * mdreport.max_trips_per_user
-        * (
-            max(
-                np.log(2),
-                np.log(2 * mdreport.max_trips_per_user)
-                - np.log(np.log(2 * mdreport.max_trips_per_user))
-                - 1,
-            )
-        )
-    )
-    moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
-    return Section(data=data, privacy_budget=eps, margin_of_error_laplace=moe)
-
-
 def get_user_tile_count(
     mdreport: "MobilityDataReport", eps: Optional[float]
 ) -> Section:

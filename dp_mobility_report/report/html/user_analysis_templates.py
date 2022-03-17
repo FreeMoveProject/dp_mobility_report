@@ -29,8 +29,6 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     radius_of_gyration_hist = ""
     radius_of_gyration_summary_table = ""
     radius_of_gyration_moe_info = ""
-    location_entropy_map = ""
-    location_entropy_legend = ""
     distinct_tiles_user_hist = ""
     distinct_tiles_user_summary_table = ""
     distinct_tiles_moe_info = ""
@@ -84,12 +82,6 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
                 mdreport.max_jump_length,
             )
 
-    if (const.LOCATION_ENTROPY in report) and (
-        report[const.LOCATION_ENTROPY].data is not None
-    ):
-        location_entropy_map, location_entropy_legend = render_location_entropy(
-            report[const.LOCATION_ENTROPY], mdreport.tessellation
-        )
 
     if (const.USER_TILE_COUNT in report) and (
         report[const.USER_TILE_COUNT].data is not None
@@ -128,8 +120,6 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         radius_of_gyration_hist=radius_of_gyration_hist,
         radius_of_gyration_summary_table=radius_of_gyration_summary_table,
         radius_of_gyration_moe_info=radius_of_gyration_moe_info,
-        location_entropy_map=location_entropy_map,
-        location_entropy_legend=location_entropy_legend,
         distinct_tiles_user_hist=distinct_tiles_user_hist,
         distinct_tiles_user_summary_table=distinct_tiles_user_summary_table,
         distinct_tiles_moe_info=distinct_tiles_moe_info,
@@ -179,37 +169,6 @@ def render_radius_of_gyration(radius_of_gyration_hist: Section) -> str:
     html = v_utils.fig_to_html(hist)
     plt.close()
     return html
-
-
-def render_location_entropy(
-    location_entropy: Section, tessellation: GeoDataFrame, threshold: float = 0.1
-) -> Tuple[str, str]:
-    # 0: all trips by a single user
-    # large: evenly distributed over different users (2^x possible different users)
-    data = location_entropy.data
-
-    location_entropy_gdf = pd.merge(
-        tessellation,
-        data,
-        how="left",
-        left_on="tile_id",
-        right_on="tile_id",
-    )
-    moe_deviation = (
-        location_entropy.margin_of_error_laplace
-        / location_entropy_gdf[const.LOCATION_ENTROPY]
-    )
-    location_entropy_gdf.loc[moe_deviation > threshold, const.LOCATION_ENTROPY] = None
-    location_entropy_map, location_entropy_legend = plot.choropleth_map(
-        location_entropy_gdf,
-        const.LOCATION_ENTROPY,
-        "Location entropy (0: all trips by a single user - large: users visit tile evenly)",
-        min_scale=0,
-    )
-    html = location_entropy_map.get_root().render()
-    legend = v_utils.fig_to_html(location_entropy_legend)
-    plt.close()
-    return html, legend
 
 
 def render_distinct_tiles_user(user_tile_count_hist: Section) -> str:
