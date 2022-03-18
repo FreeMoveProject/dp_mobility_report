@@ -137,8 +137,7 @@ def get_trips_over_time(
 
     # cut based on dp min and max values
     (
-        trips_over_time,
-        _,
+        trips_over_time
     ) = m_utils.cut_outliers(  # don't disclose outliers to the as the boundaries are not defined through user input
         df_trip[const.DATETIME],
         min_value=dp_quartiles["min"],

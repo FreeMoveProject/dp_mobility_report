@@ -7,7 +7,12 @@ from geopandas import GeoDataFrame
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model.section import Section
-from dp_mobility_report.report.html.html_utils import fmt, get_template, render_summary, cumsum_simulations
+from dp_mobility_report.report.html.html_utils import (
+    cumsum_simulations,
+    fmt,
+    get_template,
+    render_summary,
+)
 from dp_mobility_report.visualization import plot, v_utils
 
 
@@ -92,10 +97,12 @@ def render_counts_per_tile(
     return html, legend_html
 
 
-
-
-def render_counts_per_tile_cumsum(counts_per_tile:Section) -> str:
-    df_cumsum = cumsum_simulations(counts_per_tile.data.visit_count, counts_per_tile.privacy_budget, counts_per_tile.sensitivity)
+def render_counts_per_tile_cumsum(counts_per_tile: Section) -> str:
+    df_cumsum = cumsum_simulations(
+        counts_per_tile.data.visit_count,
+        counts_per_tile.privacy_budget,
+        counts_per_tile.sensitivity,
+    )
 
     chart = plot.linechart(
         df_cumsum,

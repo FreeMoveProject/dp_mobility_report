@@ -18,7 +18,6 @@ from dp_mobility_report.report.html.html_utils import (
     fmt,
     get_template,
     render_moe_info,
-    render_outlier_info,
     render_summary,
 )
 from dp_mobility_report.visualization import plot, v_utils
@@ -32,11 +31,9 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
     flows_summary_table = ""
     flows_cumsum_linechart = ""
     most_freq_flows_ranking = ""
-    outlier_count_travel_time_info = ""
     travel_time_hist = ""
     travel_time_summary_table = ""
     travel_time_moe_info = ""
-    outlier_count_jump_length_info = ""
     jump_length_hist = ""
     jump_length_summary_table = ""
     jump_length_moe_info = ""
@@ -60,12 +57,6 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
     if const.TRAVEL_TIME in report and report[const.TRAVEL_TIME].data is not None:
         travel_time_hist = render_travel_time_hist(report[const.TRAVEL_TIME])
         travel_time_summary_table = render_summary(report[const.TRAVEL_TIME].quartiles)
-        if report[const.TRAVEL_TIME].n_outliers is not None:
-            outlier_count_travel_time_info = render_outlier_info(
-                report[const.TRAVEL_TIME].n_outliers,
-                report[const.TRAVEL_TIME].margin_of_error_laplace,
-                mdreport.max_travel_time,
-            )
         travel_time_moe_info = render_moe_info(
             report[const.TRAVEL_TIME].margin_of_error_expmech
         )
@@ -73,12 +64,6 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
     if const.JUMP_LENGTH in report and report[const.JUMP_LENGTH].data is not None:
         jump_length_hist = render_jump_length_hist(report[const.JUMP_LENGTH])
         jump_length_summary_table = render_summary(report[const.JUMP_LENGTH].quartiles)
-        if report[const.JUMP_LENGTH].n_outliers is not None:
-            outlier_count_jump_length_info = render_outlier_info(
-                report[const.JUMP_LENGTH].n_outliers,
-                report[const.JUMP_LENGTH].margin_of_error_laplace,
-                mdreport.max_jump_length,
-            )
         jump_length_moe_info = render_moe_info(
             report[const.JUMP_LENGTH].margin_of_error_expmech
         )
@@ -92,11 +77,9 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
         flows_summary_table=flows_summary_table,
         flows_cumsum_linechart=flows_cumsum_linechart,
         most_freq_flows_ranking=most_freq_flows_ranking,
-        outlier_count_travel_time_info=outlier_count_travel_time_info,
         travel_time_hist=travel_time_hist,
         travel_time_moe_info=travel_time_moe_info,
         travel_time_summary_table=travel_time_summary_table,
-        outlier_count_jump_length_info=outlier_count_jump_length_info,
         jump_length_hist=jump_length_hist,
         jump_length_moe_info=jump_length_moe_info,
         jump_length_summary_table=jump_length_summary_table,
@@ -156,7 +139,9 @@ def render_intra_tile_flows(od_flows: Section) -> str:
 
 
 def render_flows_cumsum(od_flows: Section) -> str:
-    df_cumsum = cumsum_simulations(od_flows.data.flow, od_flows.privacy_budget, od_flows.sensitivity)
+    df_cumsum = cumsum_simulations(
+        od_flows.data.flow, od_flows.privacy_budget, od_flows.sensitivity
+    )
 
     chart = plot.linechart(
         df_cumsum,

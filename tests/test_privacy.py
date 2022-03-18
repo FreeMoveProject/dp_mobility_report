@@ -63,7 +63,7 @@ def test_counts_dp():
     counts = np.array([100, 10, 4, 20])
     dp_counts = diff_privacy.counts_dp(counts, eps=0.1, sensitivity=1)
     assert all(dp_counts >= 0)
-    
+
 
 def test_confidence_interval():
     pass

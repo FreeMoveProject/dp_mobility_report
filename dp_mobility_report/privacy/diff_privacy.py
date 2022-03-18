@@ -95,19 +95,20 @@ def quartiles_dp(
     # get margin of error
 
     # Calculate the probability for each element, based on its score
-    probabilities = [np.exp(eps * u / (2 * sensitivity)) for u in utility(0.5, k)]
-    # Normalize the probabilties so they sum to 1
-    probabilities = probabilities / np.linalg.norm(probabilities, ord=1)
-
-    max_index = np.argmax(probabilities)
-    conf = probabilities[max_index]
     counter = 0
-    while conf < conf_interval_perc:
-        counter += 1
-        if max_index + counter < len(probabilities):
-            conf += probabilities[max_index + counter]
-        if max_index - counter >= 0:
-            conf += probabilities[max_index - counter]
+    if eps is not None:
+        probabilities = [np.exp(eps * u / (2 * sensitivity)) for u in utility(0.5, k)]
+        # Normalize the probabilties so they sum to 1
+        probabilities = probabilities / np.linalg.norm(probabilities, ord=1)
+
+        max_index = np.argmax(probabilities)
+        conf = probabilities[max_index]
+        while conf < conf_interval_perc:
+            counter += 1
+            if max_index + counter < len(probabilities):
+                conf += probabilities[max_index + counter]
+            if max_index - counter >= 0:
+                conf += probabilities[max_index - counter]
 
     return (pd.Series(result, index=["min", "25%", "50%", "75%", "max"]), counter)
 

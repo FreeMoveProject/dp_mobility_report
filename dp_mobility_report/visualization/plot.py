@@ -19,33 +19,50 @@ grey = "#8A8A8A"
 light_grey = "#d3d3d3"
 
 
+def format(value: Union[float, int], type: Type):
+    value = type(value)
+    if type == float:
+        value = round(value, 2)
+    return value
+
+
 def histogram(
     hist: Tuple,
     x_axis_label: str,
     margin_of_error: float = None,
     rotate_label: bool = False,
-    x_axis_type: Optional[Type] = None,
+    x_axis_type: Type = float,
 ) -> mpl.figure.Figure:
     bins = hist[1]
     counts = hist[0]
 
-    if x_axis_type is not None:
-        bins = bins.astype(x_axis_type)
-
+    # single integers (instead of bin ranges) as x axis labels
     if len(bins) == len(counts):
-        labels = bins
+        labels = np.array([format(bin, x_axis_type) for bin in bins[:-1]])
+        if bins[-1] == np.Inf:
+            labels = np.append(labels, f"> {labels[-1]}")
+        else:
+            labels = np.append(labels, format(bins[-1], x_axis_type))
+
+    # bin ranges as labels
     else:
-        lower_limit = bins[:-1]
-        upper_limit = bins[1:]
+        lower_limits = bins[:-1]
+        upper_limits = bins[1:]
+
         labels = np.array(
             [
-                f"[{round(x1,2)}\n - \n{round(x2, 2)})"
-                for x1, x2 in zip(lower_limit, upper_limit)
+                f"[{format(x1, x_axis_type)}\n - \n{format(x2, x_axis_type)})"
+                if x2 != np.Inf
+                else f"≥ {format(x1, x_axis_type)}"
+                for x1, x2 in zip(lower_limits, upper_limits)
             ]
         )
-        labels[-1] = (
-            labels[-1][:-1] + "]"
-        )  # fix label string of last bin to include last value
+
+        if upper_limits[-1] != np.Inf:
+            labels[-1] = (
+                labels[-1][:-1] + "]"
+            )  # fix label string of last bin to include last value
+
     return barchart(
         labels,
         counts,

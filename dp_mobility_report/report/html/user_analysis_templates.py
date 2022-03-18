@@ -12,7 +12,6 @@ from dp_mobility_report.model.section import Section
 from dp_mobility_report.report.html.html_utils import (
     get_template,
     render_moe_info,
-    render_outlier_info,
     render_summary,
 )
 from dp_mobility_report.visualization import plot, v_utils
@@ -25,7 +24,6 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     overlapping_trips_info = ""
     time_between_traj_summary_table = ""
     time_between_traj_moe_info = ""
-    outlier_count_radius_of_gyration_info = ""
     radius_of_gyration_hist = ""
     radius_of_gyration_summary_table = ""
     radius_of_gyration_moe_info = ""
@@ -75,14 +73,6 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
             report[const.RADIUS_OF_GYRATION].margin_of_error_expmech
         )
 
-        if mdreport.max_radius_of_gyration is not None:
-            outlier_count_radius_of_gyration_info = render_outlier_info(
-                report[const.RADIUS_OF_GYRATION].n_outliers,
-                report[const.RADIUS_OF_GYRATION].margin_of_error_laplace,
-                mdreport.max_jump_length,
-            )
-
-
     if (const.USER_TILE_COUNT in report) and (
         report[const.USER_TILE_COUNT].data is not None
     ):
@@ -116,7 +106,6 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         overlapping_trips_info=overlapping_trips_info,
         time_between_traj_summary_table=time_between_traj_summary_table,
         time_between_traj_moe_info=time_between_traj_moe_info,
-        outlier_count_radius_of_gyration_info=outlier_count_radius_of_gyration_info,
         radius_of_gyration_hist=radius_of_gyration_hist,
         radius_of_gyration_summary_table=radius_of_gyration_summary_table,
         radius_of_gyration_moe_info=radius_of_gyration_moe_info,

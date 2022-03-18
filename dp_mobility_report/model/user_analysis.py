@@ -23,7 +23,8 @@ def get_trips_per_user(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
         user_nunique,
         eps,
         sensitivity=1,
-        max_value=max_trips,
+        hist_max=max_trips,
+        bin_type=int,
         evalu=mdreport.evalu,
     )
 
@@ -80,8 +81,7 @@ def get_radius_of_gyration(
         rg,
         eps,
         sensitivity=1,
-        min_value=0,
-        max_value=mdreport.max_radius_of_gyration,
+        hist_max=mdreport.max_radius_of_gyration,
         bin_range=mdreport.bin_range_radius_of_gyration,
         evalu=mdreport.evalu,
     )
@@ -134,6 +134,7 @@ def get_user_tile_count(
         user_tile_count,
         eps,
         sensitivity=1,
+        bin_type=int,
         evalu=mdreport.evalu,
     )
 
@@ -170,7 +171,6 @@ def get_mobility_entropy(
         eps,
         sensitivity=1,
         bin_range=0.1,
-        min_value=0,
-        max_value=1,
+        hist_max=1,
         evalu=mdreport.evalu,
     )

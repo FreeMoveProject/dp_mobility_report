@@ -84,7 +84,7 @@ def get_od_flows(
         quartiles=dp_quartiles,
         privacy_budget=eps,
         margin_of_error_laplace=moe,
-        sensitivity=sensitivity
+        sensitivity=sensitivity,
     )
 
 
@@ -97,15 +97,15 @@ def get_travel_time(
 ) -> Section:
 
     travel_time = od_shape[const.DATETIME_END] - od_shape[const.DATETIME]
-    travel_time = (travel_time.dt.seconds / 60).round()  # as minutes
+    travel_time = travel_time.dt.seconds / 60  # as minutes
 
     return m_utils.hist_section(
         travel_time,
         eps,
         mdreport.max_trips_per_user,
-        min_value=0,
-        max_value=mdreport.max_travel_time,
+        hist_max=mdreport.max_travel_time,
         bin_range=mdreport.bin_range_travel_time,
+        bin_type=int,
         evalu=mdreport.evalu,
     )
 
@@ -122,8 +122,7 @@ def get_jump_length(
         jump_length,
         eps,
         mdreport.max_trips_per_user,
-        min_value=0,
-        max_value=mdreport.max_jump_length,
+        hist_max=mdreport.max_jump_length,
         bin_range=mdreport.bin_range_jump_length,
         evalu=mdreport.evalu,
     )

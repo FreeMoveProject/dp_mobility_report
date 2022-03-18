@@ -30,11 +30,11 @@ class MobilityDataReport:
             for higher accuracy of other analyses. Options are `overview`, `place_analysis`, `od_analysis`, `user_analysis` and `all`. Defaults to [`all`].
         disable_progress_bar: Whether progress bars should be shown. Defaults to False.
         timewindows: List of hours as `int` that define the timewindows for the spatial analysis for single time windows. Defaults to [2, 6, 10, 14, 18, 22].
-        max_travel_time: Upper bound for travel time analysis to cut outliers based on domain knowledge. If None is given, no upper bound is set. Defaults to None.
+        max_travel_time: Upper bound for travel time histogram. If None is given, no upper bound is set. Defaults to None.
         bin_range_travel_time: The range a single histogram bin spans for travel time (e.g., 5 for 5 min bins). If None is given, the histogram bins will be determined automatically. Defaults to None.
-        max_jump_length: Upper bound for jump length analysis to cut outliers based on domain knowledge. If None is given, no upper bound is set. Defaults to None.
+        max_jump_length: Upper bound for jump length histogram. If None is given, no upper bound is set. Defaults to None.
         bin_range_jump_length: The range a single histogram bin spans for jump length (e.g., 1 for 1 km bins). If None is given, the histogram bins will be determined automatically. Defaults to None.
-        max_radius_of_gyration: Upper bound for radius of gyration analysis to cut outliers based on domain knowledge. If None is given, no upper bound is set. Defaults to None.
+        max_radius_of_gyration: Upper bound for radius of gyration histogram. If None is given, no upper bound is set. Defaults to None.
         bin_range_radius_of_gyration The range a single histogram bin spans for the radius of gyration (e.g., 1 for 1 km bins). If None is given, the histogram bins will be determined automatically. Defaults to None.
         evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to False.
     """
