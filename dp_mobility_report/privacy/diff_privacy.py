@@ -151,7 +151,7 @@ def count_dp(
     if eps is None:
         return count
     dpcount = _laplacer(count, eps, sensitivity)
-    dpcount = int((abs(dpcount) + dpcount) / 2)
+    # dpcount = int((abs(dpcount) + dpcount) / 2)
     if nonzero:
         return dpcount if dpcount > 0 else None
     else:
@@ -162,6 +162,7 @@ def counts_dp(
     counts: Union[int, np.ndarray],  # TODO: only array?
     eps: Optional[float],
     sensitivity: int,
+    allow_negative: bool = False,
 ) -> Union[int, np.ndarray]:
     if eps is None:
         return counts
@@ -171,7 +172,12 @@ def counts_dp(
         return _laplacer(x, eps_local, sensitivity)
 
     vfunc = np.vectorize(_local_laplacer)
-    dpcount = vfunc(counts)
-    dpcount = ((abs(dpcount) + dpcount) / 2).astype(int)
+    dpcounts = vfunc(counts)
+    dpcounts = limit_negative_values_to_zero(dpcounts) if not allow_negative else dpcounts
+    dpcounts = dpcounts.astype(int)
 
-    return dpcount
+    return dpcounts
+
+
+def limit_negative_values_to_zero(valule: int) -> int:
+    return ((abs(valule) + valule) / 2)

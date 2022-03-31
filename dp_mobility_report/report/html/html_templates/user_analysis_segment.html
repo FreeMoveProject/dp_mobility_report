@@ -2,8 +2,10 @@
 
 <div>
     <h3>Number of trips per user</h3>
-    
     {{trips_per_user_hist}}
+    <p class="grey info">
+        {{trips_per_user_info}}
+    </p>
     <p class="info">
         {{trips_per_user_moe_info}}
     </p>
@@ -32,6 +34,9 @@
     </p>
     
     {{radius_of_gyration_hist}}
+    <p class="grey info">
+        {{radius_of_gyration_hist_info}}
+    </p>
     {{radius_of_gyration_summary_table}}
     <p class="info">
         {{radius_of_gyration_moe_info}}

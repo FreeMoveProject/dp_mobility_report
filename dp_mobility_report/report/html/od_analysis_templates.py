@@ -14,11 +14,11 @@ from dp_mobility_report import constants as const
 from dp_mobility_report.model import od_analysis
 from dp_mobility_report.model.section import Section
 from dp_mobility_report.report.html.html_utils import (
-    cumsum_simulations,
     fmt,
     get_template,
     render_moe_info,
     render_summary,
+    render_user_input_info,
 )
 from dp_mobility_report.visualization import plot, v_utils
 
@@ -31,6 +31,7 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
     flows_summary_table = ""
     flows_cumsum_linechart = ""
     most_freq_flows_ranking = ""
+    travel_time_hist_info = ""
     travel_time_hist = ""
     travel_time_summary_table = ""
     travel_time_moe_info = ""
@@ -55,6 +56,9 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
         )
 
     if const.TRAVEL_TIME in report and report[const.TRAVEL_TIME].data is not None:
+        travel_time_hist_info = render_user_input_info(
+            mdreport.max_travel_time, mdreport.bin_range_travel_time
+        )
         travel_time_hist = render_travel_time_hist(report[const.TRAVEL_TIME])
         travel_time_summary_table = render_summary(report[const.TRAVEL_TIME].quartiles)
         travel_time_moe_info = render_moe_info(
@@ -62,6 +66,9 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
         )
 
     if const.JUMP_LENGTH in report and report[const.JUMP_LENGTH].data is not None:
+        jump_length_hist_info = render_user_input_info(
+            mdreport.max_jump_length, mdreport.bin_range_jump_length
+        )
         jump_length_hist = render_jump_length_hist(report[const.JUMP_LENGTH])
         jump_length_summary_table = render_summary(report[const.JUMP_LENGTH].quartiles)
         jump_length_moe_info = render_moe_info(
@@ -77,9 +84,11 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
         flows_summary_table=flows_summary_table,
         flows_cumsum_linechart=flows_cumsum_linechart,
         most_freq_flows_ranking=most_freq_flows_ranking,
+        travel_time_hist_info=travel_time_hist_info,
         travel_time_hist=travel_time_hist,
         travel_time_moe_info=travel_time_moe_info,
         travel_time_summary_table=travel_time_summary_table,
+        jump_length_hist_info=jump_length_hist_info,
         jump_length_hist=jump_length_hist,
         jump_length_moe_info=jump_length_moe_info,
         jump_length_summary_table=jump_length_summary_table,
@@ -139,9 +148,7 @@ def render_intra_tile_flows(od_flows: Section) -> str:
 
 
 def render_flows_cumsum(od_flows: Section) -> str:
-    df_cumsum = cumsum_simulations(
-        od_flows.data.flow, od_flows.privacy_budget, od_flows.sensitivity
-    )
+    df_cumsum = od_flows.cumsum_simulations
 
     chart = plot.linechart(
         df_cumsum,

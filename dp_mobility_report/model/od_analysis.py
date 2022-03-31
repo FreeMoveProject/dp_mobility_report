@@ -68,23 +68,26 @@ def get_od_flows(
     od_flows.fillna(0, inplace=True)
 
     od_flows["flow"] = diff_privacy.counts_dp(
-        od_flows["flow"].to_numpy(), eps, sensitivity
+        od_flows["flow"].to_numpy(), eps, sensitivity, allow_negative = True
     )
 
-    # remove all instances of 0 to reduce storage
+    moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
+    cumsum_simulations = m_utils.cumsum_simulations(od_flows.flow.to_numpy(), eps, sensitivity)
+
+    # remove all instances of 0 (and smaller) to reduce storage
     od_flows = od_flows[od_flows["flow"] > 0]
 
+    # TODO: distribution with or without 0s?
     # as counts are already dp, no further privacy mechanism needed
     dp_quartiles = od_flows.flow.describe()
-
-    moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
-
+    
     return Section(
         data=od_flows,
         quartiles=dp_quartiles,
         privacy_budget=eps,
         margin_of_error_laplace=moe,
         sensitivity=sensitivity,
+        cumsum_simulations=cumsum_simulations,
     )
 
 

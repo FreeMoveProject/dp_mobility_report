@@ -4,7 +4,6 @@ from typing import Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 
-
 @dataclass
 class Section:
     """Class for single report sections. Attribute 'data' contains the content of the report element.
@@ -24,3 +23,4 @@ class Section:
     conf_interval: dict = None
     margin_of_error_laplace: Optional[float] = None
     margin_of_error_expmech: Optional[int] = None
+    cumsum_simulations: pd.DataFrame = None

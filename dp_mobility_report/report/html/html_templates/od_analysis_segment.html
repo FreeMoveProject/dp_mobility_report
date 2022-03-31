@@ -50,8 +50,10 @@
     
     <div>
         <h4>Travel time of trips (in minutes)</h4>
-
-            {{travel_time_hist}}
+        {{travel_time_hist}}
+        <p class="grey info">
+            {{travel_time_hist_info}}
+        </p>
             {{travel_time_summary_table}}
             <p class="info">
                 {{travel_time_moe_info}}
@@ -59,7 +61,10 @@
     </div>
     <div>
         <h4>Jump length (in kilometers)</h4>
-            {{jump_length_hist}}
+        {{jump_length_hist}}
+        <p class="grey info">
+            {{jump_length_hist_info}}
+        </p>
             {{jump_length_summary_table}}
             <p class="info">
                 {{jump_length_moe_info}}

@@ -35,6 +35,14 @@ def render_summary(summary: Series, title: str = "Distribution") -> str:
     return summary_html
 
 
+def render_user_input_info(
+    max_value: Optional[Union[int, float]], bin_size: Optional[Union[int, float]]
+) -> str:
+    return f"""User configuration for histogram chart: <br>
+            maximum value: {max_value} <br>
+            bin size: {bin_size}"""
+
+
 def render_moe_info(margin_of_error: int) -> str:
     return f"""To provide privacy, quartile values are not necessarily the true values but, e.g., instead of the true maximum value the 
         second or third highest value is displayed.
@@ -51,26 +59,3 @@ def fmt(value: Any) -> Any:
     ):
         value = f"{value:,}"
     return value
-
-
-def _cumsum(series: Series):
-    return round(
-        series.sort_values(ascending=False).cumsum() / sum(series),
-        2,
-    ).reset_index(drop=True)
-
-
-def cumsum_simulations(series: DataFrame, eps: float, sensitivity: int):
-    df_cumsum = DataFrame()
-    df_cumsum["n"] = np.arange(1, len(series) + 1)
-    df_cumsum["cum_perc"] = _cumsum(series)
-
-    for i in range(1, 50):
-        sim_counts = series.apply(
-            lambda x: _laplacer(x, eps=eps, sensitivity=sensitivity)
-        )
-        sim_counts = sim_counts.apply(lambda x: int((abs(x) + x) / 2))
-        df_cumsum["cum_perc_" + str(i)] = _cumsum(sim_counts)
-
-    df_cumsum.reset_index(drop=True, inplace=True)
-    return df_cumsum

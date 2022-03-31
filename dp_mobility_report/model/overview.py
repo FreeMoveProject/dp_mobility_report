@@ -49,6 +49,7 @@ def get_dataset_statistics(
 
     n_trips = n_incomplete_trips + n_complete_trips
     if n_trips == 0:
+        n_trips = None  # trips cannot be None
         moe_trips = (moe_incomplete_trips + moe_complete_trips) / 2
     else:
         moe_trips = (
@@ -57,8 +58,8 @@ def get_dataset_statistics(
         ) / n_trips
     ci95_trips = diff_privacy.conf_interval(n_trips, moe_trips)
 
-    n_records = 0 if n_trips == 0 else (n_incomplete_trips + n_complete_trips * 2)
-    if n_records == 0:
+    n_records = None if n_trips is None else (n_incomplete_trips + n_complete_trips * 2)
+    if n_records is None:
         moe_records = (moe_incomplete_trips + moe_complete_trips * 2) / 2
     else:
         moe_records = (

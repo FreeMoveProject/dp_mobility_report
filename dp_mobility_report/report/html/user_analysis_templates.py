@@ -13,17 +13,20 @@ from dp_mobility_report.report.html.html_utils import (
     get_template,
     render_moe_info,
     render_summary,
+    render_user_input_info,
 )
 from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_user_analysis(mdreport: "MobilityDataReport") -> str:
+    trips_per_user_info = f"Trips per user are limited according to the configured maximum of trips per user: {mdreport.max_trips_per_user}"
     trips_per_user_hist = ""
     trips_per_user_summary_table = ""
     trips_per_user_moe_info = ""
     overlapping_trips_info = ""
     time_between_traj_summary_table = ""
     time_between_traj_moe_info = ""
+    radius_of_gyration_hist_info = ""
     radius_of_gyration_hist = ""
     radius_of_gyration_summary_table = ""
     radius_of_gyration_moe_info = ""
@@ -63,6 +66,9 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     if (const.RADIUS_OF_GYRATION in report) and (
         report[const.RADIUS_OF_GYRATION].data is not None
     ):
+        radius_of_gyration_hist_info = render_user_input_info(
+            mdreport.max_radius_of_gyration, mdreport.bin_range_radius_of_gyration
+        )
         radius_of_gyration_hist = render_radius_of_gyration(
             report[const.RADIUS_OF_GYRATION]
         )
@@ -100,12 +106,14 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     template_structure = get_template("user_analysis_segment.html")
 
     return template_structure.render(
+        trips_per_user_info=trips_per_user_info,
         trips_per_user_hist=trips_per_user_hist,
         trips_per_user_summary_table=trips_per_user_summary_table,
         trips_per_user_moe_info=trips_per_user_moe_info,
         overlapping_trips_info=overlapping_trips_info,
         time_between_traj_summary_table=time_between_traj_summary_table,
         time_between_traj_moe_info=time_between_traj_moe_info,
+        radius_of_gyration_hist_info=radius_of_gyration_hist_info,
         radius_of_gyration_hist=radius_of_gyration_hist,
         radius_of_gyration_summary_table=radius_of_gyration_summary_table,
         radius_of_gyration_moe_info=radius_of_gyration_moe_info,
