@@ -174,17 +174,17 @@ def render_trips_over_time(trips_over_time: Section) -> str:
             y=trips_over_time.data["trip_count"].to_numpy(),
             margin_of_error=trips_over_time.margin_of_error_laplace,
             x_axis_label="Date",
-            y_axis_label="Frequency",
+            y_axis_label="% of trips",
             rotate_label=True,
         )
         html = v_utils.fig_to_html(chart)
     else:
         chart = plot.linechart(
-            trips_over_time.data,
-            const.DATETIME,
-            "trip_count",
-            "Date",
-            "Frequency",
+            data=trips_over_time.data,
+            x=const.DATETIME,
+            y="trip_count",
+            x_axis_label="Date",
+            y_axis_label="% of trips",
             margin_of_error=trips_over_time.margin_of_error_laplace,
         )
         html = v_utils.fig_to_html(chart)
@@ -198,17 +198,8 @@ def render_trips_per_weekday(trips_per_weekday: Section) -> str:
         y=trips_per_weekday.data.values,
         margin_of_error=trips_per_weekday.margin_of_error_laplace,
         x_axis_label="Weekday",
-        y_axis_label="Average trips per weekday",
+        y_axis_label="% of trips per weekday",
         rotate_label=True,
-        # order_x=[
-        #     "Monday",
-        #     "Tuesday",
-        #     "Wednesday",
-        #     "Thursday",
-        #     "Friday",
-        #     "Saturday",
-        #     "Sunday",
-        # ],
     )
     plt.close()
     return v_utils.fig_to_html(chart)
@@ -216,10 +207,12 @@ def render_trips_per_weekday(trips_per_weekday: Section) -> str:
 
 def render_trips_per_hour(trips_per_hour: Section) -> str:
     chart = plot.multi_linechart(
-        trips_per_hour.data,
-        const.HOUR,
-        "count",
-        const.TIME_CATEGORY,
+        data=trips_per_hour.data,
+        x=const.HOUR,
+        y="count",
+        color=const.TIME_CATEGORY,
+        x_axis_label="Hour of day",
+        y_axis_label="% of trips",
         hue_order=["weekday_start", "weekday_end", "weekend_start", "weekend_end"],
         margin_of_error=trips_per_hour.margin_of_error_laplace,
     )

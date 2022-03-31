@@ -129,6 +129,8 @@ def multi_linechart(
     x: str,
     y: str,
     color: str,
+    x_axis_label: str,
+    y_axis_label: str,
     hue_order: Optional[list] = None,
     margin_of_error: Optional[float] = None,
 ) -> mpl.figure.Figure:
@@ -146,6 +148,8 @@ def multi_linechart(
         palette=palette,
     )
     plot.set_ylim(bottom=0)
+    plot.set_ylabel(y_axis_label)
+    plot.set_xlabel(x_axis_label)
 
     if margin_of_error is not None:
         for i in range(0, len(hue_order)):

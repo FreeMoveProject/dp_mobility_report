@@ -31,7 +31,7 @@ def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
             report[const.COUNTS_PER_TILE], tessellation
         )
         counts_per_tile_summary_table = render_summary(
-            report[const.COUNTS_PER_TILE].quartiles, "Distribution of visits per tile"
+            round(report[const.COUNTS_PER_TILE].quartiles, 1), "Distribution of the percentage of visits per tile" # as percent
         )
         counts_per_tile_cumsum_linechart = render_counts_per_tile_cumsum(
             report[const.COUNTS_PER_TILE]
@@ -62,13 +62,14 @@ def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
 
 
 def render_points_outside_tess(counts_per_tile: Section) -> str:
-    return f"{counts_per_tile.n_outliers} points are outside the given tessellation (95% confidence interval ± {round(counts_per_tile.margin_of_error_laplace)})."
+    return f"{round(counts_per_tile.n_outliers)}% of points are outside the given tessellation (95% confidence interval ± {round(counts_per_tile.margin_of_error_laplace)} percentage points)."
 
 
 def render_counts_per_tile(
     counts_per_tile: Section, tessellation: GeoDataFrame, threshold: float = 0.1
 ) -> Tuple[str, str]:
     data = counts_per_tile.data
+    data["visit_count"] = round(data.visit_count)
     # merge count and tessellation
     counts_per_tile_gdf = pd.merge(
         tessellation,
@@ -82,9 +83,9 @@ def render_counts_per_tile(
     moe_deviation = (
         counts_per_tile.margin_of_error_laplace / counts_per_tile_gdf["visit_count"]
     )
-    counts_per_tile_gdf.loc[moe_deviation > threshold, "visit_count"] = None
+    #counts_per_tile_gdf.loc[moe_deviation > threshold, "visit_count"] = None
     map, legend = plot.choropleth_map(
-        counts_per_tile_gdf, "visit_count", scale_title="Number of visits"
+        counts_per_tile_gdf, "visit_count", scale_title="% of visits"
     )
     html = map.get_root().render()
     legend_html = v_utils.fig_to_html(legend)
@@ -120,10 +121,10 @@ def render_most_freq_tiles_ranking(counts_per_tile: Section, top_x: int = 10) ->
         + topx_tiles[const.TILE_ID]
         + ")"
     )
-
+    
     ranking = plot.ranking(
-        topx_tiles.visit_count,
-        "Number of visits per tile",
+        round(topx_tiles.visit_count),
+        "% of visits per tile",
         y_labels=labels,
         margin_of_error=counts_per_tile.margin_of_error_laplace,
     )
@@ -142,37 +143,32 @@ def render_counts_per_tile_timewindow(
     moe_counts_per_tile_timewindow = (
         counts_per_tile_timewindow.margin_of_error_laplace / data
     )
+    
     data[moe_counts_per_tile_timewindow > threshold] = None
 
     output_html = ""
     if "weekday" in data.columns:
-        absolute_weekday = plot.multi_choropleth_map(
-            data.loc[:, "weekday"], tessellation
-        )
-
-        tile_means = data.loc[:, "weekday"].mean(axis=1)
-        dev_from_avg = data.loc[:, "weekday"].div(tile_means, axis=0)
-        relative_weekday = plot.multi_choropleth_map(dev_from_avg, tessellation)
-        output_html += (
-            "<h4>Weekday: absolute count</h4>"
-            + v_utils.fig_to_html_as_png(absolute_weekday)  # svg might get too large
-            + "<h4>Weekday: deviation from average</h4>"
-            + v_utils.fig_to_html_as_png(relative_weekday)  # svg might get too large
-        )
+        output_html += "<h4>Weekday</h4>"
+        output_html += _create_timewindow_segment(data.loc[:, "weekday"], tessellation)
 
     if "weekend" in data.columns:
-        absolute_weekend = plot.multi_choropleth_map(
-            data.loc[:, "weekend"], tessellation
-        )
-
-        tile_means = data.loc[:, "weekend"].mean(axis=1)
-        dev_from_avg = data.loc[:, "weekend"].div(tile_means, axis=0)
-        relative_weekend = plot.multi_choropleth_map(dev_from_avg, tessellation)
-        output_html += (
-            "<h4>Weekend: absolute count</h4>"
-            + v_utils.fig_to_html_as_png(absolute_weekend)
-            + "<h4>Weekend: deviation from average</h4>"
-            + v_utils.fig_to_html_as_png(relative_weekend)
-        )
+        output_html += "<h4>Weekend</h4>"
+        output_html += _create_timewindow_segment(data.loc[:, "weekend"], tessellation)
     plt.close()
     return output_html
+
+def _create_timewindow_segment(df, tessellation):
+    visits_choropleth = plot.multi_choropleth_map(
+        df, tessellation
+    )
+
+    tile_means = df.mean(axis=1)
+    dev_from_avg = df.div(tile_means, axis=0)
+    deviation_choropleth = plot.multi_choropleth_map(dev_from_avg, tessellation)
+    return (
+        f"""<h4>% of visits</h4>
+        {v_utils.fig_to_html_as_png(visits_choropleth)}
+        <h4>Deviation from tile average</h4>
+        <div><p>A value of 1 corrresponds to the average.</p></div>
+        {v_utils.fig_to_html_as_png(deviation_choropleth)}"""  # svg might get too large
+    )

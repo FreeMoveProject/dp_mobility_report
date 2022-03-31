@@ -58,11 +58,18 @@ def get_visits_per_tile(
     )
 
     counts_per_tile["visit_count"] = counts_per_tile["visit_count"].apply(diff_privacy.limit_negative_values_to_zero)
+    moe = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
+    
+    # as percent instead of absolute values
+    visists_sum = np.sum(counts_per_tile["visit_count"]) 
+    if visists_sum != 0:
+        counts_per_tile["visit_count"] = counts_per_tile["visit_count"] / visists_sum * 100
+        n_outliers = n_outliers / visists_sum * 100
+        moe = moe / visists_sum * 100
 
     # as counts are already dp, no further privacy mechanism needed
     dp_quartiles = counts_per_tile.visit_count.describe()
 
-    moe = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
 
 
     return Section(
@@ -136,6 +143,11 @@ def get_visits_per_tile_timewindow(
     )
 
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, mdreport.max_trips_per_user)
+
+    # as percent instead of absolute values
+    if counts_per_tile_timewindow.sum() != 0:
+        counts_per_tile_timewindow = counts_per_tile_timewindow / counts_per_tile_timewindow.sum()
+        moe = moe / counts_per_tile_timewindow.sum()
 
     return Section(
         data=counts_per_tile_timewindow.unstack(const.TILE_ID).T,

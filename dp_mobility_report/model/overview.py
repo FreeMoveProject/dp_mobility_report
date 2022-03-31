@@ -1,6 +1,7 @@
 from datetime import timedelta
 from typing import TYPE_CHECKING, Optional
 
+import numpy as np
 import pandas as pd
 
 if TYPE_CHECKING:
@@ -128,6 +129,7 @@ def get_trips_over_time(
 ) -> Section:
     epsi = m_utils.get_epsi(mdreport.evalu, eps, 6)
     epsi_quant = epsi * 5 if epsi is not None else None
+    # TODO: distribution actually necessary? (better to use all privacy budget on histograms?)
 
     df_trip = mdreport.df[
         (mdreport.df[const.POINT_TYPE] == const.END)
@@ -171,9 +173,17 @@ def get_trips_over_time(
         epsi,
         mdreport.max_trips_per_user,
     )
+
     moe_laplace = diff_privacy.laplace_margin_of_error(
         0.95, epsi, mdreport.max_trips_per_user
     )
+
+    # as percent instead of absolute values
+    trip_sum = np.sum(trip_count["trip_count"]) 
+    if trip_sum != 0:
+        trip_count["trip_count"] = trip_count["trip_count"] / trip_sum * 100
+        moe_laplace = moe_laplace / trip_sum * 100
+
 
     return Section(
         data=trip_count,
@@ -211,6 +221,11 @@ def get_trips_per_weekday(
     )
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, mdreport.max_trips_per_user)
 
+    trip_sum = np.sum(trips_per_weekday) 
+    if trip_sum != 0:
+        trips_per_weekday = trips_per_weekday / trip_sum * 100
+        moe = moe / trip_sum * 100
+
     return Section(
         data=trips_per_weekday, privacy_budget=eps, margin_of_error_laplace=moe
     )
@@ -231,6 +246,12 @@ def get_trips_per_hour(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
         hour_weekday[const.IS_WEEKEND] + "_" + hour_weekday[const.POINT_TYPE]
     )
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, mdreport.max_trips_per_user)
+
+    # as percent instead of absolute values
+    trip_sum = np.sum(hour_weekday[hour_weekday.point_type == const.END]["count"]) #only use ends to get sum of trips
+    if trip_sum != 0:
+        hour_weekday["count"] = hour_weekday["count"] / trip_sum * 100
+        moe = moe / trip_sum * 100
 
     return Section(
         data=hour_weekday[[const.HOUR, const.TIME_CATEGORY, "count"]],
