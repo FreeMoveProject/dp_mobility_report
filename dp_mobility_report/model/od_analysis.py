@@ -74,6 +74,13 @@ def get_od_flows(
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
     cumsum_simulations = m_utils.cumsum_simulations(od_flows.flow.to_numpy(), eps, sensitivity)
 
+    # as percent instead of absolute values
+    od_sum = np.sum(od_flows["flow"]) 
+    if od_sum != 0:
+        od_flows["flow"] = od_flows["flow"] / od_sum * 100
+        moe = moe / od_sum * 100
+
+
     # remove all instances of 0 (and smaller) to reduce storage
     od_flows = od_flows[od_flows["flow"] > 0]
 

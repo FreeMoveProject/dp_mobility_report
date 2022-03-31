@@ -98,7 +98,6 @@ def hist_section(
             else quartiles["max"]
             + (bin_range - ((quartiles["max"] - min_value) % bin_range))
         )
-        # bin_range * ((quartiles["max"] // bin_range) +1)
 
         max_bins = int((max_value - min_value) / bin_range)
         max_bins = (
@@ -120,6 +119,10 @@ def hist_section(
 
     dp_counts = diff_privacy.counts_dp(counts, epsi, sensitivity)
     moe_laplace = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
+    
+    # as percent instead of counts
+    dp_counts = dp_counts / sum(dp_counts) * 100
+    moe_laplace = moe_laplace / sum(dp_counts) * 100 
 
     return Section(
         data=(dp_counts, bins),

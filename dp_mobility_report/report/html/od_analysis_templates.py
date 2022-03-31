@@ -47,8 +47,8 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
         )
         intra_tile_flows_info = render_intra_tile_flows(report[const.OD_FLOWS])
         flows_summary_table = render_summary(
-            report[const.OD_FLOWS].quartiles,
-            "Distribution of flow counts per OD pair",
+            report[const.OD_FLOWS].quartiles.round().astype(int),
+            "Distribution of the percentage of flows per OD pair",
         )
         flows_cumsum_linechart = render_flows_cumsum(report[const.OD_FLOWS])
         most_freq_flows_ranking = render_most_freq_flows_ranking(
@@ -103,6 +103,8 @@ def render_origin_destination_flows(
 ) -> Tuple[str, str]:
     data = od_flows.data.copy()
     moe_deviation = od_flows.margin_of_error_laplace / data["flow"]
+    # round percentages for viz
+    data["flow"] = data["flow"].round()
     data.loc[moe_deviation > threshold, "flow"] = None
     top_n_flows = top_n_flows if top_n_flows <= len(data) else len(data)
     innerflow = data[data.origin == data.destination]
@@ -121,7 +123,7 @@ def render_origin_destination_flows(
 
     # tessellation_innerflow.loc[tessellation_innerflow.flow.isna(), "flow"] = 0
     innerflow_chropleth, innerflow_legend = plot.choropleth_map(
-        tessellation_innerflow, "flow", "Number of intra-tile flows"
+        tessellation_innerflow, "flow", "% of intra-tile flows"
     )  # get innerflows as color for choropleth
 
     od_map = (
@@ -192,7 +194,7 @@ def render_most_freq_flows_ranking(
 
     ranking = plot.ranking(
         topx_flows.flow,
-        "flow counts per OD pair",
+        "% of flows per OD pair",
         y_labels=labels,
         margin_of_error=od_flows.margin_of_error_laplace,
     )
@@ -205,6 +207,7 @@ def render_travel_time_hist(travel_time_hist: Section) -> str:
     hist = plot.histogram(
         travel_time_hist.data,
         x_axis_label="travel time (min.)",
+        y_axis_label="% of trips",
         x_axis_type=int,
         margin_of_error=travel_time_hist.margin_of_error_laplace,
     )
@@ -217,6 +220,7 @@ def render_jump_length_hist(jump_length_hist: Section) -> str:
     hist = plot.histogram(
         jump_length_hist.data,
         x_axis_label="jump length (kilometers)",
+        y_axis_label="% of trips",
         x_axis_type=float,
         margin_of_error=jump_length_hist.margin_of_error_laplace,
     )

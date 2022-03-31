@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Type, Union
 
 import diffprivlib
 import numpy as np
@@ -135,10 +135,13 @@ def laplace_margin_of_error(
     return laplace.ppf(q, loc=0, scale=scale)
 
 
-def conf_interval(value: Optional[Union[float, int]], margin_of_error: float) -> Tuple:
+def conf_interval(value: Optional[Union[float, int]], margin_of_error: float, type: Type = int) -> Tuple:
     if value is None:
         return (None, None)
     lower_limit = (value - margin_of_error) if (margin_of_error < value) else 0
+    if Type is not None:
+        lower_limit = type(lower_limit)
+        margin_of_error = type(margin_of_error)
     return (lower_limit, value + margin_of_error)
 
 

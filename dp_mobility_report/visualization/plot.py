@@ -29,6 +29,7 @@ def format(value: Union[float, int], type: Type):
 def histogram(
     hist: Tuple,
     x_axis_label: str,
+    y_axis_label: str = "Frequency",
     margin_of_error: float = None,
     rotate_label: bool = False,
     x_axis_type: Type = float,
@@ -67,7 +68,7 @@ def histogram(
         labels,
         counts,
         x_axis_label,
-        "Frequency",
+        y_axis_label,
         margin_of_error=margin_of_error,
         rotate_label=rotate_label,
     )
@@ -169,6 +170,7 @@ def choropleth_map(
     fill_color_name: str,
     scale_title: str = "Visit count",
     min_scale: Optional[Union[int, float]] = None,
+    aliases:list = None,
 ) -> folium.Map:
     poly_json = counts_per_tile_gdf.to_json()
 
@@ -208,7 +210,7 @@ def choropleth_map(
     folium.GeoJson(
         poly_json,
         style_function=_style_function,
-        popup=folium.GeoJsonPopup(fields=fields),
+        popup=folium.GeoJsonPopup(fields=fields, aliases=aliases),
     ).add_to(m)
 
     # colorbar object to create custom legend

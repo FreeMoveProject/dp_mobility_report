@@ -31,7 +31,7 @@ def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
             report[const.COUNTS_PER_TILE], tessellation
         )
         counts_per_tile_summary_table = render_summary(
-            round(report[const.COUNTS_PER_TILE].quartiles, 1), "Distribution of the percentage of visits per tile" # as percent
+            report[const.COUNTS_PER_TILE].quartiles.round().astype(int), "Distribution of the percentage of visits per tile" # as percent
         )
         counts_per_tile_cumsum_linechart = render_counts_per_tile_cumsum(
             report[const.COUNTS_PER_TILE]
@@ -83,9 +83,9 @@ def render_counts_per_tile(
     moe_deviation = (
         counts_per_tile.margin_of_error_laplace / counts_per_tile_gdf["visit_count"]
     )
-    #counts_per_tile_gdf.loc[moe_deviation > threshold, "visit_count"] = None
+    counts_per_tile_gdf.loc[moe_deviation > threshold, "visit_count"] = None
     map, legend = plot.choropleth_map(
-        counts_per_tile_gdf, "visit_count", scale_title="% of visits"
+        counts_per_tile_gdf, "visit_count", scale_title="% of visits", aliases=["Tile ID", "Tile Name", "% of visits"]
     )
     html = map.get_root().render()
     legend_html = v_utils.fig_to_html(legend)

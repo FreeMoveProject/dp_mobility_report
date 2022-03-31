@@ -130,6 +130,7 @@ def render_trips_per_user(trips_per_user_hist: Section) -> str:
     hist = plot.histogram(
         trips_per_user_hist.data,
         x_axis_label="Number of trips per user",
+        y_axis_label="% of users",
         x_axis_type=int,
         margin_of_error=trips_per_user_hist.margin_of_error_laplace,
     )
@@ -160,6 +161,7 @@ def render_radius_of_gyration(radius_of_gyration_hist: Section) -> str:
     hist = plot.histogram(
         radius_of_gyration_hist.data,
         x_axis_label="radius of gyration",
+        y_axis_label="% of users",
         x_axis_type=float,
         margin_of_error=radius_of_gyration_hist.margin_of_error_laplace,
     )
@@ -172,6 +174,7 @@ def render_distinct_tiles_user(user_tile_count_hist: Section) -> str:
     hist = plot.histogram(
         user_tile_count_hist.data,
         x_axis_label="number of distinct tiles a user has visited",
+        y_axis_label="% of users",
         x_axis_type=int,
         margin_of_error=user_tile_count_hist.margin_of_error_laplace,
     )
@@ -183,7 +186,7 @@ def render_distinct_tiles_user(user_tile_count_hist: Section) -> str:
 def render_mobility_entropy(mobility_entropy: Section) -> str:
     hist = plot.histogram(
         (mobility_entropy.data[0], mobility_entropy.data[1].round(2)),
-        x_axis_label="mobility entropy",
+        x_axis_label="mobility entropy",y_axis_label="% of users",
         margin_of_error=mobility_entropy.margin_of_error_laplace,
     )
     html = v_utils.fig_to_html(hist)
