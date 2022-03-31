@@ -17,7 +17,7 @@ def test_mdreport():
 
 def test_get_trips_per_user(test_mdreport):
     trips_per_user = user_analysis.get_trips_per_user(test_mdreport, None)
-    assert trips_per_user.data[0].tolist() == [1, 0, 4, 3, 5, 2, 3, 1, 1]
+    assert trips_per_user.data[0].round().tolist() == [5.0, 0.0, 20.0, 15.0, 25.0, 10.0, 15.0, 5.0, 5.0]
     assert trips_per_user.data[1].round().tolist() == [
         1.0,
         2.0,
@@ -45,7 +45,7 @@ def test_get_user_time_delta(test_mdreport):
 
 def test_get_radius_of_gyration(test_mdreport):
     rog = user_analysis.get_radius_of_gyration(test_mdreport, None)
-    assert rog.data[0].tolist() == [2, 0, 0, 2, 2, 6, 2, 3, 0, 3]
+    assert rog.data[0].round().tolist() == [10.0, 0.0, 0.0, 10.0, 10.0, 30.0, 10.0, 15.0, 0.0, 15.0]
     assert rog.data[1].round(3).tolist() == [
         2.2,
         2.437,
@@ -66,7 +66,7 @@ def test_get_radius_of_gyration(test_mdreport):
 
 def test_get_user_tile_count(test_mdreport):
     user_tile_count = user_analysis.get_user_tile_count(test_mdreport, None)
-    assert user_tile_count.data[0].tolist() == [2, 0, 18]
+    assert user_tile_count.data[0].round().tolist() == [10.0, 0.0, 90.0]
     assert user_tile_count.data[1].round(1).tolist() == [2, 3, 4]
     assert len(user_tile_count.data[0]) == 3
     assert all(np.diff(user_tile_count.data[1]) == 1)
@@ -75,7 +75,7 @@ def test_get_user_tile_count(test_mdreport):
 
 def test_get_mobility_entropy(test_mdreport):
     mobility_entropy = user_analysis.get_mobility_entropy(test_mdreport, None)
-    assert mobility_entropy.data[0].tolist() == [2, 18]
+    assert mobility_entropy.data[0].round().tolist() == [10.0, 90.0]
     assert mobility_entropy.data[1].round(2).tolist() == [
         0.8,
         0.9,

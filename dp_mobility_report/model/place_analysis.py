@@ -146,8 +146,8 @@ def get_visits_per_tile_timewindow(
 
     # as percent instead of absolute values
     if counts_per_tile_timewindow.sum() != 0:
-        counts_per_tile_timewindow = counts_per_tile_timewindow / counts_per_tile_timewindow.sum()
-        moe = moe / counts_per_tile_timewindow.sum()
+        counts_per_tile_timewindow = counts_per_tile_timewindow / counts_per_tile_timewindow.sum() * 100
+        moe = moe / counts_per_tile_timewindow.sum() * 100
 
     return Section(
         data=counts_per_tile_timewindow.unstack(const.TILE_ID).T,

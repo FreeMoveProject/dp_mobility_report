@@ -56,7 +56,8 @@ def test_get_od_flows(test_od_shape, test_mdreport):
     od_flows = od_analysis.get_od_flows(test_od_shape, test_mdreport, None).data
     assert od_flows.columns.tolist() == ["origin", "destination", "flow"]
     assert len(od_flows) == 2
-    assert od_flows.values[0].tolist() == ["1", "3", 50.0]
+    od_flows["flow"] = od_flows["flow"].round()
+    assert od_flows.values[0].tolist() == ["1", "3", 51.0]
     assert od_flows.values[1].tolist() == ["2", "4", 49.0]
 
 
@@ -77,7 +78,7 @@ def test_get_intra_tile_flows():
 
 def test_get_travel_time(test_od_shape, test_mdreport):
     travel_time = od_analysis.get_travel_time(test_od_shape, test_mdreport, None)
-    assert travel_time.data[0].tolist() == [13, 10, 7, 9, 13, 6, 14, 9, 8, 10]
+    assert travel_time.data[0].round().tolist() == [13.0, 10.0, 7.0, 9.0, 13.0, 6.0, 14.0, 9.0, 8.0, 10.0]
     assert travel_time.data[1].tolist() == [1, 13, 25, 37, 48, 60, 72, 84, 96, 107, 119]
     assert len(travel_time.data[0]) == 10
     assert travel_time.quartiles.round().tolist() == [2.0, 29.0, 60.0, 86.0, 120.0]
@@ -85,7 +86,7 @@ def test_get_travel_time(test_od_shape, test_mdreport):
     test_mdreport.max_travel_time = 60
     test_mdreport.bin_range_travel_time = 5
     travel_time = od_analysis.get_travel_time(test_od_shape, test_mdreport, None)
-    assert travel_time.data[0].tolist() == [2, 8, 6, 2, 4, 4, 4, 2, 3, 6, 7, 2, 49]
+    assert travel_time.data[0].round().tolist() == [2.0, 8.0, 6.0, 2.0, 4.0, 4.0, 4.0, 2.0, 3.0, 6.0, 7.0, 2.0, 49.0]
     assert travel_time.data[1].tolist() == [
         0,
         5,
@@ -108,7 +109,7 @@ def test_get_travel_time(test_od_shape, test_mdreport):
 
 def test_get_jump_length(test_od_shape, test_mdreport):
     jump_length = od_analysis.get_jump_length(test_od_shape, test_mdreport, None)
-    assert jump_length.data[0].tolist() == [7, 10, 15, 17, 16, 17, 9, 5, 2, 1]
+    assert jump_length.data[0].round().tolist() == [7, 10, 15, 17, 16, 17, 9, 5, 2, 1]
     assert jump_length.data[1].round(3).tolist() == [
         1.114,
         1.877,
@@ -135,7 +136,7 @@ def test_get_jump_length(test_od_shape, test_mdreport):
     test_mdreport.max_jump_length = 4
     test_mdreport.bin_range_jump_length = 0.5
     jump_length = od_analysis.get_jump_length(test_od_shape, test_mdreport, None)
-    assert jump_length.data[0].tolist() == [4, 3, 9, 5, 15, 11, 52]
+    assert jump_length.data[0].round().tolist() == [4.0, 3.0, 9.0, 5.0, 15.0, 11.0, 53.0]
     assert jump_length.data[1].tolist() == [1, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, np.Inf]
     assert len(jump_length.data[0]) == 7
     assert jump_length.quartiles.round(3).tolist() == [1.114, 3.039, 4.185, 5.35, 8.741]

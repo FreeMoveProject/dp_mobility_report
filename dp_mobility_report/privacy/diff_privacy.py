@@ -154,7 +154,7 @@ def count_dp(
     if eps is None:
         return count
     dpcount = _laplacer(count, eps, sensitivity)
-    # dpcount = int((abs(dpcount) + dpcount) / 2)
+    dpcount = int((abs(dpcount) + dpcount) / 2)
     if nonzero:
         return dpcount if dpcount > 0 else None
     else:

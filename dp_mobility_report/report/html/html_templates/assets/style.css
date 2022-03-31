@@ -372,11 +372,6 @@ select.multiple{
     text-align: left;
 }
 
-.map{
-    width: 80%; 
-    height: 600px;
-}
-
 .map_png{
     width: 80%;
 }

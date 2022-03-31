@@ -72,7 +72,7 @@ def get_od_flows(
     )
 
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
-    cumsum_simulations = m_utils.cumsum_simulations(od_flows.flow.to_numpy(), eps, sensitivity)
+    cumsum_simulations = m_utils.cumsum_simulations(od_flows.flow.copy().to_numpy(), eps, sensitivity)
 
     # as percent instead of absolute values
     od_sum = np.sum(od_flows["flow"]) 

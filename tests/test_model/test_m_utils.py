@@ -32,21 +32,21 @@ def test_cut_outliers():
 def test_hist_section():
     series = np.array([1, 1, 3, 3, 5, 5, 5, 7, 7])
     hist_sec = m_utils.hist_section(series, None, 1, bin_range=1, bin_type=int)
-    assert hist_sec.data[0].tolist() == [2, 0, 2, 0, 3, 0, 2]
+    assert hist_sec.data[0].round().tolist() == [22.0, 0.0, 22.0, 0.0, 33.0, 0.0, 22.0]
     assert hist_sec.data[1].tolist() == [1, 2, 3, 4, 5, 6, 7]
     assert hist_sec.privacy_budget is None
     assert hist_sec.quartiles.tolist() == [1, 3, 5, 5, 7]
 
     series = np.array([10, 12, 12, 14, 15, 16, 20])
     hist_sec = m_utils.hist_section(series, None, 1, bin_range=5)
-    assert hist_sec.data[0].tolist() == [4, 3]
+    assert hist_sec.data[0].round().tolist() == [57.0, 43.0]
     assert hist_sec.data[1].tolist() == [10, 15, 20]
     assert hist_sec.privacy_budget is None
     assert hist_sec.quartiles.tolist() == [10.0, 12.0, 14.0, 15.5, 20.0]
 
     series = np.array([0, 0.1, 0.15, 0.49, 0.71, 0.8, 0.82, 1])
     hist_sec = m_utils.hist_section(series, None, 1)
-    assert hist_sec.data[0].tolist() == [1, 2, 0, 0, 1, 0, 0, 1, 2, 1]
+    assert hist_sec.data[0].round().tolist() == [12.0, 25.0, 0.0, 0.0, 12.0, 0.0, 0.0, 12.0, 25.0, 12.0]
     assert hist_sec.data[1].round(2).tolist() == [
         0,
         0.1,
@@ -65,7 +65,7 @@ def test_hist_section():
 
     series = np.array([10, 12, 12, 14, 15, 16, 20, 45])
     hist_sec = m_utils.hist_section(series, None, 1, bin_range=5, hist_max=20)
-    assert hist_sec.data[0].tolist() == [4, 2, 2]
+    assert hist_sec.data[0].round().tolist() == [50.0, 25.0, 25.0]
     assert hist_sec.data[1].tolist() == [10, 15, 20, np.Inf]
     assert hist_sec.privacy_budget is None
     assert hist_sec.quartiles.tolist() == [10.0, 12.0, 14.5, 17.0, 45.0]
@@ -74,7 +74,7 @@ def test_hist_section():
     hist_sec = m_utils.hist_section(
         series, None, 1, bin_range=5, bin_type=int, hist_max=18
     )
-    assert hist_sec.data[0].tolist() == [4, 3]
+    assert hist_sec.data[0].round().tolist() == [57.0, 43.0]
     assert hist_sec.data[1].tolist() == [10, 15, np.Inf]
     assert hist_sec.privacy_budget is None
     assert hist_sec.quartiles.tolist() == [10.0, 12.0, 14.0, 15.5, 20.0]
