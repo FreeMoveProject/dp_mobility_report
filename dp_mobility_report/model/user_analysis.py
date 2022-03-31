@@ -48,7 +48,7 @@ def get_user_time_delta(
         return None
 
     sec = m_utils.hist_section(
-        (user_time_delta.dt.seconds / 3600).round(1), # convert to hours
+        (user_time_delta.dt.total_seconds() / 3600), # convert to hours
         eps,
         sensitivity=mdreport.max_trips_per_user,
         evalu=mdreport.evalu,
@@ -61,7 +61,7 @@ def get_user_time_delta(
         )
     else:
         sec.n_outliers = None
-    sec.quartiles = pd.to_timedelta(sec.quartiles, unit = 'm')
+    sec.quartiles = pd.to_timedelta(sec.quartiles, unit = 'h')
 
     return sec
 
