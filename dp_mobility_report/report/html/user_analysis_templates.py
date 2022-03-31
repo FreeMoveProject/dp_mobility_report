@@ -17,13 +17,13 @@ from dp_mobility_report.report.html.html_utils import (
 )
 from dp_mobility_report.visualization import plot, v_utils
 
-
 def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     trips_per_user_info = f"Trips per user are limited according to the configured maximum of trips per user: {mdreport.max_trips_per_user}"
     trips_per_user_hist = ""
     trips_per_user_summary_table = ""
     trips_per_user_moe_info = ""
     overlapping_trips_info = ""
+    time_between_traj_hist = ""
     time_between_traj_summary_table = ""
     time_between_traj_moe_info = ""
     radius_of_gyration_hist_info = ""
@@ -44,7 +44,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     ):
         trips_per_user_hist = render_trips_per_user(report[const.TRIPS_PER_USER])
         trips_per_user_summary_table = render_summary(
-            report[const.TRIPS_PER_USER].quartiles
+            report[const.TRIPS_PER_USER].quartiles 
         )
         trips_per_user_moe_info = render_moe_info(
             report[const.TRIPS_PER_USER].margin_of_error_expmech
@@ -55,6 +55,9 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         and (report[const.USER_TIME_DELTA] is not None)
         and (report[const.USER_TIME_DELTA].quartiles is not None)
     ):
+        time_between_traj_hist = render_time_between_traj(
+            report[const.USER_TIME_DELTA]
+        )
         time_between_traj_summary_table = render_summary(
             report[const.USER_TIME_DELTA].quartiles
         )
@@ -111,6 +114,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         trips_per_user_summary_table=trips_per_user_summary_table,
         trips_per_user_moe_info=trips_per_user_moe_info,
         overlapping_trips_info=overlapping_trips_info,
+        time_between_traj_hist=time_between_traj_hist,
         time_between_traj_summary_table=time_between_traj_summary_table,
         time_between_traj_moe_info=time_between_traj_moe_info,
         radius_of_gyration_hist_info=radius_of_gyration_hist_info,
@@ -135,6 +139,18 @@ def render_trips_per_user(trips_per_user_hist: Section) -> str:
         margin_of_error=trips_per_user_hist.margin_of_error_laplace,
     )
     return v_utils.fig_to_html(hist)
+
+def render_time_between_traj(time_between_traj_hist: Section) -> str:
+    hist = plot.histogram(
+        time_between_traj_hist.data,
+        x_axis_label="Hours between consecutive trips",
+        y_axis_label="% of trips",
+        x_axis_type=float,
+        margin_of_error=time_between_traj_hist.margin_of_error_laplace,
+    )
+    html = v_utils.fig_to_html(hist)
+    plt.close()
+    return html
 
 
 def render_overlapping_trips(n_traj_overlaps: Section) -> str:

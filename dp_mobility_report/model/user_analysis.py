@@ -33,7 +33,6 @@ def get_user_time_delta(
     mdreport: "MobilityDataReport", eps: Optional[float]
 ) -> Optional[Section]:
     epsi = m_utils.get_epsi(mdreport.evalu, eps, 6)
-    epsi_quant = epsi * 5 if epsi is not None else None
 
     mdreport.df = mdreport.df.sort_values(
         [const.UID, const.TID, const.DATETIME]
@@ -48,29 +47,23 @@ def get_user_time_delta(
     if len(user_time_delta) < 1:
         return None
 
-    dp_quartiles, moe_expmech = diff_privacy.quartiles_dp(
-        user_time_delta, epsi_quant, mdreport.max_trips_per_user
+    sec = m_utils.hist_section(
+        (user_time_delta.dt.seconds / 3600).round(1), # convert to hours
+        eps,
+        sensitivity=mdreport.max_trips_per_user,
+        evalu=mdreport.evalu,
     )
-
-    if dp_quartiles["min"] < timedelta(seconds=0):
-        n_overlaps = diff_privacy.count_dp(
+    if sec.quartiles["min"] < 0: # are there overlaps according to dp minimum?
+        sec.n_outliers = diff_privacy.count_dp(
             overlaps,
-            epsi,
+            epsi,   
             mdreport.max_trips_per_user,
         )
     else:
-        n_overlaps = None
+        sec.n_outliers = None
+    sec.quartiles = pd.to_timedelta(sec.quartiles, unit = 'm')
 
-    moe = diff_privacy.laplace_margin_of_error(0.95, epsi, mdreport.max_trips_per_user)
-
-    return Section(
-        data=None,
-        privacy_budget=eps,
-        n_outliers=n_overlaps,
-        quartiles=dp_quartiles,
-        margin_of_error_laplace=moe,
-        margin_of_error_expmech=moe_expmech,
-    )
+    return sec
 
 
 def get_radius_of_gyration(
