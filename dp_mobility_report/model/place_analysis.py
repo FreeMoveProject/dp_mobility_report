@@ -52,7 +52,7 @@ def get_visits_per_tile(
     n_outliers = diff_privacy.count_dp(n_outliers, epsi, sensitivity)  # type: ignore
 
     cumsum_simulations = m_utils.cumsum_simulations(
-        counts_per_tile.visit_count.to_numpy(),
+        counts_per_tile.visit_count.copy().to_numpy(),
         epsi,
         sensitivity,
     )
