@@ -71,8 +71,13 @@ def get_od_flows(
         od_flows["flow"].to_numpy(), eps, sensitivity, allow_negative = True
     )
 
-    moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
     cumsum_simulations = m_utils.cumsum_simulations(od_flows.flow.copy().to_numpy(), eps, sensitivity)
+
+    # remove all instances of 0 (and smaller) to reduce storage
+    od_flows = od_flows[od_flows["flow"] > 0]
+
+    # margin of error
+    moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
 
     # as percent instead of absolute values
     od_sum = np.sum(od_flows["flow"]) 
@@ -80,9 +85,6 @@ def get_od_flows(
         od_flows["flow"] = od_flows["flow"] / od_sum * 100
         moe = moe / od_sum * 100
 
-
-    # remove all instances of 0 (and smaller) to reduce storage
-    od_flows = od_flows[od_flows["flow"] > 0]
 
     # TODO: distribution with or without 0s?
     # as counts are already dp, no further privacy mechanism needed
@@ -100,7 +102,6 @@ def get_od_flows(
 
 def get_intra_tile_flows(od_flows: pd.DataFrame) -> int:
     return od_flows[(od_flows.origin == od_flows.destination)].flow.sum()
-
 
 def get_travel_time(
     od_shape: pd.DataFrame, mdreport: "MobilityDataReport", eps: Optional[float]

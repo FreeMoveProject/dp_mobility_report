@@ -12,8 +12,9 @@ from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
+    THRESHOLD = 25
     points_outside_tessellation_info = ""
-    privacy_info = "Unrealistic values: Tiles with a 5% chance of deviating more than 10 percentage points from the estimated value are grayed out in the map view."
+    privacy_info = f"Unrealistic values: Tiles with a 5% chance of deviating more than {THRESHOLD} percentage points from the estimated value are grayed out in the map view."
     counts_per_tile_map = ""
     counts_per_tile_legend = ""
     counts_per_tile_summary_table = ""
@@ -28,10 +29,10 @@ def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
             report[const.COUNTS_PER_TILE]
         )
         counts_per_tile_map, counts_per_tile_legend = render_counts_per_tile(
-            report[const.COUNTS_PER_TILE], tessellation
+            report[const.COUNTS_PER_TILE], tessellation, THRESHOLD
         )
         counts_per_tile_summary_table = render_summary(
-            report[const.COUNTS_PER_TILE].quartiles.round().astype(int), "Distribution of the percentage of visits per tile" # as percent
+            report[const.COUNTS_PER_TILE].quartiles.round(2), "Distribution of the percentage of visits per tile" # as percent
         )
         counts_per_tile_cumsum_linechart = render_counts_per_tile_cumsum(
             report[const.COUNTS_PER_TILE]
@@ -44,7 +45,7 @@ def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
         report[const.COUNTS_PER_TILE_TIMEWINDOW] is not None
     ):
         counts_per_tile_time_map = render_counts_per_tile_timewindow(
-            report[const.COUNTS_PER_TILE_TIMEWINDOW], tessellation
+            report[const.COUNTS_PER_TILE_TIMEWINDOW], tessellation, THRESHOLD
         )
 
     template_structure = get_template("place_analysis_segment.html")
@@ -62,14 +63,14 @@ def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
 
 
 def render_points_outside_tess(counts_per_tile: Section) -> str:
-    return f"{round(counts_per_tile.n_outliers)}% of points are outside the given tessellation (95% confidence interval ± {round(counts_per_tile.margin_of_error_laplace)} percentage points)."
+    return f"{round(counts_per_tile.n_outliers)}% of points are outside the given tessellation (95% confidence interval ± {round(counts_per_tile.margin_of_error_laplace, 2)} percentage points)."
 
 
 def render_counts_per_tile(
-    counts_per_tile: Section, tessellation: GeoDataFrame, threshold: float = 0.1
+    counts_per_tile: Section, tessellation: GeoDataFrame, threshold: float
 ) -> Tuple[str, str]:
     data = counts_per_tile.data
-    data["visit_count"] = round(data.visit_count)
+    data["visit_count"] = round(data.visit_count, 3)
     # merge count and tessellation
     counts_per_tile_gdf = pd.merge(
         tessellation,
@@ -123,7 +124,7 @@ def render_most_freq_tiles_ranking(counts_per_tile: Section, top_x: int = 10) ->
     )
     
     ranking = plot.ranking(
-        round(topx_tiles.visit_count),
+        round(topx_tiles.visit_count, 3),
         "% of visits per tile",
         y_labels=labels,
         margin_of_error=counts_per_tile.margin_of_error_laplace,
@@ -134,7 +135,7 @@ def render_most_freq_tiles_ranking(counts_per_tile: Section, top_x: int = 10) ->
 
 
 def render_counts_per_tile_timewindow(
-    counts_per_tile_timewindow: Section, tessellation: GeoDataFrame, threshold=0.1
+    counts_per_tile_timewindow: Section, tessellation: GeoDataFrame, threshold
 ) -> str:
     data = counts_per_tile_timewindow.data
     if data is None:

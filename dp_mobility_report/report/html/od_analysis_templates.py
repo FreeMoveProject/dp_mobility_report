@@ -24,7 +24,8 @@ from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
-    privacy_info = "Unrealistic values: OD connections with a 5% chance of deviating more than 10 percentage points from the estimated value are removed in the map view."
+    THRESHOLD = 25 # in percent
+    privacy_info = f"Unrealistic values: OD connections with a 5% chance of deviating more than {THRESHOLD} % from the estimated value are removed in the map view."
     od_map = ""
     od_legend = ""
     intra_tile_flows_info = ""
@@ -43,11 +44,11 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
 
     if const.OD_FLOWS in report and report[const.OD_FLOWS].data is not None:
         od_map, od_legend = render_origin_destination_flows(
-            report[const.OD_FLOWS], mdreport.tessellation, top_n_flows
+            report[const.OD_FLOWS], mdreport.tessellation, top_n_flows, THRESHOLD
         )
         intra_tile_flows_info = render_intra_tile_flows(report[const.OD_FLOWS])
         flows_summary_table = render_summary(
-            report[const.OD_FLOWS].quartiles.round().astype(int),
+            report[const.OD_FLOWS].quartiles.round(3),
             "Distribution of the percentage of flows per OD pair",
         )
         flows_cumsum_linechart = render_flows_cumsum(report[const.OD_FLOWS])
@@ -99,12 +100,12 @@ def render_origin_destination_flows(
     od_flows: Section,
     tessellation: GeoDataFrame,
     top_n_flows: int,
-    threshold: float = 0.1,
+    threshold: float,
 ) -> Tuple[str, str]:
     data = od_flows.data.copy()
     moe_deviation = od_flows.margin_of_error_laplace / data["flow"]
     # round percentages for viz
-    data["flow"] = data["flow"].round()
+    data["flow"] = data["flow"].round(5)
     data.loc[moe_deviation > threshold, "flow"] = None
     top_n_flows = top_n_flows if top_n_flows <= len(data) else len(data)
     innerflow = data[data.origin == data.destination]
@@ -138,15 +139,14 @@ def render_origin_destination_flows(
 
 
 def render_intra_tile_flows(od_flows: Section) -> str:
-    flow_count = od_flows.data.flow.sum()
-    intra_tile_flows = od_analysis.get_intra_tile_flows(od_flows.data)
+    intra_tile_flows = round(od_analysis.get_intra_tile_flows(od_flows.data),1)
     ci_interval_info = (
-        f"(95% confidence interval ± {round(od_flows.margin_of_error_laplace)})"
+        f"(95% confidence interval ± {round(od_flows.margin_of_error_laplace, 2)}%)"
         if od_flows.margin_of_error_laplace is not None
         else ""
     )
 
-    return f"{intra_tile_flows} ({(fmt(intra_tile_flows / flow_count * 100))} %) of flows start and end within the same cell {ci_interval_info}."
+    return f"{intra_tile_flows}% of flows start and end within the same cell {ci_interval_info}."
 
 
 def render_flows_cumsum(od_flows: Section) -> str:

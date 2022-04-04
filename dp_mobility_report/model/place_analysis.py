@@ -57,7 +57,10 @@ def get_visits_per_tile(
         sensitivity,
     )
 
+    # remove all negative values (needed for cumsum)
     counts_per_tile["visit_count"] = counts_per_tile["visit_count"].apply(diff_privacy.limit_negative_values_to_zero)
+
+    # margin of error
     moe = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
     
     # as percent instead of absolute values
@@ -146,8 +149,9 @@ def get_visits_per_tile_timewindow(
 
     # as percent instead of absolute values
     if counts_per_tile_timewindow.sum() != 0:
-        counts_per_tile_timewindow = counts_per_tile_timewindow / counts_per_tile_timewindow.sum() * 100
-        moe = moe / counts_per_tile_timewindow.sum() * 100
+        counts_sum = counts_per_tile_timewindow.sum()
+        counts_per_tile_timewindow = counts_per_tile_timewindow / counts_sum * 100
+        moe = moe / counts_sum
 
     return Section(
         data=counts_per_tile_timewindow.unstack(const.TILE_ID).T,
