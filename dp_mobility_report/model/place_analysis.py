@@ -66,9 +66,9 @@ def get_visits_per_tile(
     # as percent instead of absolute values
     visists_sum = np.sum(counts_per_tile["visit_count"]) 
     if visists_sum != 0:
-        counts_per_tile["visit_count"] = counts_per_tile["visit_count"] / visists_sum * 100
-        n_outliers = n_outliers / visists_sum * 100
-        moe = moe / visists_sum * 100
+        counts_per_tile["visit_count"] = counts_per_tile["visit_count"] / visists_sum
+        n_outliers = n_outliers / visists_sum
+        moe = moe / visists_sum
 
     # as counts are already dp, no further privacy mechanism needed
     dp_quartiles = counts_per_tile.visit_count.describe()
@@ -150,7 +150,7 @@ def get_visits_per_tile_timewindow(
     # as percent instead of absolute values
     if counts_per_tile_timewindow.sum() != 0:
         counts_sum = counts_per_tile_timewindow.sum()
-        counts_per_tile_timewindow = counts_per_tile_timewindow / counts_sum * 100
+        counts_per_tile_timewindow = counts_per_tile_timewindow / counts_sum
         moe = moe / counts_sum
 
     return Section(

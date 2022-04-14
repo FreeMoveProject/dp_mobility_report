@@ -24,9 +24,9 @@ from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
-    THRESHOLD = 25 # in percent
+    THRESHOLD = 0.2 # 20 %
     trip_count = mdreport.report[const.DS_STATISTICS].data["n_trips"]
-    privacy_info = f"Unrealistic values: OD connections with a 5% chance of deviating more than {THRESHOLD} % from the estimated value are removed in the map view."
+    privacy_info = f"Unrealistic values: OD connections with a 5% chance of deviating more than {THRESHOLD * 100} % from the estimated value are removed in the map view."
     od_map = ""
     od_legend = ""
     intra_tile_flows_info = ""
@@ -45,7 +45,7 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
 
     if const.OD_FLOWS in report and report[const.OD_FLOWS].data is not None:
         od_map, od_legend = render_origin_destination_flows(
-            report[const.OD_FLOWS], mdreport.tessellation, top_n_flows, THRESHOLD, trip_count
+            report[const.OD_FLOWS], mdreport.tessellation, top_n_flows, THRESHOLD, trip_count=trip_count
         )
         intra_tile_flows_info = render_intra_tile_flows(report[const.OD_FLOWS])
         flows_summary_table = render_summary(
@@ -54,7 +54,7 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
         )
         flows_cumsum_linechart = render_flows_cumsum(report[const.OD_FLOWS])
         most_freq_flows_ranking = render_most_freq_flows_ranking(
-            report[const.OD_FLOWS], mdreport.tessellation, trip_count
+            report[const.OD_FLOWS], mdreport.tessellation, trip_count = trip_count
         )
 
     if const.TRAVEL_TIME in report and report[const.TRAVEL_TIME].data is not None:
