@@ -25,6 +25,7 @@ from dp_mobility_report.visualization import plot, v_utils
 
 def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
     THRESHOLD = 25 # in percent
+    trip_count = mdreport.report[const.DS_STATISTICS].data["n_trips"]
     privacy_info = f"Unrealistic values: OD connections with a 5% chance of deviating more than {THRESHOLD} % from the estimated value are removed in the map view."
     od_map = ""
     od_legend = ""
@@ -44,16 +45,16 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
 
     if const.OD_FLOWS in report and report[const.OD_FLOWS].data is not None:
         od_map, od_legend = render_origin_destination_flows(
-            report[const.OD_FLOWS], mdreport.tessellation, top_n_flows, THRESHOLD
+            report[const.OD_FLOWS], mdreport.tessellation, top_n_flows, THRESHOLD, trip_count
         )
         intra_tile_flows_info = render_intra_tile_flows(report[const.OD_FLOWS])
         flows_summary_table = render_summary(
-            report[const.OD_FLOWS].quartiles.round(3),
-            "Distribution of the percentage of flows per OD pair",
+            round(report[const.OD_FLOWS].quartiles / 100 * trip_count),
+            "Distribution of flows per OD pair",
         )
         flows_cumsum_linechart = render_flows_cumsum(report[const.OD_FLOWS])
         most_freq_flows_ranking = render_most_freq_flows_ranking(
-            report[const.OD_FLOWS], mdreport.tessellation
+            report[const.OD_FLOWS], mdreport.tessellation, trip_count
         )
 
     if const.TRAVEL_TIME in report and report[const.TRAVEL_TIME].data is not None:
@@ -101,11 +102,12 @@ def render_origin_destination_flows(
     tessellation: GeoDataFrame,
     top_n_flows: int,
     threshold: float,
+    trip_count: int = 100
 ) -> Tuple[str, str]:
     data = od_flows.data.copy()
     moe_deviation = od_flows.margin_of_error_laplace / data["flow"]
     # round percentages for viz
-    data["flow"] = data["flow"].round(5)
+    data["flow"] = round(data["flow"] / 100 * trip_count) # extrapolate od flows according to dp trip countsü
     data.loc[moe_deviation > threshold, "flow"] = None
     top_n_flows = top_n_flows if top_n_flows <= len(data) else len(data)
     innerflow = data[data.origin == data.destination]
@@ -158,7 +160,7 @@ def render_flows_cumsum(od_flows: Section) -> str:
         "cum_perc",
         "Number of OD tile pairs",
         "Cumulated sum of flows between OD pairs",
-        simulations=df_cumsum.columns[2:52],
+        #simulations=df_cumsum.columns[2:52],
         add_diagonal=True,
     )
     html = v_utils.fig_to_html(chart)
@@ -167,7 +169,7 @@ def render_flows_cumsum(od_flows: Section) -> str:
 
 
 def render_most_freq_flows_ranking(
-    od_flows: Section, tessellation: GeoDataFrame, top_x: int = 10
+    od_flows: Section, tessellation: GeoDataFrame, top_x: int = 10, trip_count: int = 100
 ) -> str:
     topx_flows = od_flows.data.nlargest(top_x, "flow")
     topx_flows["rank"] = list(range(1, len(topx_flows) + 1))
@@ -193,8 +195,8 @@ def render_most_freq_flows_ranking(
     )
 
     ranking = plot.ranking(
-        topx_flows.flow,
-        "% of flows per OD pair",
+        topx_flows.flow / 100 * trip_count,
+        "Number of flows per OD pair",
         y_labels=labels,
         margin_of_error=od_flows.margin_of_error_laplace,
     )

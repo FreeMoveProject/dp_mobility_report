@@ -13,6 +13,7 @@ from dp_mobility_report.visualization import plot, v_utils
 
 def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
     THRESHOLD = 25
+    record_count = report[const.DS_STATISTICS].data["n_records"]
     points_outside_tessellation_info = ""
     privacy_info = f"Unrealistic values: Tiles with a 5% chance of deviating more than {THRESHOLD} percentage points from the estimated value are grayed out in the map view."
     counts_per_tile_map = ""
@@ -29,23 +30,24 @@ def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
             report[const.COUNTS_PER_TILE]
         )
         counts_per_tile_map, counts_per_tile_legend = render_counts_per_tile(
-            report[const.COUNTS_PER_TILE], tessellation, THRESHOLD
+            report[const.COUNTS_PER_TILE], tessellation, THRESHOLD, record_count
         )
         counts_per_tile_summary_table = render_summary(
-            report[const.COUNTS_PER_TILE].quartiles.round(2), "Distribution of the percentage of visits per tile" # as percent
+            round(report[const.COUNTS_PER_TILE].quartiles / 100 * record_count), "Distribution of visits per tile" # extrapolate visits from dp record count
         )
         counts_per_tile_cumsum_linechart = render_counts_per_tile_cumsum(
             report[const.COUNTS_PER_TILE]
         )
         most_freq_tiles_ranking = render_most_freq_tiles_ranking(
-            report[const.COUNTS_PER_TILE]
+            report[const.COUNTS_PER_TILE],
+            record_count
         )
 
     if (const.COUNTS_PER_TILE_TIMEWINDOW in report) and (
         report[const.COUNTS_PER_TILE_TIMEWINDOW] is not None
     ):
         counts_per_tile_time_map = render_counts_per_tile_timewindow(
-            report[const.COUNTS_PER_TILE_TIMEWINDOW], tessellation, THRESHOLD
+            report[const.COUNTS_PER_TILE_TIMEWINDOW], tessellation, THRESHOLD, record_count
         )
 
     template_structure = get_template("place_analysis_segment.html")
@@ -67,10 +69,11 @@ def render_points_outside_tess(counts_per_tile: Section) -> str:
 
 
 def render_counts_per_tile(
-    counts_per_tile: Section, tessellation: GeoDataFrame, threshold: float
+    counts_per_tile: Section, tessellation: GeoDataFrame, threshold: float, record_count:int = 100
 ) -> Tuple[str, str]:
     data = counts_per_tile.data
-    data["visit_count"] = round(data.visit_count, 3)
+    data["visit_count"] = round(data.visit_count / 100 * record_count) # extrapolate visits according to dp record counts
+
     # merge count and tessellation
     counts_per_tile_gdf = pd.merge(
         tessellation,
@@ -86,7 +89,7 @@ def render_counts_per_tile(
     )
     counts_per_tile_gdf.loc[moe_deviation > threshold, "visit_count"] = None
     map, legend = plot.choropleth_map(
-        counts_per_tile_gdf, "visit_count", scale_title="% of visits", aliases=["Tile ID", "Tile Name", "% of visits"]
+        counts_per_tile_gdf, "visit_count", scale_title="number of visits", aliases=["Tile ID", "Tile Name", "number of visits"]
     )
     html = map.get_root().render()
     legend_html = v_utils.fig_to_html(legend)
@@ -103,7 +106,7 @@ def render_counts_per_tile_cumsum(counts_per_tile: Section) -> str:
         "cum_perc",
         "Number of tiles",
         "Cumulated sum of visits per tile",
-        simulations=df_cumsum.columns[2:52],
+        #simulations=df_cumsum.columns[2:52],
         add_diagonal=True,
     )
     html = v_utils.fig_to_html(chart)
@@ -111,7 +114,7 @@ def render_counts_per_tile_cumsum(counts_per_tile: Section) -> str:
     return html
 
 
-def render_most_freq_tiles_ranking(counts_per_tile: Section, top_x: int = 10) -> str:
+def render_most_freq_tiles_ranking(counts_per_tile: Section, top_x: int = 10, record_count: int = 100) -> str:
     topx_tiles = counts_per_tile.data.nlargest(top_x, "visit_count")
     topx_tiles["rank"] = list(range(1, len(topx_tiles) + 1))
     labels = (
@@ -124,8 +127,8 @@ def render_most_freq_tiles_ranking(counts_per_tile: Section, top_x: int = 10) ->
     )
     
     ranking = plot.ranking(
-        round(topx_tiles.visit_count, 3),
-        "% of visits per tile",
+        round(topx_tiles.visit_count / 100 * record_count),
+        "number of visits per tile",
         y_labels=labels,
         margin_of_error=counts_per_tile.margin_of_error_laplace,
     )
@@ -135,9 +138,9 @@ def render_most_freq_tiles_ranking(counts_per_tile: Section, top_x: int = 10) ->
 
 
 def render_counts_per_tile_timewindow(
-    counts_per_tile_timewindow: Section, tessellation: GeoDataFrame, threshold
+    counts_per_tile_timewindow: Section, tessellation: GeoDataFrame, threshold: int, record_count: int = 100
 ) -> str:
-    data = counts_per_tile_timewindow.data
+    data = counts_per_tile_timewindow.data / 100 * record_count
     if data is None:
         return None
 
@@ -167,9 +170,9 @@ def _create_timewindow_segment(df, tessellation):
     dev_from_avg = df.div(tile_means, axis=0)
     deviation_choropleth = plot.multi_choropleth_map(dev_from_avg, tessellation)
     return (
-        f"""<h4>% of visits</h4>
+        f"""<h4>Number of visits</h4>
         {v_utils.fig_to_html_as_png(visits_choropleth)}
         <h4>Deviation from tile average</h4>
-        <div><p>A value of 1 corrresponds to the average.</p></div>
+        <div><p>A value of 1 corrresponds to the tile average.</p></div>
         {v_utils.fig_to_html_as_png(deviation_choropleth)}"""  # svg might get too large
     )
