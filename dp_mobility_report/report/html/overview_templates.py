@@ -18,7 +18,7 @@ def render_overview(report: dict) -> str:
     dataset_stats_table = ""
     missing_values_table = ""
     trips_over_time_linechart = ""
-    trips_over_time_summary_table = ""
+    #trips_over_time_summary_table = ""
     trips_over_time_moe_info = ""
     trips_per_weekday_barchart = ""
     trips_per_hour_linechart = ""
@@ -39,9 +39,9 @@ def render_overview(report: dict) -> str:
         trips_over_time_linechart = render_trips_over_time(
             report[const.TRIPS_OVER_TIME]
         )
-        trips_over_time_summary_table = render_summary(
-            report[const.TRIPS_OVER_TIME].quartiles
-        )
+        # trips_over_time_summary_table = render_summary(
+        #     report[const.TRIPS_OVER_TIME].quartiles
+        # )
         trips_over_time_moe_info = render_moe_info(
             report[const.TRIPS_OVER_TIME].margin_of_error_expmech
         )
@@ -64,7 +64,7 @@ def render_overview(report: dict) -> str:
         trips_over_time_info=trips_over_time_info,
         trips_over_time_linechart=trips_over_time_linechart,
         trips_over_time_moe_info=trips_over_time_moe_info,
-        trips_over_time_summary_table=trips_over_time_summary_table,
+        #trips_over_time_summary_table=trips_over_time_summary_table,
         trips_per_weekday_barchart=trips_per_weekday_barchart,
         trips_per_hour_linechart=trips_per_hour_linechart,
     )

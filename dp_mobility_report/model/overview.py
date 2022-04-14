@@ -127,15 +127,14 @@ def get_missing_values(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
 def get_trips_over_time(
     mdreport: "MobilityDataReport", eps: Optional[float]
 ) -> Section:
-    epsi = m_utils.get_epsi(mdreport.evalu, eps, 6)
-    epsi_quant = epsi * 5 if epsi is not None else None
-    # TODO: distribution actually necessary? (better to use all privacy budget on histograms?)
+    epsi = m_utils.get_epsi(mdreport.evalu, eps, 3)
+    epsi_limits = epsi * 2 if epsi is not None else None
 
     df_trip = mdreport.df[
         (mdreport.df[const.POINT_TYPE] == const.END)
     ]  # only count each trip once
-    dp_quartiles, moe_expmech = diff_privacy.quartiles_dp(
-        df_trip[const.DATETIME], epsi_quant, mdreport.max_trips_per_user
+    dp_bounds = diff_privacy.bounds_dp(
+        df_trip[const.DATETIME], epsi_limits, mdreport.max_trips_per_user
     )
 
     # cut based on dp min and max values
@@ -143,15 +142,15 @@ def get_trips_over_time(
         trips_over_time
     ) = m_utils.cut_outliers(  # don't disclose outliers to the as the boundaries are not defined through user input
         df_trip[const.DATETIME],
-        min_value=dp_quartiles["min"],
-        max_value=dp_quartiles["max"],
+        min_value=dp_bounds[0],
+        max_value=dp_bounds[1],
     )
 
     # only use date and remove time
-    dp_quartiles = dp_quartiles.dt.date
+    dp_bounds = pd.Series(dp_bounds).dt.date
 
     # different aggregations based on range of dates
-    range_of_days = dp_quartiles["max"] - dp_quartiles["min"]
+    range_of_days = dp_bounds[1] - dp_bounds[0]
     if range_of_days > timedelta(days=712):  # more than two years (102 weeks)
         resample = "M"
         datetime_precision = const.PREC_MONTH
@@ -189,9 +188,8 @@ def get_trips_over_time(
         data=trip_count,
         privacy_budget=eps,
         datetime_precision=datetime_precision,
-        quartiles=dp_quartiles,
+        quartiles=dp_bounds, # TODO: bring into correct quartile format
         margin_of_error_laplace=moe_laplace,
-        margin_of_error_expmech=moe_expmech,
     )
 
 
