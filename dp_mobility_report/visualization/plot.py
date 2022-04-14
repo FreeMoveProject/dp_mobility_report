@@ -16,7 +16,7 @@ light_blue = "#5D6FFF"
 orange = "#D9642C"
 light_orange = "#FFAD6F"
 grey = "#8A8A8A"
-light_grey = "#d3d3d3"
+light_grey = "##f2f2f2"
 
 
 def format(value: Union[float, int], type: Type):
