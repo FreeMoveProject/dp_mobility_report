@@ -168,7 +168,7 @@ def render_trips_over_time_info(datetime_precision: str) -> str:
 
 
 def render_trips_over_time(trips_over_time: Section) -> str:
-    if len(trips_over_time.data) <= 20:
+    if len(trips_over_time.data) <= 14:
         chart = plot.barchart(
             x=trips_over_time.data[const.DATETIME].to_numpy(),
             y=trips_over_time.data["trip_count"].to_numpy(),
@@ -186,6 +186,7 @@ def render_trips_over_time(trips_over_time: Section) -> str:
             x_axis_label="Date",
             y_axis_label="% of trips",
             margin_of_error=trips_over_time.margin_of_error_laplace,
+            rotate_label = True
         )
         html = v_utils.fig_to_html(chart)
     plt.close()

@@ -103,6 +103,7 @@ def linechart(
     simulations: list = None,
     margin_of_error: float = None,
     add_diagonal: bool = False,
+    rotate_label: bool = False,
 ) -> mpl.figure.Figure:
     fig, ax = plt.subplots()
     if simulations is not None:
@@ -121,6 +122,9 @@ def linechart(
     ax.set_ylim(bottom=0)
     if add_diagonal:
         ax.plot([0, data[x].max()], [0, data[y].max()], grey)
+
+    if rotate_label:
+        plt.xticks(rotation=90)
 
     return fig
 
