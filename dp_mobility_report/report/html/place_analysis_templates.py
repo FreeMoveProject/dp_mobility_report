@@ -32,8 +32,10 @@ def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
         counts_per_tile_map, counts_per_tile_legend = render_counts_per_tile(
             report[const.COUNTS_PER_TILE], tessellation, THRESHOLD, record_count
         )
+        quartiles = round(report[const.COUNTS_PER_TILE].quartiles * record_count)
+
         counts_per_tile_summary_table = render_summary(
-            round(report[const.COUNTS_PER_TILE].quartiles * record_count), "Distribution of visits per tile" # extrapolate visits from dp record count
+            quartiles.astype(int), "Distribution of visits per tile" # extrapolate visits from dp record count
         )
         counts_per_tile_cumsum_linechart = render_counts_per_tile_cumsum(
             report[const.COUNTS_PER_TILE]
@@ -75,7 +77,7 @@ def render_counts_per_tile(
     # merge count and tessellation
     counts_per_tile_gdf = pd.merge(
         tessellation,
-        perc_per_tile.data[[const.TILE_ID, "visit_count"]],
+        perc_per_tile.data[[const.TILE_ID, "visits"]],
         how="left",
         left_on=const.TILE_ID,
         right_on=const.TILE_ID,
@@ -83,13 +85,13 @@ def render_counts_per_tile(
 
     # filter visit counts above error threshold
     moe_deviation = (
-        perc_per_tile.margin_of_error_laplace / counts_per_tile_gdf["visit_count"]
+        perc_per_tile.margin_of_error_laplace / counts_per_tile_gdf["visits"]
     )
 
-    counts_per_tile_gdf["visit_count"] = round(counts_per_tile_gdf.visit_count * record_count) # extrapolate visits according to dp record counts
-    counts_per_tile_gdf.loc[moe_deviation > threshold, "visit_count"] = None
+    counts_per_tile_gdf["visits"] = round(counts_per_tile_gdf.visits * record_count) # extrapolate visits according to dp record counts
+    counts_per_tile_gdf.loc[moe_deviation > threshold, "visits"] = None
     map, legend = plot.choropleth_map(
-        counts_per_tile_gdf, "visit_count", scale_title="number of visits", aliases=["Tile ID", "Tile Name", "number of visits"]
+        counts_per_tile_gdf, "visits", scale_title="number of visits", aliases=["Tile ID", "Tile Name", "number of visits"]
     )
     html = map.get_root().render()
     legend_html = v_utils.fig_to_html(legend)
@@ -114,8 +116,8 @@ def render_counts_per_tile_cumsum(counts_per_tile: Section) -> str:
     return html
 
 
-def render_most_freq_tiles_ranking(counts_per_tile: Section, record_count: int, top_x: int = 10) -> str:
-    topx_tiles = counts_per_tile.data.nlargest(top_x, "visit_count")
+def render_most_freq_tiles_ranking(perc_per_tile: Section, record_count: int, top_x: int = 10) -> str:
+    topx_tiles = perc_per_tile.data.nlargest(top_x, "visits")
     topx_tiles["rank"] = list(range(1, len(topx_tiles) + 1))
     labels = (
         topx_tiles["rank"].astype(str)
@@ -127,10 +129,10 @@ def render_most_freq_tiles_ranking(counts_per_tile: Section, record_count: int, 
     )
     
     ranking = plot.ranking(
-        round(topx_tiles.visit_count * record_count),
+        round(topx_tiles.visits * record_count),
         "number of visits per tile",
         y_labels=labels,
-        margin_of_error=counts_per_tile.margin_of_error_laplace,
+        margin_of_error=perc_per_tile.margin_of_error_laplace * record_count,
     )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close()

@@ -19,14 +19,16 @@ def get_template(template_name: str) -> jinja2.Template:
     return jinja2_env.get_template(template_name)
 
 
-def render_summary(summary: Series, title: str = "Distribution") -> str:
+def render_summary(summary: Series, title: str = "") -> str:
     summary_list = [
         {"name": "Min.", "value": fmt(summary["min"])},
-        {"name": "25%", "value": fmt(summary["25%"])},
-        {"name": "Median", "value": fmt(summary["50%"])},
-        {"name": "75%", "value": fmt(summary["75%"])},
         {"name": "Max.", "value": fmt(summary["max"])},
     ]
+    if "25%" in summary:
+        summary_list.insert(1, {"name": "75%", "value": fmt(summary["75%"])})
+        summary_list.insert(1, {"name": "Median", "value": fmt(summary["50%"])})
+        summary_list.insert(1, {"name": "25%", "value": fmt(summary["25%"])})
+
     if "mean" in summary:
         summary_list.insert(0, {"name": "Mean", "value": fmt(summary["mean"])})
 

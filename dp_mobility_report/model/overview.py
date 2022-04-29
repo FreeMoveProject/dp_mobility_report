@@ -183,12 +183,13 @@ def get_trips_over_time(
         trip_count["trip_count"] = trip_count["trip_count"] / trip_sum * 100
         moe_laplace = moe_laplace / trip_sum * 100
 
+    quartiles = pd.Series({"min": dp_bounds[0], "max": dp_bounds[1]})
 
     return Section(
         data=trip_count,
         privacy_budget=eps,
         datetime_precision=datetime_precision,
-        quartiles=dp_bounds, # TODO: bring into correct quartile format
+        quartiles=quartiles,
         margin_of_error_laplace=moe_laplace,
     )
 

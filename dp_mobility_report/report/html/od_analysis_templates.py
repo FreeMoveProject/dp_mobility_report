@@ -48,8 +48,9 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
             report[const.OD_FLOWS], mdreport.tessellation, top_n_flows, THRESHOLD, trip_count=trip_count
         )
         intra_tile_flows_info = render_intra_tile_flows(report[const.OD_FLOWS])
+        quartiles = round(report[const.OD_FLOWS].quartiles / 100 * trip_count)
         flows_summary_table = render_summary(
-            round(report[const.OD_FLOWS].quartiles / 100 * trip_count),
+            quartiles.astype(int),
             "Distribution of flows per OD pair",
         )
         flows_cumsum_linechart = render_flows_cumsum(report[const.OD_FLOWS])
@@ -107,7 +108,7 @@ def render_origin_destination_flows(
     data = od_flows.data.copy()
     moe_deviation = od_flows.margin_of_error_laplace / data["flow"]
     # round percentages for viz
-    data["flow"] = round(data["flow"] / 100 * trip_count) # extrapolate od flows according to dp trip countsü
+    data["flow"] = round(data["flow"] / 100 * trip_count) # extrapolate od flows according to dp trip counts
     data.loc[moe_deviation > threshold, "flow"] = None
     top_n_flows = top_n_flows if top_n_flows <= len(data) else len(data)
     innerflow = data[data.origin == data.destination]
@@ -198,7 +199,7 @@ def render_most_freq_flows_ranking(
         topx_flows.flow / 100 * trip_count,
         "Number of flows per OD pair",
         y_labels=labels,
-        margin_of_error=od_flows.margin_of_error_laplace,
+        margin_of_error=od_flows.margin_of_error_laplace * trip_count,
     )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close()
