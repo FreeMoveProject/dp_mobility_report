@@ -61,7 +61,7 @@ def get_user_time_delta(
         )
     else:
         sec.n_outliers = None
-    sec.quartiles = pd.to_timedelta(sec.quartiles, unit = 'h')
+    sec.quartiles = pd.to_timedelta(sec.quartiles, unit = 'h').apply(lambda x: x.round(freq='s'))
 
     return sec
 

@@ -63,8 +63,11 @@ def quartiles_dp(
     result = []
     result.append(bounds[0])
 
+    array_type = array.dtype
     array = pd.Series(clip_to_bounds(np.ravel(array), bounds))
     array = array.sort_values().reset_index(drop=True)
+    array = array.astype(array_type) # clip_to_bounds converts int arrays to float arrays > convert those back to int
+    
     k = array.size
 
     def utility(quant: float, k: int) -> list:
