@@ -247,7 +247,6 @@ def test_report_output(test_data, test_tessellation):
         const.TRIPS_PER_USER,
         const.USER_TIME_DELTA,
         const.RADIUS_OF_GYRATION,
-        const.LOCATION_ENTROPY,
         const.USER_TILE_COUNT,
         const.MOBILITY_ENTROPY,
     ]
@@ -270,16 +269,33 @@ def test_report_output(test_data, test_tessellation):
         const.TRIPS_PER_USER,
         const.USER_TIME_DELTA,
         const.RADIUS_OF_GYRATION,
-        const.LOCATION_ENTROPY,
         const.USER_TILE_COUNT,
         const.MOBILITY_ENTROPY,
     ]
 
 
 def test_to_html_file(test_data, test_tessellation, tmp_path):
-    file_name = tmp_path / "html/test_output.html"
-    file_name.parent.mkdir()
+    # md_report.MobilityDataReport(
+    #     test_data, test_tessellation, privacy_budget=None
+    # ).to_file("test1.html")
+
     md_report.MobilityDataReport(
-        test_data, test_tessellation, privacy_budget=None
-    ).to_file(file_name)
-    assert file_name.is_file()
+        test_data,
+        test_tessellation,
+        analysis_selection=["all"],
+        privacy_budget=100,  # , analysis_selection=["user_analysis"]
+        max_travel_time=30,
+    ).to_file("test2.html")
+
+    # file_name = tmp_path / "html/test_output1.html"
+    # file_name.parent.mkdir()
+    # md_report.MobilityDataReport(
+    #     test_data, test_tessellation, privacy_budget=None
+    # ).to_file(file_name)
+    # assert file_name.is_file()
+
+    # file_name = tmp_path / "html/test_output2.html"
+    # md_report.MobilityDataReport(
+    #     test_data, test_tessellation, privacy_budget=0.1
+    # ).to_file(file_name)
+    # assert file_name.is_file()
