@@ -146,6 +146,7 @@ def render_time_between_traj(time_between_traj_hist: Section) -> str:
         x_axis_label="Hours between consecutive trips",
         y_axis_label="% of trips",
         x_axis_type=float,
+        ndigits_x_label=1,
         margin_of_error=time_between_traj_hist.margin_of_error_laplace,
     )
     html = v_utils.fig_to_html(hist)
@@ -176,7 +177,7 @@ def render_overlapping_trips(n_traj_overlaps: Section) -> str:
 def render_radius_of_gyration(radius_of_gyration_hist: Section) -> str:
     hist = plot.histogram(
         radius_of_gyration_hist.data,
-        x_axis_label="radius of gyration",
+        x_axis_label="radius of gyration (in km)",
         y_axis_label="% of users",
         x_axis_type=float,
         margin_of_error=radius_of_gyration_hist.margin_of_error_laplace,

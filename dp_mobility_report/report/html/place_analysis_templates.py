@@ -1,3 +1,4 @@
+from os import remove
 from typing import Tuple
 
 import matplotlib.pyplot as plt
@@ -16,40 +17,40 @@ def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
     record_count = report[const.DS_STATISTICS].data["n_records"] # TODO: what if no records computed?
     points_outside_tessellation_info = ""
     privacy_info = f"Unrealistic values: Tiles with a 5% chance of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are grayed out in the map view."
-    counts_per_tile_map = ""
+    visits_per_tile_map = ""
     counts_per_tile_legend = ""
-    counts_per_tile_summary_table = ""
-    counts_per_tile_cumsum_linechart = ""
+    visits_per_tile_summary_table = ""
+    visits_per_tile_cumsum_linechart = ""
     most_freq_tiles_ranking = ""
     counts_per_tile_time_map = ""
 
-    if (const.COUNTS_PER_TILE in report) and (
-        report[const.COUNTS_PER_TILE].data is not None
+    if (const.VISITS_PER_TILE in report) and (
+        report[const.VISITS_PER_TILE].data is not None
     ):
         points_outside_tessellation_info = render_points_outside_tess(
-            report[const.COUNTS_PER_TILE]
+            report[const.VISITS_PER_TILE], record_count
         )
-        counts_per_tile_map, counts_per_tile_legend = render_counts_per_tile(
-            report[const.COUNTS_PER_TILE], tessellation, THRESHOLD, record_count
+        visits_per_tile_map, counts_per_tile_legend = render_visits_per_tile(
+            report[const.VISITS_PER_TILE], tessellation, THRESHOLD, record_count
         )
-        quartiles = round(report[const.COUNTS_PER_TILE].quartiles * record_count)
+        quartiles = round(report[const.VISITS_PER_TILE].quartiles * record_count)
 
-        counts_per_tile_summary_table = render_summary(
+        visits_per_tile_summary_table = render_summary(
             quartiles.astype(int), "Distribution of visits per tile" # extrapolate visits from dp record count
         )
-        counts_per_tile_cumsum_linechart = render_counts_per_tile_cumsum(
-            report[const.COUNTS_PER_TILE]
+        visits_per_tile_cumsum_linechart = render_counts_per_tile_cumsum(
+            report[const.VISITS_PER_TILE]
         )
         most_freq_tiles_ranking = render_most_freq_tiles_ranking(
-            report[const.COUNTS_PER_TILE],
+            report[const.VISITS_PER_TILE],
             record_count=record_count
         )
 
-    if (const.COUNTS_PER_TILE_TIMEWINDOW in report) and (
-        report[const.COUNTS_PER_TILE_TIMEWINDOW] is not None
+    if (const.VISITS_PER_TILE_TIMEWINDOW in report) and (
+        report[const.VISITS_PER_TILE_TIMEWINDOW] is not None
     ):
         counts_per_tile_time_map = render_counts_per_tile_timewindow(
-            report[const.COUNTS_PER_TILE_TIMEWINDOW], tessellation, THRESHOLD, record_count
+            report[const.VISITS_PER_TILE_TIMEWINDOW], tessellation, THRESHOLD, record_count
         )
 
     template_structure = get_template("place_analysis_segment.html")
@@ -57,20 +58,21 @@ def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
     return template_structure.render(
         points_outside_tessellation_info=points_outside_tessellation_info,
         privacy_info=privacy_info,
-        counts_per_tile_map=counts_per_tile_map,
+        counts_per_tile_map=visits_per_tile_map,
         counts_per_tile_legend=counts_per_tile_legend,
-        counts_per_tile_summary_table=counts_per_tile_summary_table,
-        counts_per_tile_cumsum_linechart=counts_per_tile_cumsum_linechart,
+        counts_per_tile_summary_table=visits_per_tile_summary_table,
+        counts_per_tile_cumsum_linechart=visits_per_tile_cumsum_linechart,
         most_freq_tiles_ranking=most_freq_tiles_ranking,
         counts_per_tile_time_map=counts_per_tile_time_map,
     )
 
 
-def render_points_outside_tess(counts_per_tile: Section) -> str:
-    return f"{round(counts_per_tile.n_outliers)}% of points are outside the given tessellation (95% confidence interval ± {round(counts_per_tile.margin_of_error_laplace * 100)} percentage points)."
+def render_points_outside_tess(visits_per_tile: Section, record_count: int) -> str:
+    return f"""{round(visits_per_tile.n_outliers*record_count)} ({round(visits_per_tile.n_outliers, 2)}%) of points are outside the given tessellation 
+    (95% confidence interval ± {round(visits_per_tile.margin_of_error_laplace * record_count)})."""
 
 
-def render_counts_per_tile(
+def render_visits_per_tile(
     perc_per_tile: Section, tessellation: GeoDataFrame, threshold: float, record_count:int
 ) -> Tuple[str, str]:
 
@@ -171,7 +173,7 @@ def _create_timewindow_segment(df, tessellation):
 
     tile_means = df.mean(axis=1)
     dev_from_avg = df.div(tile_means, axis=0)
-    deviation_choropleth = plot.multi_choropleth_map(dev_from_avg, tessellation)
+    deviation_choropleth = plot.multi_choropleth_map(dev_from_avg, tessellation, diverging_cmap=True)
     return (
         f"""<h4>Number of visits</h4>
         {v_utils.fig_to_html_as_png(visits_choropleth)}

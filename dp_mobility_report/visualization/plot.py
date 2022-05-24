@@ -19,10 +19,10 @@ grey = "#8A8A8A"
 light_grey = "##f2f2f2"
 
 
-def format(value: Union[float, int], type: Type):
+def format(value: Union[float, int], type: Type, ndigits: int = 2):
     value = type(value)
     if type == float:
-        value = round(value, 2)
+        value = round(value, ndigits)
     return value
 
 
@@ -33,6 +33,7 @@ def histogram(
     margin_of_error: float = None,
     rotate_label: bool = False,
     x_axis_type: Type = float,
+    ndigits_x_label: int = 2,
 ) -> mpl.figure.Figure:
     bins = hist[1]
     counts = hist[0]
@@ -52,7 +53,7 @@ def histogram(
 
         labels = np.array(
             [
-                f"[{format(x1, x_axis_type)}\n - \n{format(x2, x_axis_type)})"
+                f"[{format(x1, x_axis_type, ndigits_x_label)}\n - \n{format(x2, x_axis_type, ndigits_x_label)})"
                 if x2 != np.Inf
                 else f"≥ {format(x1, x_axis_type)}"
                 for x1, x2 in zip(lower_limits, upper_limits)
@@ -230,11 +231,13 @@ def choropleth_map(
 
 
 def multi_choropleth_map(
-    counts_per_tile_timewindow: DataFrame, tessellation: GeoDataFrame
+    counts_per_tile_timewindow: DataFrame, tessellation: GeoDataFrame, diverging_cmap: bool = False
 ) -> mpl.figure.Figure:
     counts_per_tile_timewindow = tessellation[["tile_id", "geometry"]].merge(
         counts_per_tile_timewindow, left_on="tile_id", right_index=True, how="left"
     )
+
+
 
     # col1: tile_id, col2: geometry
     plot_count = counts_per_tile_timewindow.shape[1] - 2
@@ -244,8 +247,18 @@ def multi_choropleth_map(
 
     # upper and lower bound
     vmin = counts_per_tile_timewindow.iloc[:, 2:].min().min()
+    vmin = vmin if vmin is not np.nan else 0
     vmax = counts_per_tile_timewindow.iloc[:, 2:].max().max()
-    norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+    vmax = vmax if vmax is not np.nan else 2
+
+
+    # color
+    if diverging_cmap:
+        cmap = "RdBu_r"
+        norm=mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=1, vmax=vmax)
+    else:
+        cmap = "viridis_r"
+        norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
 
     for i in range(0, plots_per_row * row_count):
         facet_row = math.ceil((i - plots_per_row + 1) / plots_per_row)
@@ -260,7 +273,7 @@ def multi_choropleth_map(
             column_name = counts_per_tile_timewindow.columns[i + 2]
             counts_per_tile_timewindow.iloc[:, [i + 2, 1]].plot(
                 column=column_name,
-                cmap="viridis_r",
+                cmap=cmap,
                 norm=norm,
                 linewidth=0.1,
                 ax=ax,
@@ -273,7 +286,7 @@ def multi_choropleth_map(
 
     # Create colorbar as a legend
     sm = plt.cm.ScalarMappable(
-        cmap="viridis_r", norm=plt.Normalize(vmin=vmin, vmax=vmax)
+        cmap=cmap, norm=norm
     )
     sm._A = []  # add the colorbar to the figure
     # set the range for the choropleth

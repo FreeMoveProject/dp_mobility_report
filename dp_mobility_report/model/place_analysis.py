@@ -23,7 +23,7 @@ def get_visits_per_tile(
 
     sensitivity = 2 * mdreport.max_trips_per_user
     # count number of visits for each location
-    counts_per_tile = (
+    visits_per_tile = (
         mdreport.df[
             mdreport.df[const.TILE_ID].isin(mdreport.tessellation.tile_id)
         ]  # only include records within tessellation
@@ -34,17 +34,17 @@ def get_visits_per_tile(
     )
 
     # number of records outside of the tessellation
-    n_outliers = int(len(mdreport.df) - counts_per_tile.visits.sum())
+    n_outliers = int(len(mdreport.df) - visits_per_tile.visits.sum())
 
-    counts_per_tile = counts_per_tile.merge(
+    visits_per_tile = visits_per_tile.merge(
         mdreport.tessellation[[const.TILE_ID, const.TILE_NAME]],
         on=const.TILE_ID,
         how="outer",
     )
-    counts_per_tile.loc[counts_per_tile.visits.isna(), "visits"] = 0
+    visits_per_tile.loc[visits_per_tile.visits.isna(), "visits"] = 0
 
-    counts_per_tile["visits"] = diff_privacy.counts_dp(
-        counts_per_tile["visits"].values,
+    visits_per_tile["visits"] = diff_privacy.counts_dp(
+        visits_per_tile["visits"].values,
         epsi,
         sensitivity,
         allow_negative = True, # allow negative values for cum_sum simulations
@@ -52,31 +52,31 @@ def get_visits_per_tile(
     n_outliers = diff_privacy.count_dp(n_outliers, epsi, sensitivity)  # type: ignore
 
     cumsum_simulations = m_utils.cumsum_simulations(
-        counts_per_tile.visits.copy().to_numpy(),
+        visits_per_tile.visits.copy().to_numpy(),
         epsi,
         sensitivity,
     )
 
     # remove all negative values (needed for cumsum)
-    counts_per_tile["visits"] = counts_per_tile["visits"].apply(diff_privacy.limit_negative_values_to_zero)
+    visits_per_tile["visits"] = visits_per_tile["visits"].apply(diff_privacy.limit_negative_values_to_zero)
 
     # margin of error
     moe = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
     
     # as percent instead of absolute values
-    visists_sum = np.sum(counts_per_tile["visits"]) 
+    visists_sum = np.sum(visits_per_tile["visits"]) 
     if visists_sum != 0:
-        counts_per_tile["visits"] = counts_per_tile["visits"] / visists_sum
+        visits_per_tile["visits"] = visits_per_tile["visits"] / visists_sum
         n_outliers = n_outliers / visists_sum
         moe = moe / visists_sum
 
     # as counts are already dp, no further privacy mechanism needed
-    dp_quartiles = counts_per_tile.visits.describe()
+    dp_quartiles = visits_per_tile.visits.describe()
 
 
 
     return Section(
-        data=counts_per_tile,
+        data=visits_per_tile,
         privacy_budget=eps,
         sensitivity=sensitivity,
         n_outliers=n_outliers,

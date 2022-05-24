@@ -110,13 +110,13 @@ def add_overview_elements(mdreport: "MobilityDataReport", epsilon: float) -> dic
 
 def add_place_analysis_elements(mdreport: "MobilityDataReport", epsilon: float) -> dict:
     return {
-        const.COUNTS_PER_TILE: place_analysis.get_visits_per_tile(mdreport, epsilon)
-        if const.COUNTS_PER_TILE in const.PLACE_ELEMENTS
+        const.VISITS_PER_TILE: place_analysis.get_visits_per_tile(mdreport, epsilon)
+        if const.VISITS_PER_TILE in const.PLACE_ELEMENTS
         else Section(),
-        const.COUNTS_PER_TILE_TIMEWINDOW: place_analysis.get_visits_per_tile_timewindow(
+        const.VISITS_PER_TILE_TIMEWINDOW: place_analysis.get_visits_per_tile_timewindow(
             mdreport, epsilon
         )
-        if const.COUNTS_PER_TILE_TIMEWINDOW in const.PLACE_ELEMENTS
+        if const.VISITS_PER_TILE_TIMEWINDOW in const.PLACE_ELEMENTS
         else Section(),
     }
 

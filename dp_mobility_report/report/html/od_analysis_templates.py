@@ -25,8 +25,9 @@ from dp_mobility_report.visualization import plot, v_utils
 
 def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
     THRESHOLD = 0.2 # 20 %
-    trip_count = mdreport.report[const.DS_STATISTICS].data["n_trips"]
+    trip_count = mdreport.report[const.DS_STATISTICS].data["n_trips"] # TODO: what if no trip count in data?
     privacy_info = f"Unrealistic values: OD connections with a 5% chance of deviating more than {THRESHOLD * 100} % from the estimated value are removed in the map view."
+    user_config_info = f"User configuration: display max. top {top_n_flows} OD connections on map"
     od_map = ""
     od_legend = ""
     intra_tile_flows_info = ""
@@ -47,7 +48,7 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
         od_map, od_legend = render_origin_destination_flows(
             report[const.OD_FLOWS], mdreport.tessellation, top_n_flows, THRESHOLD, trip_count=trip_count
         )
-        intra_tile_flows_info = render_intra_tile_flows(report[const.OD_FLOWS])
+        intra_tile_flows_info = render_intra_tile_flows(report[const.OD_FLOWS], len(mdreport.tessellation))
         quartiles = round(report[const.OD_FLOWS].quartiles / 100 * trip_count)
         flows_summary_table = render_summary(
             quartiles.astype(int),
@@ -82,6 +83,7 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int) -> str:
     return template_structure.render(
         privacy_info=privacy_info,
         od_map=od_map,
+        user_config_info = user_config_info,
         od_legend=od_legend,
         intra_tile_flows_info=intra_tile_flows_info,
         flows_summary_table=flows_summary_table,
@@ -127,7 +129,7 @@ def render_origin_destination_flows(
 
     # tessellation_innerflow.loc[tessellation_innerflow.flow.isna(), "flow"] = 0
     innerflow_chropleth, innerflow_legend = plot.choropleth_map(
-        tessellation_innerflow, "flow", "% of intra-tile flows"
+        tessellation_innerflow, "flow", "intra-tile flows"
     )  # get innerflows as color for choropleth
 
     od_map = (
@@ -141,10 +143,10 @@ def render_origin_destination_flows(
     return html, html_legend
 
 
-def render_intra_tile_flows(od_flows: Section) -> str:
-    intra_tile_flows = round(od_analysis.get_intra_tile_flows(od_flows.data),1)
+def render_intra_tile_flows(od_flows: Section, n_tiles: int) -> str:
+    intra_tile_flows = round(od_analysis.get_intra_tile_flows(od_flows.data),2)
     ci_interval_info = (
-        f"(95% confidence interval ± {round(od_flows.margin_of_error_laplace, 2)}%)"
+        f"(95% confidence interval ± {round(n_tiles * od_flows.margin_of_error_laplace, 2)} percentage points)"
         if od_flows.margin_of_error_laplace is not None
         else ""
     )
@@ -172,7 +174,9 @@ def render_flows_cumsum(od_flows: Section) -> str:
 def render_most_freq_flows_ranking(
     od_flows: Section, tessellation: GeoDataFrame, top_x: int = 10, trip_count: int = 100
 ) -> str:
-    topx_flows = od_flows.data.nlargest(top_x, "flow")
+    #topx_flows = od_flows.data.nlargest(top_x, "flow")
+    # TODO: remove
+    topx_flows = od_flows.data[(od_flows.data.origin != od_flows.data.destination)].nlargest(top_x, "flow")
     topx_flows["rank"] = list(range(1, len(topx_flows) + 1))
     topx_flows = topx_flows.merge(
         tessellation[[const.TILE_ID, const.TILE_NAME]],

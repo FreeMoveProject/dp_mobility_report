@@ -12,8 +12,8 @@ MISSING_VALUES = "missing_values"
 TRIPS_OVER_TIME = "trips_over_time"
 TRIPS_PER_WEEKDAY = "trips_per_weekday"
 TRIPS_PER_HOUR = "trips_per_hour"
-COUNTS_PER_TILE = "counts_per_tile"
-COUNTS_PER_TILE_TIMEWINDOW = "counts_per_tile_timewindow"
+VISITS_PER_TILE = "visits_per_tile"
+VISITS_PER_TILE_TIMEWINDOW = "visits_per_tile_timewindow"
 OD_FLOWS = "od_flows"
 TRAVEL_TIME = "travel_time"
 JUMP_LENGTH = "jump_length"
@@ -29,7 +29,7 @@ OVERVIEW_ELEMENTS = [
     TRIPS_PER_WEEKDAY,
     TRIPS_PER_HOUR,
 ]
-PLACE_ELEMENTS = [COUNTS_PER_TILE, COUNTS_PER_TILE_TIMEWINDOW]
+PLACE_ELEMENTS = [VISITS_PER_TILE, VISITS_PER_TILE_TIMEWINDOW]
 OD_ELEMENTS = [OD_FLOWS, TRAVEL_TIME, JUMP_LENGTH]
 USER_ELEMENTS = [
     TRIPS_PER_USER,
