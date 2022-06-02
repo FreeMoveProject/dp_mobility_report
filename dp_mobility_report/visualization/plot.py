@@ -227,6 +227,8 @@ def choropleth_map(
         orientation="horizontal",
         label=scale_title,
     )
+    # TODO: add legend directly to map
+    
     return m, colorbar
 
 
@@ -254,6 +256,8 @@ def multi_choropleth_map(
 
     # color
     if diverging_cmap:
+        vmin = 0
+        vmax = 2 if vmax <= 1 else vmax
         cmap = "RdBu_r"
         norm=mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=1, vmax=vmax)
     else:
