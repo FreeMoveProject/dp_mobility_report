@@ -135,25 +135,6 @@ class MobilityDataReport:
             self._report = report.report_elements(self)
         return self._report
 
-    # @property
-    # def html(self) -> str:
-    #     if not self._html:
-    #         self._html, temp_map_folder = self._render_html(self._top_n_flows)
-    #     return self._html, temp_map_folder
-
-    # def _render_html(self, top_n_flows: int) -> str:
-    #     html, temp_map_folder = render_html(self, top_n_flows)
-    #     return html, temp_map_folder
-
-    # def to_html(self, top_n_flows: int) -> str:
-    #     """Generate and return complete template as lengthy string
-    #         for using with frameworks.
-    #     Returns:
-    #         HTML output as string.
-    #     """
-    #     self._top_n_flows = top_n_flows
-    #     return render_html(self, top_n_flows)
-
     def to_file(
         self,
         output_file: Union[str, Path],

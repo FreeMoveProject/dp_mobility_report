@@ -1,8 +1,6 @@
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
-import pandas as pd
-from geopandas import GeoDataFrame
 
 if TYPE_CHECKING:
     from dp_mobility_report.md_report import MobilityDataReport

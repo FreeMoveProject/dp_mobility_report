@@ -1,14 +1,8 @@
-import os
-import shutil
-from pathlib import Path
 from typing import Any, Optional, Union
 
 import jinja2
 import numpy as np
-from folium import Map
-from pandas import DataFrame, Series
-
-from dp_mobility_report.privacy.diff_privacy import _laplacer
+from pandas import Series
 
 # Initializing Jinja
 package_loader = jinja2.PackageLoader(
@@ -50,7 +44,7 @@ def render_user_input_info(
 
 
 def render_moe_info(margin_of_error: int) -> str:
-    return f"""To provide privacy, quartile values are not necessarily the true values but, e.g., instead of the true maximum value the 
+    return """To provide privacy, quartile values are not necessarily the true values but, e.g., instead of the true maximum value the 
         second or third highest value is displayed.
         This is achieved by the so-called exponential mechanism, where a value is drawn based on probabilites defined by the privacy budget. 
         Generally, a value closer to the true value has a higher chance of being drawn."""

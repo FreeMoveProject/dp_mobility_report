@@ -151,13 +151,12 @@ def get_visits_per_tile_timewindow(
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, mdreport.max_trips_per_user)
 
     # scale to record count of overview segment
-    if record_count is not None:
-        if counts_per_tile_timewindow.sum() != 0:
-            counts_sum = counts_per_tile_timewindow.sum()
-            counts_per_tile_timewindow = (
-                counts_per_tile_timewindow / counts_sum * record_count
-            )
-            moe = moe / counts_sum * record_count
+    if (record_count is not None) and (counts_per_tile_timewindow.sum() != 0):
+        counts_sum = counts_per_tile_timewindow.sum()
+        counts_per_tile_timewindow = (
+            counts_per_tile_timewindow / counts_sum * record_count
+        )
+        moe = moe / counts_sum * record_count
 
     return Section(
         data=counts_per_tile_timewindow.unstack(const.TILE_ID).T,

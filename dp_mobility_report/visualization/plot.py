@@ -19,7 +19,7 @@ grey = "#8A8A8A"
 light_grey = "##f2f2f2"
 
 
-def format(value: Union[float, int], type: Type, ndigits: int = 2):
+def format(value: Union[float, int], type: Type, ndigits: int = 2) -> Union[float, int]:
     value = type(value)
     if type == float:
         value = round(value, ndigits)

@@ -1,9 +1,7 @@
 import os
 from pathlib import Path
-from typing import Tuple
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 from geopandas import GeoDataFrame
 
@@ -22,7 +20,6 @@ def render_place_analysis(
     THRESHOLD = 0.2  # 20%
     points_outside_tessellation_info = ""
     privacy_info = f"Unrealistic values: Tiles with a 5% chance of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are grayed out in the map view."
-    visits_per_tile_map = ""
     visits_per_tile_legend = ""
     visits_per_tile_summary_table = ""
     visits_per_tile_cumsum_linechart = ""
@@ -108,7 +105,6 @@ def render_visits_per_tile(
 
     map.save(os.path.join(temp_map_folder, "visits_per_tile_map.html"))
 
-    # html = map.get_root().render()
     legend_html = v_utils.fig_to_html(legend)
     plt.close()
     return legend_html
@@ -179,7 +175,7 @@ def render_counts_per_tile_timewindow(
     return output_html
 
 
-def _create_timewindow_segment(df, tessellation):
+def _create_timewindow_segment(df: pd.DataFrame, tessellation: GeoDataFrame) -> str:
     visits_choropleth = plot.multi_choropleth_map(df, tessellation)
 
     tile_means = df.mean(axis=1)

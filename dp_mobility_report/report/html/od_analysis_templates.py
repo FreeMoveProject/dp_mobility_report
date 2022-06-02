@@ -1,13 +1,11 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import skmob
 from geopandas.geodataframe import GeoDataFrame
-from scipy.stats import laplace
 
 if TYPE_CHECKING:
     from dp_mobility_report.md_report import MobilityDataReport
@@ -16,7 +14,6 @@ from dp_mobility_report import constants as const
 from dp_mobility_report.model import od_analysis
 from dp_mobility_report.model.section import Section
 from dp_mobility_report.report.html.html_utils import (
-    fmt,
     get_template,
     render_moe_info,
     render_summary,
@@ -36,7 +33,6 @@ def render_od_analysis(
     user_config_info = (
         f"User configuration: display max. top {top_n_flows} OD connections on map"
     )
-    od_map = ""
     od_legend = ""
     intra_tile_flows_info = ""
     flows_summary_table = ""
@@ -153,7 +149,6 @@ def render_origin_destination_flows(
 
     od_map.save(os.path.join(temp_map_folder, "od_map.html"))
 
-    # html = od_map.get_root().render()
     html_legend = v_utils.fig_to_html(innerflow_legend)
     plt.close()
     return html_legend

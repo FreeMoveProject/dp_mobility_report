@@ -1,7 +1,4 @@
-from datetime import datetime
-
 import matplotlib.pyplot as plt
-from pandas import DataFrame, Series
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model.section import Section

@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING
 
-from dp_mobility_report import constants as const
 from dp_mobility_report.report.html.html_utils import fmt, get_template
 
 if TYPE_CHECKING:

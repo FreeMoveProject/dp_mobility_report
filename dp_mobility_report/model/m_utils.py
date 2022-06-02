@@ -1,7 +1,6 @@
 from typing import List, Optional, Tuple, Type, Union
 
 import numpy as np
-import pandas as pd
 from haversine import haversine
 from pandas import DataFrame, Series
 
@@ -46,7 +45,7 @@ def hist_section(
         series, min_value=quartiles["min"], max_value=quartiles["max"]
     )
 
-    ### determine bins for histogram ###
+    ## determine bins for histogram ##
 
     # max value of histogram: either given as input or determined by dp max
     hist_max = (
@@ -147,8 +146,8 @@ def _cumsum(array: np.array):
 
 
 def cumsum_simulations(
-    counts: np.array, eps: float, sensitivity: int, nsim=10, nrow=100
-):
+    counts: np.array, eps: float, sensitivity: int, nsim: int = 10, nrow: int = 100
+) -> DataFrame:
     df_cumsum = DataFrame()
     df_cumsum["n"] = np.arange(1, len(counts) + 1)
 

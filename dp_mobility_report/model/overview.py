@@ -114,7 +114,7 @@ def get_missing_values(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
     moe = diff_privacy.laplace_margin_of_error(
         0.95, epsi, 2 * mdreport.max_trips_per_user
     )
-    conf_interval = dict()
+    conf_interval = {}
     for col in columns:
         missings[col] = diff_privacy.count_dp(
             missings[col], epsi, 2 * mdreport.max_trips_per_user

@@ -1,3 +1,5 @@
+examples/html/old/*
+
 *.code-workspace
 *.DS_Store
 .vscode/*

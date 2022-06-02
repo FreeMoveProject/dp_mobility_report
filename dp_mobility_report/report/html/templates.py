@@ -2,7 +2,7 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Tuple
 
 if TYPE_CHECKING:
     from dp_mobility_report.md_report import MobilityDataReport
@@ -20,7 +20,7 @@ from dp_mobility_report.report.html import (
 
 def render_html(
     mdreport: "MobilityDataReport", output_filename: str, top_n_flows: int = 100
-) -> str:
+) -> Tuple[str, str]:
     template_structure = html_utils.get_template("structure.html")
     temp_map_folder = Path(os.path.join("/tmp", tempfile.gettempdir())).with_name(
         "maps"
