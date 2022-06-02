@@ -4,6 +4,7 @@ from typing import Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 
+
 @dataclass
 class Section:
     """Class for single report sections. Attribute 'data' contains the content of the report element.

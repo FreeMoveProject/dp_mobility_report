@@ -69,12 +69,15 @@ def report_elements(mdreport: "MobilityDataReport") -> dict:
     ) as pbar:
         if is_all_analyses | (const.OVERVIEW in mdreport.analysis_selection):
             report = {**report, **add_overview_elements(mdreport, epsilon)}
-            record_count = report[const.DS_STATISTICS].data['n_records']
-            trip_count = report[const.DS_STATISTICS].data['n_trips']
+            record_count = report[const.DS_STATISTICS].data["n_records"]
+            trip_count = report[const.DS_STATISTICS].data["n_trips"]
         pbar.update()
 
         if is_all_analyses | (const.PLACE_ANALYSIS in mdreport.analysis_selection):
-            report = {**report, **add_place_analysis_elements(mdreport, epsilon, record_count)}
+            report = {
+                **report,
+                **add_place_analysis_elements(mdreport, epsilon, record_count),
+            }
         pbar.update()
 
         if is_all_analyses | (const.OD_ANALYSIS in mdreport.analysis_selection):
@@ -112,9 +115,13 @@ def add_overview_elements(mdreport: "MobilityDataReport", epsilon: float) -> dic
     }
 
 
-def add_place_analysis_elements(mdreport: "MobilityDataReport", epsilon: float, record_count: Optional[int]) -> dict:
+def add_place_analysis_elements(
+    mdreport: "MobilityDataReport", epsilon: float, record_count: Optional[int]
+) -> dict:
     return {
-        const.VISITS_PER_TILE: place_analysis.get_visits_per_tile(mdreport, epsilon, record_count)
+        const.VISITS_PER_TILE: place_analysis.get_visits_per_tile(
+            mdreport, epsilon, record_count
+        )
         if const.VISITS_PER_TILE in const.PLACE_ELEMENTS
         else Section(),
         const.VISITS_PER_TILE_TIMEWINDOW: place_analysis.get_visits_per_tile_timewindow(
@@ -126,10 +133,15 @@ def add_place_analysis_elements(mdreport: "MobilityDataReport", epsilon: float, 
 
 
 def add_od_analysis_elements(
-    mdreport: "MobilityDataReport", _od_shape: DataFrame, epsilon: float, trip_count: Optional[int]
+    mdreport: "MobilityDataReport",
+    _od_shape: DataFrame,
+    epsilon: float,
+    trip_count: Optional[int],
 ) -> dict:
     return {
-        const.OD_FLOWS: od_analysis.get_od_flows(_od_shape, mdreport, epsilon, trip_count)
+        const.OD_FLOWS: od_analysis.get_od_flows(
+            _od_shape, mdreport, epsilon, trip_count
+        )
         if const.OD_FLOWS in const.OD_ELEMENTS
         else Section(),
         const.TRAVEL_TIME: od_analysis.get_travel_time(_od_shape, mdreport, epsilon)

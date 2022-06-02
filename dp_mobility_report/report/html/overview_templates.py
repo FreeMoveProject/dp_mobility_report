@@ -186,7 +186,7 @@ def render_trips_over_time(trips_over_time: Section) -> str:
             x_axis_label="Date",
             y_axis_label="% of trips",
             margin_of_error=trips_over_time.margin_of_error_laplace,
-            rotate_label = True
+            rotate_label=True,
         )
         html = v_utils.fig_to_html(chart)
     plt.close()

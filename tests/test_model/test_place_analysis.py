@@ -16,21 +16,21 @@ def test_mdreport():
 
 def test_get_visits_per_tile(test_mdreport):
     """Correct visits per tile values without noise."""
-    visits_per_location = place_analysis.get_visits_per_tile(test_mdreport, None)
-    assert visits_per_location.quartiles[
-        ["min", "25%", "50%", "75%", "max"]
-    ].round(2).tolist() == [0.25, 0.25, 0.25, 0.25, 0.25]
-    assert visits_per_location.data.visits.round(2).tolist() == [0.25, 0.25, 0.25, 0.25]
-    assert visits_per_location.n_outliers.round(3) == 0.005
+    visits_per_location = place_analysis.get_visits_per_tile(test_mdreport, None, None)
+    assert visits_per_location.quartiles[["min", "25%", "50%", "75%", "max"]].round(
+        2
+    ).tolist() == [49, 49.75, 50, 50, 50]
+    assert visits_per_location.data.visits.tolist() == [50, 50, 50, 49]
+    assert visits_per_location.n_outliers == 1
 
 
 def test_get_visits_per_tile_timewindow(test_mdreport):
     visits_timewindow = place_analysis.get_visits_per_tile_timewindow(
-        test_mdreport, None
+        test_mdreport, None, None
     ).data
     assert len(visits_timewindow.columns) == 12
     assert len(visits_timewindow.index) == 4
-    assert visits_timewindow.sum().sum() == 1
-    assert visits_timewindow[("weekday", "1: 2-6")].round(2).tolist() == [0, 0, 0.03, 0.07]
-    assert visits_timewindow[("weekend", "4: 14-18")].round(2).tolist() == [0, 0, 0.02, 0]
-    assert visits_timewindow[("weekday", "3: 10-14")].round(2).tolist() == [0, 0, 0.07, 0.06]
+    assert visits_timewindow.sum().sum() == 100
+    assert visits_timewindow[("weekday", "1: 2-6")].round(2).tolist() == [0, 0, 3, 7]
+    assert visits_timewindow[("weekend", "4: 14-18")].round(2).tolist() == [0, 0, 2, 0]
+    assert visits_timewindow[("weekday", "3: 10-14")].round(2).tolist() == [0, 0, 7, 6]

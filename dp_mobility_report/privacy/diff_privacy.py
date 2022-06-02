@@ -66,8 +66,10 @@ def quartiles_dp(
     array_type = array.dtype
     array = pd.Series(clip_to_bounds(np.ravel(array), bounds))
     array = array.sort_values().reset_index(drop=True)
-    array = array.astype(array_type) # clip_to_bounds converts int arrays to float arrays > convert those back to int
-    
+    array = array.astype(
+        array_type
+    )  # clip_to_bounds converts int arrays to float arrays > convert those back to int
+
     k = array.size
 
     def utility(quant: float, k: int) -> list:
@@ -138,7 +140,9 @@ def laplace_margin_of_error(
     return laplace.ppf(q, loc=0, scale=scale)
 
 
-def conf_interval(value: Optional[Union[float, int]], margin_of_error: float, type: Type = int) -> Tuple:
+def conf_interval(
+    value: Optional[Union[float, int]], margin_of_error: float, type: Type = int
+) -> Tuple:
     if value is None:
         return (None, None)
     lower_limit = (value - margin_of_error) if (margin_of_error < value) else 0
@@ -179,11 +183,13 @@ def counts_dp(
 
     vfunc = np.vectorize(_local_laplacer)
     dpcounts = vfunc(counts)
-    dpcounts = limit_negative_values_to_zero(dpcounts) if not allow_negative else dpcounts
+    dpcounts = (
+        limit_negative_values_to_zero(dpcounts) if not allow_negative else dpcounts
+    )
     dpcounts = dpcounts.astype(int)
 
     return dpcounts
 
 
 def limit_negative_values_to_zero(valule: int) -> int:
-    return ((abs(valule) + valule) / 2)
+    return (abs(valule) + valule) / 2

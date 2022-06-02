@@ -13,12 +13,12 @@ from dp_mobility_report.privacy import diff_privacy
 
 
 def get_visits_per_tile(
-    mdreport: "MobilityDataReport", eps: Optional[float]
+    mdreport: "MobilityDataReport", eps: Optional[float], record_count: Optional[int]
 ) -> Section:
     epsi = eps
     # epsi = m_utils.get_epsi(
     #     mdreport.evalu, eps, 2
-    # )  
+    # )
     # TODO: is this really eps / 2? bc outliers are like an own tile?
 
     sensitivity = 2 * mdreport.max_trips_per_user
@@ -47,7 +47,7 @@ def get_visits_per_tile(
         visits_per_tile["visits"].values,
         epsi,
         sensitivity,
-        allow_negative = True, # allow negative values for cum_sum simulations
+        allow_negative=True,  # allow negative values for cum_sum simulations
     )
     n_outliers = diff_privacy.count_dp(n_outliers, epsi, sensitivity)  # type: ignore
 
@@ -58,22 +58,25 @@ def get_visits_per_tile(
     )
 
     # remove all negative values (needed for cumsum)
-    visits_per_tile["visits"] = visits_per_tile["visits"].apply(diff_privacy.limit_negative_values_to_zero)
+    visits_per_tile["visits"] = visits_per_tile["visits"].apply(
+        diff_privacy.limit_negative_values_to_zero
+    )
 
     # margin of error
     moe = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
-    
-    # as percent instead of absolute values
-    visists_sum = np.sum(visits_per_tile["visits"]) 
-    if visists_sum != 0:
-        visits_per_tile["visits"] = visits_per_tile["visits"] / visists_sum
-        n_outliers = n_outliers / visists_sum
-        moe = moe / visists_sum
+
+    # scale to record count of overview segment
+    if record_count is not None:
+        visists_sum = np.sum(visits_per_tile["visits"])
+        if visists_sum != 0:
+            visits_per_tile["visits"] = (
+                visits_per_tile["visits"] / visists_sum * record_count
+            ).astype(int)
+            n_outliers = int(n_outliers / visists_sum * record_count)
+            moe = int(moe / visists_sum * record_count)
 
     # as counts are already dp, no further privacy mechanism needed
     dp_quartiles = visits_per_tile.visits.describe()
-
-
 
     return Section(
         data=visits_per_tile,
@@ -99,7 +102,7 @@ def _get_hour_bin(hour: int, timewindows: np.ndarray) -> str:
 
 
 def get_visits_per_tile_timewindow(
-    mdreport: "MobilityDataReport", eps: Optional[float]
+    mdreport: "MobilityDataReport", eps: Optional[float], record_count: Optional[int]
 ) -> Section:
     mdreport.df["timewindows"] = mdreport.df[const.HOUR].apply(
         lambda x: _get_hour_bin(x, mdreport.timewindows)
@@ -147,11 +150,14 @@ def get_visits_per_tile_timewindow(
 
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, mdreport.max_trips_per_user)
 
-    # as percent instead of absolute values
-    if counts_per_tile_timewindow.sum() != 0:
-        counts_sum = counts_per_tile_timewindow.sum()
-        counts_per_tile_timewindow = counts_per_tile_timewindow / counts_sum
-        moe = moe / counts_sum
+    # scale to record count of overview segment
+    if record_count is not None:
+        if counts_per_tile_timewindow.sum() != 0:
+            counts_sum = counts_per_tile_timewindow.sum()
+            counts_per_tile_timewindow = (
+                counts_per_tile_timewindow / counts_sum * record_count
+            )
+            moe = moe / counts_sum * record_count
 
     return Section(
         data=counts_per_tile_timewindow.unstack(const.TILE_ID).T,

@@ -48,20 +48,22 @@ def get_user_time_delta(
         return None
 
     sec = m_utils.hist_section(
-        (user_time_delta.dt.total_seconds() / 3600), # convert to hours
+        (user_time_delta.dt.total_seconds() / 3600),  # convert to hours
         eps,
         sensitivity=mdreport.max_trips_per_user,
         evalu=mdreport.evalu,
     )
-    if sec.quartiles["min"] < 0: # are there overlaps according to dp minimum?
+    if sec.quartiles["min"] < 0:  # are there overlaps according to dp minimum?
         sec.n_outliers = diff_privacy.count_dp(
             overlaps,
-            epsi,   
+            epsi,
             mdreport.max_trips_per_user,
         )
     else:
         sec.n_outliers = None
-    sec.quartiles = pd.to_timedelta(sec.quartiles, unit = 'h').apply(lambda x: x.round(freq='s'))
+    sec.quartiles = pd.to_timedelta(sec.quartiles, unit="h").apply(
+        lambda x: x.round(freq="s")
+    )
 
     return sec
 

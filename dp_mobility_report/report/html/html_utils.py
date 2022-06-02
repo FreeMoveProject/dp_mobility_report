@@ -1,11 +1,11 @@
 import os
-from pathlib import Path
 import shutil
+from pathlib import Path
 from typing import Any, Optional, Union
-from folium import Map
 
 import jinja2
 import numpy as np
+from folium import Map
 from pandas import DataFrame, Series
 
 from dp_mobility_report.privacy.diff_privacy import _laplacer

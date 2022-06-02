@@ -175,7 +175,7 @@ def choropleth_map(
     fill_color_name: str,
     scale_title: str = "Visit count",
     min_scale: Optional[Union[int, float]] = None,
-    aliases:list = None,
+    aliases: list = None,
 ) -> folium.Map:
     poly_json = counts_per_tile_gdf.to_json()
 
@@ -228,18 +228,18 @@ def choropleth_map(
         label=scale_title,
     )
     # TODO: add legend directly to map
-    
+
     return m, colorbar
 
 
 def multi_choropleth_map(
-    counts_per_tile_timewindow: DataFrame, tessellation: GeoDataFrame, diverging_cmap: bool = False
+    counts_per_tile_timewindow: DataFrame,
+    tessellation: GeoDataFrame,
+    diverging_cmap: bool = False,
 ) -> mpl.figure.Figure:
     counts_per_tile_timewindow = tessellation[["tile_id", "geometry"]].merge(
         counts_per_tile_timewindow, left_on="tile_id", right_index=True, how="left"
     )
-
-
 
     # col1: tile_id, col2: geometry
     plot_count = counts_per_tile_timewindow.shape[1] - 2
@@ -253,13 +253,12 @@ def multi_choropleth_map(
     vmax = counts_per_tile_timewindow.iloc[:, 2:].max().max()
     vmax = vmax if vmax is not np.nan else 2
 
-
     # color
     if diverging_cmap:
         vmin = 0
         vmax = 2 if vmax <= 1 else vmax
         cmap = "RdBu_r"
-        norm=mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=1, vmax=vmax)
+        norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=1, vmax=vmax)
     else:
         cmap = "viridis_r"
         norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
@@ -289,9 +288,7 @@ def multi_choropleth_map(
             ax.set_title(column_name)
 
     # Create colorbar as a legend
-    sm = plt.cm.ScalarMappable(
-        cmap=cmap, norm=norm
-    )
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm._A = []  # add the colorbar to the figure
     # set the range for the choropleth
     fig.colorbar(sm, ax=axes)

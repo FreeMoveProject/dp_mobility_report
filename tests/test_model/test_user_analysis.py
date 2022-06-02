@@ -17,7 +17,17 @@ def test_mdreport():
 
 def test_get_trips_per_user(test_mdreport):
     trips_per_user = user_analysis.get_trips_per_user(test_mdreport, None)
-    assert trips_per_user.data[0].round().tolist() == [5.0, 0.0, 20.0, 15.0, 25.0, 10.0, 15.0, 5.0, 5.0]
+    assert trips_per_user.data[0].round().tolist() == [
+        5.0,
+        0.0,
+        20.0,
+        15.0,
+        25.0,
+        10.0,
+        15.0,
+        5.0,
+        5.0,
+    ]
     assert trips_per_user.data[1].round().tolist() == [
         1.0,
         2.0,
@@ -45,7 +55,18 @@ def test_get_user_time_delta(test_mdreport):
 
 def test_get_radius_of_gyration(test_mdreport):
     rog = user_analysis.get_radius_of_gyration(test_mdreport, None)
-    assert rog.data[0].round().tolist() == [10.0, 0.0, 0.0, 10.0, 10.0, 30.0, 10.0, 15.0, 0.0, 15.0]
+    assert rog.data[0].round().tolist() == [
+        10.0,
+        0.0,
+        0.0,
+        10.0,
+        10.0,
+        30.0,
+        10.0,
+        15.0,
+        0.0,
+        15.0,
+    ]
     assert rog.data[1].round(3).tolist() == [
         2.2,
         2.437,

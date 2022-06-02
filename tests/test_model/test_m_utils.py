@@ -46,7 +46,18 @@ def test_hist_section():
 
     series = np.array([0, 0.1, 0.15, 0.49, 0.71, 0.8, 0.82, 1])
     hist_sec = m_utils.hist_section(series, None, 1)
-    assert hist_sec.data[0].round().tolist() == [12.0, 25.0, 0.0, 0.0, 12.0, 0.0, 0.0, 12.0, 25.0, 12.0]
+    assert hist_sec.data[0].round().tolist() == [
+        12.0,
+        25.0,
+        0.0,
+        0.0,
+        12.0,
+        0.0,
+        0.0,
+        12.0,
+        25.0,
+        12.0,
+    ]
     assert hist_sec.data[1].round(2).tolist() == [
         0,
         0.1,

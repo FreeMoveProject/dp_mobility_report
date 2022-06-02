@@ -43,7 +43,10 @@ def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame) -> pd.DataFrame:
 
 
 def get_od_flows(
-    od_shape: pd.DataFrame, mdreport: "MobilityDataReport", eps: Optional[float]
+    od_shape: pd.DataFrame,
+    mdreport: "MobilityDataReport",
+    eps: Optional[float],
+    trip_count: Optional[int],
 ) -> Section:
     sensitivity = mdreport.max_trips_per_user
     od_flows = (
@@ -68,10 +71,12 @@ def get_od_flows(
     od_flows.fillna(0, inplace=True)
 
     od_flows["flow"] = diff_privacy.counts_dp(
-        od_flows["flow"].to_numpy(), eps, sensitivity, allow_negative = True
+        od_flows["flow"].to_numpy(), eps, sensitivity, allow_negative=True
     )
 
-    cumsum_simulations = m_utils.cumsum_simulations(od_flows.flow.copy().to_numpy(), eps, sensitivity)
+    cumsum_simulations = m_utils.cumsum_simulations(
+        od_flows.flow.copy().to_numpy(), eps, sensitivity
+    )
 
     # remove all instances of 0 (and smaller) to reduce storage
     od_flows = od_flows[od_flows["flow"] > 0]
@@ -79,17 +84,17 @@ def get_od_flows(
     # margin of error
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
 
-    # as percent instead of absolute values
-    od_sum = np.sum(od_flows["flow"]) 
-    if od_sum != 0:
-        od_flows["flow"] = od_flows["flow"] / od_sum * 100
-        moe = moe / od_sum * 100
-
+    # scale to trip count of overview segment
+    if trip_count is not None:
+        od_sum = np.sum(od_flows["flow"])
+        if od_sum != 0:
+            od_flows["flow"] = (od_flows["flow"] / od_sum * trip_count).astype(int)
+            moe = int(moe / od_sum * trip_count)
 
     # TODO: distribution with or without 0s?
     # as counts are already dp, no further privacy mechanism needed
     dp_quartiles = od_flows.flow.describe()
-    
+
     return Section(
         data=od_flows,
         quartiles=dp_quartiles,
@@ -102,6 +107,7 @@ def get_od_flows(
 
 def get_intra_tile_flows(od_flows: pd.DataFrame) -> int:
     return od_flows[(od_flows.origin == od_flows.destination)].flow.sum()
+
 
 def get_travel_time(
     od_shape: pd.DataFrame, mdreport: "MobilityDataReport", eps: Optional[float]

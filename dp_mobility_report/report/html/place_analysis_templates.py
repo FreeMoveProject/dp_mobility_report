@@ -13,8 +13,13 @@ from dp_mobility_report.report.html.html_utils import get_template, render_summa
 from dp_mobility_report.visualization import plot, v_utils
 
 
-def render_place_analysis(report: dict, tessellation: GeoDataFrame, temp_map_folder: Path, output_filename: str) -> str:
-    THRESHOLD = 0.2 # 20%
+def render_place_analysis(
+    report: dict,
+    tessellation: GeoDataFrame,
+    temp_map_folder: Path,
+    output_filename: str,
+) -> str:
+    THRESHOLD = 0.2  # 20%
     points_outside_tessellation_info = ""
     privacy_info = f"Unrealistic values: Tiles with a 5% chance of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are grayed out in the map view."
     visits_per_tile_map = ""
@@ -36,7 +41,8 @@ def render_place_analysis(report: dict, tessellation: GeoDataFrame, temp_map_fol
         quartiles = round(report[const.VISITS_PER_TILE].quartiles)
 
         visits_per_tile_summary_table = render_summary(
-            quartiles.astype(int), "Distribution of visits per tile" # extrapolate visits from dp record count
+            quartiles.astype(int),
+            "Distribution of visits per tile",  # extrapolate visits from dp record count
         )
         visits_per_tile_cumsum_linechart = render_counts_per_tile_cumsum(
             report[const.VISITS_PER_TILE]
@@ -72,7 +78,10 @@ def render_points_outside_tess(visits_per_tile: Section) -> str:
 
 
 def render_visits_per_tile(
-    perc_per_tile: Section, tessellation: GeoDataFrame, threshold: float, temp_map_folder: Path
+    perc_per_tile: Section,
+    tessellation: GeoDataFrame,
+    threshold: float,
+    temp_map_folder: Path,
 ) -> str:
 
     # merge count and tessellation
@@ -91,12 +100,15 @@ def render_visits_per_tile(
 
     counts_per_tile_gdf.loc[moe_deviation > threshold, "visits"] = None
     map, legend = plot.choropleth_map(
-        counts_per_tile_gdf, "visits", scale_title="number of visits", aliases=["Tile ID", "Tile Name", "number of visits"]
+        counts_per_tile_gdf,
+        "visits",
+        scale_title="number of visits",
+        aliases=["Tile ID", "Tile Name", "number of visits"],
     )
 
     map.save(os.path.join(temp_map_folder, "visits_per_tile_map.html"))
-    
-    #html = map.get_root().render()
+
+    # html = map.get_root().render()
     legend_html = v_utils.fig_to_html(legend)
     plt.close()
     return legend_html
@@ -111,7 +123,7 @@ def render_counts_per_tile_cumsum(counts_per_tile: Section) -> str:
         "cum_perc",
         "Number of tiles",
         "Cumulated sum of visits per tile",
-        #simulations=df_cumsum.columns[2:52],
+        # simulations=df_cumsum.columns[2:52],
         add_diagonal=True,
     )
     html = v_utils.fig_to_html(chart)
@@ -130,7 +142,7 @@ def render_most_freq_tiles_ranking(perc_per_tile: Section, top_x: int = 10) -> s
         + topx_tiles[const.TILE_ID]
         + ")"
     )
-    
+
     ranking = plot.ranking(
         round(topx_tiles.visits),
         "number of visits per tile",
@@ -149,7 +161,7 @@ def render_counts_per_tile_timewindow(
     moe_counts_per_tile_timewindow = (
         counts_per_tile_timewindow.margin_of_error_laplace / data
     )
-    
+
     if data is None:
         return None
 
@@ -166,18 +178,17 @@ def render_counts_per_tile_timewindow(
     plt.close()
     return output_html
 
+
 def _create_timewindow_segment(df, tessellation):
-    visits_choropleth = plot.multi_choropleth_map(
-        df, tessellation
-    )
+    visits_choropleth = plot.multi_choropleth_map(df, tessellation)
 
     tile_means = df.mean(axis=1)
     dev_from_avg = df.div(tile_means, axis=0)
-    deviation_choropleth = plot.multi_choropleth_map(dev_from_avg, tessellation, diverging_cmap=True)
-    return (
-        f"""<h4>Number of visits</h4>
+    deviation_choropleth = plot.multi_choropleth_map(
+        dev_from_avg, tessellation, diverging_cmap=True
+    )
+    return f"""<h4>Number of visits</h4>
         {v_utils.fig_to_html_as_png(visits_choropleth)}
         <h4>Deviation from tile average</h4>
         <div><p>A value of 1 corrresponds to the tile average.</p></div>
         {v_utils.fig_to_html_as_png(deviation_choropleth)}"""  # svg might get too large
-    )

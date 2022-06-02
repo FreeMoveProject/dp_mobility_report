@@ -5,12 +5,15 @@
     <h3>Visits per tile</h3>
     <p class="info">{{privacy_info}}</p>
     
-    <div style="width: 800px; height: 600px;">
+    <iframe src="{{output_filename}}/maps/visits_per_tile_map.html" width="80%" height="600" style="border:1px solid black;">
+    </iframe>
+<!---    <div style="width: 800px; height: 600px;">
         {{counts_per_tile_map}}
     </div>
+--->
     
     <div>
-        {{counts_per_tile_legend}}
+        {{visits_per_tile_legend}}
     </div>
     <p>
         {{points_outside_tessellation_info}}

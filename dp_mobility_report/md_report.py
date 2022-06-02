@@ -1,5 +1,7 @@
+import os
 import warnings
 from pathlib import Path
+from shutil import rmtree
 from typing import Any, List, Optional, Union
 
 import numpy as np
@@ -11,7 +13,11 @@ from tqdm.auto import tqdm
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import preprocessing
 from dp_mobility_report.report import report
-from dp_mobility_report.report.html.templates import create_html_assets, render_html
+from dp_mobility_report.report.html.templates import (
+    create_html_assets,
+    create_maps_folder,
+    render_html,
+)
 
 
 class MobilityDataReport:
@@ -129,24 +135,24 @@ class MobilityDataReport:
             self._report = report.report_elements(self)
         return self._report
 
-    @property
-    def html(self) -> str:
-        if not self._html:
-            self._html = self._render_html(self._top_n_flows)
-        return self._html
+    # @property
+    # def html(self) -> str:
+    #     if not self._html:
+    #         self._html, temp_map_folder = self._render_html(self._top_n_flows)
+    #     return self._html, temp_map_folder
 
-    def _render_html(self, top_n_flows: int) -> str:
-        html = render_html(self, top_n_flows)
-        return html
+    # def _render_html(self, top_n_flows: int) -> str:
+    #     html, temp_map_folder = render_html(self, top_n_flows)
+    #     return html, temp_map_folder
 
-    def to_html(self, top_n_flows: int) -> str:
-        """Generate and return complete template as lengthy string
-            for using with frameworks.
-        Returns:
-            HTML output as string.
-        """
-        self._top_n_flows = top_n_flows
-        return self.html
+    # def to_html(self, top_n_flows: int) -> str:
+    #     """Generate and return complete template as lengthy string
+    #         for using with frameworks.
+    #     Returns:
+    #         HTML output as string.
+    #     """
+    #     self._top_n_flows = top_n_flows
+    #     return render_html(self, top_n_flows)
 
     def to_file(
         self,
@@ -176,13 +182,24 @@ class MobilityDataReport:
                     f"To remove this warning, please use .html or .json."
                 )
 
-        create_html_assets(output_file)
+        output_dir = os.path.dirname(output_file)
+        filename = Path(os.path.basename(output_file)).stem
+        output_dir = Path(os.path.join(output_dir, filename))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        create_html_assets(output_dir)
 
         with tqdm(  # progress bar
             total=1, desc="Create HTML Output", disable=disable_progress_bar
         ) as pbar:
-            data = self.to_html(top_n_flows)
+            data, temp_map_folder = render_html(self, filename, top_n_flows)
             pbar.update()
+
+        create_maps_folder(temp_map_folder, output_dir)
+
+        # clean up temp folder
+        rmtree(temp_map_folder, ignore_errors=True)
 
         output_file.write_text(data, encoding="utf-8")
 

@@ -178,7 +178,7 @@ def get_trips_over_time(
     )
 
     # as percent instead of absolute values
-    trip_sum = np.sum(trip_count["trip_count"]) 
+    trip_sum = np.sum(trip_count["trip_count"])
     if trip_sum != 0:
         trip_count["trip_count"] = trip_count["trip_count"] / trip_sum * 100
         moe_laplace = moe_laplace / trip_sum * 100
@@ -220,7 +220,7 @@ def get_trips_per_weekday(
     )
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, mdreport.max_trips_per_user)
 
-    trip_sum = np.sum(trips_per_weekday) 
+    trip_sum = np.sum(trips_per_weekday)
     if trip_sum != 0:
         trips_per_weekday = trips_per_weekday / trip_sum * 100
         moe = moe / trip_sum * 100
@@ -247,7 +247,9 @@ def get_trips_per_hour(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, mdreport.max_trips_per_user)
 
     # as percent instead of absolute values
-    trip_sum = np.sum(hour_weekday[hour_weekday.point_type == const.END]["count"]) #only use ends to get sum of trips
+    trip_sum = np.sum(
+        hour_weekday[hour_weekday.point_type == const.END]["count"]
+    )  # only use ends to get sum of trips
     if trip_sum != 0:
         hour_weekday["count"] = hour_weekday["count"] / trip_sum * 100
         moe = moe / trip_sum * 100

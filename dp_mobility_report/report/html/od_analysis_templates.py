@@ -25,10 +25,17 @@ from dp_mobility_report.report.html.html_utils import (
 from dp_mobility_report.visualization import plot, v_utils
 
 
-def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int, temp_map_folder: Path, output_filename:str) -> str:
-    THRESHOLD = 0.2 # 20 %
+def render_od_analysis(
+    mdreport: "MobilityDataReport",
+    top_n_flows: int,
+    temp_map_folder: Path,
+    output_filename: str,
+) -> str:
+    THRESHOLD = 0.2  # 20 %
     privacy_info = f"Unrealistic values: OD connections with a 5% chance of deviating more than {THRESHOLD * 100} % from the estimated value are removed in the map view."
-    user_config_info = f"User configuration: display max. top {top_n_flows} OD connections on map"
+    user_config_info = (
+        f"User configuration: display max. top {top_n_flows} OD connections on map"
+    )
     od_map = ""
     od_legend = ""
     intra_tile_flows_info = ""
@@ -47,9 +54,15 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int, temp_ma
 
     if const.OD_FLOWS in report and report[const.OD_FLOWS].data is not None:
         od_legend = render_origin_destination_flows(
-            report[const.OD_FLOWS], mdreport.tessellation, top_n_flows, THRESHOLD, temp_map_folder
+            report[const.OD_FLOWS],
+            mdreport.tessellation,
+            top_n_flows,
+            THRESHOLD,
+            temp_map_folder,
         )
-        intra_tile_flows_info = render_intra_tile_flows(report[const.OD_FLOWS], len(mdreport.tessellation))
+        intra_tile_flows_info = render_intra_tile_flows(
+            report[const.OD_FLOWS], len(mdreport.tessellation)
+        )
         quartiles = round(report[const.OD_FLOWS].quartiles)
         flows_summary_table = render_summary(
             quartiles.astype(int),
@@ -84,7 +97,7 @@ def render_od_analysis(mdreport: "MobilityDataReport", top_n_flows: int, temp_ma
     return template_structure.render(
         privacy_info=privacy_info,
         output_filename=output_filename,
-        user_config_info = user_config_info,
+        user_config_info=user_config_info,
         od_legend=od_legend,
         intra_tile_flows_info=intra_tile_flows_info,
         flows_summary_table=flows_summary_table,
@@ -106,7 +119,7 @@ def render_origin_destination_flows(
     tessellation: GeoDataFrame,
     top_n_flows: int,
     threshold: float,
-    temp_map_folder: Path
+    temp_map_folder: Path,
 ) -> str:
     data = od_flows.data.copy()
     moe_deviation = od_flows.margin_of_error_laplace / data["flow"]
@@ -139,15 +152,15 @@ def render_origin_destination_flows(
     )
 
     od_map.save(os.path.join(temp_map_folder, "od_map.html"))
-    
-    #html = od_map.get_root().render()
+
+    # html = od_map.get_root().render()
     html_legend = v_utils.fig_to_html(innerflow_legend)
     plt.close()
     return html_legend
 
 
 def render_intra_tile_flows(od_flows: Section, n_tiles: int) -> str:
-    intra_tile_flows = round(od_analysis.get_intra_tile_flows(od_flows.data),2)
+    intra_tile_flows = round(od_analysis.get_intra_tile_flows(od_flows.data), 2)
     ci_interval_info = (
         f"(95% confidence interval ± {round(n_tiles * od_flows.margin_of_error_laplace, 2)} percentage points)"
         if od_flows.margin_of_error_laplace is not None
@@ -166,7 +179,7 @@ def render_flows_cumsum(od_flows: Section) -> str:
         "cum_perc",
         "Number of OD tile pairs",
         "Cumulated sum of flows between OD pairs",
-        #simulations=df_cumsum.columns[2:52],
+        # simulations=df_cumsum.columns[2:52],
         add_diagonal=True,
     )
     html = v_utils.fig_to_html(chart)
@@ -180,8 +193,8 @@ def render_most_freq_flows_ranking(
     topx_flows = od_flows.data.nlargest(top_x, "flow")
 
     # if no intra-cell flows should be shown
-    #topx_flows = od_flows.data[(od_flows.data.origin != od_flows.data.destination)].nlargest(top_x, "flow")
-    
+    # topx_flows = od_flows.data[(od_flows.data.origin != od_flows.data.destination)].nlargest(top_x, "flow")
+
     topx_flows["rank"] = list(range(1, len(topx_flows) + 1))
     topx_flows = topx_flows.merge(
         tessellation[[const.TILE_ID, const.TILE_NAME]],

@@ -1,8 +1,8 @@
 from typing import List, Optional, Tuple, Type, Union
 
 import numpy as np
-from haversine import haversine
 import pandas as pd
+from haversine import haversine
 from pandas import DataFrame, Series
 
 from dp_mobility_report.model.section import Section
@@ -119,11 +119,11 @@ def hist_section(
 
     dp_counts = diff_privacy.counts_dp(counts, epsi, sensitivity)
     moe_laplace = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
-    
+
     # as percent instead of counts
     trip_counts = sum(dp_counts)
     dp_counts = dp_counts / trip_counts * 100
-    moe_laplace = moe_laplace  / trip_counts * 100 
+    moe_laplace = moe_laplace / trip_counts * 100
 
     return Section(
         data=(dp_counts, bins),
@@ -146,21 +146,23 @@ def _cumsum(array: np.array):
     return (array.cumsum() / array.sum()).round(2)
 
 
-def cumsum_simulations(counts: np.array, eps: float, sensitivity: int, nsim=10, nrow = 100):
+def cumsum_simulations(
+    counts: np.array, eps: float, sensitivity: int, nsim=10, nrow=100
+):
     df_cumsum = DataFrame()
     df_cumsum["n"] = np.arange(1, len(counts) + 1)
 
     for i in range(1, nsim):
         sim_counts = diff_privacy.counts_dp(counts, eps, sensitivity)
         df_cumsum["cum_perc_" + str(i)] = _cumsum(sim_counts)
-    
+
     # once negative values have been used for simulations create cumsum of series without negative values
     df_cumsum["cum_perc"] = _cumsum(diff_privacy.limit_negative_values_to_zero(counts))
 
     # reuduce df size by only keeping max 100 values
     if len(df_cumsum) > nrow:
         nth = len(df_cumsum) // nrow
-        last_row = df_cumsum.iloc[len(df_cumsum)-1, :]
+        last_row = df_cumsum.iloc[len(df_cumsum) - 1, :]
         df_cumsum = df_cumsum.iloc[::nth, :]
         # append last row
         if int(last_row.n) not in list(df_cumsum.n):
