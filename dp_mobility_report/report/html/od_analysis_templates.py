@@ -29,7 +29,10 @@ def render_od_analysis(
     output_filename: str,
 ) -> str:
     THRESHOLD = 0.2  # 20 %
-    privacy_info = f"Unrealistic values: OD connections with a 5% chance of deviating more than {THRESHOLD * 100} % from the estimated value are removed in the map view."
+    privacy_info = f"""Intra-tile flows below a certain threshold are grayed out: 
+        Due to the applied noise, tiles with a low intra-tile flow count are likely to contain a high percentage of noise. 
+        For usability reasons, such unrealistic values are grayed out. 
+        More specifically: The threshold is set so that values for tiles with a 5% chance of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are not shown."""
     user_config_info = (
         f"User configuration: display max. top {top_n_flows} OD connections on map"
     )

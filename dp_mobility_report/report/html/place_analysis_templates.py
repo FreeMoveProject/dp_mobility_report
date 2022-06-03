@@ -19,7 +19,10 @@ def render_place_analysis(
 ) -> str:
     THRESHOLD = 0.2  # 20%
     points_outside_tessellation_info = ""
-    privacy_info = f"Unrealistic values: Tiles with a 5% chance of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are grayed out in the map view."
+    privacy_info = f"""Tiles below a certain threshold are grayed out: 
+        Due to the applied noise, tiles with a low visit count are likely to contain a high percentage of noise. 
+        For usability reasons, such unrealistic values are grayed out. 
+        More specifically: The threshold is set so that values for tiles with a 5% chance of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are not shown."""
     visits_per_tile_legend = ""
     visits_per_tile_summary_table = ""
     visits_per_tile_cumsum_linechart = ""
@@ -186,5 +189,7 @@ def _create_timewindow_segment(df: pd.DataFrame, tessellation: GeoDataFrame) -> 
     return f"""<h4>Number of visits</h4>
         {v_utils.fig_to_html_as_png(visits_choropleth)}
         <h4>Deviation from tile average</h4>
-        <div><p>A value of 1 corrresponds to the tile average.</p></div>
+        <div><p>The average of each cell 
+        over all time windows equals 1 (100% of average traffic). 
+        A value of < 1 (> 1) means that a tile is visited less (more) frequently in this time window than it is on average.</p></div>
         {v_utils.fig_to_html_as_png(deviation_choropleth)}"""  # svg might get too large
