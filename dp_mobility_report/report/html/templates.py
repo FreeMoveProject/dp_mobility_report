@@ -3,6 +3,8 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Tuple
+import pkg_resources
+
 
 if TYPE_CHECKING:
     from dp_mobility_report.md_report import MobilityDataReport
@@ -71,7 +73,7 @@ def create_html_assets(output_file: Path) -> None:
         shutil.rmtree(path)
     os.mkdir(path)
 
-    asset_folder = Path("dp_mobility_report/report/html/html_templates/assets/")
+    asset_folder = pkg_resources.resource_filename('dp_mobility_report','report/html/html_templates/assets/')
 
     for file_name in os.listdir(asset_folder):
         # construct full file path
