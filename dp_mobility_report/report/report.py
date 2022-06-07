@@ -173,3 +173,14 @@ def add_user_analysis_elements(mdreport: "MobilityDataReport", epsilon: float) -
         if const.MOBILITY_ENTROPY in const.USER_ELEMENTS
         else Section(),
     }
+    
+def add_analysis_without_tmp_elements(mdreport: "MobilityDataReport", epsilon: float) -> dict:
+    return {
+        #Todo here all analysis which are possible with data without timestamp
+        # all_analyses: ... from
+        # OVERVIEW_ELEMENTS:
+        # PLACE_ELEMENTS:
+        # OD_ELEMENTS:
+        # USER_ELEMENTS:
+    }
+
