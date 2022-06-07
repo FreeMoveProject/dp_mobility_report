@@ -21,9 +21,10 @@ tessellation["tile_name"] = tessellation.tile_id
 report = md_report.MobilityDataReport(
     df,
     tessellation,
-    privacy_budget=None,
-    analysis_selection=["all"],
-    max_trips_per_user=None,
+    privacy_budget=50,
+    analysis_selection=["overview", "place_analysis"],
+    evalu=True,
+    max_trips_per_user=5,
     max_travel_time=90,
     bin_range_travel_time=5,
     max_jump_length=30,
@@ -31,12 +32,7 @@ report = md_report.MobilityDataReport(
     max_radius_of_gyration=18,
     bin_range_radius_of_gyration=1.5,
 )
-report.to_file(
-    os.path.join(path_html_output, "geolife_no_privacy.html"), top_n_flows=100
-)
-
-# diff. privacy
-report = md_report.MobilityDataReport(
+report.to_file(os.path.join(path_html_output, "geolife.html"), top_n_flows=100)
 
 # MADRID
 df = pd.read_csv(os.path.join(path_data, "madrid.csv"))
@@ -45,9 +41,9 @@ tessellation = gpd.read_file(os.path.join(path_data, "madrid_tessellation.gpkg")
 report = md_report.MobilityDataReport(
     df,
     tessellation,
-    privacy_budget=None,
+    privacy_budget=10,
     analysis_selection=["all"],
-    max_trips_per_user=None,
+    max_trips_per_user=5,
     max_travel_time=90,
     bin_range_travel_time=5,
     max_jump_length=30,
@@ -55,9 +51,7 @@ report = md_report.MobilityDataReport(
     max_radius_of_gyration=18,
     bin_range_radius_of_gyration=1.5,
 )
-report.to_file(
-    os.path.join(path_html_output, "madrid_no_privacy.html"), top_n_flows=300
-)
+report.to_file(os.path.join(path_html_output, "madrid.html"), top_n_flows=300)
 
 
 # BERLIN
@@ -69,9 +63,9 @@ tessellation = gpd.read_file(os.path.join(path_data, "berlin_tessellation.gpkg")
 report = md_report.MobilityDataReport(
     df,
     tessellation,
-    privacy_budget=None,
+    privacy_budget=1,
     analysis_selection=["all"],
-    max_trips_per_user=None,
+    max_trips_per_user=5,
     max_travel_time=90,
     bin_range_travel_time=5,
     max_jump_length=30,
@@ -79,6 +73,4 @@ report = md_report.MobilityDataReport(
     max_radius_of_gyration=18,
     bin_range_radius_of_gyration=1.5,
 )
-report.to_file(
-    os.path.join(path_html_output, "berlin_no_privacy.html"), top_n_flows=300
-)
+report.to_file(os.path.join(path_html_output, "berlin.html"), top_n_flows=300)
