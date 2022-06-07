@@ -16,10 +16,6 @@ def get_visits_per_tile(
     mdreport: "MobilityDataReport", eps: Optional[float], record_count: Optional[int]
 ) -> Section:
     epsi = eps
-    # epsi = m_utils.get_epsi(
-    #     mdreport.evalu, eps, 2
-    # )
-    # TODO: is this really eps / 2? bc outliers are like an own tile?
 
     sensitivity = 2 * mdreport.max_trips_per_user
     # count number of visits for each location
