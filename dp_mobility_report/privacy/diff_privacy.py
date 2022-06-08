@@ -44,6 +44,9 @@ def quartiles_dp(
     conf_interval_perc: float = 0.95,
 ) -> Tuple:
 
+    # remove nans from array
+    array = array.dropna()
+
     if np.issubdtype(array.dtype, np.timedelta64):
         array = array.values.astype(np.int64)
         dtyp = "timedelta"

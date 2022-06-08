@@ -1,4 +1,5 @@
 examples/html/old/*
+examples/config.py
 
 *.code-workspace
 *.DS_Store
