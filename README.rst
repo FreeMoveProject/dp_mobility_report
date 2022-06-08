@@ -59,8 +59,10 @@ Create a mobility report as HTML:
 
 
 The parameter ``privacy_budget`` (in term of :math:`{\epsilon}`-differential privacy) determines how much noise is added to the data. The budget is split between all analyses of the report.
+If the value is set to ``None`` no noise (i.e., no privacy guarantee) is applied to the report.
 
 The parameter ``max_trips_per_user`` specifies how many trips a user can contribute to the dataset at most. If a user is represented with more trips, a random sample is drawn according to ``max_trips_per_user``.
+If the value is set to ``None`` the full dataset is used. Note, that deriving the maximum trips per user from the data violates the differential privacy guarantee. Thus, ``None`` should only be used in combination with ``privacy_budget=None``.
 
 Example HTMLs can be found in the examples_ folder.
 
