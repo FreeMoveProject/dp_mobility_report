@@ -1,8 +1,8 @@
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Type, Union
 
 import numpy as np
 from haversine import haversine
-from pandas import Series
+from pandas import DataFrame, Series
 
 from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
@@ -18,66 +18,118 @@ def cut_outliers(
     min_value: Optional[Union[float, int]] = None,
     max_value: Optional[Union[float, int]] = None,
 ) -> Tuple:
-    n = len(data)
     if (min_value is not None) and (max_value is not None) and (min_value > max_value):
         raise ValueError("min_value cannot be larger than max_value")
     if min_value is not None:
         data = data[data >= min_value]
     if max_value is not None:
         data = data[data <= max_value]
-    outlier_count = n - len(data)
-    return (data, outlier_count)
+    return data
 
 
 def hist_section(
     series: Union[np.ndarray, Series],
     eps: Optional[float],
     sensitivity: int,
-    min_value: Optional[Union[float, int]] = None,
-    max_value: Optional[Union[float, int]] = None,
+    hist_max: Optional[Union[float, int]] = None,
     bin_range: Optional[Union[float, int]] = None,
-    max_bins: Optional[int] = None,
+    bin_type: Type = float,
     evalu: bool = False,
 ) -> Section:
-    epsi = get_epsi(evalu, eps, 7)
+    epsi = get_epsi(evalu, eps, 6)
     epsi_quant = epsi * 5 if epsi is not None else None
 
     series = Series(series) if isinstance(series, np.ndarray) else series
+    quartiles, moe_expmech = diff_privacy.quartiles_dp(series, epsi_quant, sensitivity)
+    series = cut_outliers(
+        series, min_value=quartiles["min"], max_value=quartiles["max"]
+    )
 
-    if (min_value is not None) or (max_value is not None):
-        series, n_outliers = cut_outliers(
-            series, min_value=min_value, max_value=max_value
-        )
-        dp_n_outliers = diff_privacy.count_dp(n_outliers, epsi, sensitivity)
+    ## determine bins for histogram ##
+
+    # max value of histogram: either given as input or determined by dp max
+    hist_max = (
+        hist_max
+        if (hist_max is not None and hist_max < quartiles["max"])
+        else quartiles["max"]
+    )
+
+    # if there are less than 10 integers, use value counts of single integers instead of bin ranges for histogram
+    if (
+        (bin_range is None or bin_range == 1)
+        and (bin_type is int)
+        and (hist_max - quartiles["min"] < 10)
+    ):
+        min_value = int(quartiles["min"])
+        max_value = int(quartiles["max"])
+        bins = np.array(range(min_value, max_value + 1))
+        counts = np.bincount(series, minlength=len(bins))[min_value : max_value + 1]
+
+        # sum all counts above hist max to single bin >max
+        if bins[-1] > hist_max:
+            bins = bins[bins <= hist_max]
+            counts[len(bins)] = counts[len(bins) :].sum()  # sum up to single >max count
+            counts = counts[: len(bins) + 1]  # remove long tail
+            bins = np.append(bins, np.Inf)
+
+    # else use ranges for bins to create histogram
     else:
-        dp_n_outliers = None
+        # if hist range is small (<1), set bin_range to 0.1 to prevent too fine-granular bins
+        if bin_range is None and (hist_max - quartiles["min"]) < 1:
+            bin_range = 0.1
 
-    quartiles = diff_privacy.quartiles_dp(series, epsi_quant, sensitivity)
-    # TODO:rather always diff private min and max values? (outliers are already cut) but then bins are not "clean"
-    min_value = quartiles["min"] if min_value is None else min_value
-    max_value = quartiles["max"] if max_value is None else max_value
-
-    if np.issubdtype(series.dtype, np.integer) and (max_value - min_value < 10):
-        min_value = int(min_value)
-        max_value = int(max_value)
-        dp_values = np.array(range(min_value, max_value + 1))
-        counts = np.bincount(series)[min_value : max_value + 1]
-    else:
+        # if bin_range is provided, snap min and max value accordingly(to create "clean" bins).
         if bin_range is not None:
-            max_bins = int((max_value - min_value) / bin_range)
-            max_bins = max_bins if max_bins > 2 else 2
-        elif max_bins is None:
-            max_bins = 10  # set default of 10
+            # "snap" min_value: e.g., if bin range is 5 and dp min value is 12, min_value snaps to 10
+            min_value = quartiles["min"] - (quartiles["min"] % bin_range)
+
+        # set default of 10 bins if no bin_range is given.
+        # compute bin_range from hist_max and snap max_value accordingly. This is necessary, bc hist_max and dp max might differ:
+        # to create 10 bins up to hist_max but maintain bins up to dp max (to aggregate them in the following step)
+        else:
+            bin_range = (hist_max - quartiles["min"]) / 10
+            min_value = quartiles["min"]
+
+        # "snap" max_value to bin_range: E.g., if bin range is 5, and the dp max value is 23, max_value snaps to 25
+        max_value = (
+            quartiles["max"]
+            if round((quartiles["max"] - min_value) % bin_range, 2) == 0
+            else quartiles["max"]
+            + (bin_range - ((quartiles["max"] - min_value) % bin_range))
+        )
+
+        max_bins = int((max_value - min_value) / bin_range)
+        max_bins = (
+            max_bins if max_bins > 2 else 2
+        )  # make sure there are at least 2 bins for histogram function to work
+
         hist = np.histogram(series, bins=max_bins, range=(min_value, max_value))
         counts = hist[0]
-        dp_values = hist[1]
+        bins = hist[1].astype(bin_type)
+
+        # sum all counts above hist max to single bin >max
+        if bins[-1] > hist_max:
+            bins = bins[bins <= hist_max]
+            counts[len(bins) - 1] = counts[
+                len(bins) - 1 :
+            ].sum()  # sum up to single >max count
+            counts = counts[: len(bins)]  # remove long tail
+            bins = np.append(bins, np.Inf)
+
     dp_counts = diff_privacy.counts_dp(counts, epsi, sensitivity)
+    moe_laplace = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
+
+    # as percent instead of counts
+    trip_counts = sum(dp_counts)
+    dp_counts = dp_counts / trip_counts * 100
+    moe_laplace = moe_laplace / trip_counts * 100
 
     return Section(
-        data=(dp_counts, dp_values),
+        data=(dp_counts, bins),
         privacy_budget=eps,
-        n_outliers=dp_n_outliers,
         quartiles=quartiles,
+        margin_of_error_laplace=moe_laplace,
+        margin_of_error_expmech=moe_expmech,
     )
 
 
@@ -86,3 +138,34 @@ def get_epsi(evalu: bool, eps: Optional[float], elements: int) -> Optional[float
         return eps
     else:
         return eps / elements
+
+
+def _cumsum(array: np.array):
+    array[::-1].sort()
+    return (array.cumsum() / array.sum()).round(2)
+
+
+def cumsum_simulations(
+    counts: np.array, eps: float, sensitivity: int, nsim: int = 10, nrow: int = 100
+) -> DataFrame:
+    df_cumsum = DataFrame()
+    df_cumsum["n"] = np.arange(1, len(counts) + 1)
+
+    for i in range(1, nsim):
+        sim_counts = diff_privacy.counts_dp(counts, eps, sensitivity)
+        df_cumsum["cum_perc_" + str(i)] = _cumsum(sim_counts)
+
+    # once negative values have been used for simulations create cumsum of series without negative values
+    df_cumsum["cum_perc"] = _cumsum(diff_privacy.limit_negative_values_to_zero(counts))
+
+    # reuduce df size by only keeping max 100 values
+    if len(df_cumsum) > nrow:
+        nth = len(df_cumsum) // nrow
+        last_row = df_cumsum.iloc[len(df_cumsum) - 1, :]
+        df_cumsum = df_cumsum.iloc[::nth, :]
+        # append last row
+        if int(last_row.n) not in list(df_cumsum.n):
+            df_cumsum = df_cumsum.append(last_row)
+
+    df_cumsum.reset_index(drop=True, inplace=True)
+    return df_cumsum

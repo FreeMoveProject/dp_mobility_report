@@ -13,49 +13,75 @@ from dp_mobility_report.privacy import diff_privacy
 
 
 def get_visits_per_tile(
-    mdreport: "MobilityDataReport", eps: Optional[float]
+    mdreport: "MobilityDataReport", eps: Optional[float], record_count: Optional[int]
 ) -> Section:
-    epsi = m_utils.get_epsi(mdreport.evalu, eps, 3)
+    epsi = eps
 
+    sensitivity = 2 * mdreport.max_trips_per_user
     # count number of visits for each location
-    counts_per_tile = (
+    visits_per_tile = (
         mdreport.df[
             mdreport.df[const.TILE_ID].isin(mdreport.tessellation.tile_id)
         ]  # only include records within tessellation
         .groupby(const.TILE_ID)
-        .aggregate(visit_count=(const.TILE_ID, "count"))
-        .sort_values("visit_count", ascending=False)
+        .aggregate(visits=(const.TILE_ID, "count"))
+        .sort_values("visits", ascending=False)
         .reset_index()
     )
 
     # number of records outside of the tessellation
-    n_outliers = int(len(mdreport.df) - counts_per_tile.visit_count.sum())
+    n_outliers = int(len(mdreport.df) - visits_per_tile.visits.sum())
 
-    counts_per_tile = counts_per_tile.merge(
+    visits_per_tile = visits_per_tile.merge(
         mdreport.tessellation[[const.TILE_ID, const.TILE_NAME]],
         on=const.TILE_ID,
         how="outer",
     )
-    counts_per_tile.loc[counts_per_tile.visit_count.isna(), "visit_count"] = 0
+    visits_per_tile.loc[visits_per_tile.visits.isna(), "visits"] = 0
 
-    dp_quartiles = diff_privacy.quartiles_dp(
-        counts_per_tile.visit_count, epsi, mdreport.max_trips_per_user * 2
-    )
-
-    counts_per_tile["visit_count"] = diff_privacy.counts_dp(
-        counts_per_tile["visit_count"].values,
+    visits_per_tile["visits"] = diff_privacy.counts_dp(
+        visits_per_tile["visits"].values,
         epsi,
-        mdreport.max_trips_per_user * 2,
+        sensitivity,
+        allow_negative=True,  # allow negative values for cum_sum simulations
     )
-    n_outliers = diff_privacy.count_dp(  # type: ignore
-        n_outliers, epsi, mdreport.max_trips_per_user * 2
+    n_outliers = diff_privacy.count_dp(n_outliers, epsi, sensitivity)  # type: ignore
+
+    cumsum_simulations = m_utils.cumsum_simulations(
+        visits_per_tile.visits.copy().to_numpy(),
+        epsi,
+        sensitivity,
     )
+
+    # remove all negative values (needed for cumsum)
+    visits_per_tile["visits"] = visits_per_tile["visits"].apply(
+        diff_privacy.limit_negative_values_to_zero
+    )
+
+    # margin of error
+    moe = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
+
+    # scale to record count of overview segment
+    if record_count is not None:
+        visists_sum = np.sum(visits_per_tile["visits"])
+        if visists_sum != 0:
+            visits_per_tile["visits"] = (
+                visits_per_tile["visits"] / visists_sum * record_count
+            ).astype(int)
+            n_outliers = int(n_outliers / visists_sum * record_count)
+            moe = int(moe / visists_sum * record_count)
+
+    # as counts are already dp, no further privacy mechanism needed
+    dp_quartiles = visits_per_tile.visits.describe()
 
     return Section(
-        data=counts_per_tile,
+        data=visits_per_tile,
         privacy_budget=eps,
+        sensitivity=sensitivity,
         n_outliers=n_outliers,
         quartiles=dp_quartiles,
+        margin_of_error_laplace=moe,
+        cumsum_simulations=cumsum_simulations,
     )
 
 
@@ -72,7 +98,7 @@ def _get_hour_bin(hour: int, timewindows: np.ndarray) -> str:
 
 
 def get_visits_per_tile_timewindow(
-    mdreport: "MobilityDataReport", eps: Optional[float]
+    mdreport: "MobilityDataReport", eps: Optional[float], record_count: Optional[int]
 ) -> Section:
     mdreport.df["timewindows"] = mdreport.df[const.HOUR].apply(
         lambda x: _get_hour_bin(x, mdreport.timewindows)
@@ -117,6 +143,19 @@ def get_visits_per_tile_timewindow(
             counts_per_tile_timewindow.values, eps, mdreport.max_trips_per_user
         ),
     )
+
+    moe = diff_privacy.laplace_margin_of_error(0.95, eps, mdreport.max_trips_per_user)
+
+    # scale to record count of overview segment
+    if (record_count is not None) and (counts_per_tile_timewindow.sum() != 0):
+        counts_sum = counts_per_tile_timewindow.sum()
+        counts_per_tile_timewindow = (
+            counts_per_tile_timewindow / counts_sum * record_count
+        )
+        moe = moe / counts_sum * record_count
+
     return Section(
-        data=counts_per_tile_timewindow.unstack(const.TILE_ID).T, privacy_budget=eps
+        data=counts_per_tile_timewindow.unstack(const.TILE_ID).T,
+        privacy_budget=eps,
+        margin_of_error_laplace=moe,
     )

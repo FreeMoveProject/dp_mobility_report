@@ -12,15 +12,14 @@ MISSING_VALUES = "missing_values"
 TRIPS_OVER_TIME = "trips_over_time"
 TRIPS_PER_WEEKDAY = "trips_per_weekday"
 TRIPS_PER_HOUR = "trips_per_hour"
-COUNTS_PER_TILE = "counts_per_tile"
-COUNTS_PER_TILE_TIMEWINDOW = "counts_per_tile_timewindow"
+VISITS_PER_TILE = "visits_per_tile"
+VISITS_PER_TILE_TIMEWINDOW = "visits_per_tile_timewindow"
 OD_FLOWS = "od_flows"
 TRAVEL_TIME = "travel_time"
 JUMP_LENGTH = "jump_length"
 TRIPS_PER_USER = "trips_per_user"
 USER_TIME_DELTA = "user_time_delta"
 RADIUS_OF_GYRATION = "radius_of_gyration"
-LOCATION_ENTROPY = "location_entropy"
 USER_TILE_COUNT = "user_tile_count"
 MOBILITY_ENTROPY = "mobility_entropy"
 OVERVIEW_ELEMENTS = [
@@ -30,13 +29,12 @@ OVERVIEW_ELEMENTS = [
     TRIPS_PER_WEEKDAY,
     TRIPS_PER_HOUR,
 ]
-PLACE_ELEMENTS = [COUNTS_PER_TILE, COUNTS_PER_TILE_TIMEWINDOW]
+PLACE_ELEMENTS = [VISITS_PER_TILE, VISITS_PER_TILE_TIMEWINDOW]
 OD_ELEMENTS = [OD_FLOWS, TRAVEL_TIME, JUMP_LENGTH]
 USER_ELEMENTS = [
     TRIPS_PER_USER,
     USER_TIME_DELTA,
     RADIUS_OF_GYRATION,
-    LOCATION_ENTROPY,
     USER_TILE_COUNT,
     MOBILITY_ENTROPY,
 ]
@@ -53,6 +51,7 @@ LAT_END = "lat_end"
 DATETIME_END = "datetime_end"
 DATE = "date"
 DAY_NAME = "day_name"
+WEEKDAY = "weekday"
 HOUR = "hour"
 IS_WEEKEND = "is_weekend"
 TIME_CATEGORY = "time_category"

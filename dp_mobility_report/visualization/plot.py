@@ -16,33 +16,62 @@ light_blue = "#5D6FFF"
 orange = "#D9642C"
 light_orange = "#FFAD6F"
 grey = "#8A8A8A"
+light_grey = "##f2f2f2"
+
+
+def format(value: Union[float, int], type: Type, ndigits: int = 2) -> Union[float, int]:
+    value = type(value)
+    if type == float:
+        value = round(value, ndigits)
+    return value
 
 
 def histogram(
     hist: Tuple,
     x_axis_label: str,
+    y_axis_label: str = "Frequency",
+    margin_of_error: float = None,
     rotate_label: bool = False,
-    x_axis_type: Optional[Type] = None,
+    x_axis_type: Type = float,
+    ndigits_x_label: int = 2,
 ) -> mpl.figure.Figure:
     bins = hist[1]
     counts = hist[0]
 
-    if x_axis_type is not None:
-        bins = bins.astype(x_axis_type)
-
+    # single integers (instead of bin ranges) as x axis labels
     if len(bins) == len(counts):
-        labels = bins
+        labels = np.array([format(bin, x_axis_type) for bin in bins[:-1]])
+        if bins[-1] == np.Inf:
+            labels = np.append(labels, f"> {labels[-1]}")
+        else:
+            labels = np.append(labels, format(bins[-1], x_axis_type))
+
+    # bin ranges as labels
     else:
-        lower_bound = bins[:-1]
-        upper_bound = bins[1:]
+        lower_limits = bins[:-1]
+        upper_limits = bins[1:]
+
         labels = np.array(
             [
-                "[" + str(x1) + "\n - \n " + str(x2) + ")"
-                for x1, x2 in zip(lower_bound, upper_bound)
+                f"[{format(x1, x_axis_type, ndigits_x_label)}\n - \n{format(x2, x_axis_type, ndigits_x_label)})"
+                if x2 != np.Inf
+                else f"≥ {format(x1, x_axis_type)}"
+                for x1, x2 in zip(lower_limits, upper_limits)
             ]
         )
+
+        if upper_limits[-1] != np.Inf:
+            labels[-1] = (
+                labels[-1][:-1] + "]"
+            )  # fix label string of last bin to include last value
+
     return barchart(
-        labels, counts, x_axis_label, "Frequency", rotate_label=rotate_label
+        labels,
+        counts,
+        x_axis_label,
+        y_axis_label,
+        margin_of_error=margin_of_error,
+        rotate_label=rotate_label,
     )
 
 
@@ -51,14 +80,15 @@ def barchart(
     y: np.ndarray,
     x_axis_label: str,
     y_axis_label: str,
-    order_x: Optional[list] = None,
+    margin_of_error: Optional[float] = None,
     rotate_label: bool = False,
 ) -> mpl.figure.Figure:
-    fig = plt.figure()
-    plot = fig.add_subplot(111)
-    sns.barplot(x=x, y=y, color=dark_blue, ax=plot, order=order_x)
-    plot.set_ylabel(y_axis_label)
-    plot.set_xlabel(x_axis_label)
+    fig, ax = plt.subplots()
+    ax.bar(x, y, yerr=margin_of_error, align="center", alpha=0.5, capsize=10)
+    ax.set_ylabel(y_axis_label)
+    ax.set_xlabel(x_axis_label)
+    plt.xticks(x)
+    plt.ylim(bottom=0)
 
     if rotate_label:
         plt.xticks(rotation=90)
@@ -71,25 +101,49 @@ def linechart(
     y: str,
     x_axis_label: str,
     y_axis_label: str,
+    simulations: list = None,
+    margin_of_error: float = None,
     add_diagonal: bool = False,
+    rotate_label: bool = False,
 ) -> mpl.figure.Figure:
-    fig = plt.figure()
-    plot = fig.add_subplot(111)
-    sns.lineplot(data=data, x=x, y=y, ax=plot)
-    plot.set_ylabel(y_axis_label)
-    plot.set_xlabel(x_axis_label)
-    plot.set_ylim(bottom=0)
-
+    fig, ax = plt.subplots()
+    if simulations is not None:
+        ax.plot(data[x], data[simulations], light_grey)
+    if margin_of_error is not None:
+        ax.fill_between(
+            data[x],
+            (data[y] - margin_of_error),
+            (data[y] + margin_of_error),
+            color="blue",
+            alpha=0.1,
+        )
+    ax.plot(data[x], data[y])
+    ax.set_ylabel(y_axis_label)
+    ax.set_xlabel(x_axis_label)
+    ax.set_ylim(bottom=0)
     if add_diagonal:
-        plot.plot([0, data[x].max()], [0, data[y].max()], grey)
+        ax.plot([0, data[x].max()], [0, data[y].max()], grey)
+
+    if rotate_label:
+        plt.xticks(rotation=90)
+
     return fig
 
 
 def multi_linechart(
-    data: DataFrame, x: str, y: str, color: str, hue_order: Optional[list] = None
+    data: DataFrame,
+    x: str,
+    y: str,
+    color: str,
+    x_axis_label: str,
+    y_axis_label: str,
+    hue_order: Optional[list] = None,
+    margin_of_error: Optional[float] = None,
 ) -> mpl.figure.Figure:
     fig = plt.figure()
     plot = fig.add_subplot(111)
+    palette = [dark_blue, light_blue, orange, light_orange]
+
     sns.lineplot(
         data=data,
         x=x,
@@ -97,9 +151,22 @@ def multi_linechart(
         hue=color,
         ax=plot,
         hue_order=hue_order,
-        palette=[dark_blue, light_blue, orange, light_orange],
+        palette=palette,
     )
     plot.set_ylim(bottom=0)
+    plot.set_ylabel(y_axis_label)
+    plot.set_xlabel(x_axis_label)
+
+    if margin_of_error is not None:
+        for i in range(0, len(hue_order)):
+            hue_data = data[data[color] == hue_order[i]]
+            plot.fill_between(
+                hue_data[x],
+                (hue_data[y] - margin_of_error),
+                (hue_data[y] + margin_of_error),
+                color=palette[i],
+                alpha=0.1,
+            )
     return fig
 
 
@@ -108,6 +175,7 @@ def choropleth_map(
     fill_color_name: str,
     scale_title: str = "Visit count",
     min_scale: Optional[Union[int, float]] = None,
+    aliases: list = None,
 ) -> folium.Map:
     poly_json = counts_per_tile_gdf.to_json()
 
@@ -147,7 +215,7 @@ def choropleth_map(
     folium.GeoJson(
         poly_json,
         style_function=_style_function,
-        popup=folium.GeoJsonPopup(fields=fields),
+        popup=folium.GeoJsonPopup(fields=fields, aliases=aliases),
     ).add_to(m)
 
     # colorbar object to create custom legend
@@ -159,11 +227,15 @@ def choropleth_map(
         orientation="horizontal",
         label=scale_title,
     )
+    # TODO: add legend directly to map
+
     return m, colorbar
 
 
 def multi_choropleth_map(
-    counts_per_tile_timewindow: DataFrame, tessellation: GeoDataFrame
+    counts_per_tile_timewindow: DataFrame,
+    tessellation: GeoDataFrame,
+    diverging_cmap: bool = False,
 ) -> mpl.figure.Figure:
     counts_per_tile_timewindow = tessellation[["tile_id", "geometry"]].merge(
         counts_per_tile_timewindow, left_on="tile_id", right_index=True, how="left"
@@ -177,8 +249,19 @@ def multi_choropleth_map(
 
     # upper and lower bound
     vmin = counts_per_tile_timewindow.iloc[:, 2:].min().min()
+    vmin = vmin if vmin is not np.nan else 0
     vmax = counts_per_tile_timewindow.iloc[:, 2:].max().max()
-    norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+    vmax = vmax if vmax is not np.nan else 2
+
+    # color
+    if diverging_cmap:
+        vmin = 0
+        vmax = 2 if vmax <= 1 else vmax
+        cmap = "RdBu_r"
+        norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=1, vmax=vmax)
+    else:
+        cmap = "viridis_r"
+        norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
 
     for i in range(0, plots_per_row * row_count):
         facet_row = math.ceil((i - plots_per_row + 1) / plots_per_row)
@@ -193,7 +276,7 @@ def multi_choropleth_map(
             column_name = counts_per_tile_timewindow.columns[i + 2]
             counts_per_tile_timewindow.iloc[:, [i + 2, 1]].plot(
                 column=column_name,
-                cmap="viridis_r",
+                cmap=cmap,
                 norm=norm,
                 linewidth=0.1,
                 ax=ax,
@@ -205,9 +288,7 @@ def multi_choropleth_map(
             ax.set_title(column_name)
 
     # Create colorbar as a legend
-    sm = plt.cm.ScalarMappable(
-        cmap="viridis_r", norm=plt.Normalize(vmin=vmin, vmax=vmax)
-    )
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm._A = []  # add the colorbar to the figure
     # set the range for the choropleth
     fig.colorbar(sm, ax=axes)
@@ -228,3 +309,28 @@ def _basemap(center_x: float, center_y: float, zoom_start: int = 10) -> folium.M
         location=[center_y, center_x],
         control_scale=True,
     )
+
+
+def ranking(
+    x: np.ndarray,
+    x_axis_label: str,
+    y_labels: list = None,
+    margin_of_error: Optional[float] = None,
+) -> mpl.figure.Figure:
+    y = list(range(1, len(x) + 1))[::-1]
+    y_labels = y if y_labels is None else y_labels
+    fig, ax = plt.subplots()
+    ax.errorbar(
+        x,
+        y,
+        xerr=margin_of_error,
+        fmt="o",
+        ecolor="lightblue",
+        elinewidth=5,
+        capsize=10,
+    )
+    ax.set_yticks(y)
+    ax.set_yticklabels(y_labels)
+    ax.set_ylabel("Rank")
+    ax.set_xlabel(x_axis_label)
+    return fig

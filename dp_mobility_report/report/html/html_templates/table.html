@@ -1,18 +1,18 @@
 {% if name %}
-    <p class="h4">{{ name }}</p>
+    <h4>{{ name }}</h3>
 {% endif %}
-<table class="table table-condensed stats">
+<table class="table medium-size-table">
     <tbody>
         {% for row in rows %}
         <tr>
-            <th>{{ row['name'] }}</th>
+            <th class="table-rowheader">{{ row['name'] }}</th>
             <td>{{ row['value'] }}</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 {% if caption %}
-    <div class="caption text-center text-muted">
+    <div class="caption text-center">
         {{ caption }}
     </div>
 {% endif %}

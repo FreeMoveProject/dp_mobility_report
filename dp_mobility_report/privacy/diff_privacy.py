@@ -1,9 +1,10 @@
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Type, Union
 
 import diffprivlib
 import numpy as np
 import pandas as pd
 from diffprivlib.validation import clip_to_bounds
+from scipy.stats import laplace
 
 
 def bounds_dp(
@@ -40,7 +41,11 @@ def quartiles_dp(
     eps: Optional[float],
     sensitivity: int,
     bounds: Tuple = None,
-) -> pd.Series:
+    conf_interval_perc: float = 0.95,
+) -> Tuple:
+
+    # remove nans from array
+    array = array.dropna()
 
     if np.issubdtype(array.dtype, np.timedelta64):
         array = array.values.astype(np.int64)
@@ -61,9 +66,17 @@ def quartiles_dp(
     result = []
     result.append(bounds[0])
 
+    array_type = array.dtype
     array = pd.Series(clip_to_bounds(np.ravel(array), bounds))
     array = array.sort_values().reset_index(drop=True)
+    array = array.astype(
+        array_type
+    )  # clip_to_bounds converts int arrays to float arrays > convert those back to int
+
     k = array.size
+
+    def utility(quant: float, k: int) -> list:
+        return list(-np.abs(np.arange(0, k) - quant * k))
 
     if eps is None:
         result.append(array.quantile(0.25))
@@ -74,7 +87,7 @@ def quartiles_dp(
             mech = diffprivlib.mechanisms.exponential.Exponential(
                 epsilon=epsi,
                 sensitivity=sensitivity,
-                utility=list(-np.abs(np.arange(0, k) - quant * k)),
+                utility=utility(quant, k),
             )
             idx = mech.randomise()
             output = array[idx]
@@ -87,7 +100,25 @@ def quartiles_dp(
     elif dtyp == "datetime":
         result = pd.to_datetime(result)
 
-    return pd.Series(result, index=["min", "25%", "50%", "75%", "max"])
+    # get margin of error
+
+    # Calculate the probability for each element, based on its score
+    counter = 0
+    if eps is not None:
+        probabilities = [np.exp(eps * u / (2 * sensitivity)) for u in utility(0.5, k)]
+        # Normalize the probabilties so they sum to 1
+        probabilities = probabilities / np.linalg.norm(probabilities, ord=1)
+
+        max_index = np.argmax(probabilities)
+        conf = probabilities[max_index]
+        while conf < conf_interval_perc:
+            counter += 1
+            if max_index + counter < len(probabilities):
+                conf += probabilities[max_index + counter]
+            if max_index - counter >= 0:
+                conf += probabilities[max_index - counter]
+
+    return (pd.Series(result, index=["min", "25%", "50%", "75%", "max"]), counter)
 
 
 def _laplacer(x: int, eps: float, sensitivity: int) -> int:
@@ -99,6 +130,29 @@ def _laplacer(x: int, eps: float, sensitivity: int) -> int:
             0,
         )
     )
+
+
+def laplace_margin_of_error(
+    conf_interval_perc: float, eps: Optional[float], sensitivity: int
+) -> float:
+    if eps is None:
+        return 0
+    delta = 0
+    q = conf_interval_perc + 0.5 * (1 - conf_interval_perc)
+    scale = sensitivity / (eps - np.log(1 - delta))
+    return laplace.ppf(q, loc=0, scale=scale)
+
+
+def conf_interval(
+    value: Optional[Union[float, int]], margin_of_error: float, type: Type = int
+) -> Tuple:
+    if value is None:
+        return (None, None)
+    lower_limit = (value - margin_of_error) if (margin_of_error < value) else 0
+    if Type is not None:
+        lower_limit = type(lower_limit)
+        margin_of_error = type(margin_of_error)
+    return (lower_limit, value + margin_of_error)
 
 
 def count_dp(
@@ -121,6 +175,7 @@ def counts_dp(
     counts: Union[int, np.ndarray],  # TODO: only array?
     eps: Optional[float],
     sensitivity: int,
+    allow_negative: bool = False,
 ) -> Union[int, np.ndarray]:
     if eps is None:
         return counts
@@ -130,45 +185,14 @@ def counts_dp(
         return _laplacer(x, eps_local, sensitivity)
 
     vfunc = np.vectorize(_local_laplacer)
-    dpcount = vfunc(counts)
-    dpcount = ((abs(dpcount) + dpcount) / 2).astype(int)
+    dpcounts = vfunc(counts)
+    dpcounts = (
+        limit_negative_values_to_zero(dpcounts) if not allow_negative else dpcounts
+    )
+    dpcounts = dpcounts.astype(int)
 
-    return dpcount
+    return dpcounts
 
 
-def entropy_dp(
-    array: pd.Series, epsi: Optional[float], maxcontribution: int
-) -> np.ndarray:
-    if epsi is None:
-        return array
-    if maxcontribution > 1:
-        sensitivity = (
-            2
-            * maxcontribution
-            * (
-                max(
-                    np.log(2),
-                    np.log(2 * maxcontribution)
-                    - np.log(np.log(2 * maxcontribution))
-                    - 1,
-                )
-            )
-        )
-    else:
-        sensitivity = np.log(2)
-
-    def _laplacer(x: int) -> int:
-        return int(
-            round(
-                diffprivlib.mechanisms.laplace.Laplace(
-                    epsilon=epsi, delta=0.0, sensitivity=sensitivity
-                ).randomise(x),
-                0,
-            )
-        )
-
-    vfunc = np.vectorize(_laplacer)
-    entropy = vfunc(array)
-    entropy = (abs(entropy) + entropy) / 2
-    # entropy >=0 and <= log k with k categories.
-    return entropy
+def limit_negative_values_to_zero(valule: int) -> int:
+    return (abs(valule) + valule) / 2

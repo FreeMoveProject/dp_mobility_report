@@ -1,5 +1,7 @@
+import os
 import warnings
 from pathlib import Path
+from shutil import rmtree
 from typing import Any, List, Optional, Union
 
 import numpy as np
@@ -11,7 +13,11 @@ from tqdm.auto import tqdm
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import preprocessing
 from dp_mobility_report.report import report
-from dp_mobility_report.report.html.templates import create_html_assets, render_html
+from dp_mobility_report.report.html.templates import (
+    create_html_assets,
+    create_maps_folder,
+    render_html,
+)
 
 
 class MobilityDataReport:
@@ -30,11 +36,11 @@ class MobilityDataReport:
             for higher accuracy of other analyses. Options are `overview`, `place_analysis`, `od_analysis`, `user_analysis` and `all`. Defaults to [`all`].
         disable_progress_bar: Whether progress bars should be shown. Defaults to False.
         timewindows: List of hours as `int` that define the timewindows for the spatial analysis for single time windows. Defaults to [2, 6, 10, 14, 18, 22].
-        max_travel_time: Upper bound for travel time analysis to cut outliers based on domain knowledge. If None is given, no upper bound is set. Defaults to None.
+        max_travel_time: Upper bound for travel time histogram. If None is given, no upper bound is set. Defaults to None.
         bin_range_travel_time: The range a single histogram bin spans for travel time (e.g., 5 for 5 min bins). If None is given, the histogram bins will be determined automatically. Defaults to None.
-        max_jump_length: Upper bound for jump length analysis to cut outliers based on domain knowledge. If None is given, no upper bound is set. Defaults to None.
+        max_jump_length: Upper bound for jump length histogram. If None is given, no upper bound is set. Defaults to None.
         bin_range_jump_length: The range a single histogram bin spans for jump length (e.g., 1 for 1 km bins). If None is given, the histogram bins will be determined automatically. Defaults to None.
-        max_radius_of_gyration: Upper bound for radius of gyration analysis to cut outliers based on domain knowledge. If None is given, no upper bound is set. Defaults to None.
+        max_radius_of_gyration: Upper bound for radius of gyration histogram. If None is given, no upper bound is set. Defaults to None.
         bin_range_radius_of_gyration The range a single histogram bin spans for the radius of gyration (e.g., 1 for 1 km bins). If None is given, the histogram bins will be determined automatically. Defaults to None.
         evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to False.
     """
@@ -129,25 +135,6 @@ class MobilityDataReport:
             self._report = report.report_elements(self)
         return self._report
 
-    @property
-    def html(self) -> str:
-        if not self._html:
-            self._html = self._render_html(self._top_n_flows)
-        return self._html
-
-    def _render_html(self, top_n_flows: int) -> str:
-        html = render_html(self, top_n_flows)
-        return html
-
-    def to_html(self, top_n_flows: int) -> str:
-        """Generate and return complete template as lengthy string
-            for using with frameworks.
-        Returns:
-            HTML output as string.
-        """
-        self._top_n_flows = top_n_flows
-        return self.html
-
     def to_file(
         self,
         output_file: Union[str, Path],
@@ -176,13 +163,24 @@ class MobilityDataReport:
                     f"To remove this warning, please use .html or .json."
                 )
 
-        create_html_assets(output_file)
+        output_dir = os.path.dirname(output_file)
+        filename = Path(os.path.basename(output_file)).stem
+        output_dir = Path(os.path.join(output_dir, filename))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        create_html_assets(output_dir)
 
         with tqdm(  # progress bar
             total=1, desc="Create HTML Output", disable=disable_progress_bar
         ) as pbar:
-            data = self.to_html(top_n_flows)
+            data, temp_map_folder = render_html(self, filename, top_n_flows)
             pbar.update()
+
+        create_maps_folder(temp_map_folder, output_dir)
+
+        # clean up temp folder
+        rmtree(temp_map_folder, ignore_errors=True)
 
         output_file.write_text(data, encoding="utf-8")
 

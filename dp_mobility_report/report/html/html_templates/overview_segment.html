@@ -1,25 +1,38 @@
 <h2>Overview</h2>
 
-{{dataset_stats_table}}
-
-{{missing_values_table}}
-
-<h3>Temporal properties</h3>
-
-<h4>Number of trips over time</h4>
-
- {{trips_over_time_linechart}}
-
-<br>
-
 <div>
-{{trips_over_time_summary_table}}
+    {{dataset_stats_table}}
 </div>
 
- <h4>Number of trips per weekday</h4>
+<div>
+    {{missing_values_table}}
+</div>
 
- {{trips_per_weekday_barchart}}
+<div>
+    <h3>Temporal properties</h3>
+    
+    <div>
+        <h4>Trips over time</h4>
+        {{trips_over_time_linechart}}
 
- <h4>Number of trips per hour of day split by weekday and weekend</h4>
+        <p class ="info">
+            {{trips_over_time_info}}
+        </p>
+    </div>
 
- {{trips_per_hour_linechart}}
+    {{trips_over_time_summary_table}}
+    <p class="info">
+        {{trips_over_time_moe_info}}
+    </p> 
+    
+    <div>
+        <h4>Trips per weekday</h4>
+        {{trips_per_weekday_barchart}}
+    </div>
+    
+    <div>
+        <h4>Trips per hour of day split by weekday and weekend</h4>
+        {{trips_per_hour_linechart}}
+    </div>
+</div>
+    

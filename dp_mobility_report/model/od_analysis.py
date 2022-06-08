@@ -43,8 +43,12 @@ def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame) -> pd.DataFrame:
 
 
 def get_od_flows(
-    od_shape: pd.DataFrame, mdreport: "MobilityDataReport", eps: Optional[float]
+    od_shape: pd.DataFrame,
+    mdreport: "MobilityDataReport",
+    eps: Optional[float],
+    trip_count: Optional[int],
 ) -> Section:
+    sensitivity = mdreport.max_trips_per_user
     od_flows = (
         od_shape.groupby([const.TILE_ID, const.TILE_ID_END])
         .aggregate(flow=(const.TID, "count"))
@@ -67,12 +71,38 @@ def get_od_flows(
     od_flows.fillna(0, inplace=True)
 
     od_flows["flow"] = diff_privacy.counts_dp(
-        od_flows["flow"].to_numpy(), eps, mdreport.max_trips_per_user
+        od_flows["flow"].to_numpy(), eps, sensitivity, allow_negative=True
     )
 
-    # remove all instances of 0 to reduce storage
+    cumsum_simulations = m_utils.cumsum_simulations(
+        od_flows.flow.copy().to_numpy(), eps, sensitivity
+    )
+
+    # remove all instances of 0 (and smaller) to reduce storage
     od_flows = od_flows[od_flows["flow"] > 0]
-    return Section(data=od_flows, privacy_budget=eps)
+
+    # margin of error
+    moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
+
+    # scale to trip count of overview segment
+    if trip_count is not None:
+        od_sum = np.sum(od_flows["flow"])
+        if od_sum != 0:
+            od_flows["flow"] = (od_flows["flow"] / od_sum * trip_count).astype(int)
+            moe = int(moe / od_sum * trip_count)
+
+    # TODO: distribution with or without 0s?
+    # as counts are already dp, no further privacy mechanism needed
+    dp_quartiles = od_flows.flow.describe()
+
+    return Section(
+        data=od_flows,
+        quartiles=dp_quartiles,
+        privacy_budget=eps,
+        margin_of_error_laplace=moe,
+        sensitivity=sensitivity,
+        cumsum_simulations=cumsum_simulations,
+    )
 
 
 def get_intra_tile_flows(od_flows: pd.DataFrame) -> int:
@@ -84,15 +114,15 @@ def get_travel_time(
 ) -> Section:
 
     travel_time = od_shape[const.DATETIME_END] - od_shape[const.DATETIME]
-    travel_time = (travel_time.dt.seconds / 60).round()  # as minutes
+    travel_time = travel_time.dt.seconds / 60  # as minutes
 
     return m_utils.hist_section(
         travel_time,
         eps,
         mdreport.max_trips_per_user,
-        min_value=0,
-        max_value=mdreport.max_travel_time,
+        hist_max=mdreport.max_travel_time,
         bin_range=mdreport.bin_range_travel_time,
+        bin_type=int,
         evalu=mdreport.evalu,
     )
 
@@ -109,8 +139,7 @@ def get_jump_length(
         jump_length,
         eps,
         mdreport.max_trips_per_user,
-        min_value=0,
-        max_value=mdreport.max_jump_length,
+        hist_max=mdreport.max_jump_length,
         bin_range=mdreport.bin_range_jump_length,
         evalu=mdreport.evalu,
     )

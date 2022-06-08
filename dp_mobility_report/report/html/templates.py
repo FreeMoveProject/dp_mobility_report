@@ -1,7 +1,10 @@
 import os
 import shutil
+import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Tuple
+import pkg_resources
+
 
 if TYPE_CHECKING:
     from dp_mobility_report.md_report import MobilityDataReport
@@ -17,8 +20,16 @@ from dp_mobility_report.report.html import (
 )
 
 
-def render_html(mdreport: "MobilityDataReport", top_n_flows: int = 100) -> str:
+def render_html(
+    mdreport: "MobilityDataReport", output_filename: str, top_n_flows: int = 100
+) -> Tuple[str, str]:
     template_structure = html_utils.get_template("structure.html")
+    temp_map_folder = Path(os.path.join("/tmp", tempfile.gettempdir())).with_name(
+        "maps"
+    )
+    # remove any old temp files in case there exist any
+    shutil.rmtree(temp_map_folder, ignore_errors=True)
+    os.mkdir(temp_map_folder)
 
     overview_segment = ""
     place_analysis_segment = ""
@@ -34,35 +45,54 @@ def render_html(mdreport: "MobilityDataReport", top_n_flows: int = 100) -> str:
 
     if is_all_analyses | (const.PLACE_ANALYSIS in mdreport.analysis_selection):
         place_analysis_segment = place_analysis_templates.render_place_analysis(
-            mdreport.report, mdreport.tessellation
+            mdreport.report, mdreport.tessellation, temp_map_folder, output_filename
         )
     if is_all_analyses | (const.OD_ANALYSIS in mdreport.analysis_selection):
         od_analysis_segment = od_analysis_templates.render_od_analysis(
-            mdreport, top_n_flows
+            mdreport, top_n_flows, temp_map_folder, output_filename
         )
     if is_all_analyses | (const.USER_ANALYSIS in mdreport.analysis_selection):
         user_analysis_segment = user_analysis_templates.render_user_analysis(mdreport)
 
-    return template_structure.render(
-        config_segment=config_segment,
-        overview_segment=overview_segment,
-        place_analysis_segment=place_analysis_segment,
-        od_analysis_segment=od_analysis_segment,
-        user_analysis_segment=user_analysis_segment,
+    return (
+        template_structure.render(
+            output_filename=output_filename,
+            config_segment=config_segment,
+            overview_segment=overview_segment,
+            place_analysis_segment=place_analysis_segment,
+            od_analysis_segment=od_analysis_segment,
+            user_analysis_segment=user_analysis_segment,
+        ),
+        temp_map_folder,
     )
 
 
 def create_html_assets(output_file: Path) -> None:
-    path = output_file.with_name("assets")
+    path = Path(os.path.join(output_file, "assets"))
     if path.is_dir():
         shutil.rmtree(path)
     os.mkdir(path)
 
-    asset_folder = Path("dp_mobility_report/report/html/html_templates/assets/")
+    asset_folder = pkg_resources.resource_filename('dp_mobility_report','report/html/html_templates/assets/')
 
     for file_name in os.listdir(asset_folder):
         # construct full file path
         source = os.path.join(asset_folder, file_name)
+        destination = os.path.join(path, file_name)
+        # copy only files
+        if os.path.isfile(source):
+            shutil.copy(source, destination)
+
+
+def create_maps_folder(temp_map_folder: Path, output_dir: str) -> None:
+    path = Path(os.path.join(output_dir, "maps"))
+    if path.is_dir():
+        shutil.rmtree(path)
+    os.makedirs(path)
+
+    for file_name in os.listdir(temp_map_folder):
+        # construct full file path
+        source = os.path.join(temp_map_folder, file_name)
         destination = os.path.join(path, file_name)
         # copy only files
         if os.path.isfile(source):

@@ -1,4 +1,3 @@
-import math
 from datetime import timedelta
 from typing import TYPE_CHECKING, List, Optional
 
@@ -23,8 +22,8 @@ def get_trips_per_user(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
         user_nunique,
         eps,
         sensitivity=1,
-        min_value=1,
-        max_value=max_trips,
+        hist_max=max_trips,
+        bin_type=int,
         evalu=mdreport.evalu,
     )
 
@@ -33,7 +32,6 @@ def get_user_time_delta(
     mdreport: "MobilityDataReport", eps: Optional[float]
 ) -> Optional[Section]:
     epsi = m_utils.get_epsi(mdreport.evalu, eps, 6)
-    epsi_quant = epsi * 5 if epsi is not None else None
 
     mdreport.df = mdreport.df.sort_values(
         [const.UID, const.TID, const.DATETIME]
@@ -48,18 +46,25 @@ def get_user_time_delta(
     if len(user_time_delta) < 1:
         return None
 
-    n_overlaps = diff_privacy.count_dp(
-        overlaps,
-        epsi,
-        mdreport.max_trips_per_user,
+    sec = m_utils.hist_section(
+        (user_time_delta.dt.total_seconds() / 3600),  # convert to hours
+        eps,
+        sensitivity=mdreport.max_trips_per_user,
+        evalu=mdreport.evalu,
     )
-    dp_quartiles = diff_privacy.quartiles_dp(
-        user_time_delta, epsi_quant, mdreport.max_trips_per_user
+    if sec.quartiles["min"] < 0:  # are there overlaps according to dp minimum?
+        sec.n_outliers = diff_privacy.count_dp(
+            overlaps,
+            epsi,
+            mdreport.max_trips_per_user,
+        )
+    else:
+        sec.n_outliers = None
+    sec.quartiles = pd.to_timedelta(sec.quartiles, unit="h").apply(
+        lambda x: x.round(freq="s")
     )
 
-    return Section(
-        data=None, privacy_budget=eps, n_outliers=n_overlaps, quartiles=dp_quartiles
-    )
+    return sec
 
 
 def get_radius_of_gyration(
@@ -70,8 +75,7 @@ def get_radius_of_gyration(
         rg,
         eps,
         sensitivity=1,
-        min_value=0,
-        max_value=mdreport.max_radius_of_gyration,
+        hist_max=mdreport.max_radius_of_gyration,
         bin_range=mdreport.bin_range_radius_of_gyration,
         evalu=mdreport.evalu,
     )
@@ -115,38 +119,6 @@ def _tile_visits_by_user(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def get_location_entropy(
-    mdreport: "MobilityDataReport", eps: Optional[float]
-) -> Section:
-    total_visits_by_tile = mdreport.df.groupby(const.TILE_ID).aggregate(
-        total_visits=(const.ID, "count")
-    )
-    tile_visits_by_user = _tile_visits_by_user(mdreport.df).merge(
-        total_visits_by_tile, left_on=const.TILE_ID, right_index=True
-    )[[const.TILE_ID, "count_by_user", "total_visits"]]
-
-    tile_visits_by_user["p"] = (
-        tile_visits_by_user.count_by_user / tile_visits_by_user.total_visits
-    )
-    tile_visits_by_user["log2p"] = -tile_visits_by_user.p.apply(
-        lambda x: math.log(x, 2)
-    )
-    tile_visits_by_user[const.LOCATION_ENTROPY] = (
-        tile_visits_by_user.p * tile_visits_by_user.log2p
-    )
-
-    location_entropy = tile_visits_by_user.groupby(const.TILE_ID)[
-        const.LOCATION_ENTROPY
-    ].sum()
-    location_entropy_dp = diff_privacy.entropy_dp(
-        location_entropy, eps, mdreport.max_trips_per_user
-    )
-    data = pd.Series(
-        location_entropy_dp, index=location_entropy.index, name=location_entropy.name
-    )
-    return Section(data=data, privacy_budget=eps)
-
-
 def get_user_tile_count(
     mdreport: "MobilityDataReport", eps: Optional[float]
 ) -> Section:
@@ -156,6 +128,7 @@ def get_user_tile_count(
         user_tile_count,
         eps,
         sensitivity=1,
+        bin_type=int,
         evalu=mdreport.evalu,
     )
 
@@ -168,8 +141,9 @@ def _mobility_entropy(df: pd.DataFrame) -> np.ndarray:
         total_visits_by_user, left_on=const.UID, right_index=True
     )
     tile_visits_by_user["probs"] = (
-        1.0 * tile_visits_by_user.count_by_user / tile_visits_by_user.total_visits
+        tile_visits_by_user.count_by_user / tile_visits_by_user.total_visits
     )
+
     entropy = tile_visits_by_user.groupby(const.UID).probs.apply(
         lambda x: stats.entropy(x, base=2)
     )
@@ -190,8 +164,7 @@ def get_mobility_entropy(
         mobility_entropy,
         eps,
         sensitivity=1,
-        min_value=0,
-        max_value=1,
-        max_bins=10,
+        bin_range=0.1,
+        hist_max=1,
         evalu=mdreport.evalu,
     )

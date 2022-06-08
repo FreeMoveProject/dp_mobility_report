@@ -1,102 +1,128 @@
-from typing import Tuple
+import os
+from pathlib import Path
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 from geopandas import GeoDataFrame
 
 from dp_mobility_report import constants as const
+from dp_mobility_report.model.section import Section
 from dp_mobility_report.report.html.html_utils import get_template, render_summary
 from dp_mobility_report.visualization import plot, v_utils
 
 
-def render_place_analysis(report: dict, tessellation: GeoDataFrame) -> str:
+def render_place_analysis(
+    report: dict,
+    tessellation: GeoDataFrame,
+    temp_map_folder: Path,
+    output_filename: str,
+) -> str:
+    THRESHOLD = 0.2  # 20%
     points_outside_tessellation_info = ""
-    counts_per_tile_map = ""
-    counts_per_tile_legend = ""
-    counts_per_tile_summary_table = ""
-    counts_per_tile_cumsum_linechart = ""
+    privacy_info = f"""Tiles below a certain threshold are grayed out: 
+        Due to the applied noise, tiles with a low visit count are likely to contain a high percentage of noise. 
+        For usability reasons, such unrealistic values are grayed out. 
+        More specifically: The threshold is set so that values for tiles with a 5% chance of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are not shown."""
+    visits_per_tile_legend = ""
+    visits_per_tile_summary_table = ""
+    visits_per_tile_cumsum_linechart = ""
     most_freq_tiles_ranking = ""
     counts_per_tile_time_map = ""
 
-    if (const.COUNTS_PER_TILE in report) and (
-        report[const.COUNTS_PER_TILE].data is not None
+    if (const.VISITS_PER_TILE in report) and (
+        report[const.VISITS_PER_TILE].data is not None
     ):
         points_outside_tessellation_info = render_points_outside_tess(
-            report[const.COUNTS_PER_TILE].n_outliers
+            report[const.VISITS_PER_TILE]
         )
-        counts_per_tile_map, counts_per_tile_legend = render_counts_per_tile(
-            report[const.COUNTS_PER_TILE].data, tessellation
+        visits_per_tile_legend = render_visits_per_tile(
+            report[const.VISITS_PER_TILE], tessellation, THRESHOLD, temp_map_folder
         )
-        counts_per_tile_summary_table = render_summary(
-            report[const.COUNTS_PER_TILE].quartiles
+        quartiles = round(report[const.VISITS_PER_TILE].quartiles)
+
+        visits_per_tile_summary_table = render_summary(
+            quartiles.astype(int),
+            "Distribution of visits per tile",  # extrapolate visits from dp record count
         )
-        counts_per_tile_cumsum_linechart = render_counts_per_tile_cumsum(
-            report[const.COUNTS_PER_TILE].data
+        visits_per_tile_cumsum_linechart = render_counts_per_tile_cumsum(
+            report[const.VISITS_PER_TILE]
         )
         most_freq_tiles_ranking = render_most_freq_tiles_ranking(
-            report[const.COUNTS_PER_TILE].data
+            report[const.VISITS_PER_TILE],
         )
 
-    if (const.COUNTS_PER_TILE_TIMEWINDOW in report) and (
-        report[const.COUNTS_PER_TILE_TIMEWINDOW].data is not None
+    if (const.VISITS_PER_TILE_TIMEWINDOW in report) and (
+        report[const.VISITS_PER_TILE_TIMEWINDOW] is not None
     ):
         counts_per_tile_time_map = render_counts_per_tile_timewindow(
-            report[const.COUNTS_PER_TILE_TIMEWINDOW].data, tessellation
+            report[const.VISITS_PER_TILE_TIMEWINDOW], tessellation, THRESHOLD
         )
 
     template_structure = get_template("place_analysis_segment.html")
 
     return template_structure.render(
         points_outside_tessellation_info=points_outside_tessellation_info,
-        counts_per_tile_map=counts_per_tile_map,
-        counts_per_tile_legend=counts_per_tile_legend,
-        counts_per_tile_summary_table=counts_per_tile_summary_table,
-        counts_per_tile_cumsum_linechart=counts_per_tile_cumsum_linechart,
+        privacy_info=privacy_info,
+        output_filename=output_filename,
+        visits_per_tile_legend=visits_per_tile_legend,
+        counts_per_tile_summary_table=visits_per_tile_summary_table,
+        counts_per_tile_cumsum_linechart=visits_per_tile_cumsum_linechart,
         most_freq_tiles_ranking=most_freq_tiles_ranking,
         counts_per_tile_time_map=counts_per_tile_time_map,
     )
 
 
-def render_points_outside_tess(points_outside_tessellation: int) -> str:
-    return "Points outside the given tessellation: " + str(points_outside_tessellation)
+def render_points_outside_tess(visits_per_tile: Section) -> str:
+    return f"""{round(visits_per_tile.n_outliers)} ({round(visits_per_tile.n_outliers, 2)}%) of points are outside the given tessellation 
+    (95% confidence interval ± {round(visits_per_tile.margin_of_error_laplace)})."""
 
 
-def render_counts_per_tile(
-    counts_per_tile: pd.DataFrame, tessellation: GeoDataFrame
-) -> Tuple[str, str]:
+def render_visits_per_tile(
+    perc_per_tile: Section,
+    tessellation: GeoDataFrame,
+    threshold: float,
+    temp_map_folder: Path,
+) -> str:
+
     # merge count and tessellation
     counts_per_tile_gdf = pd.merge(
         tessellation,
-        counts_per_tile[[const.TILE_ID, "visit_count"]],
+        perc_per_tile.data[[const.TILE_ID, "visits"]],
         how="left",
         left_on=const.TILE_ID,
         right_on=const.TILE_ID,
     )
-    map, legend = plot.choropleth_map(
-        counts_per_tile_gdf, "visit_count", scale_title="Number of visits"
+
+    # filter visit counts above error threshold
+    moe_deviation = (
+        perc_per_tile.margin_of_error_laplace / counts_per_tile_gdf["visits"]
     )
-    html = map.get_root().render()
+
+    counts_per_tile_gdf.loc[moe_deviation > threshold, "visits"] = None
+    map, legend = plot.choropleth_map(
+        counts_per_tile_gdf,
+        "visits",
+        scale_title="number of visits",
+        aliases=["Tile ID", "Tile Name", "number of visits"],
+    )
+
+    map.save(os.path.join(temp_map_folder, "visits_per_tile_map.html"))
+
     legend_html = v_utils.fig_to_html(legend)
     plt.close()
-    return html, legend_html
+    return legend_html
 
 
-def render_counts_per_tile_cumsum(counts_per_tile: pd.DataFrame) -> str:
-    df_cumsum = pd.DataFrame()
-    df_cumsum["cum_perc"] = round(
-        counts_per_tile.visit_count.sort_values(ascending=False).cumsum()
-        / sum(counts_per_tile.visit_count),
-        2,
-    )
-    df_cumsum["n"] = np.arange(1, len(counts_per_tile) + 1)
-    df_cumsum.reset_index(drop=True, inplace=True)
+def render_counts_per_tile_cumsum(counts_per_tile: Section) -> str:
+    df_cumsum = counts_per_tile.cumsum_simulations
+
     chart = plot.linechart(
         df_cumsum,
         "n",
         "cum_perc",
         "Number of tiles",
-        "Cumulated sum of counts per tile",
+        "Cumulated sum of visits per tile",
+        # simulations=df_cumsum.columns[2:52],
         add_diagonal=True,
     )
     html = v_utils.fig_to_html(chart)
@@ -104,72 +130,66 @@ def render_counts_per_tile_cumsum(counts_per_tile: pd.DataFrame) -> str:
     return html
 
 
-def render_most_freq_tiles_ranking(
-    counts_per_tile: pd.DataFrame, top_n: int = 10
-) -> str:
-    if counts_per_tile is None:
-        return None
-    topx_tiles = counts_per_tile.nlargest(top_n, "visit_count")
+def render_most_freq_tiles_ranking(perc_per_tile: Section, top_x: int = 10) -> str:
+    topx_tiles = perc_per_tile.data.nlargest(top_x, "visits")
     topx_tiles["rank"] = list(range(1, len(topx_tiles) + 1))
-
-    topx_tiles_list = []
-    for _, row in topx_tiles.iterrows():
-        topx_tiles_list.append(
-            {
-                "name": row["rank"],
-                "value": str(row[const.TILE_NAME])
-                + " (Id: "
-                + str(row[const.TILE_ID])
-                + "): "
-                + str(row["visit_count"]),
-            }
-        )
-    template_table = get_template("table.html")
-    tile_ranking_html = template_table.render(
-        name="Ranking most frequently visited tiles", rows=topx_tiles_list
+    labels = (
+        topx_tiles["rank"].astype(str)
+        + ": "
+        + topx_tiles[const.TILE_NAME]
+        + "(Id: "
+        + topx_tiles[const.TILE_ID]
+        + ")"
     )
 
-    return tile_ranking_html
+    ranking = plot.ranking(
+        round(topx_tiles.visits),
+        "number of visits per tile",
+        y_labels=labels,
+        margin_of_error=perc_per_tile.margin_of_error_laplace,
+    )
+    html_ranking = v_utils.fig_to_html(ranking)
+    plt.close()
+    return html_ranking
 
 
 def render_counts_per_tile_timewindow(
-    counts_per_tile_timewindow: pd.DataFrame, tessellation: GeoDataFrame
+    counts_per_tile_timewindow: Section, tessellation: GeoDataFrame, threshold: int
 ) -> str:
-    if counts_per_tile_timewindow is None:
+    data = counts_per_tile_timewindow.data
+    moe_counts_per_tile_timewindow = (
+        counts_per_tile_timewindow.margin_of_error_laplace / data
+    )
+
+    if data is None:
         return None
+
+    data[moe_counts_per_tile_timewindow > threshold] = None
+
     output_html = ""
-    if "weekday" in counts_per_tile_timewindow.columns:
-        absolute_weekday = plot.multi_choropleth_map(
-            counts_per_tile_timewindow.loc[:, "weekday"], tessellation
-        )
+    if "weekday" in data.columns:
+        output_html += "<h4>Weekday</h4>"
+        output_html += _create_timewindow_segment(data.loc[:, "weekday"], tessellation)
 
-        tile_means = counts_per_tile_timewindow.loc[:, "weekday"].mean(axis=1)
-        dev_from_avg = counts_per_tile_timewindow.loc[:, "weekday"].div(
-            tile_means, axis=0
-        )
-        relative_weekday = plot.multi_choropleth_map(dev_from_avg, tessellation)
-        output_html += (
-            "<h4>Weekday: absolute count</h4>"
-            + v_utils.fig_to_html_as_png(absolute_weekday)  # svg might get too large
-            + "<h4>Weekday: deviation from average</h4>"
-            + v_utils.fig_to_html_as_png(relative_weekday)  # svg might get too large
-        )
-
-    if "weekend" in counts_per_tile_timewindow.columns:
-        absolute_weekend = plot.multi_choropleth_map(
-            counts_per_tile_timewindow.loc[:, "weekend"], tessellation
-        )
-
-        tile_means = counts_per_tile_timewindow.loc[:, "weekend"].mean(axis=1)
-        dev_from_avg = counts_per_tile_timewindow.loc[:, "weekend"].div(
-            tile_means, axis=0
-        )
-        relative_weekend = plot.multi_choropleth_map(dev_from_avg, tessellation)
-        output_html += (
-            "<h4>Weekend: absolute count</h4>"
-            + v_utils.fig_to_html(absolute_weekend)
-            + "<h4>Weekend: deviation from average</h4>"
-            + v_utils.fig_to_html(relative_weekend)
-        )
+    if "weekend" in data.columns:
+        output_html += "<h4>Weekend</h4>"
+        output_html += _create_timewindow_segment(data.loc[:, "weekend"], tessellation)
     plt.close()
     return output_html
+
+
+def _create_timewindow_segment(df: pd.DataFrame, tessellation: GeoDataFrame) -> str:
+    visits_choropleth = plot.multi_choropleth_map(df, tessellation)
+
+    tile_means = df.mean(axis=1)
+    dev_from_avg = df.div(tile_means, axis=0)
+    deviation_choropleth = plot.multi_choropleth_map(
+        dev_from_avg, tessellation, diverging_cmap=True
+    )
+    return f"""<h4>Number of visits</h4>
+        {v_utils.fig_to_html_as_png(visits_choropleth)}
+        <h4>Deviation from tile average</h4>
+        <div><p>The average of each cell 
+        over all time windows equals 1 (100% of average traffic). 
+        A value of < 1 (> 1) means that a tile is visited less (more) frequently in this time window than it is on average.</p></div>
+        {v_utils.fig_to_html_as_png(deviation_choropleth)}"""  # svg might get too large

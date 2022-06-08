@@ -43,9 +43,6 @@ def test_get_trips_over_time(test_mdreport):
     expected_quartiles = pd.Series(
         data={
             "min": "2020-12-13",
-            "25%": "2020-12-14",
-            "50%": "2020-12-16",
-            "75%": "2020-12-17",
             "max": "2020-12-19",
         }
     )

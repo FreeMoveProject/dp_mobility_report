@@ -6,11 +6,11 @@ haversine
 scipy
 numpy
 datetime
-skmob
 geopandas
 rtree
 shapely
 pandas
+scikit-mobility
 diffprivlib
 jinja2
 seaborn
