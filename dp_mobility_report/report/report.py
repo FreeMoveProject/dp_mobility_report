@@ -174,13 +174,49 @@ def add_user_analysis_elements(mdreport: "MobilityDataReport", epsilon: float) -
         else Section(),
     }
     
-def add_analysis_without_tmp_elements(mdreport: "MobilityDataReport", epsilon: float) -> dict:
+def add_analysis_without_tmp_elements(
+    mdreport: "MobilityDataReport",
+    epsilon: float,
+    record_count: Optional[int],
+    _od_shape: DataFrame,
+    trip_count: Optional[int]) -> dict:
     return {
-        #Todo here all analysis which are possible with data without timestamp
-        # all_analyses: ... from
-        # OVERVIEW_ELEMENTS:
-        # PLACE_ELEMENTS:
-        # OD_ELEMENTS:
-        # USER_ELEMENTS:
+        #OVERVIEW_ELEMENTS:
+        const.DS_STATISTICS: overview.get_dataset_statistics(mdreport, epsilon)
+        if const.DS_STATISTICS in const.OVERVIEW_ELEMENTS
+        else Section(),
+        const.MISSING_VALUES: overview.get_missing_values(mdreport, epsilon)
+        if const.MISSING_VALUES in const.OVERVIEW_ELEMENTS
+        else Section(),
+        #PLACE_ELEMENTS:
+        const.VISITS_PER_TILE: place_analysis.get_visits_per_tile(
+            mdreport, epsilon, record_count
+        )
+        if const.VISITS_PER_TILE in const.PLACE_ELEMENTS
+        else Section(),
+        #OD_ELEMENTS:
+        const.OD_FLOWS: od_analysis.get_od_flows(
+            _od_shape, mdreport, epsilon, trip_count
+        )
+        if const.OD_FLOWS in const.OD_ELEMENTS
+        else Section(),
+        const.JUMP_LENGTH: od_analysis.get_jump_length(_od_shape, mdreport, epsilon)
+        if const.JUMP_LENGTH in const.OD_ELEMENTS
+        else Section(),
+        #USER_ELEMENTS:
+        const.TRIPS_PER_USER: user_analysis.get_trips_per_user(mdreport, epsilon)
+        if const.TRIPS_PER_USER in const.USER_ELEMENTS
+        else Section(),
+        const.RADIUS_OF_GYRATION: user_analysis.get_radius_of_gyration(
+            mdreport, epsilon
+        )
+        if const.RADIUS_OF_GYRATION in const.USER_ELEMENTS
+        else Section(),
+        const.USER_TILE_COUNT: user_analysis.get_user_tile_count(mdreport, epsilon)
+        if const.USER_TILE_COUNT in const.USER_ELEMENTS
+        else Section(),
+        const.MOBILITY_ENTROPY: user_analysis.get_mobility_entropy(mdreport, epsilon)
+        if const.MOBILITY_ENTROPY in const.USER_ELEMENTS
+        else Section(),
     }
 
