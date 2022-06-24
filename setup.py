@@ -42,7 +42,7 @@ setup(
     long_description=readme + "\n\n" + history,
     include_package_data=True,
     keywords="dp_mobility_report",
-    name="dp-mobility-report",
+    name="dp_mobility_report",
     packages=find_packages(include=["dp_mobility_report", "dp_mobility_report.*"]),
     test_suite="tests",
     tests_require=test_requirements,
