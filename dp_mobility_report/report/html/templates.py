@@ -24,9 +24,10 @@ def render_html(
     mdreport: "MobilityDataReport", output_filename: str, top_n_flows: int = 100
 ) -> Tuple[str, str]:
     template_structure = html_utils.get_template("structure.html")
-    temp_map_folder = Path(os.path.join("/tmp", tempfile.gettempdir())).with_name(
-        "maps"
-    )
+    #temp_map_folder = Path(os.path.join("tmp", tempfile.gettempdir())).with_name(
+    #    "maps"
+    #)
+    temp_map_folder = Path(os.path.join(tempfile.gettempdir(), 'maps'))
     # remove any old temp files in case there exist any
     shutil.rmtree(temp_map_folder, ignore_errors=True)
     os.mkdir(temp_map_folder)
