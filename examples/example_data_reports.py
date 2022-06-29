@@ -1,4 +1,7 @@
-import os
+#import os
+import sys, os
+path = os.path.dirname(__file__)
+sys.path.append(os.path.join(path, ".."))
 
 import geopandas as gpd
 import pandas as pd
@@ -51,44 +54,3 @@ report = md_report.MobilityDataReport(
 )
 report.to_file(os.path.join(path_html_output, "geolife_eps11.html"), top_n_flows=100)
 
-
-# MADRID
-#df = pd.read_csv(os.path.join(path_data, "madrid.csv"))
-#tessellation = gpd.read_file(os.path.join(path_data, "madrid_tessellation.gpkg"))
-
-#report = md_report.MobilityDataReport(
-#    df,
-#    tessellation,
-#    privacy_budget=10,
-#    analysis_selection=["all"],
-#    max_trips_per_user=5,
-#    max_travel_time=90,
-#    bin_range_travel_time=5,
-#    max_jump_length=30,
-#    bin_range_jump_length=3,
-#    max_radius_of_gyration=18,
-#    bin_range_radius_of_gyration=1.5,
-#)
-#report.to_file(os.path.join(path_html_output, "madrid.html"), top_n_flows=300)
-
-
-# BERLIN
-#df = pd.read_csv(
-#    os.path.join(path_data, "berlin_w_tile_id.csv"), dtype={"tile_id": str}
-#)
-#tessellation = gpd.read_file(os.path.join(path_data, "berlin_tessellation.gpkg"))
-
-#report = md_report.MobilityDataReport(
-#    df,
-#    tessellation,
-#    privacy_budget=1,
-#    analysis_selection=["all"],
-#    max_trips_per_user=5,
-#    max_travel_time=90,
-#    bin_range_travel_time=5,
-#    max_jump_length=30,
-#    bin_range_jump_length=3,
-#    max_radius_of_gyration=18,
-#    bin_range_radius_of_gyration=1.5,
-#)
-#report.to_file(os.path.join(path_html_output, "berlin.html"), top_n_flows=300)
