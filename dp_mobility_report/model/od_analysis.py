@@ -13,32 +13,56 @@ from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
 
 
-def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame) -> pd.DataFrame:
-    ends_od_shape = (
-        df[
-            (df[const.POINT_TYPE] == const.END)
-            & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
-        ][[const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]]
-        .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
-        .rename(
-            columns={
-                const.TILE_ID: const.TILE_ID_END,
-                const.LAT: const.LAT_END,
-                const.LNG: const.LNG_END,
-                const.DATETIME: const.DATETIME_END,
-            }
+def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame, timestamps: bool) -> pd.DataFrame:
+    if timestamps:
+        ends_od_shape = (
+            df[
+                (df[const.POINT_TYPE] == const.END)
+                & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
+            ][[const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]]
+            .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
+            .rename(
+                columns={
+                    const.TILE_ID: const.TILE_ID_END,
+                    const.LAT: const.LAT_END,
+                    const.LNG: const.LNG_END,
+                    const.DATETIME: const.DATETIME_END,
+                }
+            )
         )
-    )
 
-    od_shape = (
-        df[
-            (df[const.POINT_TYPE] == const.START)
-            & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
-        ][[const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]]
-        .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
-        .merge(ends_od_shape, on=const.TID, how="inner")
-    )
+        od_shape = (
+            df[
+                (df[const.POINT_TYPE] == const.START)
+                & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
+            ][[const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]]
+            .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
+            .merge(ends_od_shape, on=const.TID, how="inner")
+        )
+    else:
+        ends_od_shape = (
+            df[
+                (df[const.POINT_TYPE] == const.END)
+                & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
+            ][[const.TILE_ID, const.LAT, const.LNG]]
+            .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
+            .rename(
+                columns={
+                    const.TILE_ID: const.TILE_ID_END,
+                    const.LAT: const.LAT_END,
+                    const.LNG: const.LNG_END,
+                }
+            )
+        )
 
+        od_shape = (
+            df[
+                (df[const.POINT_TYPE] == const.START)
+                & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
+            ][[const.TID, const.TILE_ID, const.LAT, const.LNG]]
+            .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
+            .merge(ends_od_shape, on=const.TID, how="inner")
+        )
     return od_shape
 
 

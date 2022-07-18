@@ -43,6 +43,7 @@ class MobilityDataReport:
         max_radius_of_gyration: Upper bound for radius of gyration histogram. If None is given, no upper bound is set. Defaults to None.
         bin_range_radius_of_gyration The range a single histogram bin spans for the radius of gyration (e.g., 1 for 1 km bins). If None is given, the histogram bins will be determined automatically. Defaults to None.
         evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to False.
+        timestamps: if the dataset has timestamp attribute. Defaults to true.
     """
 
     _report: dict = {}
@@ -64,6 +65,7 @@ class MobilityDataReport:
         bin_range_jump_length: Optional[Union[int, float]] = None,
         max_radius_of_gyration: Optional[Union[int, float]] = None,
         bin_range_radius_of_gyration: Optional[Union[int, float]] = None,
+        timestamps: bool = True,
         evalu: bool = False,
     ) -> None:
         _validate_input(
@@ -81,9 +83,9 @@ class MobilityDataReport:
             max_jump_length,
             bin_range_jump_length,
             max_radius_of_gyration,
-            bin_range_radius_of_gyration,
+            bin_range_radius_of_gyration
         )
-
+        self.timestamps = timestamps
         self.user_privacy = user_privacy
         with tqdm(  # progress bar
             total=2, desc="Preprocess data", disable=disable_progress_bar
@@ -104,6 +106,7 @@ class MobilityDataReport:
                 tessellation,
                 self.max_trips_per_user,
                 self.user_privacy,
+                self.timestamps
             )
             pbar.update()
 

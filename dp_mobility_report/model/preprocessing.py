@@ -30,11 +30,11 @@ def preprocess_tessellation(tessellation: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return tessellation[[const.TILE_ID, const.TILE_NAME, const.GEOMETRY]]
 
 
-def _validate_columns(df: pd.DataFrame) -> pd.DataFrame:
+def _validate_columns(df: pd.DataFrame, timestamps) -> pd.DataFrame:
     if const.UID not in df.columns:
         raise ValueError("Column 'uid' must be present in data.")
     df[const.UID] = df[const.UID].astype(str)
-    if const.TID not in df.columns:
+    if const.TID not in df.columns and timestamps:
         raise ValueError("Column 'tid' must be present in data.")
     if const.LAT not in df.columns:
         raise ValueError("Column 'lat' must be present in data.")
@@ -44,12 +44,13 @@ def _validate_columns(df: pd.DataFrame) -> pd.DataFrame:
         raise ValueError("Column 'lng' must be present in data.")
     if not pd.core.dtypes.common.is_float_dtype(df[const.LNG]):
         raise TypeError("Column 'lng' is not of type float.")
-    if const.DATETIME not in df.columns:
+    if const.DATETIME not in df.columns and timestamps:
         raise ValueError("Column 'datetime' must be present in data.")
-    try:
-        df.loc[:, const.DATETIME] = pd.to_datetime(df[const.DATETIME])
-    except Exception as ex:
-        raise TypeError("Column 'datetime' cannot be cast to datetime.") from ex
+    if const.DATETIME not in df.columns and timestamps:
+        try:
+            df.loc[:, const.DATETIME] = pd.to_datetime(df[const.DATETIME])
+        except Exception as ex:
+            raise TypeError("Column 'datetime' cannot be cast to datetime.") from ex
     return df
 
 
@@ -58,40 +59,61 @@ def preprocess_data(
     tessellation: gpd.GeoDataFrame,
     max_trips_per_user: int,
     user_privacy: bool,
+    timestamps: bool
 ) -> pd.DataFrame:
-    df = _validate_columns(df)
+    df = _validate_columns(df, timestamps)
 
     df.loc[:, const.ID] = range(0, len(df))
 
     # make sure trip ids are unique and ordered correctly
-    df[const.TID] = (
-        df.sort_values([const.UID, const.DATETIME])
-        .groupby([const.UID, const.TID], sort=False)
-        .ngroup()
-    )
+    if timestamps:
+        df[const.TID] = (
+            df.sort_values([const.UID, const.DATETIME])
+            .groupby([const.UID, const.TID], sort=False)
+            .ngroup()
+        )
 
-    # remove unnessessary columns
-    columns = [const.ID, const.UID, const.TID, const.DATETIME, const.LAT, const.LNG]
-    if const.TILE_ID in df.columns:
-        columns.append(const.TILE_ID)
-    df = df.loc[:, columns]
+        # remove unnessessary columns
+        columns = [const.ID, const.UID, const.TID, const.DATETIME, const.LAT, const.LNG]
+        if const.TILE_ID in df.columns:
+            columns.append(const.TILE_ID)
+        df = df.loc[:, columns]
 
-    # create time related variables
-    df.loc[:, const.HOUR] = df[const.DATETIME].dt.hour
-    df.loc[:, const.IS_WEEKEND] = np.select(
-        [df[const.DATETIME].dt.weekday > 4], ["weekend"], default="weekday"
-    )
+        # create time related variables
+        df.loc[:, const.HOUR] = df[const.DATETIME].dt.hour
+        df.loc[:, const.IS_WEEKEND] = np.select(
+            [df[const.DATETIME].dt.weekday > 4], ["weekend"], default="weekday"
+        )
 
-    # remove waypoints
-    df = df.sort_values(const.DATETIME).groupby(const.TID).nth([0, -1])
-    df.reset_index(inplace=True)
+        # remove waypoints
+        df = df.sort_values(const.DATETIME).groupby(const.TID).nth([0, -1])
+        df.reset_index(inplace=True)
 
-    # assign start and end as point_type
-    df[const.POINT_TYPE] = "start"
-    df.sort_values(const.DATETIME, inplace=True)
-    df.loc[
-        df.groupby(const.TID)[const.POINT_TYPE].tail(1).index, const.POINT_TYPE
-    ] = "end"
+        # assign start and end as point_type
+        df[const.POINT_TYPE] = "start"
+        df.sort_values(const.DATETIME, inplace=True)
+        df.loc[
+            df.groupby(const.TID)[const.POINT_TYPE].tail(1).index, const.POINT_TYPE
+        ] = "end"
+    else:
+        # make sure trip ids are unique and ordered correctly
+        df[const.TID] = (
+            df.sort_values([const.UID])
+            .groupby([const.UID, const.TID], sort=False)
+            .ngroup()
+        )
+        # remove unnessessary columns
+        columns = [const.ID, const.UID, const.TID, const.LAT, const.LNG]
+        if const.TILE_ID in df.columns:
+            columns.append(const.TILE_ID)
+        df = df.loc[:, columns]
+
+        # assign start and end as point_type
+        df[const.POINT_TYPE] = "start"
+        df.loc[
+            df.groupby(const.TID)[const.POINT_TYPE].tail(1).index, const.POINT_TYPE
+        ] = "end"
+
 
     # if tile assignment isn't already provided, recompute assignment
     if const.TILE_ID not in df.columns:
@@ -102,7 +124,7 @@ def preprocess_data(
         )
         df.tile_id = df.tile_id.astype(str)
 
-    df = sample_trips(df, max_trips_per_user, user_privacy)
+    df = sample_trips(df, max_trips_per_user, user_privacy, timestamps)
     return df
 
 
@@ -116,19 +138,37 @@ def assign_points_to_tessellation(
     )
 
     # Spatial join points to polygons
-    df = gpd.sjoin(
+    df = gpd.sjoin_nearest(
         tessellation[[const.TILE_ID, const.TILE_NAME, const.GEOMETRY]],
         gdf,
-        how="right",
+        how="right"
     )
     df.drop(["index_left", const.GEOMETRY], axis=1, inplace=True)
     return pd.DataFrame(df)
 
 
 def sample_trips(
-    df: pd.DataFrame, max_trips_per_user: int, user_privacy: bool
+    df: pd.DataFrame, max_trips_per_user: int, user_privacy: bool, timestamps: bool
 ) -> pd.DataFrame:
-    if user_privacy:
+    if user_privacy and timestamps:
+        tid_sample = (
+            df[[const.UID, const.TID]]
+            .drop_duplicates(const.TID)
+            .groupby(const.UID)[const.TID]
+            .apply(
+                lambda x: np.random.choice(
+                    x,
+                    size=(
+                        max_trips_per_user if max_trips_per_user < len(x) else len(x)
+                    ),
+                    replace=False,
+                )
+            )
+        )
+        return df.loc[
+            df[const.TID].isin(np.concatenate(tid_sample.values)),
+        ]
+    elif user_privacy and not timestamps:
         tid_sample = (
             df[[const.UID, const.TID]]
             .drop_duplicates(const.TID)

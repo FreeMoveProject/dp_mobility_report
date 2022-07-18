@@ -53,7 +53,7 @@ def report_elements(mdreport: "MobilityDataReport") -> dict:
     )
     record_count = None
     trip_count = None
-
+    timestamps = mdreport.timestamps
     # get privacy budget for each report element
     if mdreport.privacy_budget is None or mdreport.evalu is True:
         epsilon = mdreport.privacy_budget
@@ -68,7 +68,7 @@ def report_elements(mdreport: "MobilityDataReport") -> dict:
         total=4, desc="Create report", disable=mdreport.disable_progress_bar
     ) as pbar:
         if is_all_analyses | (const.OVERVIEW in mdreport.analysis_selection):
-            report = {**report, **add_overview_elements(mdreport, epsilon)}
+            report = {**report, **add_overview_elements(mdreport, epsilon, timestamps)}
             record_count = report[const.DS_STATISTICS].data["n_records"]
             trip_count = report[const.DS_STATISTICS].data["n_trips"]
         pbar.update()
@@ -76,103 +76,144 @@ def report_elements(mdreport: "MobilityDataReport") -> dict:
         if is_all_analyses | (const.PLACE_ANALYSIS in mdreport.analysis_selection):
             report = {
                 **report,
-                **add_place_analysis_elements(mdreport, epsilon, record_count),
+                **add_place_analysis_elements(mdreport, epsilon, timestamps, record_count),
             }
         pbar.update()
 
-        if is_all_analyses | (const.OD_ANALYSIS in mdreport.analysis_selection):
-            _od_shape = od_analysis.get_od_shape(mdreport.df, mdreport.tessellation)
+        if (is_all_analyses | (const.OD_ANALYSIS in mdreport.analysis_selection)) and mdreport.timestamps:
+            _od_shape = od_analysis.get_od_shape(mdreport.df, mdreport.tessellation, mdreport.timestamps)
             report = {
                 **report,
-                **add_od_analysis_elements(mdreport, _od_shape, epsilon, trip_count),
+                **add_od_analysis_elements(mdreport, _od_shape, epsilon, timestamps, trip_count),
             }
         pbar.update()
 
         if is_all_analyses | (const.USER_ANALYSIS in mdreport.analysis_selection):
-            report = {**report, **add_user_analysis_elements(mdreport, epsilon)}
+            report = {**report, **add_user_analysis_elements(mdreport, epsilon, timestamps)}
         pbar.update()
 
     return report
 
 
-def add_overview_elements(mdreport: "MobilityDataReport", epsilon: float) -> dict:
-    return {
-        const.DS_STATISTICS: overview.get_dataset_statistics(mdreport, epsilon)
-        if const.DS_STATISTICS in const.OVERVIEW_ELEMENTS
-        else Section(),
-        const.MISSING_VALUES: overview.get_missing_values(mdreport, epsilon)
-        if const.MISSING_VALUES in const.OVERVIEW_ELEMENTS
-        else Section(),
-        const.TRIPS_OVER_TIME: overview.get_trips_over_time(mdreport, epsilon)
-        if const.TRIPS_OVER_TIME in const.OVERVIEW_ELEMENTS
-        else Section(),
-        const.TRIPS_PER_WEEKDAY: overview.get_trips_per_weekday(mdreport, epsilon)
-        if const.TRIPS_PER_WEEKDAY in const.OVERVIEW_ELEMENTS
-        else Section(),
-        const.TRIPS_PER_HOUR: overview.get_trips_per_hour(mdreport, epsilon)
-        if const.TRIPS_PER_HOUR in const.OVERVIEW_ELEMENTS
-        else Section(),
-    }
+def add_overview_elements(mdreport: "MobilityDataReport", epsilon: float, timestamps: bool) -> dict:
+    if timestamps:
+        return {
+            const.DS_STATISTICS: overview.get_dataset_statistics(mdreport, epsilon, timestamps)
+            if const.DS_STATISTICS in const.OVERVIEW_ELEMENTS
+            else Section(),
+            const.MISSING_VALUES: overview.get_missing_values(mdreport, epsilon, timestamps)
+            if const.MISSING_VALUES in const.OVERVIEW_ELEMENTS
+            else Section(),
+            const.TRIPS_OVER_TIME: overview.get_trips_over_time(mdreport, epsilon)
+            if const.TRIPS_OVER_TIME in const.OVERVIEW_ELEMENTS
+            else Section(),
+            const.TRIPS_PER_WEEKDAY: overview.get_trips_per_weekday(mdreport, epsilon)
+            if const.TRIPS_PER_WEEKDAY in const.OVERVIEW_ELEMENTS
+            else Section(),
+            const.TRIPS_PER_HOUR: overview.get_trips_per_hour(mdreport, epsilon)
+            if const.TRIPS_PER_HOUR in const.OVERVIEW_ELEMENTS
+            else Section(),
+        }
+    else:
+        return {
+            const.DS_STATISTICS: overview.get_dataset_statistics(mdreport, epsilon, timestamps)
+            if const.DS_STATISTICS in const.OVERVIEW_ELEMENTS
+            else Section(),
+            const.MISSING_VALUES: overview.get_missing_values(mdreport, epsilon, timestamps)
+            if const.MISSING_VALUES in const.OVERVIEW_ELEMENTS
+            else Section()
+        }
 
 
 def add_place_analysis_elements(
-    mdreport: "MobilityDataReport", epsilon: float, record_count: Optional[int]
+    mdreport: "MobilityDataReport", epsilon: float, timestamps: bool, record_count: Optional[int]
 ) -> dict:
-    return {
-        const.VISITS_PER_TILE: place_analysis.get_visits_per_tile(
-            mdreport, epsilon, record_count
-        )
-        if const.VISITS_PER_TILE in const.PLACE_ELEMENTS
-        else Section(),
-        const.VISITS_PER_TILE_TIMEWINDOW: place_analysis.get_visits_per_tile_timewindow(
-            mdreport, epsilon, record_count
-        )
-        if const.VISITS_PER_TILE_TIMEWINDOW in const.PLACE_ELEMENTS
-        else Section(),
-    }
+    if timestamps:
+        return {
+            const.VISITS_PER_TILE: place_analysis.get_visits_per_tile(
+                mdreport, epsilon, record_count
+            )
+            if const.VISITS_PER_TILE in const.PLACE_ELEMENTS
+            else Section(),
+            const.VISITS_PER_TILE_TIMEWINDOW: place_analysis.get_visits_per_tile_timewindow(
+                mdreport, epsilon, record_count
+            )
+            if const.VISITS_PER_TILE_TIMEWINDOW in const.PLACE_ELEMENTS
+            else Section(),
+        }
+    else:
+        return {
+            const.VISITS_PER_TILE: place_analysis.get_visits_per_tile(
+                mdreport, epsilon, record_count
+            )
+            if const.VISITS_PER_TILE in const.PLACE_ELEMENTS
+            else Section()
+        }
 
 
 def add_od_analysis_elements(
     mdreport: "MobilityDataReport",
     _od_shape: DataFrame,
     epsilon: float,
+    timestamps: bool,
     trip_count: Optional[int],
 ) -> dict:
-    return {
-        const.OD_FLOWS: od_analysis.get_od_flows(
-            _od_shape, mdreport, epsilon, trip_count
-        )
-        if const.OD_FLOWS in const.OD_ELEMENTS
-        else Section(),
-        const.TRAVEL_TIME: od_analysis.get_travel_time(_od_shape, mdreport, epsilon)
-        if const.TRAVEL_TIME in const.OD_ELEMENTS
-        else Section(),
-        const.JUMP_LENGTH: od_analysis.get_jump_length(_od_shape, mdreport, epsilon)
-        if const.JUMP_LENGTH in const.OD_ELEMENTS
-        else Section(),
-    }
+    if timestamps:
+        return {
+            const.OD_FLOWS: od_analysis.get_od_flows(
+                _od_shape, mdreport, epsilon, trip_count
+            )
+            if const.OD_FLOWS in const.OD_ELEMENTS
+            else Section(),
+            const.TRAVEL_TIME: od_analysis.get_travel_time(_od_shape, mdreport, epsilon)
+            if const.TRAVEL_TIME in const.OD_ELEMENTS
+            else Section(),
+            const.JUMP_LENGTH: od_analysis.get_jump_length(_od_shape, mdreport, epsilon)
+            if const.JUMP_LENGTH in const.OD_ELEMENTS
+            else Section(),
+        }
+    else:
+        return None
 
 
-def add_user_analysis_elements(mdreport: "MobilityDataReport", epsilon: float) -> dict:
-    return {
-        const.TRIPS_PER_USER: user_analysis.get_trips_per_user(mdreport, epsilon)
-        if const.TRIPS_PER_USER in const.USER_ELEMENTS
-        else Section(),
-        const.USER_TIME_DELTA: user_analysis.get_user_time_delta(mdreport, epsilon)
-        if const.USER_TIME_DELTA in const.USER_ELEMENTS
-        else Section(),
-        const.RADIUS_OF_GYRATION: user_analysis.get_radius_of_gyration(
-            mdreport, epsilon
-        )
-        if const.RADIUS_OF_GYRATION in const.USER_ELEMENTS
-        else Section(),
-        const.USER_TILE_COUNT: user_analysis.get_user_tile_count(mdreport, epsilon)
-        if const.USER_TILE_COUNT in const.USER_ELEMENTS
-        else Section(),
-        const.MOBILITY_ENTROPY: user_analysis.get_mobility_entropy(mdreport, epsilon)
-        if const.MOBILITY_ENTROPY in const.USER_ELEMENTS
-        else Section(),
-    }
+def add_user_analysis_elements(mdreport: "MobilityDataReport", epsilon: float, timestamps: bool) -> dict:
+    if timestamps:
+        return {
+            const.TRIPS_PER_USER: user_analysis.get_trips_per_user(mdreport, epsilon)
+            if const.TRIPS_PER_USER in const.USER_ELEMENTS
+            else Section(),
+            const.USER_TIME_DELTA: user_analysis.get_user_time_delta(mdreport, epsilon)
+            if const.USER_TIME_DELTA in const.USER_ELEMENTS
+            else Section(),
+            const.RADIUS_OF_GYRATION: user_analysis.get_radius_of_gyration(
+                mdreport, epsilon
+            )
+            if const.RADIUS_OF_GYRATION in const.USER_ELEMENTS
+            else Section(),
+            const.USER_TILE_COUNT: user_analysis.get_user_tile_count(mdreport, epsilon)
+            if const.USER_TILE_COUNT in const.USER_ELEMENTS
+            else Section(),
+            const.MOBILITY_ENTROPY: user_analysis.get_mobility_entropy(mdreport, epsilon)
+            if const.MOBILITY_ENTROPY in const.USER_ELEMENTS
+            else Section(),
+        }
+    else:
+        return {
+            const.TRIPS_PER_USER: user_analysis.get_trips_per_user(mdreport, epsilon, timestamps)
+            if const.TRIPS_PER_USER in const.USER_ELEMENTS
+            else Section(),
+            const.RADIUS_OF_GYRATION: user_analysis.get_radius_of_gyration(
+                mdreport, epsilon
+            )
+            if const.RADIUS_OF_GYRATION in const.USER_ELEMENTS
+            else Section(),
+            const.USER_TILE_COUNT: user_analysis.get_user_tile_count(mdreport, epsilon)
+            if const.USER_TILE_COUNT in const.USER_ELEMENTS
+            else Section(),
+            const.MOBILITY_ENTROPY: user_analysis.get_mobility_entropy(mdreport, epsilon)
+            if const.MOBILITY_ENTROPY in const.USER_ELEMENTS
+            else Section(),
+        }
     
 def add_analysis_without_tmp_elements(
     mdreport: "MobilityDataReport",

@@ -42,7 +42,7 @@ def render_html(
     config_segment = config_templates.render_config(mdreport)
 
     if is_all_analyses | (const.OVERVIEW in mdreport.analysis_selection):
-        overview_segment = overview_templates.render_overview(mdreport.report)
+        overview_segment = overview_templates.render_overview(mdreport.report, mdreport.timestamps)
 
     if is_all_analyses | (const.PLACE_ANALYSIS in mdreport.analysis_selection):
         place_analysis_segment = place_analysis_templates.render_place_analysis(
