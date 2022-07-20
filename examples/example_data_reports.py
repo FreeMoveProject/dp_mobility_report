@@ -16,7 +16,30 @@ if not os.path.exists(path_html_output):
     os.makedirs(path_html_output)
 
 # GEOLIFE
-df = pd.read_csv(os.path.join(path_data, "geolife_dpstar.dat-eps10.0-iteration0.csv"))
+df = pd.read_csv(os.path.join(path_data,"geolife_without_waypoints_df.csv"))
+tessellation = gpd.read_file(os.path.join(path_data, "geolife_tessellation.gpkg"))
+tessellation["tile_name"] = tessellation.tile_id
+
+report = md_report.MobilityDataReport(
+    df,
+    tessellation,
+    privacy_budget=None,
+    evalu=True,
+    user_privacy = True,
+    max_trips_per_user=5,
+    max_travel_time=90,
+    bin_range_travel_time=5,
+    max_jump_length=3000,
+    bin_range_jump_length=30,
+    max_radius_of_gyration=3000,
+    bin_range_radius_of_gyration=15,
+    timestamps = True,
+)
+report.to_file(os.path.join(path_html_output, "geolife_noprivacy_eps10.html"), top_n_flows=100)
+
+# GEOLIFE with synthetic data
+"""
+df = pd.read_csv(os.path.join(path_data,"geolife_dpstar.dat-eps10.0-iteration0.csv"))
 tessellation = gpd.read_file(os.path.join(path_data, "geolife_tessellation.gpkg"))
 tessellation["tile_name"] = tessellation.tile_id
 
@@ -33,9 +56,10 @@ report = md_report.MobilityDataReport(
     bin_range_jump_length=30,
     max_radius_of_gyration=3000,
     bin_range_radius_of_gyration=15,
-    timestamps = False
+    timestamps = False,
 )
 report.to_file(os.path.join(path_html_output, "geolife_dpstar_eps10.html"), top_n_flows=100)
+"""
 
 #diff private
 """report = md_report.MobilityDataReport(
