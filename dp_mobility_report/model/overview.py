@@ -172,7 +172,7 @@ def get_trips_over_time(
     trip_count = pd.DataFrame(trips_over_time)
     trip_count.loc[:, "trip_count"] = 1
     trip_count = (
-        trip_count.set_index(const.DATETIME).resample(resample).count().reset_index()
+        trip_count.set_index(const.DATETIME).resample(resample,label='left').count().reset_index()
     )
     trip_count[const.DATETIME] = trip_count[const.DATETIME].dt.date
     trip_count["trip_count"] = diff_privacy.counts_dp(
@@ -180,7 +180,7 @@ def get_trips_over_time(
         epsi,
         mdreport.max_trips_per_user,
     )
-
+    
     moe_laplace = diff_privacy.laplace_margin_of_error(
         0.95, epsi, mdreport.max_trips_per_user
     )
@@ -248,7 +248,7 @@ def get_trips_per_hour(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
     hour_weekday["count"] = diff_privacy.counts_dp(
         hour_weekday["count"], eps, mdreport.max_trips_per_user
     )
-
+    
     hour_weekday[const.TIME_CATEGORY] = (
         hour_weekday[const.IS_WEEKEND] + "_" + hour_weekday[const.POINT_TYPE]
     )
