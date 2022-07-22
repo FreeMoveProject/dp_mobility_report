@@ -6,10 +6,6 @@ Differentially Private Mobility Data Report
 .. image:: https://img.shields.io/pypi/v/dp_mobility_report.svg
         :target: https://pypi.python.org/pypi/dp_mobility_report
 
-
-.. image:: https://readthedocs.org/projects/mobility-data-report/badge/?version=latest
-        :target: https://mobility-data-report.readthedocs.io/en/latest/?version=latest
-        :alt: Documentation Status
         
 .. image:: https://readthedocs.org/projects/dp-mobility-report/badge/?version=latest
         :target: https://dp-mobility-report.readthedocs.io/en/latest/?version=latest
