@@ -33,13 +33,13 @@ report = md_report.MobilityDataReport(
     bin_range_jump_length=30,
     max_radius_of_gyration=18,
     bin_range_radius_of_gyration=15,
-    timestamps = True,
+    timestamps = False,
 )
-report.to_file(os.path.join(path_html_output, "geolife_noprivacy_eps10.html"), top_n_flows=100)
+report.to_file(os.path.join(path_html_output, "geolife_noprivacy.html"), top_n_flows=100)
 
 # GEOLIFE with synthetic data
 """
-df = pd.read_csv(os.path.join(path_data,"geolife_dpstar.dat-eps10.0-iteration0.csv"))
+df = pd.read_csv(os.path.join(path_data,"geolife_synth_dpstar_eps10.csv"))
 tessellation = gpd.read_file(os.path.join(path_data, "geolife_tessellation.gpkg"))
 tessellation["tile_name"] = tessellation.tile_id
 
