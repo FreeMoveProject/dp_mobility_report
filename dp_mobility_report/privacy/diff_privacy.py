@@ -176,7 +176,7 @@ def counts_dp(
     eps: Optional[float],
     sensitivity: int,
     allow_negative: bool = False,
-) -> Union[int, np.ndarray]:
+) -> np.ndarray:
     if eps is None:
         return counts
     eps_local = eps  # workaround for linting error
@@ -194,5 +194,5 @@ def counts_dp(
     return dpcounts
 
 
-def limit_negative_values_to_zero(valule: int) -> int:
-    return (abs(valule) + valule) / 2
+def limit_negative_values_to_zero(value: int) -> int:
+    return int((abs(value) + value) / 2)

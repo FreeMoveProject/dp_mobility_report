@@ -38,7 +38,7 @@ def render_place_analysis(
         visits_per_tile_legend = render_visits_per_tile(
             report[const.VISITS_PER_TILE], tessellation, THRESHOLD, temp_map_folder
         )
-        quartiles = round(report[const.VISITS_PER_TILE].quartiles)
+        quartiles = report[const.VISITS_PER_TILE].quartiles.round()
 
         visits_per_tile_summary_table = render_summary(
             quartiles.astype(int),

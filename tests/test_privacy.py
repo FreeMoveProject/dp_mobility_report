@@ -16,7 +16,7 @@ def test_bounds_dp():
 
 
 def test_quartiles_dp():
-    array = np.array([1, 1, 2, 2, 4, 4, 5, 5])
+    array = pd.Series([1, 1, 2, 2, 4, 4, 5, 5])
     quartiles, _ = diff_privacy.quartiles_dp(array, eps=None, sensitivity=None)
     assert quartiles.index.tolist() == ["min", "25%", "50%", "75%", "max"]
     assert quartiles.tolist() == [1, 1.75, 3, 4.25, 5]

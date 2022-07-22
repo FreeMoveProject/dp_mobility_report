@@ -1,11 +1,10 @@
 import os
 
+import config
 import geopandas as gpd
 import pandas as pd
 
 from dp_mobility_report import md_report
-
-import config 
 
 path_data = config.path_data
 path_html_output = config.path_html_output

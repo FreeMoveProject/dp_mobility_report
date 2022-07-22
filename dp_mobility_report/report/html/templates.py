@@ -3,8 +3,8 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Tuple
-import pkg_resources
 
+import pkg_resources
 
 if TYPE_CHECKING:
     from dp_mobility_report.md_report import MobilityDataReport
@@ -22,7 +22,7 @@ from dp_mobility_report.report.html import (
 
 def render_html(
     mdreport: "MobilityDataReport", output_filename: str, top_n_flows: int = 100
-) -> Tuple[str, str]:
+) -> Tuple[str, Path]:
     template_structure = html_utils.get_template("structure.html")
     temp_map_folder = Path(os.path.join("/tmp", tempfile.gettempdir())).with_name(
         "maps"
@@ -73,7 +73,9 @@ def create_html_assets(output_file: Path) -> None:
         shutil.rmtree(path)
     os.mkdir(path)
 
-    asset_folder = pkg_resources.resource_filename('dp_mobility_report','report/html/html_templates/assets/')
+    asset_folder = pkg_resources.resource_filename(
+        "dp_mobility_report", "report/html/html_templates/assets/"
+    )
 
     for file_name in os.listdir(asset_folder):
         # construct full file path
@@ -84,7 +86,7 @@ def create_html_assets(output_file: Path) -> None:
             shutil.copy(source, destination)
 
 
-def create_maps_folder(temp_map_folder: Path, output_dir: str) -> None:
+def create_maps_folder(temp_map_folder: Path, output_dir: Path) -> None:
     path = Path(os.path.join(output_dir, "maps"))
     if path.is_dir():
         shutil.rmtree(path)

@@ -45,7 +45,7 @@ def hist_section(
         series, min_value=quartiles["min"], max_value=quartiles["max"]
     )
 
-    ## determine bins for histogram ##
+    # determine bins for histogram
 
     # max value of histogram: either given as input or determined by dp max
     hist_max = (

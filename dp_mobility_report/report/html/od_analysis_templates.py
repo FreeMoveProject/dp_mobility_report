@@ -62,7 +62,7 @@ def render_od_analysis(
         intra_tile_flows_info = render_intra_tile_flows(
             report[const.OD_FLOWS], len(mdreport.tessellation)
         )
-        quartiles = round(report[const.OD_FLOWS].quartiles)
+        quartiles = report[const.OD_FLOWS].quartiles.round()
         flows_summary_table = render_summary(
             quartiles.astype(int),
             "Distribution of flows per OD pair",

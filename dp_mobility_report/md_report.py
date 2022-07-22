@@ -163,9 +163,9 @@ class MobilityDataReport:
                     f"To remove this warning, please use .html or .json."
                 )
 
-        output_dir = os.path.dirname(output_file)
+        output_dir = Path(os.path.splitext(output_file)[0])
         filename = Path(os.path.basename(output_file)).stem
-        output_dir = Path(os.path.join(output_dir, filename))
+
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
