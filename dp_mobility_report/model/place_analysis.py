@@ -55,7 +55,7 @@ def get_visits_per_tile(
 
     # remove all negative values (needed for cumsum)
     visits_per_tile["visits"] = visits_per_tile["visits"].apply(
-        diff_privacy.limit_negative_values_to_zero
+        diff_privacy.limit_negative_value_to_zero
     )
 
     # margin of error

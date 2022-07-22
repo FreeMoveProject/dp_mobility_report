@@ -164,7 +164,10 @@ def get_trips_over_time(
     trip_count = pd.DataFrame(trips_over_time)
     trip_count.loc[:, "trip_count"] = 1
     trip_count = (
-        trip_count.set_index(const.DATETIME).resample(resample,label='left').count().reset_index()
+        trip_count.set_index(const.DATETIME)
+        .resample(resample, label="left")
+        .count()
+        .reset_index()
     )
     trip_count[const.DATETIME] = trip_count[const.DATETIME].dt.date
     trip_count["trip_count"] = diff_privacy.counts_dp(

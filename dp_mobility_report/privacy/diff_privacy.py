@@ -189,10 +189,13 @@ def counts_dp(
     dpcounts = (
         limit_negative_values_to_zero(dpcounts) if not allow_negative else dpcounts
     )
-    dpcounts = dpcounts.astype(int)
-
     return dpcounts
 
 
-def limit_negative_values_to_zero(value: int) -> int:
+def limit_negative_values_to_zero(array: np.array) -> np.array:
+    x = np.vectorize(limit_negative_value_to_zero)
+    return x(array)
+
+
+def limit_negative_value_to_zero(value: int) -> int:
     return int((abs(value) + value) / 2)

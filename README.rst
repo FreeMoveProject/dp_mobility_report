@@ -28,7 +28,7 @@ Install
 
 .. code-block:: bash
 
-        pip install dp_mobility_report
+        pip install dp-mobility-report
 
 or from GitHub:
 
