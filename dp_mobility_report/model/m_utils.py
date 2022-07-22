@@ -1,6 +1,7 @@
 from typing import List, Optional, Tuple, Type, Union
 
 import numpy as np
+import pandas as pd
 from haversine import haversine
 from pandas import DataFrame, Series
 
@@ -165,7 +166,7 @@ def cumsum_simulations(
         df_cumsum = df_cumsum.iloc[::nth, :]
         # append last row
         if int(last_row.n) not in list(df_cumsum.n):
-            df_cumsum = df_cumsum.append(last_row)
+            pd.concat([df_cumsum, pd.DataFrame(last_row).T])
 
     df_cumsum.reset_index(drop=True, inplace=True)
     return df_cumsum
