@@ -15,7 +15,7 @@ Differentially Private Mobility Data Report
 
 
 
-!!! THIS PACKAGE IS STILL UNDER CONSTRUCTION  !!!
+! This package is still in alpha-version status !
 
 * Free software: MIT license
 * Documentation: https://mobility-data-report.readthedocs.io.
