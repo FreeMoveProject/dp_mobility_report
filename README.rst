@@ -7,16 +7,21 @@ Differentially Private Mobility Data Report
         :target: https://pypi.python.org/pypi/dp_mobility_report
 
 
-.. image:: https://readthedocs.org/projects/dp-mobility-report/badge/?version=latest
-        :target:https://dp-mobility-report.readthedocs.io/en/latest/?version=latest
+.. image:: https://readthedocs.org/projects/mobility-data-report/badge/?version=latest
+        :target: https://mobility-data-report.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
+        
+.. image:: https://readthedocs.org/projects/dp-mobility-report/badge/?version=latest
+        :target: https://dp-mobility-report.readthedocs.io/en/latest/?version=latest
+        :alt: Documentation Status
+
 
 
 
 ! This package is still in alpha-version status !
 
 * Free software: MIT license
-* Documentation: https://dp-mobility-report.readthedocs.io/en/latest/
+* Documentation: https://dp-mobility-report.readthedocs.io.
 
 
 ``dp_mobility_report``: A python package to create a standardized mobility report with differential privacy guarentees, especially for urban human mobility data.
