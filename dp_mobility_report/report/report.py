@@ -199,7 +199,7 @@ def add_user_analysis_elements(mdreport: "MobilityDataReport", epsilon: float, t
         }
     else:
         return {
-            const.TRIPS_PER_USER: user_analysis.get_trips_per_user(mdreport, epsilon, timestamps)
+            const.TRIPS_PER_USER: user_analysis.get_trips_per_user(mdreport, epsilon)
             if const.TRIPS_PER_USER in const.USER_ELEMENTS
             else Section(),
             const.RADIUS_OF_GYRATION: user_analysis.get_radius_of_gyration(
