@@ -78,7 +78,7 @@ def preprocess_data(
         if const.TILE_ID in df.columns:
             columns.append(const.TILE_ID)
         df = df.loc[:, columns]
-
+        df[const.DATETIME] = pd.to_datetime(df[const.DATETIME])
         # create time related variables
         df.loc[:, const.HOUR] = df[const.DATETIME].dt.hour
         df.loc[:, const.IS_WEEKEND] = np.select(

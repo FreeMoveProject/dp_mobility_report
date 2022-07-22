@@ -176,7 +176,7 @@ def add_od_analysis_elements(
         return None
 
 
-def add_user_analysis_elements(mdreport: "MobilityDataReport", epsilon: float, timestamps: bool) -> dict:
+def add_user_analysis_elements(mdreport: "MobilityDataReport", epsilon: float, timestamps=True) -> dict:
     if timestamps:
         return {
             const.TRIPS_PER_USER: user_analysis.get_trips_per_user(mdreport, epsilon)
