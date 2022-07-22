@@ -6,11 +6,9 @@ Differentially Private Mobility Data Report
 .. image:: https://img.shields.io/pypi/v/dp_mobility_report.svg
         :target: https://pypi.python.org/pypi/dp_mobility_report
 
-.. image:: https://img.shields.io/travis/AlexandraKapp/dp_mobility_report.svg
-        :target: https://travis-ci.com/AlexandraKapp/dp_mobility_report
 
-.. image:: https://readthedocs.org/projects/mobility-data-report/badge/?version=latest
-        :target: https://mobility-data-report.readthedocs.io/en/latest/?version=latest
+.. image:: https://readthedocs.org/projects/dp-mobility-report/badge/?version=latest
+        :target:https://dp-mobility-report.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
 
 
@@ -18,7 +16,7 @@ Differentially Private Mobility Data Report
 ! This package is still in alpha-version status !
 
 * Free software: MIT license
-* Documentation: https://mobility-data-report.readthedocs.io.
+* Documentation: https://dp-mobility-report.readthedocs.io/en/latest/
 
 
 ``dp_mobility_report``: A python package to create a standardized mobility report with differential privacy guarentees, especially for urban human mobility data.
@@ -26,6 +24,12 @@ Differentially Private Mobility Data Report
 
 Install
 **********************
+
+.. code-block:: bash
+
+        pip install dp_mobility_report
+
+or from GitHub:
 
 .. code-block:: bash
 
@@ -58,7 +62,7 @@ Create a mobility report as HTML:
         report.to_file("my_mobility_report.html")
 
 
-The parameter ``privacy_budget`` (in term of :math:`{\epsilon}`-differential privacy) determines how much noise is added to the data. The budget is split between all analyses of the report.
+The parameter ``privacy_budget`` (in terms of *epsilon*-differential privacy) determines how much noise is added to the data. The budget is split between all analyses of the report.
 If the value is set to ``None`` no noise (i.e., no privacy guarantee) is applied to the report.
 
 The parameter ``max_trips_per_user`` specifies how many trips a user can contribute to the dataset at most. If a user is represented with more trips, a random sample is drawn according to ``max_trips_per_user``.
