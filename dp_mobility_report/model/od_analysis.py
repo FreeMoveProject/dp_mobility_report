@@ -13,7 +13,7 @@ from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
 
 
-def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame, timestamps: bool) -> pd.DataFrame:
+def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame, timestamps: bool=True) -> pd.DataFrame:
     if timestamps:
         ends_od_shape = (
             df[
@@ -134,12 +134,14 @@ def get_intra_tile_flows(od_flows: pd.DataFrame) -> int:
 
 
 def get_travel_time(
-    od_shape: pd.DataFrame, mdreport: "MobilityDataReport", eps: Optional[float]
+    od_shape: pd.DataFrame, mdreport: "MobilityDataReport", eps: Optional[float], timestamps: bool=True
 ) -> Section:
-
-    travel_time = od_shape[const.DATETIME_END] - od_shape[const.DATETIME]
-    travel_time = travel_time.dt.seconds / 60  # as minutes
-
+    if timestamps:
+        travel_time = od_shape[const.DATETIME_END] - od_shape[const.DATETIME]
+        travel_time = travel_time.dt.seconds / 60  # as minutes
+    else:
+        travel_time = 0
+        
     return m_utils.hist_section(
         travel_time,
         eps,

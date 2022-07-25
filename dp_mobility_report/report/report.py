@@ -165,7 +165,7 @@ def add_od_analysis_elements(
             )
             if const.OD_FLOWS in const.OD_ELEMENTS
             else Section(),
-            const.TRAVEL_TIME: od_analysis.get_travel_time(_od_shape, mdreport, epsilon)
+            const.TRAVEL_TIME: od_analysis.get_travel_time(_od_shape, mdreport, epsilon, timestamps)
             if const.TRAVEL_TIME in const.OD_ELEMENTS
             else Section(),
             const.JUMP_LENGTH: od_analysis.get_jump_length(_od_shape, mdreport, epsilon)
