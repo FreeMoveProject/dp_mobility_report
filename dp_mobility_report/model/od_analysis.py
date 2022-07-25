@@ -44,7 +44,7 @@ def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame, timestamps: bool=
             df[
                 (df[const.POINT_TYPE] == const.END)
                 & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
-            ][[const.TILE_ID, const.LAT, const.LNG]]
+            ][[const.TID, const.TILE_ID, const.LAT, const.LNG]]
             .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
             .rename(
                 columns={
@@ -134,14 +134,11 @@ def get_intra_tile_flows(od_flows: pd.DataFrame) -> int:
 
 
 def get_travel_time(
-    od_shape: pd.DataFrame, mdreport: "MobilityDataReport", eps: Optional[float], timestamps: bool=True
+    od_shape: pd.DataFrame, mdreport: "MobilityDataReport", eps: Optional[float]
 ) -> Section:
-    if timestamps:
-        travel_time = od_shape[const.DATETIME_END] - od_shape[const.DATETIME]
-        travel_time = travel_time.dt.seconds / 60  # as minutes
-    else:
-        travel_time = 0
-        
+    travel_time = od_shape[const.DATETIME_END] - od_shape[const.DATETIME]
+    travel_time = travel_time.dt.seconds / 60  # as minutes
+
     return m_utils.hist_section(
         travel_time,
         eps,

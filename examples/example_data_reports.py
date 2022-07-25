@@ -31,11 +31,11 @@ report = md_report.MobilityDataReport(
     bin_range_travel_time=5,
     max_jump_length=3000,
     bin_range_jump_length=30,
-    max_radius_of_gyration=18,
+    max_radius_of_gyration=3000,
     bin_range_radius_of_gyration=15,
     timestamps = False,
 )
-report.to_file(os.path.join(path_html_output, "geolife_eps10.html"), top_n_flows=100)
+report.to_file(os.path.join(path_html_output, "geolife_dpstar.dat-eps10.html"), top_n_flows=100)
 
 # GEOLIFE with synthetic data
 """

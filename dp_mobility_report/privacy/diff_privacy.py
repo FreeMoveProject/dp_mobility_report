@@ -41,7 +41,7 @@ def quartiles_dp(
     eps: Optional[float],
     sensitivity: int,
     bounds: Tuple = None,
-    conf_interval_perc: float = 0.95,
+    conf_interval_perc: float = 0.95
 ) -> Tuple:
 
     if np.issubdtype(array.dtype, np.timedelta64):

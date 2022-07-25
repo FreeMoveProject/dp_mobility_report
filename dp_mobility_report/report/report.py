@@ -80,11 +80,11 @@ def report_elements(mdreport: "MobilityDataReport") -> dict:
             }
         pbar.update()
 
-        if (is_all_analyses | (const.OD_ANALYSIS in mdreport.analysis_selection)) and mdreport.timestamps:
+        if (is_all_analyses | (const.OD_ANALYSIS in mdreport.analysis_selection)):
             _od_shape = od_analysis.get_od_shape(mdreport.df, mdreport.tessellation, mdreport.timestamps)
             report = {
                 **report,
-                **add_od_analysis_elements(mdreport, _od_shape, epsilon, timestamps, trip_count),
+                **add_od_analysis_elements(mdreport, _od_shape, epsilon, trip_count, timestamps),
             }
         pbar.update()
 
@@ -155,8 +155,8 @@ def add_od_analysis_elements(
     mdreport: "MobilityDataReport",
     _od_shape: DataFrame,
     epsilon: float,
-    timestamps: bool,
     trip_count: Optional[int],
+    timestamps: bool=True
 ) -> dict:
     if timestamps:
         return {
@@ -165,7 +165,7 @@ def add_od_analysis_elements(
             )
             if const.OD_FLOWS in const.OD_ELEMENTS
             else Section(),
-            const.TRAVEL_TIME: od_analysis.get_travel_time(_od_shape, mdreport, epsilon, timestamps)
+            const.TRAVEL_TIME: od_analysis.get_travel_time(_od_shape, mdreport, epsilon)
             if const.TRAVEL_TIME in const.OD_ELEMENTS
             else Section(),
             const.JUMP_LENGTH: od_analysis.get_jump_length(_od_shape, mdreport, epsilon)
@@ -173,8 +173,16 @@ def add_od_analysis_elements(
             else Section(),
         }
     else:
-        return None
-
+        return {
+            const.OD_FLOWS: od_analysis.get_od_flows(
+                _od_shape, mdreport, epsilon, trip_count
+            )
+            if const.OD_FLOWS in const.OD_ELEMENTS
+            else Section(),
+            const.JUMP_LENGTH: od_analysis.get_jump_length(_od_shape, mdreport, epsilon)
+            if const.JUMP_LENGTH in const.OD_ELEMENTS
+            else Section(),
+        }
 
 def add_user_analysis_elements(mdreport: "MobilityDataReport", epsilon: float, timestamps=True) -> dict:
     if timestamps:
