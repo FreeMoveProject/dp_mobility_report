@@ -46,6 +46,7 @@ def render_od_analysis(
     travel_time_summary_table = ""
     travel_time_moe_info = ""
     jump_length_hist = ""
+    jump_length_hist_info= ""
     jump_length_summary_table = ""
     jump_length_moe_info = ""
 

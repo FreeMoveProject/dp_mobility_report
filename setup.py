@@ -41,7 +41,7 @@ setup(
     long_description_content_type="text/x-rst",
     include_package_data=True,
     keywords="dp_mobility_report",
-    name="dp-mobility-report",
+    name="dp_mobility_report",
     packages=find_packages(include=["dp_mobility_report", "dp_mobility_report.*"]),
     test_suite="tests",
     tests_require=test_requirements,

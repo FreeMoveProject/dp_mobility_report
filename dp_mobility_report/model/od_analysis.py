@@ -13,32 +13,56 @@ from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
 
 
-def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame) -> pd.DataFrame:
-    ends_od_shape = (
-        df[
-            (df[const.POINT_TYPE] == const.END)
-            & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
-        ][[const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]]
-        .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
-        .rename(
-            columns={
-                const.TILE_ID: const.TILE_ID_END,
-                const.LAT: const.LAT_END,
-                const.LNG: const.LNG_END,
-                const.DATETIME: const.DATETIME_END,
-            }
+def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame, timestamps: bool=True) -> pd.DataFrame:
+    if timestamps:
+        ends_od_shape = (
+            df[
+                (df[const.POINT_TYPE] == const.END)
+                & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
+            ][[const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]]
+            .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
+            .rename(
+                columns={
+                    const.TILE_ID: const.TILE_ID_END,
+                    const.LAT: const.LAT_END,
+                    const.LNG: const.LNG_END,
+                    const.DATETIME: const.DATETIME_END,
+                }
+            )
         )
-    )
 
-    od_shape = (
-        df[
-            (df[const.POINT_TYPE] == const.START)
-            & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
-        ][[const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]]
-        .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
-        .merge(ends_od_shape, on=const.TID, how="inner")
-    )
+        od_shape = (
+            df[
+                (df[const.POINT_TYPE] == const.START)
+                & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
+            ][[const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]]
+            .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
+            .merge(ends_od_shape, on=const.TID, how="inner")
+        )
+    else:
+        ends_od_shape = (
+            df[
+                (df[const.POINT_TYPE] == const.END)
+                & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
+            ][[const.TID, const.TILE_ID, const.LAT, const.LNG]]
+            .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
+            .rename(
+                columns={
+                    const.TILE_ID: const.TILE_ID_END,
+                    const.LAT: const.LAT_END,
+                    const.LNG: const.LNG_END,
+                }
+            )
+        )
 
+        od_shape = (
+            df[
+                (df[const.POINT_TYPE] == const.START)
+                & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
+            ][[const.TID, const.TILE_ID, const.LAT, const.LNG]]
+            .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
+            .merge(ends_od_shape, on=const.TID, how="inner")
+        )
     return od_shape
 
 
@@ -112,7 +136,6 @@ def get_intra_tile_flows(od_flows: pd.DataFrame) -> int:
 def get_travel_time(
     od_shape: pd.DataFrame, mdreport: "MobilityDataReport", eps: Optional[float]
 ) -> Section:
-
     travel_time = od_shape[const.DATETIME_END] - od_shape[const.DATETIME]
     travel_time = travel_time.dt.seconds / 60  # as minutes
 

@@ -24,9 +24,10 @@ def render_html(
     mdreport: "MobilityDataReport", output_filename: str, top_n_flows: int = 100
 ) -> Tuple[str, Path]:
     template_structure = html_utils.get_template("structure.html")
-    temp_map_folder = Path(os.path.join("/tmp", tempfile.gettempdir())).with_name(
-        "maps"
-    )
+    #temp_map_folder = Path(os.path.join("tmp", tempfile.gettempdir())).with_name(
+    #    "maps"
+    #)
+    temp_map_folder = Path(os.path.join(tempfile.gettempdir(), 'maps'))
     # remove any old temp files in case there exist any
     shutil.rmtree(temp_map_folder, ignore_errors=True)
     os.mkdir(temp_map_folder)
@@ -41,7 +42,7 @@ def render_html(
     config_segment = config_templates.render_config(mdreport)
 
     if is_all_analyses | (const.OVERVIEW in mdreport.analysis_selection):
-        overview_segment = overview_templates.render_overview(mdreport.report)
+        overview_segment = overview_templates.render_overview(mdreport.report, mdreport.timestamps)
 
     if is_all_analyses | (const.PLACE_ANALYSIS in mdreport.analysis_selection):
         place_analysis_segment = place_analysis_templates.render_place_analysis(

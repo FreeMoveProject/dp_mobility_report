@@ -11,9 +11,10 @@ from dp_mobility_report.report.html.html_utils import (
 from dp_mobility_report.visualization import plot, v_utils
 
 
-def render_overview(report: dict) -> str:
+def render_overview(report: dict, timestamp: bool=True) -> str:
     dataset_stats_table = ""
     missing_values_table = ""
+    trips_over_time_info=""
     trips_over_time_linechart = ""
     trips_over_time_summary_table = ""
     trips_over_time_moe_info = ""
@@ -24,7 +25,7 @@ def render_overview(report: dict) -> str:
         dataset_stats_table = render_dataset_statistics(report[const.DS_STATISTICS])
 
     if const.MISSING_VALUES in report and report[const.MISSING_VALUES].data is not None:
-        missing_values_table = render_missing_values(report[const.MISSING_VALUES])
+        missing_values_table = render_missing_values(report[const.MISSING_VALUES], timestamp)
 
     if (
         const.TRIPS_OVER_TIME in report
@@ -117,41 +118,69 @@ def render_dataset_statistics(dataset_statistics: Section) -> str:
     return dataset_stats_html
 
 
-def render_missing_values(missing_values: Section) -> str:
+def render_missing_values(missing_values: Section, timestamp:bool=True) -> str:
     ci = missing_values.conf_interval
     data = missing_values.data
-    missing_values_list = [
-        {
-            "name": "User ID (uid)",
-            "lower_limit": fmt(ci["ci95_" + const.UID][0]),
-            "estimate": fmt(data[const.UID]),
-            "upper_limit": fmt(ci["ci95_" + const.UID][1]),
-        },
-        {
-            "name": "Trip ID (tid)",
-            "lower_limit": fmt(ci["ci95_" + const.TID][0]),
-            "estimate": fmt(data[const.TID]),
-            "upper_limit": fmt(ci["ci95_" + const.TID][1]),
-        },
-        {
-            "name": "Timestamp (datetime)",
-            "lower_limit": fmt(ci["ci95_" + const.DATETIME][0]),
-            "estimate": fmt(data[const.DATETIME]),
-            "upper_limit": fmt(ci["ci95_" + const.DATETIME][1]),
-        },
-        {
-            "name": "Latitude (lat)",
-            "lower_limit": fmt(ci["ci95_" + const.LAT][0]),
-            "estimate": fmt(data[const.LAT]),
-            "upper_limit": fmt(ci["ci95_" + const.LAT][1]),
-        },
-        {
-            "name": "Longitude (lng)",
-            "lower_limit": fmt(ci["ci95_" + const.LNG][0]),
-            "estimate": fmt(data[const.LNG]),
-            "upper_limit": fmt(ci["ci95_" + const.LNG][1]),
-        },
-    ]
+    if timestamp:
+        missing_values_list = [
+            {
+                "name": "User ID (uid)",
+                "lower_limit": fmt(ci["ci95_" + const.UID][0]),
+                "estimate": fmt(data[const.UID]),
+                "upper_limit": fmt(ci["ci95_" + const.UID][1]),
+            },
+            {
+                "name": "Trip ID (tid)",
+                "lower_limit": fmt(ci["ci95_" + const.TID][0]),
+                "estimate": fmt(data[const.TID]),
+                "upper_limit": fmt(ci["ci95_" + const.TID][1]),
+            },
+            {
+                "name": "Timestamp (datetime)",
+                "lower_limit": fmt(ci["ci95_" + const.DATETIME][0]),
+                "estimate": fmt(data[const.DATETIME]),
+                "upper_limit": fmt(ci["ci95_" + const.DATETIME][1]),
+            },
+            {
+                "name": "Latitude (lat)",
+                "lower_limit": fmt(ci["ci95_" + const.LAT][0]),
+                "estimate": fmt(data[const.LAT]),
+                "upper_limit": fmt(ci["ci95_" + const.LAT][1]),
+            },
+            {
+                "name": "Longitude (lng)",
+                "lower_limit": fmt(ci["ci95_" + const.LNG][0]),
+                "estimate": fmt(data[const.LNG]),
+                "upper_limit": fmt(ci["ci95_" + const.LNG][1]),
+            },
+        ]
+    else:
+        missing_values_list = [
+            {
+                "name": "User ID (uid)",
+                "lower_limit": fmt(ci["ci95_" + const.UID][0]),
+                "estimate": fmt(data[const.UID]),
+                "upper_limit": fmt(ci["ci95_" + const.UID][1]),
+            },
+            {
+                "name": "Trip ID (tid)",
+                "lower_limit": fmt(ci["ci95_" + const.TID][0]),
+                "estimate": fmt(data[const.TID]),
+                "upper_limit": fmt(ci["ci95_" + const.TID][1]),
+            },
+            {
+                "name": "Latitude (lat)",
+                "lower_limit": fmt(ci["ci95_" + const.LAT][0]),
+                "estimate": fmt(data[const.LAT]),
+                "upper_limit": fmt(ci["ci95_" + const.LAT][1]),
+            },
+            {
+                "name": "Longitude (lng)",
+                "lower_limit": fmt(ci["ci95_" + const.LNG][0]),
+                "estimate": fmt(data[const.LNG]),
+                "upper_limit": fmt(ci["ci95_" + const.LNG][1]),
+            },
+        ]
 
     template_table = get_template("table_conf_interval.html")
     missing_values_html = template_table.render(
