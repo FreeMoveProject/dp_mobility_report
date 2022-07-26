@@ -16,26 +16,26 @@ if not os.path.exists(path_html_output):
     os.makedirs(path_html_output)
 
 # GEOLIFE
-df = pd.read_csv(os.path.join(path_data,"geolife_dpstar.dat-eps10.0-iteration0.csv"))
+df = pd.read_csv(os.path.join(path_data,"geolife_without_waypoints_df.csv"))
 tessellation = gpd.read_file(os.path.join(path_data, "geolife_tessellation.gpkg"))
 tessellation["tile_name"] = tessellation.tile_id
 
 report = md_report.MobilityDataReport(
     df,
     tessellation,
-    privacy_budget=None,
+    privacy_budget=20.0,
     evalu=True,
-    user_privacy = False,
+    user_privacy = True,
     max_trips_per_user=5,
     max_travel_time=90,
     bin_range_travel_time=5,
     max_jump_length=3000,
     bin_range_jump_length=30,
-    max_radius_of_gyration=3000,
+    max_radius_of_gyration=18,
     bin_range_radius_of_gyration=15,
-    timestamps = False,
+    timestamps = True,
 )
-report.to_file(os.path.join(path_html_output, "geolife_dpstar.dat-eps10.html"), top_n_flows=100)
+report.to_file(os.path.join(path_html_output, "geolife_eps20_220726.html"), top_n_flows=100)
 
 # GEOLIFE with synthetic data
 """
