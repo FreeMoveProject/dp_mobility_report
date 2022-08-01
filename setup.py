@@ -25,14 +25,14 @@ test_requirements = [
 setup(
     author="Alexandra Kapp",
     author_email="alexandra.kapp@htw-berlin.de",
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     description="Create a report for mobility data with differential privacy guarantees.",
     install_requires=requirements,
