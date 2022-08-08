@@ -59,3 +59,10 @@ def fmt(value: Any) -> Any:
     ):
         value = f"{value:,}"
     return value
+
+
+def render_eps(value: Optional[float]) -> Optional[float]:
+    if value is None:
+        return None
+    else:
+        return round(value, 4)

@@ -24,6 +24,7 @@ def render_config_table(mdreport: "MobilityDataReport") -> str:
         {"name": "Privacy budget", "value": fmt(mdreport.privacy_budget)},
         {"name": "User privacy", "value": fmt(mdreport.user_privacy)},
         {"name": "Analysis selection", "value": fmt(mdreport.analysis_selection)},
+        {"name": "Budget split", "value": fmt(mdreport.budget_split)},
         {"name": "Evaluation dev. mode", "value": fmt(mdreport.evalu)},
     ]
 

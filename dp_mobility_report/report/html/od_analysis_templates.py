@@ -18,6 +18,7 @@ from dp_mobility_report.report.html.html_utils import (
     render_moe_info,
     render_summary,
     render_user_input_info,
+    render_eps,
 )
 from dp_mobility_report.visualization import plot, v_utils
 
@@ -97,15 +98,18 @@ def render_od_analysis(
         privacy_info=privacy_info,
         output_filename=output_filename,
         user_config_info=user_config_info,
+        od_eps=render_eps(report[const.OD_FLOWS].privacy_budget),
         od_legend=od_legend,
         intra_tile_flows_info=intra_tile_flows_info,
         flows_summary_table=flows_summary_table,
         flows_cumsum_linechart=flows_cumsum_linechart,
         most_freq_flows_ranking=most_freq_flows_ranking,
+        travel_time_eps=render_eps(report[const.TRAVEL_TIME].privacy_budget),
         travel_time_hist_info=travel_time_hist_info,
         travel_time_hist=travel_time_hist,
         travel_time_moe_info=travel_time_moe_info,
         travel_time_summary_table=travel_time_summary_table,
+        jump_length_eps=render_eps(report[const.JUMP_LENGTH].privacy_budget),
         jump_length_hist_info=jump_length_hist_info,
         jump_length_hist=jump_length_hist,
         jump_length_moe_info=jump_length_moe_info,

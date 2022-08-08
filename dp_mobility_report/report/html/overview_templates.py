@@ -7,6 +7,7 @@ from dp_mobility_report.report.html.html_utils import (
     get_template,
     render_moe_info,
     render_summary,
+    render_eps
 )
 from dp_mobility_report.visualization import plot, v_utils
 
@@ -58,11 +59,14 @@ def render_overview(report: dict) -> str:
     return template_structure.render(
         dataset_stats_table=dataset_stats_table,
         missing_values_table=missing_values_table,
+        trips_over_time_eps=render_eps(report[const.TRIPS_OVER_TIME].privacy_budget),
         trips_over_time_info=trips_over_time_info,
         trips_over_time_linechart=trips_over_time_linechart,
         trips_over_time_moe_info=trips_over_time_moe_info,
         trips_over_time_summary_table=trips_over_time_summary_table,
+        trips_per_weekday_eps=render_eps(report[const.TRIPS_PER_WEEKDAY].privacy_budget),
         trips_per_weekday_barchart=trips_per_weekday_barchart,
+        trips_per_hour_eps=render_eps(report[const.TRIPS_PER_HOUR].privacy_budget),
         trips_per_hour_linechart=trips_per_hour_linechart,
     )
 
@@ -112,7 +116,8 @@ def render_dataset_statistics(dataset_statistics: Section) -> str:
     # create html from template
     template_table = get_template("table_conf_interval.html")
     dataset_stats_html = template_table.render(
-        name="Dataset statistics", rows=dataset_stats_list
+        name="Dataset statistics", 
+        privacy_budget = render_eps(dataset_statistics.privacy_budget), rows=dataset_stats_list
     )
     return dataset_stats_html
 
@@ -155,7 +160,9 @@ def render_missing_values(missing_values: Section) -> str:
 
     template_table = get_template("table_conf_interval.html")
     missing_values_html = template_table.render(
-        name="Missing values", rows=missing_values_list
+        name=f"Missing values", 
+        privacy_budget = render_eps(missing_values.privacy_budget), 
+        rows=missing_values_list
     )
     return missing_values_html
 

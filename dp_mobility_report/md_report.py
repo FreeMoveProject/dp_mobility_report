@@ -33,7 +33,11 @@ class MobilityDataReport:
         user_privacy: Whether item-level or user-level privacy is applied. Defaults to True (user-level privacy).
         max_trips_per_user: maximum number of trips a user shall contribute to the data. Dataset will be sampled accordingly.
         analysis_selection: Select only needed analyses. A selection reduces computation time and leaves more privacy budget
-            for higher accuracy of other analyses. Options are `overview`, `place_analysis`, `od_analysis`, `user_analysis` and `all`. Defaults to [`all`].
+            for higher accuracy of other analyses. Options are `const.OVERVIEW`, `const.PLACE_ANALYSIS`, `const.OD_ANALYSIS`, `const.USER_ANALYSIS` and `const.ALL`. Defaults to [`const.ALL`].
+        budget_split: `dict`to customize how much privacy budget is assigned to which analysis. Each key needs to be named according to an analysis and the value needs to be an integer indicating the weight for the privacy budget. 
+            If no weight is assigned, a default weight of 1 is set. 
+            For example, if `budget_split = {const.VISITS_PER_TILE: 10}, then the privacy budget for `visits_per_tile` is 10 times higher than for every other analysis, which all get a default weight of 1. 
+            Possible `dict` keys (all analyses): `const.DS_STATISTICS`, `const.MISSING_VALUES`, `const.TRIPS_OVER_TIME`, `const.TRIPS_PER_WEEKDAY`, `const.TRIPS_PER_HOUR`, `const.VISITS_PER_TILE`, `const.VISITS_PER_TILE_TIMEWINDOW`, `const.OD_FLOWS`, `const.TRAVEL_TIME`, `const.JUMP_LENGTH`, `const.TRIPS_PER_USER`, `const.USER_TIME_DELTA`, `const.RADIUS_OF_GYRATION`, `const.USER_TILE_COUNT`, `const.MOBILITY_ENTROPY`
         disable_progress_bar: Whether progress bars should be shown. Defaults to False.
         timewindows: List of hours as `int` that define the timewindows for the spatial analysis for single time windows. Defaults to [2, 6, 10, 14, 18, 22].
         max_travel_time: Upper bound for travel time histogram. If None is given, no upper bound is set. Defaults to None.
@@ -56,6 +60,11 @@ class MobilityDataReport:
         user_privacy: bool = True,
         max_trips_per_user: Optional[int] = None,
         analysis_selection: List[str] = [const.ALL],
+        budget_split: dict = {
+            const.VISITS_PER_TILE: 10,
+            const.VISITS_PER_TILE_TIMEWINDOW: 100,
+            const.OD_FLOWS: 100,
+        },
         disable_progress_bar: bool = False,
         timewindows: Union[List[int], np.ndarray] = [2, 6, 10, 14, 18, 22],
         max_travel_time: Optional[int] = None,
@@ -72,6 +81,7 @@ class MobilityDataReport:
             privacy_budget,
             max_trips_per_user,
             analysis_selection,
+            budget_split,
             disable_progress_bar,
             evalu,
             user_privacy,
@@ -119,6 +129,7 @@ class MobilityDataReport:
         self.max_radius_of_gyration = max_radius_of_gyration
         self.bin_range_radius_of_gyration = bin_range_radius_of_gyration
         self.analysis_selection = analysis_selection
+        self.budget_split = budget_split
         self.evalu = evalu
         self.disable_progress_bar = disable_progress_bar
 
@@ -191,6 +202,7 @@ def _validate_input(
     privacy_budget: Optional[Union[int, float]],
     max_trips_per_user: Optional[int],
     analysis_selection: List[str],
+    budget_split: dict,
     disable_progress_bar: bool,
     evalu: bool,
     user_privacy: bool,
@@ -219,6 +231,9 @@ def _validate_input(
         raise ValueError(
             f"Unknown analysis selection {analysis_selection}. Only elements from {const.ANALYSIS_SELECTION} are valid inputs."
         )
+
+    # TODO
+    # validate that budget_split only holds keys that are present elements list and that values are numeric / int (?)
 
     if not isinstance(timewindows, (list, np.ndarray)):
         raise TypeError("'timewindows' is not a list or a numpy array.")

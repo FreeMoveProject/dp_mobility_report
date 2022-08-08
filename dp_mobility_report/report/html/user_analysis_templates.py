@@ -12,6 +12,7 @@ from dp_mobility_report.report.html.html_utils import (
     render_moe_info,
     render_summary,
     render_user_input_info,
+    render_eps,
 )
 from dp_mobility_report.visualization import plot, v_utils
 
@@ -106,21 +107,26 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     template_structure = get_template("user_analysis_segment.html")
 
     return template_structure.render(
+        trips_per_user_eps = render_eps(report[const.TRIPS_PER_USER].privacy_budget),
         trips_per_user_info=trips_per_user_info,
         trips_per_user_hist=trips_per_user_hist,
         trips_per_user_summary_table=trips_per_user_summary_table,
         trips_per_user_moe_info=trips_per_user_moe_info,
         overlapping_trips_info=overlapping_trips_info,
+        time_between_traj_eps = render_eps(report[const.USER_TIME_DELTA].privacy_budget),
         time_between_traj_hist=time_between_traj_hist,
         time_between_traj_summary_table=time_between_traj_summary_table,
         time_between_traj_moe_info=time_between_traj_moe_info,
+        radius_of_gyration_eps = render_eps(report[const.RADIUS_OF_GYRATION].privacy_budget),
         radius_of_gyration_hist_info=radius_of_gyration_hist_info,
         radius_of_gyration_hist=radius_of_gyration_hist,
         radius_of_gyration_summary_table=radius_of_gyration_summary_table,
         radius_of_gyration_moe_info=radius_of_gyration_moe_info,
+        distinct_tiles_user_eps = render_eps(report[const.USER_TILE_COUNT].privacy_budget),
         distinct_tiles_user_hist=distinct_tiles_user_hist,
         distinct_tiles_user_summary_table=distinct_tiles_user_summary_table,
         distinct_tiles_moe_info=distinct_tiles_moe_info,
+        mobility_entropy_eps = render_eps(report[const.MOBILITY_ENTROPY].privacy_budget),
         mobility_entropy_hist=mobility_entropy_hist,
         mobility_entropy_summary_table=mobility_entropy_summary_table,
         mobility_entropy_moe_info=mobility_entropy_moe_info,

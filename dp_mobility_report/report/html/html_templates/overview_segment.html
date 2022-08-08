@@ -13,6 +13,7 @@
     
     <div>
         <h4>Trips over time</h4>
+        <p>privacy budget: {{trips_over_time_eps}}</p>
         {{trips_over_time_linechart}}
 
         <p class ="info">
@@ -26,12 +27,14 @@
     </p> 
     
     <div>
-        <h4>Trips per weekday</h4>
+        <h4>Trips per weekday</h4>        
+        <p>privacy budget: {{trips_per_weekday_eps}}</p>
         {{trips_per_weekday_barchart}}
     </div>
     
     <div>
         <h4>Trips per hour of day split by weekday and weekend</h4>
+        <p>privacy budget: {{ trips_per_hour_eps }}</p>
         {{trips_per_hour_linechart}}
     </div>
 </div>
