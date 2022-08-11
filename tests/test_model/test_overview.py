@@ -17,7 +17,7 @@ def test_mdreport():
 
 def test_get_dataset_statistics(test_mdreport):
     """Correct dateset statistics without noise."""
-    ds_stats = overview.get_dataset_statistics(test_mdreport, None).data
+    ds_stats = overview.get_dataset_statistics(test_mdreport, None, True).data
     assert ds_stats["n_records"] == 200
     assert ds_stats["n_trips"] == 100
     assert ds_stats["n_complete_trips"] == 100
@@ -28,7 +28,7 @@ def test_get_dataset_statistics(test_mdreport):
 
 def test_get_missing_values(test_mdreport):
     """Correct missing values without noise."""
-    missings = overview.get_missing_values(test_mdreport, None).data
+    missings = overview.get_missing_values(test_mdreport, None, True).data
     assert missings[const.UID] == 0
     assert missings[const.TID] == 0
     assert missings[const.DATETIME] == 0
