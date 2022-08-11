@@ -15,10 +15,10 @@ from dp_mobility_report.model import od_analysis
 from dp_mobility_report.model.section import Section
 from dp_mobility_report.report.html.html_utils import (
     get_template,
+    render_eps,
     render_moe_info,
     render_summary,
     render_user_input_info,
-    render_eps,
 )
 from dp_mobility_report.visualization import plot, v_utils
 

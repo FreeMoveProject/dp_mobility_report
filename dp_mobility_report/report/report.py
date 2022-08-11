@@ -127,19 +127,24 @@ def add_overview_elements(mdreport: "MobilityDataReport", eps_factor: float) -> 
         if const.DS_STATISTICS in const.OVERVIEW_ELEMENTS
         else Section(),
         const.MISSING_VALUES: overview.get_missing_values(
-            mdreport, _get_eps(eps_factor, const.MISSING_VALUES, mdreport.budget_split))
+            mdreport, _get_eps(eps_factor, const.MISSING_VALUES, mdreport.budget_split)
+        )
         if const.MISSING_VALUES in const.OVERVIEW_ELEMENTS
         else Section(),
         const.TRIPS_OVER_TIME: overview.get_trips_over_time(
-            mdreport, _get_eps(eps_factor, const.TRIPS_OVER_TIME, mdreport.budget_split))
+            mdreport, _get_eps(eps_factor, const.TRIPS_OVER_TIME, mdreport.budget_split)
+        )
         if const.TRIPS_OVER_TIME in const.OVERVIEW_ELEMENTS
         else Section(),
         const.TRIPS_PER_WEEKDAY: overview.get_trips_per_weekday(
-            mdreport, _get_eps(eps_factor, const.TRIPS_PER_WEEKDAY, mdreport.budget_split))
+            mdreport,
+            _get_eps(eps_factor, const.TRIPS_PER_WEEKDAY, mdreport.budget_split),
+        )
         if const.TRIPS_PER_WEEKDAY in const.OVERVIEW_ELEMENTS
         else Section(),
         const.TRIPS_PER_HOUR: overview.get_trips_per_hour(
-            mdreport, _get_eps(eps_factor, const.TRIPS_PER_HOUR, mdreport.budget_split))
+            mdreport, _get_eps(eps_factor, const.TRIPS_PER_HOUR, mdreport.budget_split)
+        )
         if const.TRIPS_PER_HOUR in const.OVERVIEW_ELEMENTS
         else Section(),
     }
@@ -150,12 +155,18 @@ def add_place_analysis_elements(
 ) -> dict:
     return {
         const.VISITS_PER_TILE: place_analysis.get_visits_per_tile(
-            mdreport, _get_eps(eps_factor, const.VISITS_PER_TILE, mdreport.budget_split), record_count
+            mdreport,
+            _get_eps(eps_factor, const.VISITS_PER_TILE, mdreport.budget_split),
+            record_count,
         )
         if const.VISITS_PER_TILE in const.PLACE_ELEMENTS
         else Section(),
         const.VISITS_PER_TILE_TIMEWINDOW: place_analysis.get_visits_per_tile_timewindow(
-            mdreport, _get_eps(eps_factor, const.VISITS_PER_TILE_TIMEWINDOW, mdreport.budget_split), record_count
+            mdreport,
+            _get_eps(
+                eps_factor, const.VISITS_PER_TILE_TIMEWINDOW, mdreport.budget_split
+            ),
+            record_count,
         )
         if const.VISITS_PER_TILE_TIMEWINDOW in const.PLACE_ELEMENTS
         else Section(),
@@ -170,16 +181,25 @@ def add_od_analysis_elements(
 ) -> dict:
     return {
         const.OD_FLOWS: od_analysis.get_od_flows(
-            _od_shape, mdreport, _get_eps(eps_factor, const.OD_FLOWS, mdreport.budget_split), trip_count
+            _od_shape,
+            mdreport,
+            _get_eps(eps_factor, const.OD_FLOWS, mdreport.budget_split),
+            trip_count,
         )
         if const.OD_FLOWS in const.OD_ELEMENTS
         else Section(),
         const.TRAVEL_TIME: od_analysis.get_travel_time(
-            _od_shape, mdreport, _get_eps(eps_factor, const.TRAVEL_TIME, mdreport.budget_split))
+            _od_shape,
+            mdreport,
+            _get_eps(eps_factor, const.TRAVEL_TIME, mdreport.budget_split),
+        )
         if const.TRAVEL_TIME in const.OD_ELEMENTS
         else Section(),
         const.JUMP_LENGTH: od_analysis.get_jump_length(
-            _od_shape, mdreport, _get_eps(eps_factor, const.JUMP_LENGTH, mdreport.budget_split))
+            _od_shape,
+            mdreport,
+            _get_eps(eps_factor, const.JUMP_LENGTH, mdreport.budget_split),
+        )
         if const.JUMP_LENGTH in const.OD_ELEMENTS
         else Section(),
     }
@@ -190,24 +210,30 @@ def add_user_analysis_elements(
 ) -> dict:
     return {
         const.TRIPS_PER_USER: user_analysis.get_trips_per_user(
-            mdreport, _get_eps(eps_factor, const.TRIPS_PER_USER, mdreport.budget_split))
+            mdreport, _get_eps(eps_factor, const.TRIPS_PER_USER, mdreport.budget_split)
+        )
         if const.TRIPS_PER_USER in const.USER_ELEMENTS
         else Section(),
         const.USER_TIME_DELTA: user_analysis.get_user_time_delta(
-            mdreport, _get_eps(eps_factor, const.USER_TIME_DELTA, mdreport.budget_split))
+            mdreport, _get_eps(eps_factor, const.USER_TIME_DELTA, mdreport.budget_split)
+        )
         if const.USER_TIME_DELTA in const.USER_ELEMENTS
         else Section(),
         const.RADIUS_OF_GYRATION: user_analysis.get_radius_of_gyration(
-            mdreport, _get_eps(eps_factor, const.RADIUS_OF_GYRATION, mdreport.budget_split)
+            mdreport,
+            _get_eps(eps_factor, const.RADIUS_OF_GYRATION, mdreport.budget_split),
         )
         if const.RADIUS_OF_GYRATION in const.USER_ELEMENTS
         else Section(),
         const.USER_TILE_COUNT: user_analysis.get_user_tile_count(
-            mdreport, _get_eps(eps_factor, const.USER_TILE_COUNT, mdreport.budget_split))
+            mdreport, _get_eps(eps_factor, const.USER_TILE_COUNT, mdreport.budget_split)
+        )
         if const.USER_TILE_COUNT in const.USER_ELEMENTS
         else Section(),
         const.MOBILITY_ENTROPY: user_analysis.get_mobility_entropy(
-            mdreport, _get_eps(eps_factor, const.MOBILITY_ENTROPY, mdreport.budget_split))
+            mdreport,
+            _get_eps(eps_factor, const.MOBILITY_ENTROPY, mdreport.budget_split),
+        )
         if const.MOBILITY_ENTROPY in const.USER_ELEMENTS
         else Section(),
     }

@@ -141,7 +141,7 @@ def get_epsi(evalu: bool, eps: Optional[float], elements: int) -> Optional[float
         return eps / elements
 
 
-def _cumsum(array: np.array):
+def _cumsum(array: np.array) -> np.array:
     array[::-1].sort()
     return (array.cumsum() / array.sum()).round(2)
 

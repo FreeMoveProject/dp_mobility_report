@@ -7,7 +7,11 @@ from geopandas import GeoDataFrame
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model.section import Section
-from dp_mobility_report.report.html.html_utils import get_template, render_summary, render_eps
+from dp_mobility_report.report.html.html_utils import (
+    get_template,
+    render_eps,
+    render_summary,
+)
 from dp_mobility_report.visualization import plot, v_utils
 
 
@@ -70,7 +74,9 @@ def render_place_analysis(
         counts_per_tile_cumsum_linechart=visits_per_tile_cumsum_linechart,
         most_freq_tiles_ranking=most_freq_tiles_ranking,
         counts_per_tile_time_map=counts_per_tile_time_map,
-        visits_per_tile_timewindow_eps=render_eps(report[const.VISITS_PER_TILE_TIMEWINDOW].privacy_budget),
+        visits_per_tile_timewindow_eps=render_eps(
+            report[const.VISITS_PER_TILE_TIMEWINDOW].privacy_budget
+        ),
     )
 
 
