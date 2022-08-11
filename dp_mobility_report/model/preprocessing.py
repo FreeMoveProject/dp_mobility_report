@@ -30,7 +30,7 @@ def preprocess_tessellation(tessellation: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return tessellation[[const.TILE_ID, const.TILE_NAME, const.GEOMETRY]]
 
 
-def _validate_columns(df: pd.DataFrame, timestamps) -> pd.DataFrame:
+def _validate_columns(df: pd.DataFrame, timestamps:bool= True) -> pd.DataFrame:
     if const.UID not in df.columns:
         raise ValueError("Column 'uid' must be present in data.")
     df[const.UID] = df[const.UID].astype(str)
@@ -59,7 +59,7 @@ def preprocess_data(
     tessellation: gpd.GeoDataFrame,
     max_trips_per_user: int,
     user_privacy: bool,
-    timestamps: bool
+    timestamps: bool=True
 ) -> pd.DataFrame:
     df = _validate_columns(df, timestamps)
 
