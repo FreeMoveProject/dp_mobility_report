@@ -19,14 +19,10 @@ def get_dataset_statistics(
     epsi = m_utils.get_epsi(mdreport.evalu, eps, 4)
 
     # counts for complete and incomplete trips
-    if timestamps:
-        points_per_trip = (
-            mdreport.df.reset_index().groupby(const.TID).count()["index"].value_counts()
-        )
-    else: 
-        points_per_trip = (
-            mdreport.df.reset_index().groupby(const.UID).count()["index"].value_counts()
-        )
+    points_per_trip = (
+        mdreport.df.reset_index().groupby(const.TID).count()["index"].value_counts()
+    )
+    
     n_incomplete_trips = 0 if 1 not in points_per_trip else points_per_trip[1]
     n_incomplete_trips = diff_privacy.count_dp(
         n_incomplete_trips,

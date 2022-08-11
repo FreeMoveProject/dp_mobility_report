@@ -114,7 +114,6 @@ def preprocess_data(
             df.groupby(const.TID)[const.POINT_TYPE].tail(1).index, const.POINT_TYPE
         ] = "end"
 
-
     # if tile assignment isn't already provided, recompute assignment
     if const.TILE_ID not in df.columns:
         df = assign_points_to_tessellation(df, tessellation)
@@ -138,10 +137,16 @@ def assign_points_to_tessellation(
     )
 
     # Spatial join points to polygons
-    df = gpd.sjoin_nearest(
+    #df = gpd.sjoin_nearest(
+    #    tessellation[[const.TILE_ID, const.TILE_NAME, const.GEOMETRY]],
+    #    gdf,
+    #    how="right"
+    #)
+    # Spatial join points to polygons
+    df = gpd.sjoin(
         tessellation[[const.TILE_ID, const.TILE_NAME, const.GEOMETRY]],
         gdf,
-        how="right"
+        how="right",
     )
     df.drop(["index_left", const.GEOMETRY], axis=1, inplace=True)
     return pd.DataFrame(df)
