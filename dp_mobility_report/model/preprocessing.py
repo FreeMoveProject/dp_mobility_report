@@ -34,7 +34,7 @@ def _validate_columns(df: pd.DataFrame, timestamps) -> pd.DataFrame:
     if const.UID not in df.columns:
         raise ValueError("Column 'uid' must be present in data.")
     df[const.UID] = df[const.UID].astype(str)
-    if const.TID not in df.columns and timestamps:
+    if const.TID not in df.columns: #and timestamps:
         raise ValueError("Column 'tid' must be present in data.")
     if const.LAT not in df.columns:
         raise ValueError("Column 'lat' must be present in data.")
@@ -46,7 +46,7 @@ def _validate_columns(df: pd.DataFrame, timestamps) -> pd.DataFrame:
         raise TypeError("Column 'lng' is not of type float.")
     if const.DATETIME not in df.columns and timestamps:
         raise ValueError("Column 'datetime' must be present in data.")
-    if const.DATETIME not in df.columns and timestamps:
+    if timestamps:
         try:
             df.loc[:, const.DATETIME] = pd.to_datetime(df[const.DATETIME])
         except Exception as ex:
@@ -135,13 +135,7 @@ def assign_points_to_tessellation(
         geometry=[Point(xy) for xy in zip(df[const.LNG], df[const.LAT])],
         crs="EPSG:4326",
     )
-
-    # Spatial join points to polygons
-    #df = gpd.sjoin_nearest(
-    #    tessellation[[const.TILE_ID, const.TILE_NAME, const.GEOMETRY]],
-    #    gdf,
-    #    how="right"
-    #)
+    
     # Spatial join points to polygons
     df = gpd.sjoin(
         tessellation[[const.TILE_ID, const.TILE_NAME, const.GEOMETRY]],
