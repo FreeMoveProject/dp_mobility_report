@@ -83,7 +83,7 @@ def test_preprocess_data(test_data, test_tessellation, caplog):
     # log output if tile id already present
     with caplog.at_level(logging.INFO):
         processed_data = preprocessing.preprocess_data(
-            processed_data, test_tessellation, max_trips_per_user=5, user_privacy=True
+            processed_data, test_tessellation, max_trips_per_user=5, user_privacy=True, timestamps=True
         )
     assert (
         "'tile_id' present in data. No new assignment of points to tessellation."
