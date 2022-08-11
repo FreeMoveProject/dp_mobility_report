@@ -62,6 +62,19 @@ def test_get_trips_per_weekday(test_mdreport):
     assert trips_per_weekday["Saturday"] == 3
     assert trips_per_weekday["Sunday"] == 15
 
+    # test that all days are created even if not present in data
+    test_mdreport.df = test_mdreport.df[test_mdreport.df.day_name == "Monday"]
+    trips_per_weekday = overview.get_trips_per_weekday(test_mdreport, None).data
+    assert trips_per_weekday.index.tolist() == [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+    ]
+
 
 def test_get_trips_per_hour(test_mdreport):
     """Correct trips per hour values without noise."""

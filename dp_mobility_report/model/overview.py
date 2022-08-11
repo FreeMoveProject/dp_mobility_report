@@ -1,3 +1,4 @@
+import calendar
 from datetime import timedelta
 from typing import TYPE_CHECKING, Optional
 
@@ -202,16 +203,20 @@ def get_trips_per_weekday(
 ) -> Section:
     mdreport.df.loc[:, const.DATE] = mdreport.df[const.DATETIME].dt.date
     mdreport.df.loc[:, const.DAY_NAME] = mdreport.df[const.DATETIME].dt.day_name()
-    mdreport.df.loc[:, const.WEEKDAY] = mdreport.df[const.DATETIME].dt.weekday
 
     trips_per_weekday = (
         mdreport.df[
             mdreport.df[const.POINT_TYPE] == const.END
         ]  # count trips not records
-        .sort_values(const.WEEKDAY)
         .groupby([const.DAY_NAME], sort=False)
         .count()[const.TID]
     )
+    missing_days = set(calendar.day_name) - set(trips_per_weekday.index.tolist())
+    trips_per_weekday = trips_per_weekday.append(pd.Series(0, index=list(missing_days)))
+    trips_per_weekday.index = pd.Categorical(
+        trips_per_weekday.index, list(calendar.day_name)
+    )
+    trips_per_weekday.sort_index(inplace=True)
 
     trips_per_weekday = pd.Series(
         index=trips_per_weekday.index,
@@ -234,6 +239,8 @@ def get_trips_per_weekday(
 
 
 def get_trips_per_hour(mdreport: "MobilityDataReport", eps: Optional[float]) -> Section:
+
+    # TODO: include all times (even if not present in data)
     hour_weekday = mdreport.df.groupby(
         [const.HOUR, const.IS_WEEKEND, const.POINT_TYPE]
     ).count()[const.TID]
