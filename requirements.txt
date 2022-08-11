@@ -9,7 +9,7 @@ numpy==1.21.4
 pandarallel==1.5.4
 pandas==1.1.5
 pyproj==3.3.0
-geopandas==0.11.0
+geopandas==0.10.2
 rtree
 scipy==1.7.3
 shapely
