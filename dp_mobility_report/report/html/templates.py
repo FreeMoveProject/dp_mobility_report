@@ -36,22 +36,20 @@ def render_html(
     od_analysis_segment = ""
     user_analysis_segment = ""
 
-    is_all_analyses = const.ALL in mdreport.analysis_selection
-
     config_segment = config_templates.render_config(mdreport)
 
-    if is_all_analyses | (const.OVERVIEW in mdreport.analysis_selection):
+    if not set(const.OVERVIEW_ELEMENTS).issubset(mdreport.exclude_analyses):
         overview_segment = overview_templates.render_overview(mdreport.report)
 
-    if is_all_analyses | (const.PLACE_ANALYSIS in mdreport.analysis_selection):
+    if not set(const.PLACE_ELEMENTS).issubset(mdreport.exclude_analyses):
         place_analysis_segment = place_analysis_templates.render_place_analysis(
             mdreport.report, mdreport.tessellation, temp_map_folder, output_filename
         )
-    if is_all_analyses | (const.OD_ANALYSIS in mdreport.analysis_selection):
+    if not set(const.OD_ELEMENTS).issubset(mdreport.exclude_analyses):
         od_analysis_segment = od_analysis_templates.render_od_analysis(
             mdreport, top_n_flows, temp_map_folder, output_filename
         )
-    if is_all_analyses | (const.USER_ANALYSIS in mdreport.analysis_selection):
+    if not set(const.USER_ELEMENTS).issubset(mdreport.exclude_analyses):
         user_analysis_segment = user_analysis_templates.render_user_analysis(mdreport)
 
     return (
