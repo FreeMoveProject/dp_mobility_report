@@ -246,6 +246,27 @@ def get_trips_per_hour(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
     ).count()[const.TID]
     hour_weekday.name = "count"
 
+    # create all potential combinations
+    full_combination = pd.DataFrame(
+        list(
+            map(
+                np.ravel,
+                np.meshgrid(
+                    range(0, 24),
+                    [const.WEEKDAY, const.WEEKEND],
+                    [const.START, const.END],
+                ),
+            )
+        )
+    ).T
+    full_combination.columns = [const.HOUR, const.IS_WEEKEND, const.POINT_TYPE]
+    full_combination["count"] = 0
+    full_combination.set_index(
+        [const.HOUR, const.IS_WEEKEND, const.POINT_TYPE], inplace=True
+    )
+
+    hour_weekday = full_combination.add(pd.DataFrame(hour_weekday), fill_value=0)
+
     hour_weekday = hour_weekday.reset_index()
     hour_weekday["count"] = diff_privacy.counts_dp(
         hour_weekday["count"], eps, mdreport.max_trips_per_user

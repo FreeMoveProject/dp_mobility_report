@@ -63,7 +63,7 @@ def test_get_trips_per_weekday(test_mdreport):
     assert trips_per_weekday["Sunday"] == 15
 
     # test that all days are created even if not present in data
-    test_mdreport.df = test_mdreport.df[test_mdreport.df.day_name == "Monday"]
+    test_mdreport.df = test_mdreport.df[test_mdreport.df[const.DAY_NAME] == "Monday"]
     trips_per_weekday = overview.get_trips_per_weekday(test_mdreport, None).data
     assert trips_per_weekday.index.tolist() == [
         "Monday",
@@ -88,4 +88,10 @@ def test_get_trips_per_hour(test_mdreport):
         "weekend_start",
     ]
     assert trips_per_hour.columns.tolist() == [const.HOUR, const.TIME_CATEGORY, "count"]
-    assert len(trips_per_hour) == 73
+    assert len(trips_per_hour) == 96
+
+    # test that all hours are created even if not present in data
+    test_mdreport.df = test_mdreport.df[test_mdreport.df[const.HOUR] == 16]
+    trips_per_hour = overview.get_trips_per_hour(test_mdreport, None).data
+    assert len(trips_per_hour) == 96
+    assert trips_per_hour[const.HOUR].unique().tolist() == list(range(0, 24))
