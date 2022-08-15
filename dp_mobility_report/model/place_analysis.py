@@ -69,7 +69,7 @@ def get_visits_per_tile(
                 visits_per_tile["visits"] / visists_sum * record_count
             ).astype(int)
             n_outliers = int(n_outliers / visists_sum * record_count)
-            moe = int(moe / visists_sum * record_count)
+            moe = moe / visists_sum * record_count
 
     # as counts are already dp, no further privacy mechanism needed
     dp_quartiles = visits_per_tile.visits.describe()

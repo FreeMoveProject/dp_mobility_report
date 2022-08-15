@@ -8,6 +8,7 @@ from geopandas import GeoDataFrame
 from dp_mobility_report import constants as const
 from dp_mobility_report.model.section import Section
 from dp_mobility_report.report.html.html_utils import (
+    fmt_moe,
     get_template,
     render_eps,
     render_summary,
@@ -27,15 +28,22 @@ def render_place_analysis(
         Due to the applied noise, tiles with a low visit count are likely to contain a high percentage of noise. 
         For usability reasons, such unrealistic values are grayed out. 
         More specifically: The threshold is set so that values for tiles with a 5% chance of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are not shown."""
+    visits_per_tile_eps = ""
+    visits_per_tile_moe = ""
     visits_per_tile_legend = ""
     visits_per_tile_summary_table = ""
     visits_per_tile_cumsum_linechart = ""
     most_freq_tiles_ranking = ""
-    counts_per_tile_time_map = ""
+    visits_per_tile_timewindow_eps= ""
+    visits_per_tile_timewindow_moe = ""
+    visits_per_tile_time_map = ""
 
     if (const.VISITS_PER_TILE in report) and (
         report[const.VISITS_PER_TILE].data is not None
     ):
+        visits_per_tile_eps=render_eps(report[const.VISITS_PER_TILE].privacy_budget)
+        visits_per_tile_moe=fmt_moe(report[const.VISITS_PER_TILE].margin_of_error_laplace)
+
         points_outside_tessellation_info = render_points_outside_tess(
             report[const.VISITS_PER_TILE]
         )
@@ -48,7 +56,7 @@ def render_place_analysis(
             quartiles.astype(int),
             "Distribution of visits per tile",  # extrapolate visits from dp record count
         )
-        visits_per_tile_cumsum_linechart = render_counts_per_tile_cumsum(
+        visits_per_tile_cumsum_linechart = render_visits_per_tile_cumsum(
             report[const.VISITS_PER_TILE]
         )
         most_freq_tiles_ranking = render_most_freq_tiles_ranking(
@@ -58,36 +66,41 @@ def render_place_analysis(
     if (const.VISITS_PER_TILE_TIMEWINDOW in report) and (
         report[const.VISITS_PER_TILE_TIMEWINDOW] is not None
     ):
-        counts_per_tile_time_map = render_counts_per_tile_timewindow(
+        visits_per_tile_timewindow_eps=render_eps(
+            report[const.VISITS_PER_TILE_TIMEWINDOW].privacy_budget
+        )
+        visits_per_tile_timewindow_moe=fmt_moe(report[const.VISITS_PER_TILE_TIMEWINDOW].margin_of_error_laplace)
+
+        visits_per_tile_time_map = render_visits_per_tile_timewindow(
             report[const.VISITS_PER_TILE_TIMEWINDOW], tessellation, THRESHOLD
         )
 
     template_structure = get_template("place_analysis_segment.html")
 
     return template_structure.render(
+        output_filename=output_filename,
         points_outside_tessellation_info=points_outside_tessellation_info,
         privacy_info=privacy_info,
-        visits_per_tile_eps=render_eps(report[const.VISITS_PER_TILE].privacy_budget),
-        output_filename=output_filename,
+        visits_per_tile_eps=visits_per_tile_eps,
+        visits_per_tile_moe=visits_per_tile_moe,
         visits_per_tile_legend=visits_per_tile_legend,
-        counts_per_tile_summary_table=visits_per_tile_summary_table,
-        counts_per_tile_cumsum_linechart=visits_per_tile_cumsum_linechart,
+        visits_per_tile_summary_table=visits_per_tile_summary_table,
+        visits_per_tile_cumsum_linechart=visits_per_tile_cumsum_linechart,
         most_freq_tiles_ranking=most_freq_tiles_ranking,
-        counts_per_tile_time_map=counts_per_tile_time_map,
-        visits_per_tile_timewindow_eps=render_eps(
-            report[const.VISITS_PER_TILE_TIMEWINDOW].privacy_budget
-        ),
+        visits_per_tile_timewindow_eps=visits_per_tile_timewindow_eps,
+        visits_per_tile_timewindow_moe=visits_per_tile_timewindow_moe,
+        visits_per_tile_time_map=visits_per_tile_time_map,
     )
 
 
 def render_points_outside_tess(visits_per_tile: Section) -> str:
     record_count = visits_per_tile.data.visits.sum() + visits_per_tile.n_outliers
     return f"""{round(visits_per_tile.n_outliers)} ({round(visits_per_tile.n_outliers / record_count * 100, 2)}%) of points are outside the given tessellation 
-    (95% confidence interval ± {round(visits_per_tile.margin_of_error_laplace)})."""
+    (95% confidence interval ± {fmt_moe(visits_per_tile.margin_of_error_laplace)})."""
 
 
 def render_visits_per_tile(
-    perc_per_tile: Section,
+    visits_per_tile: Section,
     tessellation: GeoDataFrame,
     threshold: float,
     temp_map_folder: Path,
@@ -96,7 +109,7 @@ def render_visits_per_tile(
     # merge count and tessellation
     counts_per_tile_gdf = pd.merge(
         tessellation,
-        perc_per_tile.data[[const.TILE_ID, "visits"]],
+        visits_per_tile.data[[const.TILE_ID, "visits"]],
         how="left",
         left_on=const.TILE_ID,
         right_on=const.TILE_ID,
@@ -104,7 +117,7 @@ def render_visits_per_tile(
 
     # filter visit counts above error threshold
     moe_deviation = (
-        perc_per_tile.margin_of_error_laplace / counts_per_tile_gdf["visits"]
+        visits_per_tile.margin_of_error_laplace / counts_per_tile_gdf["visits"]
     )
 
     counts_per_tile_gdf.loc[moe_deviation > threshold, "visits"] = None
@@ -122,7 +135,7 @@ def render_visits_per_tile(
     return legend_html
 
 
-def render_counts_per_tile_cumsum(counts_per_tile: Section) -> str:
+def render_visits_per_tile_cumsum(counts_per_tile: Section) -> str:
     df_cumsum = counts_per_tile.cumsum_simulations
 
     chart = plot.linechart(
@@ -162,7 +175,7 @@ def render_most_freq_tiles_ranking(perc_per_tile: Section, top_x: int = 10) -> s
     return html_ranking
 
 
-def render_counts_per_tile_timewindow(
+def render_visits_per_tile_timewindow(
     counts_per_tile_timewindow: Section, tessellation: GeoDataFrame, threshold: int
 ) -> str:
     data = counts_per_tile_timewindow.data

@@ -19,20 +19,25 @@ from dp_mobility_report.visualization import plot, v_utils
 
 def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     trips_per_user_info = f"Trips per user are limited according to the configured maximum of trips per user: {mdreport.max_trips_per_user}"
+    trips_per_user_eps = ""
     trips_per_user_hist = ""
     trips_per_user_summary_table = ""
     trips_per_user_moe_info = ""
+    time_between_traj_eps = ""
     overlapping_trips_info = ""
     time_between_traj_hist = ""
     time_between_traj_summary_table = ""
     time_between_traj_moe_info = ""
+    radius_of_gyration_eps = ""
     radius_of_gyration_hist_info = ""
     radius_of_gyration_hist = ""
     radius_of_gyration_summary_table = ""
     radius_of_gyration_moe_info = ""
+    distinct_tiles_user_eps = ""
     distinct_tiles_user_hist = ""
     distinct_tiles_user_summary_table = ""
     distinct_tiles_moe_info = ""
+    mobility_entropy_eps = ""
     mobility_entropy_hist = ""
     mobility_entropy_summary_table = ""
     mobility_entropy_moe_info = ""
@@ -42,6 +47,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     if (const.TRIPS_PER_USER in report) and (
         report[const.TRIPS_PER_USER].data is not None
     ):
+        trips_per_user_eps=render_eps(report[const.TRIPS_PER_USER].privacy_budget)
         trips_per_user_hist = render_trips_per_user(report[const.TRIPS_PER_USER])
         trips_per_user_summary_table = render_summary(
             report[const.TRIPS_PER_USER].quartiles
@@ -55,6 +61,8 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         and (report[const.USER_TIME_DELTA] is not None)
         and (report[const.USER_TIME_DELTA].quartiles is not None)
     ):
+        time_between_traj_eps=render_eps(report[const.USER_TIME_DELTA].privacy_budget)
+        overlapping_trips_info = render_overlapping_trips(report[const.USER_TIME_DELTA])
         time_between_traj_hist = render_time_between_traj(report[const.USER_TIME_DELTA])
         time_between_traj_summary_table = render_summary(
             report[const.USER_TIME_DELTA].quartiles
@@ -62,11 +70,13 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
         time_between_traj_moe_info = render_moe_info(
             report[const.USER_TIME_DELTA].margin_of_error_expmech
         )
-        overlapping_trips_info = render_overlapping_trips(report[const.USER_TIME_DELTA])
 
     if (const.RADIUS_OF_GYRATION in report) and (
         report[const.RADIUS_OF_GYRATION].data is not None
     ):
+        radius_of_gyration_eps = render_eps(
+            report[const.RADIUS_OF_GYRATION].privacy_budget
+        )
         radius_of_gyration_hist_info = render_user_input_info(
             mdreport.max_radius_of_gyration, mdreport.bin_range_radius_of_gyration
         )
@@ -83,6 +93,9 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     if (const.USER_TILE_COUNT in report) and (
         report[const.USER_TILE_COUNT].data is not None
     ):
+        distinct_tiles_user_eps=render_eps(
+            report[const.USER_TILE_COUNT].privacy_budget
+        )
         distinct_tiles_user_hist = render_distinct_tiles_user(
             report[const.USER_TILE_COUNT]
         )
@@ -96,6 +109,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     if (const.MOBILITY_ENTROPY in report) and (
         report[const.MOBILITY_ENTROPY].data is not None
     ):
+        mobility_entropy_eps=render_eps(report[const.MOBILITY_ENTROPY].privacy_budget)
         mobility_entropy_hist = render_mobility_entropy(report[const.MOBILITY_ENTROPY])
         mobility_entropy_summary_table = render_summary(
             report[const.MOBILITY_ENTROPY].quartiles
@@ -107,30 +121,26 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     template_structure = get_template("user_analysis_segment.html")
 
     return template_structure.render(
-        trips_per_user_eps=render_eps(report[const.TRIPS_PER_USER].privacy_budget),
+        trips_per_user_eps=trips_per_user_eps,
         trips_per_user_info=trips_per_user_info,
         trips_per_user_hist=trips_per_user_hist,
         trips_per_user_summary_table=trips_per_user_summary_table,
         trips_per_user_moe_info=trips_per_user_moe_info,
+        time_between_traj_eps=time_between_traj_eps,
         overlapping_trips_info=overlapping_trips_info,
-        time_between_traj_eps=render_eps(report[const.USER_TIME_DELTA].privacy_budget),
         time_between_traj_hist=time_between_traj_hist,
         time_between_traj_summary_table=time_between_traj_summary_table,
         time_between_traj_moe_info=time_between_traj_moe_info,
-        radius_of_gyration_eps=render_eps(
-            report[const.RADIUS_OF_GYRATION].privacy_budget
-        ),
+        radius_of_gyration_eps=radius_of_gyration_eps,
         radius_of_gyration_hist_info=radius_of_gyration_hist_info,
         radius_of_gyration_hist=radius_of_gyration_hist,
         radius_of_gyration_summary_table=radius_of_gyration_summary_table,
         radius_of_gyration_moe_info=radius_of_gyration_moe_info,
-        distinct_tiles_user_eps=render_eps(
-            report[const.USER_TILE_COUNT].privacy_budget
-        ),
+        distinct_tiles_user_eps=distinct_tiles_user_eps,
         distinct_tiles_user_hist=distinct_tiles_user_hist,
         distinct_tiles_user_summary_table=distinct_tiles_user_summary_table,
         distinct_tiles_moe_info=distinct_tiles_moe_info,
-        mobility_entropy_eps=render_eps(report[const.MOBILITY_ENTROPY].privacy_budget),
+        mobility_entropy_eps=mobility_entropy_eps,
         mobility_entropy_hist=mobility_entropy_hist,
         mobility_entropy_summary_table=mobility_entropy_summary_table,
         mobility_entropy_moe_info=mobility_entropy_moe_info,

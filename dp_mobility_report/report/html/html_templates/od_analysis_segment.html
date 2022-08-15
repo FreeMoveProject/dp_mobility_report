@@ -3,10 +3,11 @@
 
 <div>
     <h3>OD flows between tiles</h3>
-    <p>{{od_eps}}</p>
+    <p>privacy budget: {{od_eps}}</p>
+    <p>95%-confidence interval: +/-{{od_moe}}</p>
     <div>
         <p class = "info">
-            {{privacy_info}}
+          {{privacy_info}}
         </p>
         <iframe src="{{output_filename}}/maps/od_map.html" width="80%" height="600" style="border:1px solid black;">
         </iframe>
@@ -57,7 +58,8 @@
     
     <div>
         <h4>Travel time of trips (in minutes)</h4>
-        <p>{{travel_time_eps}}</p>
+        <p>privacy budget: {{travel_time_eps}}</p>
+        <p>95%-confidence interval: +/-: {{travel_time_moe}}</p>
 
         {{travel_time_hist}}
         <p class="grey info">
@@ -70,7 +72,8 @@
     </div>
     <div>
         <h4>Jump length (in kilometers)</h4>
-        <p>{{travel_time_eps}}</p>
+        <p>privacy budget: {{travel_time_eps}}</p>
+        <p>95%-confidence interval: {{travel_time_moe}}</p>
 
         <p>The jump length is the straight-line distance between the origin and destination.</p>
         {{jump_length_hist}}

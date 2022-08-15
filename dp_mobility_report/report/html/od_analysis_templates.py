@@ -14,6 +14,7 @@ from dp_mobility_report import constants as const
 from dp_mobility_report.model import od_analysis
 from dp_mobility_report.model.section import Section
 from dp_mobility_report.report.html.html_utils import (
+    fmt_moe,
     get_template,
     render_eps,
     render_moe_info,
@@ -37,22 +38,31 @@ def render_od_analysis(
     user_config_info = (
         f"User configuration: display max. top {top_n_flows} OD connections on map"
     )
+    od_eps = ""
+    od_moe = ""
     od_legend = ""
     intra_tile_flows_info = ""
     flows_summary_table = ""
     flows_cumsum_linechart = ""
     most_freq_flows_ranking = ""
+    travel_time_eps = ""
+    travel_time_moe = ""
     travel_time_hist_info = ""
     travel_time_hist = ""
     travel_time_summary_table = ""
     travel_time_moe_info = ""
+    jump_length_eps = ""
+    jump_length_moe = ""
     jump_length_hist = ""
-    jump_length_summary_table = ""
     jump_length_moe_info = ""
+    jump_length_summary_table = ""
 
     report = mdreport.report
 
     if const.OD_FLOWS in report and report[const.OD_FLOWS].data is not None:
+        od_eps=render_eps(report[const.OD_FLOWS].privacy_budget)
+        od_moe=fmt_moe(report[const.OD_FLOWS].margin_of_error_laplace)
+
         od_legend = render_origin_destination_flows(
             report[const.OD_FLOWS],
             mdreport.tessellation,
@@ -74,42 +84,51 @@ def render_od_analysis(
         )
 
     if const.TRAVEL_TIME in report and report[const.TRAVEL_TIME].data is not None:
+        travel_time_eps=render_eps(report[const.TRAVEL_TIME].privacy_budget)
+        travel_time_moe=fmt_moe(report[const.TRAVEL_TIME].margin_of_error_laplace)
+
         travel_time_hist_info = render_user_input_info(
             mdreport.max_travel_time, mdreport.bin_range_travel_time
         )
         travel_time_hist = render_travel_time_hist(report[const.TRAVEL_TIME])
-        travel_time_summary_table = render_summary(report[const.TRAVEL_TIME].quartiles)
         travel_time_moe_info = render_moe_info(
             report[const.TRAVEL_TIME].margin_of_error_expmech
         )
+        travel_time_summary_table = render_summary(report[const.TRAVEL_TIME].quartiles)
 
     if const.JUMP_LENGTH in report and report[const.JUMP_LENGTH].data is not None:
+        jump_length_eps=render_eps(report[const.JUMP_LENGTH].privacy_budget)
+        jump_length_moe=fmt_moe(report[const.JUMP_LENGTH].margin_of_error_laplace)
+
         jump_length_hist_info = render_user_input_info(
             mdreport.max_jump_length, mdreport.bin_range_jump_length
         )
         jump_length_hist = render_jump_length_hist(report[const.JUMP_LENGTH])
-        jump_length_summary_table = render_summary(report[const.JUMP_LENGTH].quartiles)
         jump_length_moe_info = render_moe_info(
             report[const.JUMP_LENGTH].margin_of_error_expmech
         )
+        jump_length_summary_table = render_summary(report[const.JUMP_LENGTH].quartiles)
 
     template_structure = get_template("od_analysis_segment.html")
     return template_structure.render(
         privacy_info=privacy_info,
         output_filename=output_filename,
         user_config_info=user_config_info,
-        od_eps=render_eps(report[const.OD_FLOWS].privacy_budget),
+        od_eps=od_eps,
+        od_moe=od_moe,
         od_legend=od_legend,
         intra_tile_flows_info=intra_tile_flows_info,
         flows_summary_table=flows_summary_table,
         flows_cumsum_linechart=flows_cumsum_linechart,
         most_freq_flows_ranking=most_freq_flows_ranking,
-        travel_time_eps=render_eps(report[const.TRAVEL_TIME].privacy_budget),
+        travel_time_eps=travel_time_eps,
+        travel_time_moe=travel_time_moe,
         travel_time_hist_info=travel_time_hist_info,
         travel_time_hist=travel_time_hist,
-        travel_time_moe_info=travel_time_moe_info,
         travel_time_summary_table=travel_time_summary_table,
-        jump_length_eps=render_eps(report[const.JUMP_LENGTH].privacy_budget),
+        travel_time_moe_info=travel_time_moe_info,
+        jump_length_eps=jump_length_eps,
+        jump_length_moe=jump_length_moe,
         jump_length_hist_info=jump_length_hist_info,
         jump_length_hist=jump_length_hist,
         jump_length_moe_info=jump_length_moe_info,
