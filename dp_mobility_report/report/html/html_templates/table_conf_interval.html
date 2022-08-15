@@ -9,9 +9,8 @@
                 <th class ="table-header"></th>
             {% endif %}
             <th class ="table-header"></th>
-            <th class ="table-header">lower limit</th>
             <th class ="table-header">estimate</th>
-            <th class ="table-header">upper limit</th>
+            <th class ="table-header">95%-confidence interval +/-</th>
         </tr>
         {% for row in rows %}
         <tr>
@@ -19,9 +18,8 @@
                 <th class="table-rowheader">{{ row['rank'] }}</th>
             {% endif %}
             <th class = "table-rowheader">{{ row['name'] }}</th>
-            <td>{{ row['lower_limit'] }}</td>
             <td class="estimate">{{ row['estimate'] }}</td>
-            <td>{{ row['upper_limit'] }}</td>
+            <td>{{ row['margin_of_error'] }}</td>
         </tr>
         {% endfor %}
     </tbody>

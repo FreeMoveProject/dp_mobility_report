@@ -29,11 +29,9 @@ def get_dataset_statistics(
         epsi,
         mdreport.max_trips_per_user,
     )
+
     moe_incomplete_trips = diff_privacy.laplace_margin_of_error(
         0.95, epsi, mdreport.max_trips_per_user
-    )
-    ci95_incomplete_trips = diff_privacy.conf_interval(
-        n_incomplete_trips, moe_incomplete_trips
     )
 
     n_complete_trips = 0 if 2 not in points_per_trip else points_per_trip[2]
@@ -45,9 +43,6 @@ def get_dataset_statistics(
     moe_complete_trips = diff_privacy.laplace_margin_of_error(
         0.95, epsi, 2 * mdreport.max_trips_per_user
     )
-    ci95_complete_trips = diff_privacy.conf_interval(
-        n_complete_trips, moe_complete_trips
-    )
 
     n_trips = n_incomplete_trips + n_complete_trips
     if n_trips == 0:
@@ -58,7 +53,6 @@ def get_dataset_statistics(
             n_incomplete_trips * moe_incomplete_trips
             + n_complete_trips * moe_complete_trips
         ) / n_trips
-    ci95_trips = diff_privacy.conf_interval(n_trips, moe_trips)
 
     n_records = None if n_trips is None else (n_incomplete_trips + n_complete_trips * 2)
     if n_records is None:
@@ -68,13 +62,11 @@ def get_dataset_statistics(
             n_incomplete_trips * moe_incomplete_trips
             + n_complete_trips * 2 * moe_complete_trips
         ) / n_records
-    ci95_records = diff_privacy.conf_interval(n_records, moe_records)
 
     n_users = diff_privacy.count_dp(
         mdreport.df[const.UID].nunique(), epsi, 1, nonzero=True
     )
     moe_users = diff_privacy.laplace_margin_of_error(0.95, epsi, 1)
-    ci95_users = diff_privacy.conf_interval(n_users, moe_users)
 
     n_locations = diff_privacy.count_dp(
         mdreport.df.groupby([const.LAT, const.LNG]).ngroups,
@@ -85,7 +77,6 @@ def get_dataset_statistics(
     moe_locations = diff_privacy.laplace_margin_of_error(
         0.95, epsi, 2 * mdreport.max_trips_per_user
     )
-    ci95_locations = diff_privacy.conf_interval(n_locations, moe_locations)
 
     stats = {
         "n_records": n_records,
@@ -95,15 +86,17 @@ def get_dataset_statistics(
         "n_users": n_users,
         "n_locations": n_locations,
     }
-    conf_interval = {
-        "ci95_complete_trips": ci95_complete_trips,
-        "ci95_incomplete_trips": ci95_incomplete_trips,
-        "ci95_trips": ci95_trips,
-        "ci95_records": ci95_records,
-        "ci95_users": ci95_users,
-        "ci95_locations": ci95_locations,
+    
+    moe = {
+        "records": moe_records,
+        "trips": moe_trips,
+        "complete_trips": moe_complete_trips,
+        "incomplete_trips": moe_incomplete_trips,
+        "users": moe_users,
+        "locations": moe_locations,
     }
-    return Section(data=stats, privacy_budget=eps, conf_interval=conf_interval)
+
+    return Section(data=stats, privacy_budget=eps, margin_of_errors_laplace=moe)
 
 
 def get_missing_values(mdreport: "MobilityDataReport", eps: Optional[float]) -> Section:
@@ -115,14 +108,8 @@ def get_missing_values(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
     moe = diff_privacy.laplace_margin_of_error(
         0.95, epsi, 2 * mdreport.max_trips_per_user
     )
-    conf_interval = {}
-    for col in columns:
-        missings[col] = diff_privacy.count_dp(
-            missings[col], epsi, 2 * mdreport.max_trips_per_user
-        )
-        conf_interval["ci95_" + col] = diff_privacy.conf_interval(missings[col], moe)
 
-    return Section(data=missings, privacy_budget=eps, conf_interval=conf_interval)
+    return Section(data=missings, privacy_budget=eps, margin_of_error_laplace=moe)
 
 
 def get_trips_over_time(

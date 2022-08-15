@@ -60,6 +60,10 @@ def fmt(value: Any) -> Any:
         value = f"{value:,}"
     return value
 
+def fmt_moe(margin_of_error: Optional[float]) -> float:
+    if margin_of_error is None:
+        return 0
+    return round(margin_of_error, 1)
 
 def render_eps(value: Optional[float]) -> Optional[float]:
     if value is None:
