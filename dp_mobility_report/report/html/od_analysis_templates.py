@@ -141,15 +141,19 @@ def render_origin_destination_flows(
     )
 
     # tessellation_innerflow.loc[tessellation_innerflow.flow.isna(), "flow"] = 0
-    innerflow_chropleth, innerflow_legend = plot.choropleth_map(
+    innerflow_choropleth, innerflow_legend = plot.choropleth_map(
         tessellation_innerflow, "flow", "intra-tile flows"
     )  # get innerflows as color for choropleth
 
-    od_map = (
-        fdf[fdf.origin != fdf.destination]
-        .nlargest(top_n_flows, "flow")
-        .plot_flows(flow_color="red", map_f=innerflow_chropleth)
-    )
+    inter_flows = fdf[fdf.origin != fdf.destination]
+    if not inter_flows.flow.isnull().all():
+        od_map = (
+            fdf[fdf.origin != fdf.destination]
+            .nlargest(top_n_flows, "flow")
+            .plot_flows(flow_color="red", map_f=innerflow_choropleth)
+        )
+    else: # if there are no inter flows only plot innerflow choropleth
+        od_map = innerflow_choropleth
 
     od_map.save(os.path.join(temp_map_folder, "od_map.html"))
 
