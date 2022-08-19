@@ -60,7 +60,11 @@ def test_raised_errors_in_preprocess_tessellation(test_tessellation):
 def test_preprocess_data(test_data, test_tessellation, caplog):
     """Test correct preprocessing of data."""
     processed_data = preprocessing.preprocess_data(
-        test_data, test_tessellation, max_trips_per_user=5, user_privacy=True, timestamps=True
+        test_data,
+        test_tessellation,
+        max_trips_per_user=5,
+        user_privacy=True,
+        timestamps=True,
     )
     assert processed_data.columns.tolist() == [
         const.TILE_ID,
@@ -83,7 +87,11 @@ def test_preprocess_data(test_data, test_tessellation, caplog):
     # log output if tile id already present
     with caplog.at_level(logging.INFO):
         processed_data = preprocessing.preprocess_data(
-            processed_data, test_tessellation, max_trips_per_user=5, user_privacy=True, timestamps=True
+            processed_data,
+            test_tessellation,
+            max_trips_per_user=5,
+            user_privacy=True,
+            timestamps=True,
         )
     assert (
         "'tile_id' present in data. No new assignment of points to tessellation."
@@ -94,15 +102,25 @@ def test_preprocess_data(test_data, test_tessellation, caplog):
 def test_data_validation(test_data):
     """Test if correct errors are raised with wrong data input."""
     with pytest.raises(ValueError):
-        preprocessing._validate_columns(test_data.drop(const.UID, axis=1), timestamps=True)
+        preprocessing._validate_columns(
+            test_data.drop(const.UID, axis=1), timestamps=True
+        )
     with pytest.raises(ValueError):
-        preprocessing._validate_columns(test_data.drop(const.TID, axis=1), timestamps=True)
+        preprocessing._validate_columns(
+            test_data.drop(const.TID, axis=1), timestamps=True
+        )
     with pytest.raises(ValueError):
-        preprocessing._validate_columns(test_data.drop(const.LAT, axis=1), timestamps=True)
+        preprocessing._validate_columns(
+            test_data.drop(const.LAT, axis=1), timestamps=True
+        )
     with pytest.raises(ValueError):
-        preprocessing._validate_columns(test_data.drop(const.LNG, axis=1), timestamps=True)
+        preprocessing._validate_columns(
+            test_data.drop(const.LNG, axis=1), timestamps=True
+        )
     with pytest.raises(ValueError):
-        preprocessing._validate_columns(test_data.drop(const.DATETIME, axis=1), timestamps=True)
+        preprocessing._validate_columns(
+            test_data.drop(const.DATETIME, axis=1), timestamps=True
+        )
 
     with pytest.raises(TypeError):
         test_data_ = test_data.drop(const.LAT, axis=1)
@@ -144,7 +162,10 @@ def test_assign_points_to_tessellation(test_data, test_tessellation):
 def test_sample_trips(test_data):
     # same length, if max_trips_per_user are max
     sampled_data = preprocessing.sample_trips(
-        test_data, test_data.groupby(const.UID).nunique()[const.TID].max(), True, timestamps=True
+        test_data,
+        test_data.groupby(const.UID).nunique()[const.TID].max(),
+        True,
+        timestamps=True,
     )
     assert len(sampled_data) == len(test_data)
 

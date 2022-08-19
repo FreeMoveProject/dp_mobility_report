@@ -46,7 +46,7 @@ def render_od_analysis(
     travel_time_summary_table = ""
     travel_time_moe_info = ""
     jump_length_hist = ""
-    jump_length_hist_info= ""
+    jump_length_hist_info = ""
     jump_length_summary_table = ""
     jump_length_moe_info = ""
 
@@ -152,7 +152,7 @@ def render_origin_destination_flows(
             .nlargest(top_n_flows, "flow")
             .plot_flows(flow_color="red", map_f=innerflow_choropleth)
         )
-    else: # if there are no inter flows only plot innerflow choropleth
+    else:  # if there are no inter flows only plot innerflow choropleth
         od_map = innerflow_choropleth
 
     od_map.save(os.path.join(temp_map_folder, "od_map.html"))

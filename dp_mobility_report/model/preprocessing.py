@@ -30,11 +30,11 @@ def preprocess_tessellation(tessellation: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return tessellation[[const.TILE_ID, const.TILE_NAME, const.GEOMETRY]]
 
 
-def _validate_columns(df: pd.DataFrame, timestamps:bool) -> pd.DataFrame:
+def _validate_columns(df: pd.DataFrame, timestamps: bool) -> pd.DataFrame:
     if const.UID not in df.columns:
         raise ValueError("Column 'uid' must be present in data.")
     df[const.UID] = df[const.UID].astype(str)
-    if const.TID not in df.columns: #and timestamps:
+    if const.TID not in df.columns:
         raise ValueError("Column 'tid' must be present in data.")
     if const.LAT not in df.columns:
         raise ValueError("Column 'lat' must be present in data.")
@@ -59,7 +59,7 @@ def preprocess_data(
     tessellation: gpd.GeoDataFrame,
     max_trips_per_user: int,
     user_privacy: bool,
-    timestamps: bool
+    timestamps: bool,
 ) -> pd.DataFrame:
     df = _validate_columns(df, timestamps)
 
@@ -135,7 +135,7 @@ def assign_points_to_tessellation(
         geometry=[Point(xy) for xy in zip(df[const.LNG], df[const.LAT])],
         crs="EPSG:4326",
     )
-    
+
     # Spatial join points to polygons
     df = gpd.sjoin(
         tessellation[[const.TILE_ID, const.TILE_NAME, const.GEOMETRY]],

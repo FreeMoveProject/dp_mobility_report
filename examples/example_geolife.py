@@ -52,4 +52,3 @@ report = md_report.MobilityDataReport(
     bin_range_radius_of_gyration=1.5,
 )
 report.to_file(os.path.join(path_html_output, "geolife.html"), top_n_flows=100)
-

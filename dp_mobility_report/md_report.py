@@ -83,7 +83,7 @@ class MobilityDataReport:
             max_jump_length,
             bin_range_jump_length,
             max_radius_of_gyration,
-            bin_range_radius_of_gyration
+            bin_range_radius_of_gyration,
         )
         self.timestamps = timestamps
         self.user_privacy = user_privacy
@@ -106,7 +106,7 @@ class MobilityDataReport:
                 tessellation,
                 self.max_trips_per_user,
                 self.user_privacy,
-                self.timestamps
+                self.timestamps,
             )
             pbar.update()
 

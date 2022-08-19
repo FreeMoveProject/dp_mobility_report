@@ -276,7 +276,6 @@ def test_report_output(test_data, test_tessellation):
 
 def test_to_html_file(test_data, test_tessellation, tmp_path):
 
-
     file_name = tmp_path / "html/test_output1.html"
     file_name.parent.mkdir()
     md_report.MobilityDataReport(

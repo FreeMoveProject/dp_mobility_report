@@ -22,7 +22,7 @@ def get_dataset_statistics(
     points_per_trip = (
         mdreport.df.reset_index().groupby(const.TID).count()["index"].value_counts()
     )
-    
+
     n_incomplete_trips = 0 if 1 not in points_per_trip else points_per_trip[1]
     n_incomplete_trips = diff_privacy.count_dp(
         n_incomplete_trips,
@@ -106,7 +106,9 @@ def get_dataset_statistics(
     return Section(data=stats, privacy_budget=eps, conf_interval=conf_interval)
 
 
-def get_missing_values(mdreport: "MobilityDataReport", eps: Optional[float], timestamps: bool) -> Section:
+def get_missing_values(
+    mdreport: "MobilityDataReport", eps: Optional[float], timestamps: bool
+) -> Section:
     if timestamps:
         columns = [const.UID, const.TID, const.DATETIME, const.LAT, const.LNG]
     else:
@@ -179,7 +181,7 @@ def get_trips_over_time(
         epsi,
         mdreport.max_trips_per_user,
     )
-    
+
     moe_laplace = diff_privacy.laplace_margin_of_error(
         0.95, epsi, mdreport.max_trips_per_user
     )
@@ -247,7 +249,7 @@ def get_trips_per_hour(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
     hour_weekday["count"] = diff_privacy.counts_dp(
         hour_weekday["count"], eps, mdreport.max_trips_per_user
     )
-    
+
     hour_weekday[const.TIME_CATEGORY] = (
         hour_weekday[const.IS_WEEKEND] + "_" + hour_weekday[const.POINT_TYPE]
     )

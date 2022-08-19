@@ -13,7 +13,9 @@ from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
 
 
-def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame, timestamps: bool=True) -> pd.DataFrame:
+def get_od_shape(
+    df: pd.DataFrame, tessellation: GeoDataFrame, timestamps: bool = True
+) -> pd.DataFrame:
     if timestamps:
         ends_od_shape = (
             df[

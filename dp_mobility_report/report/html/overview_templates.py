@@ -11,10 +11,10 @@ from dp_mobility_report.report.html.html_utils import (
 from dp_mobility_report.visualization import plot, v_utils
 
 
-def render_overview(report: dict, timestamp: bool=True) -> str:
+def render_overview(report: dict, timestamp: bool = True) -> str:
     dataset_stats_table = ""
     missing_values_table = ""
-    trips_over_time_info=""
+    trips_over_time_info = ""
     trips_over_time_linechart = ""
     trips_over_time_summary_table = ""
     trips_over_time_moe_info = ""
@@ -25,7 +25,9 @@ def render_overview(report: dict, timestamp: bool=True) -> str:
         dataset_stats_table = render_dataset_statistics(report[const.DS_STATISTICS])
 
     if const.MISSING_VALUES in report and report[const.MISSING_VALUES].data is not None:
-        missing_values_table = render_missing_values(report[const.MISSING_VALUES], timestamp)
+        missing_values_table = render_missing_values(
+            report[const.MISSING_VALUES], timestamp
+        )
 
     if (
         const.TRIPS_OVER_TIME in report
@@ -118,7 +120,7 @@ def render_dataset_statistics(dataset_statistics: Section) -> str:
     return dataset_stats_html
 
 
-def render_missing_values(missing_values: Section, timestamp:bool=True) -> str:
+def render_missing_values(missing_values: Section, timestamp: bool = True) -> str:
     ci = missing_values.conf_interval
     data = missing_values.data
     if timestamp:
