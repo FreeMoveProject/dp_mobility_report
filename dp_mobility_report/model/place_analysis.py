@@ -13,15 +13,15 @@ from dp_mobility_report.privacy import diff_privacy
 
 
 def get_visits_per_tile(
-    mreport: "DpMobilityReport", eps: Optional[float], record_count: Optional[int]
+    dpmreport: "DpMobilityReport", eps: Optional[float], record_count: Optional[int]
 ) -> Section:
     epsi = eps
 
-    sensitivity = 2 * mreport.max_trips_per_user
+    sensitivity = 2 * dpmreport.max_trips_per_user
     # count number of visits for each location
     visits_per_tile = (
-        mreport.df[
-            mreport.df[const.TILE_ID].isin(mreport.tessellation.tile_id)
+        dpmreport.df[
+            dpmreport.df[const.TILE_ID].isin(dpmreport.tessellation.tile_id)
         ]  # only include records within tessellation
         .groupby(const.TILE_ID)
         .aggregate(visits=(const.TILE_ID, "count"))
@@ -30,10 +30,10 @@ def get_visits_per_tile(
     )
 
     # number of records outside of the tessellation
-    n_outliers = int(len(mreport.df) - visits_per_tile.visits.sum())
+    n_outliers = int(len(dpmreport.df) - visits_per_tile.visits.sum())
 
     visits_per_tile = visits_per_tile.merge(
-        mreport.tessellation[[const.TILE_ID, const.TILE_NAME]],
+        dpmreport.tessellation[[const.TILE_ID, const.TILE_NAME]],
         on=const.TILE_ID,
         how="outer",
     )
@@ -98,22 +98,22 @@ def _get_hour_bin(hour: int, timewindows: np.ndarray) -> str:
 
 
 def get_visits_per_tile_timewindow(
-    mreport: "DpMobilityReport", eps: Optional[float], record_count: Optional[int]
+    dpmreport: "DpMobilityReport", eps: Optional[float], record_count: Optional[int]
 ) -> Section:
-    mreport.df["timewindows"] = mreport.df[const.HOUR].apply(
-        lambda x: _get_hour_bin(x, mreport.timewindows)
+    dpmreport.df["timewindows"] = dpmreport.df[const.HOUR].apply(
+        lambda x: _get_hour_bin(x, dpmreport.timewindows)
     )
 
     # only points within tessellation and end points
-    counts_per_tile_timewindow = mreport.df[
-        (mreport.df[const.POINT_TYPE] == const.END)
-        & mreport.df[const.TILE_ID].isin(mreport.tessellation[const.TILE_ID])
+    counts_per_tile_timewindow = dpmreport.df[
+        (dpmreport.df[const.POINT_TYPE] == const.END)
+        & dpmreport.df[const.TILE_ID].isin(dpmreport.tessellation[const.TILE_ID])
     ][[const.TILE_ID, const.IS_WEEKEND, "timewindows"]]
 
     # create full combination of all times and tiles for application of dp
-    tile_ids = mreport.tessellation[const.TILE_ID].unique()
-    is_weekend = mreport.df[const.IS_WEEKEND].unique()
-    timewindows = mreport.df.timewindows.unique()
+    tile_ids = dpmreport.tessellation[const.TILE_ID].unique()
+    is_weekend = dpmreport.df[const.IS_WEEKEND].unique()
+    timewindows = dpmreport.df.timewindows.unique()
     full_combination = pd.DataFrame(
         list(map(np.ravel, np.meshgrid(tile_ids, is_weekend, timewindows))),
         index=[const.TILE_ID, const.IS_WEEKEND, "timewindows"],
@@ -140,11 +140,11 @@ def get_visits_per_tile_timewindow(
     counts_per_tile_timewindow = pd.Series(
         index=counts_per_tile_timewindow.index,
         data=diff_privacy.counts_dp(
-            counts_per_tile_timewindow.values, eps, mreport.max_trips_per_user
+            counts_per_tile_timewindow.values, eps, dpmreport.max_trips_per_user
         ),
     )
 
-    moe = diff_privacy.laplace_margin_of_error(0.95, eps, mreport.max_trips_per_user)
+    moe = diff_privacy.laplace_margin_of_error(0.95, eps, dpmreport.max_trips_per_user)
 
     # scale to record count of overview segment
     if (record_count is not None) and (counts_per_tile_timewindow.sum() != 0):

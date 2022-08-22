@@ -8,15 +8,15 @@ from dp_mobility_report.model import user_analysis
 
 
 @pytest.fixture
-def test_mreport():
+def test_dpmreport():
     """Create a test report."""
     test_data = pd.read_csv("tests/test_files/test_data.csv")
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
     return DpMobilityReport(test_data, test_tessellation, privacy_budget=None)
 
 
-def test_get_trips_per_user(test_mreport):
-    trips_per_user = user_analysis.get_trips_per_user(test_mreport, None)
+def test_get_trips_per_user(test_dpmreport):
+    trips_per_user = user_analysis.get_trips_per_user(test_dpmreport, None)
     assert trips_per_user.data[0].round().tolist() == [
         5.0,
         0.0,
@@ -44,8 +44,8 @@ def test_get_trips_per_user(test_mreport):
     assert trips_per_user.quartiles.tolist() == [1.0, 3.75, 5.0, 6.25, 9.0]
 
 
-def test_get_user_time_delta(test_mreport):
-    user_time_delta = user_analysis.get_user_time_delta(test_mreport, None)
+def test_get_user_time_delta(test_dpmreport):
+    user_time_delta = user_analysis.get_user_time_delta(test_dpmreport, None)
     assert user_time_delta.quartiles[0].total_seconds() == -2613
     assert user_time_delta.quartiles[1].total_seconds() == 26630
     assert user_time_delta.quartiles[2].total_seconds() == 63127
@@ -53,8 +53,8 @@ def test_get_user_time_delta(test_mreport):
     assert user_time_delta.quartiles[4].total_seconds() == 347720
 
 
-def test_get_radius_of_gyration(test_mreport):
-    rog = user_analysis.get_radius_of_gyration(test_mreport, None)
+def test_get_radius_of_gyration(test_dpmreport):
+    rog = user_analysis.get_radius_of_gyration(test_dpmreport, None)
     assert rog.data[0].round().tolist() == [
         10.0,
         0.0,
@@ -85,8 +85,8 @@ def test_get_radius_of_gyration(test_mreport):
     assert rog.quartiles.round(3).tolist() == [2.200, 3.325, 3.529, 3.881, 4.568]
 
 
-def test_get_user_tile_count(test_mreport):
-    user_tile_count = user_analysis.get_user_tile_count(test_mreport, None)
+def test_get_user_tile_count(test_dpmreport):
+    user_tile_count = user_analysis.get_user_tile_count(test_dpmreport, None)
     assert user_tile_count.data[0].round().tolist() == [10.0, 0.0, 90.0]
     assert user_tile_count.data[1].round(1).tolist() == [2, 3, 4]
     assert len(user_tile_count.data[0]) == 3
@@ -94,8 +94,8 @@ def test_get_user_tile_count(test_mreport):
     assert user_tile_count.quartiles.round().tolist() == [2, 4, 4, 4, 4]
 
 
-def test_get_mobility_entropy(test_mreport):
-    mobility_entropy = user_analysis.get_mobility_entropy(test_mreport, None)
+def test_get_mobility_entropy(test_dpmreport):
+    mobility_entropy = user_analysis.get_mobility_entropy(test_dpmreport, None)
     assert mobility_entropy.data[0].round().tolist() == [10.0, 90.0]
     assert mobility_entropy.data[1].round(2).tolist() == [
         0.8,

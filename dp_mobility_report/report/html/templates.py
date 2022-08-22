@@ -21,7 +21,7 @@ from dp_mobility_report.report.html import (
 
 
 def render_html(
-    mreport: "DpMobilityReport", output_filename: str, top_n_flows: int = 100
+    dpmreport: "DpMobilityReport", output_filename: str, top_n_flows: int = 100
 ) -> Tuple[str, Path]:
     template_structure = html_utils.get_template("structure.html")
     temp_map_folder = Path(os.path.join(tempfile.gettempdir(), "maps"))
@@ -35,23 +35,23 @@ def render_html(
     od_analysis_segment = ""
     user_analysis_segment = ""
 
-    is_all_analyses = const.ALL in mreport.analysis_selection
+    is_all_analyses = const.ALL in dpmreport.analysis_selection
 
-    config_segment = config_templates.render_config(mreport)
+    config_segment = config_templates.render_config(dpmreport)
 
-    if is_all_analyses | (const.OVERVIEW in mreport.analysis_selection):
-        overview_segment = overview_templates.render_overview(mreport.report)
+    if is_all_analyses | (const.OVERVIEW in dpmreport.analysis_selection):
+        overview_segment = overview_templates.render_overview(dpmreport.report)
 
-    if is_all_analyses | (const.PLACE_ANALYSIS in mreport.analysis_selection):
+    if is_all_analyses | (const.PLACE_ANALYSIS in dpmreport.analysis_selection):
         place_analysis_segment = place_analysis_templates.render_place_analysis(
-            mreport.report, mreport.tessellation, temp_map_folder, output_filename
+            dpmreport.report, dpmreport.tessellation, temp_map_folder, output_filename
         )
-    if is_all_analyses | (const.OD_ANALYSIS in mreport.analysis_selection):
+    if is_all_analyses | (const.OD_ANALYSIS in dpmreport.analysis_selection):
         od_analysis_segment = od_analysis_templates.render_od_analysis(
-            mreport, top_n_flows, temp_map_folder, output_filename
+            dpmreport, top_n_flows, temp_map_folder, output_filename
         )
-    if is_all_analyses | (const.USER_ANALYSIS in mreport.analysis_selection):
-        user_analysis_segment = user_analysis_templates.render_user_analysis(mreport)
+    if is_all_analyses | (const.USER_ANALYSIS in dpmreport.analysis_selection):
+        user_analysis_segment = user_analysis_templates.render_user_analysis(dpmreport)
 
     return (
         template_structure.render(

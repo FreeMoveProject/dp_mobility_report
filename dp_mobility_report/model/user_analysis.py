@@ -14,9 +14,9 @@ from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
 
 
-def get_trips_per_user(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
-    user_nunique = mreport.df.groupby(const.UID).nunique()[const.TID]
-    max_trips = mreport.max_trips_per_user if mreport.user_privacy else None
+def get_trips_per_user(dpmreport: "DpMobilityReport", eps: Optional[float]) -> Section:
+    user_nunique = dpmreport.df.groupby(const.UID).nunique()[const.TID]
+    max_trips = dpmreport.max_trips_per_user if dpmreport.user_privacy else None
 
     return m_utils.hist_section(
         user_nunique,
@@ -24,21 +24,23 @@ def get_trips_per_user(mreport: "DpMobilityReport", eps: Optional[float]) -> Sec
         sensitivity=1,
         hist_max=max_trips,
         bin_type=int,
-        evalu=mreport.evalu,
+        evalu=dpmreport.evalu,
     )
 
 
 def get_user_time_delta(
-    mreport: "DpMobilityReport", eps: Optional[float]
+    dpmreport: "DpMobilityReport", eps: Optional[float]
 ) -> Optional[Section]:
-    epsi = m_utils.get_epsi(mreport.evalu, eps, 6)
+    epsi = m_utils.get_epsi(dpmreport.evalu, eps, 6)
 
-    mreport.df = mreport.df.sort_values(
+    dpmreport.df = dpmreport.df.sort_values(
         [const.UID, const.TID, const.DATETIME]
     )  # assuming tid numbers are integers and given in a chronological order, as arranged in "preprocessing"
-    same_user = mreport.df[const.UID] == mreport.df[const.UID].shift()
-    same_tid = mreport.df[const.TID] == mreport.df[const.TID].shift()
-    user_time_delta = mreport.df[const.DATETIME] - mreport.df[const.DATETIME].shift()
+    same_user = dpmreport.df[const.UID] == dpmreport.df[const.UID].shift()
+    same_tid = dpmreport.df[const.TID] == dpmreport.df[const.TID].shift()
+    user_time_delta = (
+        dpmreport.df[const.DATETIME] - dpmreport.df[const.DATETIME].shift()
+    )
     user_time_delta[(same_tid) | (~same_user)] = None
     user_time_delta = user_time_delta[user_time_delta.notnull()]
     overlaps = len(user_time_delta[user_time_delta < timedelta(seconds=0)])
@@ -49,14 +51,14 @@ def get_user_time_delta(
     sec = m_utils.hist_section(
         (user_time_delta.dt.total_seconds() / 3600),  # convert to hours
         eps,
-        sensitivity=mreport.max_trips_per_user,
-        evalu=mreport.evalu,
+        sensitivity=dpmreport.max_trips_per_user,
+        evalu=dpmreport.evalu,
     )
     if sec.quartiles["min"] < 0:  # are there overlaps according to dp minimum?
         sec.n_outliers = diff_privacy.count_dp(
             overlaps,
             epsi,
-            mreport.max_trips_per_user,
+            dpmreport.max_trips_per_user,
         )
     else:
         sec.n_outliers = None
@@ -67,15 +69,17 @@ def get_user_time_delta(
     return sec
 
 
-def get_radius_of_gyration(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
-    rg = _radius_of_gyration(mreport.df)
+def get_radius_of_gyration(
+    dpmreport: "DpMobilityReport", eps: Optional[float]
+) -> Section:
+    rg = _radius_of_gyration(dpmreport.df)
     return m_utils.hist_section(
         rg,
         eps,
         sensitivity=1,
-        hist_max=mreport.max_radius_of_gyration,
-        bin_range=mreport.bin_range_radius_of_gyration,
-        evalu=mreport.evalu,
+        hist_max=dpmreport.max_radius_of_gyration,
+        bin_range=dpmreport.bin_range_radius_of_gyration,
+        evalu=dpmreport.evalu,
     )
 
 
@@ -117,15 +121,15 @@ def _tile_visits_by_user(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def get_user_tile_count(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
-    user_tile_count = mreport.df.groupby(const.UID).nunique()[const.TILE_ID]
+def get_user_tile_count(dpmreport: "DpMobilityReport", eps: Optional[float]) -> Section:
+    user_tile_count = dpmreport.df.groupby(const.UID).nunique()[const.TILE_ID]
 
     return m_utils.hist_section(
         user_tile_count,
         eps,
         sensitivity=1,
         bin_type=int,
-        evalu=mreport.evalu,
+        evalu=dpmreport.evalu,
     )
 
 
@@ -151,8 +155,10 @@ def _mobility_entropy(df: pd.DataFrame) -> np.ndarray:
     return entropy
 
 
-def get_mobility_entropy(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
-    mobility_entropy = _mobility_entropy(mreport.df)
+def get_mobility_entropy(
+    dpmreport: "DpMobilityReport", eps: Optional[float]
+) -> Section:
+    mobility_entropy = _mobility_entropy(dpmreport.df)
 
     return m_utils.hist_section(
         mobility_entropy,
@@ -160,5 +166,5 @@ def get_mobility_entropy(mreport: "DpMobilityReport", eps: Optional[float]) -> S
         sensitivity=1,
         bin_range=0.1,
         hist_max=1,
-        evalu=mreport.evalu,
+        evalu=dpmreport.evalu,
     )

@@ -44,11 +44,11 @@ def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame) -> pd.DataFrame:
 
 def get_od_flows(
     od_shape: pd.DataFrame,
-    mreport: "DpMobilityReport",
+    dpmreport: "DpMobilityReport",
     eps: Optional[float],
     trip_count: Optional[int],
 ) -> Section:
-    sensitivity = mreport.max_trips_per_user
+    sensitivity = dpmreport.max_trips_per_user
     od_flows = (
         od_shape.groupby([const.TILE_ID, const.TILE_ID_END])
         .aggregate(flow=(const.TID, "count"))
@@ -63,7 +63,7 @@ def get_od_flows(
     )
 
     # fill all potential combinations with 0s for correct application of dp
-    full_tile_ids = np.unique(mreport.tessellation[const.TILE_ID])
+    full_tile_ids = np.unique(dpmreport.tessellation[const.TILE_ID])
     full_combinations = list(map(np.ravel, np.meshgrid(full_tile_ids, full_tile_ids)))
     od_flows = pd.DataFrame(
         {"origin": full_combinations[0], "destination": full_combinations[1]}
@@ -110,7 +110,7 @@ def get_intra_tile_flows(od_flows: pd.DataFrame) -> int:
 
 
 def get_travel_time(
-    od_shape: pd.DataFrame, mreport: "DpMobilityReport", eps: Optional[float]
+    od_shape: pd.DataFrame, dpmreport: "DpMobilityReport", eps: Optional[float]
 ) -> Section:
 
     travel_time = od_shape[const.DATETIME_END] - od_shape[const.DATETIME]
@@ -119,16 +119,16 @@ def get_travel_time(
     return m_utils.hist_section(
         travel_time,
         eps,
-        mreport.max_trips_per_user,
-        hist_max=mreport.max_travel_time,
-        bin_range=mreport.bin_range_travel_time,
+        dpmreport.max_trips_per_user,
+        hist_max=dpmreport.max_travel_time,
+        bin_range=dpmreport.bin_range_travel_time,
         bin_type=int,
-        evalu=mreport.evalu,
+        evalu=dpmreport.evalu,
     )
 
 
 def get_jump_length(
-    od_shape: pd.DataFrame, mreport: "DpMobilityReport", eps: Optional[float]
+    od_shape: pd.DataFrame, dpmreport: "DpMobilityReport", eps: Optional[float]
 ) -> Section:
 
     # parallel computation for speed up
@@ -138,8 +138,8 @@ def get_jump_length(
     return m_utils.hist_section(
         jump_length,
         eps,
-        mreport.max_trips_per_user,
-        hist_max=mreport.max_jump_length,
-        bin_range=mreport.bin_range_jump_length,
-        evalu=mreport.evalu,
+        dpmreport.max_trips_per_user,
+        hist_max=dpmreport.max_jump_length,
+        bin_range=dpmreport.bin_range_jump_length,
+        evalu=dpmreport.evalu,
     )

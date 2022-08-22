@@ -23,7 +23,7 @@ from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_od_analysis(
-    mreport: "DpMobilityReport",
+    dpmreport: "DpMobilityReport",
     top_n_flows: int,
     temp_map_folder: Path,
     output_filename: str,
@@ -49,18 +49,18 @@ def render_od_analysis(
     jump_length_summary_table = ""
     jump_length_moe_info = ""
 
-    report = mreport.report
+    report = dpmreport.report
 
     if const.OD_FLOWS in report and report[const.OD_FLOWS].data is not None:
         od_legend = render_origin_destination_flows(
             report[const.OD_FLOWS],
-            mreport.tessellation,
+            dpmreport.tessellation,
             top_n_flows,
             THRESHOLD,
             temp_map_folder,
         )
         intra_tile_flows_info = render_intra_tile_flows(
-            report[const.OD_FLOWS], len(mreport.tessellation)
+            report[const.OD_FLOWS], len(dpmreport.tessellation)
         )
         quartiles = report[const.OD_FLOWS].quartiles.round()
         flows_summary_table = render_summary(
@@ -69,12 +69,12 @@ def render_od_analysis(
         )
         flows_cumsum_linechart = render_flows_cumsum(report[const.OD_FLOWS])
         most_freq_flows_ranking = render_most_freq_flows_ranking(
-            report[const.OD_FLOWS], mreport.tessellation
+            report[const.OD_FLOWS], dpmreport.tessellation
         )
 
     if const.TRAVEL_TIME in report and report[const.TRAVEL_TIME].data is not None:
         travel_time_hist_info = render_user_input_info(
-            mreport.max_travel_time, mreport.bin_range_travel_time
+            dpmreport.max_travel_time, dpmreport.bin_range_travel_time
         )
         travel_time_hist = render_travel_time_hist(report[const.TRAVEL_TIME])
         travel_time_summary_table = render_summary(report[const.TRAVEL_TIME].quartiles)
@@ -84,7 +84,7 @@ def render_od_analysis(
 
     if const.JUMP_LENGTH in report and report[const.JUMP_LENGTH].data is not None:
         jump_length_hist_info = render_user_input_info(
-            mreport.max_jump_length, mreport.bin_range_jump_length
+            dpmreport.max_jump_length, dpmreport.bin_range_jump_length
         )
         jump_length_hist = render_jump_length_hist(report[const.JUMP_LENGTH])
         jump_length_summary_table = render_summary(report[const.JUMP_LENGTH].quartiles)

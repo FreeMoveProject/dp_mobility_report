@@ -264,9 +264,13 @@ def test_to_html_file(test_data, test_tessellation, tmp_path):
 
     file_name = tmp_path / "html/test_output1.html"
     file_name.parent.mkdir()
-    DpMobilityReport(test_data, test_tessellation, privacy_budget=None).to_file(file_name)
+    DpMobilityReport(test_data, test_tessellation, privacy_budget=None).to_file(
+        file_name
+    )
     assert file_name.is_file()
 
     file_name = tmp_path / "html/test_output2.html"
-    DpMobilityReport(test_data, test_tessellation, privacy_budget=0.1).to_file(file_name)
+    DpMobilityReport(test_data, test_tessellation, privacy_budget=0.1).to_file(
+        file_name
+    )
     assert file_name.is_file()

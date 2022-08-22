@@ -13,21 +13,23 @@ from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
 
 
-def get_dataset_statistics(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
-    epsi = m_utils.get_epsi(mreport.evalu, eps, 4)
+def get_dataset_statistics(
+    dpmreport: "DpMobilityReport", eps: Optional[float]
+) -> Section:
+    epsi = m_utils.get_epsi(dpmreport.evalu, eps, 4)
 
     # counts for complete and incomplete trips
     points_per_trip = (
-        mreport.df.reset_index().groupby(const.TID).count()["index"].value_counts()
+        dpmreport.df.reset_index().groupby(const.TID).count()["index"].value_counts()
     )
     n_incomplete_trips = 0 if 1 not in points_per_trip else points_per_trip[1]
     n_incomplete_trips = diff_privacy.count_dp(
         n_incomplete_trips,
         epsi,
-        mreport.max_trips_per_user,
+        dpmreport.max_trips_per_user,
     )
     moe_incomplete_trips = diff_privacy.laplace_margin_of_error(
-        0.95, epsi, mreport.max_trips_per_user
+        0.95, epsi, dpmreport.max_trips_per_user
     )
     ci95_incomplete_trips = diff_privacy.conf_interval(
         n_incomplete_trips, moe_incomplete_trips
@@ -37,10 +39,10 @@ def get_dataset_statistics(mreport: "DpMobilityReport", eps: Optional[float]) ->
     n_complete_trips = diff_privacy.count_dp(
         n_complete_trips,
         epsi,
-        2 * mreport.max_trips_per_user,
+        2 * dpmreport.max_trips_per_user,
     )
     moe_complete_trips = diff_privacy.laplace_margin_of_error(
-        0.95, epsi, 2 * mreport.max_trips_per_user
+        0.95, epsi, 2 * dpmreport.max_trips_per_user
     )
     ci95_complete_trips = diff_privacy.conf_interval(
         n_complete_trips, moe_complete_trips
@@ -68,19 +70,19 @@ def get_dataset_statistics(mreport: "DpMobilityReport", eps: Optional[float]) ->
     ci95_records = diff_privacy.conf_interval(n_records, moe_records)
 
     n_users = diff_privacy.count_dp(
-        mreport.df[const.UID].nunique(), epsi, 1, nonzero=True
+        dpmreport.df[const.UID].nunique(), epsi, 1, nonzero=True
     )
     moe_users = diff_privacy.laplace_margin_of_error(0.95, epsi, 1)
     ci95_users = diff_privacy.conf_interval(n_users, moe_users)
 
     n_locations = diff_privacy.count_dp(
-        mreport.df.groupby([const.LAT, const.LNG]).ngroups,
+        dpmreport.df.groupby([const.LAT, const.LNG]).ngroups,
         epsi,
-        2 * mreport.max_trips_per_user,
+        2 * dpmreport.max_trips_per_user,
         nonzero=True,
     )
     moe_locations = diff_privacy.laplace_margin_of_error(
-        0.95, epsi, 2 * mreport.max_trips_per_user
+        0.95, epsi, 2 * dpmreport.max_trips_per_user
     )
     ci95_locations = diff_privacy.conf_interval(n_locations, moe_locations)
 
@@ -103,34 +105,34 @@ def get_dataset_statistics(mreport: "DpMobilityReport", eps: Optional[float]) ->
     return Section(data=stats, privacy_budget=eps, conf_interval=conf_interval)
 
 
-def get_missing_values(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
+def get_missing_values(dpmreport: "DpMobilityReport", eps: Optional[float]) -> Section:
     columns = [const.UID, const.TID, const.DATETIME, const.LAT, const.LNG]
-    epsi = m_utils.get_epsi(mreport.evalu, eps, len(columns))
+    epsi = m_utils.get_epsi(dpmreport.evalu, eps, len(columns))
 
-    missings = dict((len(mreport.df) - mreport.df.count())[columns])
+    missings = dict((len(dpmreport.df) - dpmreport.df.count())[columns])
 
     moe = diff_privacy.laplace_margin_of_error(
-        0.95, epsi, 2 * mreport.max_trips_per_user
+        0.95, epsi, 2 * dpmreport.max_trips_per_user
     )
     conf_interval = {}
     for col in columns:
         missings[col] = diff_privacy.count_dp(
-            missings[col], epsi, 2 * mreport.max_trips_per_user
+            missings[col], epsi, 2 * dpmreport.max_trips_per_user
         )
         conf_interval["ci95_" + col] = diff_privacy.conf_interval(missings[col], moe)
 
     return Section(data=missings, privacy_budget=eps, conf_interval=conf_interval)
 
 
-def get_trips_over_time(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
-    epsi = m_utils.get_epsi(mreport.evalu, eps, 3)
+def get_trips_over_time(dpmreport: "DpMobilityReport", eps: Optional[float]) -> Section:
+    epsi = m_utils.get_epsi(dpmreport.evalu, eps, 3)
     epsi_limits = epsi * 2 if epsi is not None else None
 
-    df_trip = mreport.df[
-        (mreport.df[const.POINT_TYPE] == const.END)
+    df_trip = dpmreport.df[
+        (dpmreport.df[const.POINT_TYPE] == const.END)
     ]  # only count each trip once
     dp_bounds = diff_privacy.bounds_dp(
-        df_trip[const.DATETIME], epsi_limits, mreport.max_trips_per_user
+        df_trip[const.DATETIME], epsi_limits, dpmreport.max_trips_per_user
     )
 
     # cut based on dp min and max values
@@ -169,11 +171,11 @@ def get_trips_over_time(mreport: "DpMobilityReport", eps: Optional[float]) -> Se
     trip_count["trip_count"] = diff_privacy.counts_dp(
         trip_count["trip_count"].values,
         epsi,
-        mreport.max_trips_per_user,
+        dpmreport.max_trips_per_user,
     )
 
     moe_laplace = diff_privacy.laplace_margin_of_error(
-        0.95, epsi, mreport.max_trips_per_user
+        0.95, epsi, dpmreport.max_trips_per_user
     )
 
     # as percent instead of absolute values
@@ -193,13 +195,17 @@ def get_trips_over_time(mreport: "DpMobilityReport", eps: Optional[float]) -> Se
     )
 
 
-def get_trips_per_weekday(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
-    mreport.df.loc[:, const.DATE] = mreport.df[const.DATETIME].dt.date
-    mreport.df.loc[:, const.DAY_NAME] = mreport.df[const.DATETIME].dt.day_name()
-    mreport.df.loc[:, const.WEEKDAY] = mreport.df[const.DATETIME].dt.weekday
+def get_trips_per_weekday(
+    dpmreport: "DpMobilityReport", eps: Optional[float]
+) -> Section:
+    dpmreport.df.loc[:, const.DATE] = dpmreport.df[const.DATETIME].dt.date
+    dpmreport.df.loc[:, const.DAY_NAME] = dpmreport.df[const.DATETIME].dt.day_name()
+    dpmreport.df.loc[:, const.WEEKDAY] = dpmreport.df[const.DATETIME].dt.weekday
 
     trips_per_weekday = (
-        mreport.df[mreport.df[const.POINT_TYPE] == const.END]  # count trips not records
+        dpmreport.df[
+            dpmreport.df[const.POINT_TYPE] == const.END
+        ]  # count trips not records
         .sort_values(const.WEEKDAY)
         .groupby([const.DAY_NAME], sort=False)
         .count()[const.TID]
@@ -210,10 +216,10 @@ def get_trips_per_weekday(mreport: "DpMobilityReport", eps: Optional[float]) -> 
         data=diff_privacy.counts_dp(
             trips_per_weekday.values,
             eps,
-            mreport.max_trips_per_user,
+            dpmreport.max_trips_per_user,
         ),
     )
-    moe = diff_privacy.laplace_margin_of_error(0.95, eps, mreport.max_trips_per_user)
+    moe = diff_privacy.laplace_margin_of_error(0.95, eps, dpmreport.max_trips_per_user)
 
     trip_sum = np.sum(trips_per_weekday)
     if trip_sum != 0:
@@ -225,21 +231,21 @@ def get_trips_per_weekday(mreport: "DpMobilityReport", eps: Optional[float]) -> 
     )
 
 
-def get_trips_per_hour(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
-    hour_weekday = mreport.df.groupby(
+def get_trips_per_hour(dpmreport: "DpMobilityReport", eps: Optional[float]) -> Section:
+    hour_weekday = dpmreport.df.groupby(
         [const.HOUR, const.IS_WEEKEND, const.POINT_TYPE]
     ).count()[const.TID]
     hour_weekday.name = "count"
 
     hour_weekday = hour_weekday.reset_index()
     hour_weekday["count"] = diff_privacy.counts_dp(
-        hour_weekday["count"], eps, mreport.max_trips_per_user
+        hour_weekday["count"], eps, dpmreport.max_trips_per_user
     )
 
     hour_weekday[const.TIME_CATEGORY] = (
         hour_weekday[const.IS_WEEKEND] + "_" + hour_weekday[const.POINT_TYPE]
     )
-    moe = diff_privacy.laplace_margin_of_error(0.95, eps, mreport.max_trips_per_user)
+    moe = diff_privacy.laplace_margin_of_error(0.95, eps, dpmreport.max_trips_per_user)
 
     # as percent instead of absolute values
     trip_sum = np.sum(

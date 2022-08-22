@@ -16,8 +16,8 @@ from dp_mobility_report.report.html.html_utils import (
 from dp_mobility_report.visualization import plot, v_utils
 
 
-def render_user_analysis(mreport: "DpMobilityReport") -> str:
-    trips_per_user_info = f"Trips per user are limited according to the configured maximum of trips per user: {mreport.max_trips_per_user}"
+def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
+    trips_per_user_info = f"Trips per user are limited according to the configured maximum of trips per user: {dpmreport.max_trips_per_user}"
     trips_per_user_hist = ""
     trips_per_user_summary_table = ""
     trips_per_user_moe_info = ""
@@ -36,7 +36,7 @@ def render_user_analysis(mreport: "DpMobilityReport") -> str:
     mobility_entropy_summary_table = ""
     mobility_entropy_moe_info = ""
 
-    report = mreport.report
+    report = dpmreport.report
 
     if (const.TRIPS_PER_USER in report) and (
         report[const.TRIPS_PER_USER].data is not None
@@ -67,7 +67,7 @@ def render_user_analysis(mreport: "DpMobilityReport") -> str:
         report[const.RADIUS_OF_GYRATION].data is not None
     ):
         radius_of_gyration_hist_info = render_user_input_info(
-            mreport.max_radius_of_gyration, mreport.bin_range_radius_of_gyration
+            dpmreport.max_radius_of_gyration, dpmreport.bin_range_radius_of_gyration
         )
         radius_of_gyration_hist = render_radius_of_gyration(
             report[const.RADIUS_OF_GYRATION]
