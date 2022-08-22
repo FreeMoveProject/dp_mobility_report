@@ -4,7 +4,7 @@ import config
 import geopandas as gpd
 import pandas as pd
 
-from dp_mobility_report import MobilityReport
+from dp_mobility_report import DpMobilityReport
 
 path_data = config.path_data
 path_html_output = config.path_html_output
@@ -19,7 +19,7 @@ df = pd.read_csv(
 )
 tessellation = gpd.read_file(os.path.join(path_data, "berlin_tessellation.gpkg"))
 
-report = MobilityReport(
+report = DpMobilityReport(
     df,
     tessellation,
     privacy_budget=1,
@@ -34,7 +34,7 @@ report = MobilityReport(
 )
 report.to_file(os.path.join(path_html_output, "berlin.html"), top_n_flows=300)
 
-report = MobilityReport(
+report = DpMobilityReport(
     df,
     tessellation,
     privacy_budget=None,

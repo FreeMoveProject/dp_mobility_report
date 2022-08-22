@@ -2,7 +2,7 @@ from datetime import timedelta
 from typing import TYPE_CHECKING, List, Optional
 
 if TYPE_CHECKING:
-    from dp_mobility_report import MobilityReport
+    from dp_mobility_report import DpMobilityReport
 
 import numpy as np
 import pandas as pd
@@ -14,7 +14,7 @@ from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
 
 
-def get_trips_per_user(mreport: "MobilityReport", eps: Optional[float]) -> Section:
+def get_trips_per_user(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
     user_nunique = mreport.df.groupby(const.UID).nunique()[const.TID]
     max_trips = mreport.max_trips_per_user if mreport.user_privacy else None
 
@@ -29,7 +29,7 @@ def get_trips_per_user(mreport: "MobilityReport", eps: Optional[float]) -> Secti
 
 
 def get_user_time_delta(
-    mreport: "MobilityReport", eps: Optional[float]
+    mreport: "DpMobilityReport", eps: Optional[float]
 ) -> Optional[Section]:
     epsi = m_utils.get_epsi(mreport.evalu, eps, 6)
 
@@ -67,7 +67,7 @@ def get_user_time_delta(
     return sec
 
 
-def get_radius_of_gyration(mreport: "MobilityReport", eps: Optional[float]) -> Section:
+def get_radius_of_gyration(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
     rg = _radius_of_gyration(mreport.df)
     return m_utils.hist_section(
         rg,
@@ -117,7 +117,7 @@ def _tile_visits_by_user(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def get_user_tile_count(mreport: "MobilityReport", eps: Optional[float]) -> Section:
+def get_user_tile_count(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
     user_tile_count = mreport.df.groupby(const.UID).nunique()[const.TILE_ID]
 
     return m_utils.hist_section(
@@ -151,7 +151,7 @@ def _mobility_entropy(df: pd.DataFrame) -> np.ndarray:
     return entropy
 
 
-def get_mobility_entropy(mreport: "MobilityReport", eps: Optional[float]) -> Section:
+def get_mobility_entropy(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
     mobility_entropy = _mobility_entropy(mreport.df)
 
     return m_utils.hist_section(

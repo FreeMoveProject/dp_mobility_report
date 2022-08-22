@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from dp_mobility_report import MobilityReport
+    from dp_mobility_report import DpMobilityReport
 
 import numpy as np
 import pandas as pd
@@ -44,7 +44,7 @@ def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame) -> pd.DataFrame:
 
 def get_od_flows(
     od_shape: pd.DataFrame,
-    mreport: "MobilityReport",
+    mreport: "DpMobilityReport",
     eps: Optional[float],
     trip_count: Optional[int],
 ) -> Section:
@@ -110,7 +110,7 @@ def get_intra_tile_flows(od_flows: pd.DataFrame) -> int:
 
 
 def get_travel_time(
-    od_shape: pd.DataFrame, mreport: "MobilityReport", eps: Optional[float]
+    od_shape: pd.DataFrame, mreport: "DpMobilityReport", eps: Optional[float]
 ) -> Section:
 
     travel_time = od_shape[const.DATETIME_END] - od_shape[const.DATETIME]
@@ -128,7 +128,7 @@ def get_travel_time(
 
 
 def get_jump_length(
-    od_shape: pd.DataFrame, mreport: "MobilityReport", eps: Optional[float]
+    od_shape: pd.DataFrame, mreport: "DpMobilityReport", eps: Optional[float]
 ) -> Section:
 
     # parallel computation for speed up

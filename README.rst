@@ -37,26 +37,26 @@ or from GitHub:
         pip install git+https://github.com/FreeMoveProject/dp_mobility_report
 
 
-Data preparation:
+Data preparation
 **********************
 
 - **df**: a pandas ``DataFrame``. Expected columns: User ID ``uid``, Trip ID ``tid``, Timestamp ``datetime``, latitude and longitude in CRS EPSG:4326 ``lat`` and ``lng``.
 - **tessellation**: a geopandas ``GeoDataFrame`` with polygons. Expected columns ``tile_id``. The tessellation is used for spatial aggregations of the data.
 
-Create a mobility report as HTML:
+Create a mobility report as HTML
 **************************************
 
 .. code-block:: python
 
         import pandas as pd
         import geopandas as gpd
-        from dp_mobility_report import MobilityReport
+        from dp_mobility_report import DpMobilityReport
 
         # -- insert paths --
         df = pd.read_csv("mobility_dataset.csv")
         tessellation = gpd.read_file("tessellation.gpkg")
 
-        report = MobilityReport(df, tessellation, privacy_budget=1, max_trips_per_user=4)
+        report = DpMobilityReport(df, tessellation, privacy_budget=1, max_trips_per_user=4)
 
         report.to_file("my_mobility_report.html")
 

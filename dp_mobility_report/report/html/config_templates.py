@@ -3,10 +3,10 @@ from typing import TYPE_CHECKING
 from dp_mobility_report.report.html.html_utils import fmt, get_template
 
 if TYPE_CHECKING:
-    from dp_mobility_report import MobilityReport
+    from dp_mobility_report import DpMobilityReport
 
 
-def render_config(mreport: "MobilityReport") -> str:
+def render_config(mreport: "DpMobilityReport") -> str:
 
     config_table = render_config_table(mreport)
     privacy_info = render_privacy_info(mreport.privacy_budget is not None)
@@ -17,7 +17,7 @@ def render_config(mreport: "MobilityReport") -> str:
     )
 
 
-def render_config_table(mreport: "MobilityReport") -> str:
+def render_config_table(mreport: "DpMobilityReport") -> str:
 
     config_list = [
         {"name": "Max. trips per user", "value": fmt(mreport.max_trips_per_user)},

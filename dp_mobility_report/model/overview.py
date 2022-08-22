@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 if TYPE_CHECKING:
-    from dp_mobility_report import MobilityReport
+    from dp_mobility_report import DpMobilityReport
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import m_utils
@@ -13,7 +13,7 @@ from dp_mobility_report.model.section import Section
 from dp_mobility_report.privacy import diff_privacy
 
 
-def get_dataset_statistics(mreport: "MobilityReport", eps: Optional[float]) -> Section:
+def get_dataset_statistics(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
     epsi = m_utils.get_epsi(mreport.evalu, eps, 4)
 
     # counts for complete and incomplete trips
@@ -103,7 +103,7 @@ def get_dataset_statistics(mreport: "MobilityReport", eps: Optional[float]) -> S
     return Section(data=stats, privacy_budget=eps, conf_interval=conf_interval)
 
 
-def get_missing_values(mreport: "MobilityReport", eps: Optional[float]) -> Section:
+def get_missing_values(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
     columns = [const.UID, const.TID, const.DATETIME, const.LAT, const.LNG]
     epsi = m_utils.get_epsi(mreport.evalu, eps, len(columns))
 
@@ -122,7 +122,7 @@ def get_missing_values(mreport: "MobilityReport", eps: Optional[float]) -> Secti
     return Section(data=missings, privacy_budget=eps, conf_interval=conf_interval)
 
 
-def get_trips_over_time(mreport: "MobilityReport", eps: Optional[float]) -> Section:
+def get_trips_over_time(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
     epsi = m_utils.get_epsi(mreport.evalu, eps, 3)
     epsi_limits = epsi * 2 if epsi is not None else None
 
@@ -193,7 +193,7 @@ def get_trips_over_time(mreport: "MobilityReport", eps: Optional[float]) -> Sect
     )
 
 
-def get_trips_per_weekday(mreport: "MobilityReport", eps: Optional[float]) -> Section:
+def get_trips_per_weekday(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
     mreport.df.loc[:, const.DATE] = mreport.df[const.DATETIME].dt.date
     mreport.df.loc[:, const.DAY_NAME] = mreport.df[const.DATETIME].dt.day_name()
     mreport.df.loc[:, const.WEEKDAY] = mreport.df[const.DATETIME].dt.weekday
@@ -225,7 +225,7 @@ def get_trips_per_weekday(mreport: "MobilityReport", eps: Optional[float]) -> Se
     )
 
 
-def get_trips_per_hour(mreport: "MobilityReport", eps: Optional[float]) -> Section:
+def get_trips_per_hour(mreport: "DpMobilityReport", eps: Optional[float]) -> Section:
     hour_weekday = mreport.df.groupby(
         [const.HOUR, const.IS_WEEKEND, const.POINT_TYPE]
     ).count()[const.TID]

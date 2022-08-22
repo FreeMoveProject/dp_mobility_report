@@ -8,7 +8,7 @@ import skmob
 from geopandas.geodataframe import GeoDataFrame
 
 if TYPE_CHECKING:
-    from dp_mobility_report import MobilityReport
+    from dp_mobility_report import DpMobilityReport
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import od_analysis
@@ -23,7 +23,7 @@ from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_od_analysis(
-    mreport: "MobilityReport",
+    mreport: "DpMobilityReport",
     top_n_flows: int,
     temp_map_folder: Path,
     output_filename: str,

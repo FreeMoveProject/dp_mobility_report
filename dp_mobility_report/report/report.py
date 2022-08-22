@@ -6,7 +6,7 @@ from tqdm.auto import tqdm
 from dp_mobility_report.model.section import Section
 
 if TYPE_CHECKING:
-    from dp_mobility_report import MobilityReport
+    from dp_mobility_report import DpMobilityReport
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import (
@@ -45,7 +45,7 @@ def get_analysis_elements_info(analysis_selection: list) -> Tuple:
     return element_count, is_all_analyses
 
 
-def report_elements(mreport: "MobilityReport") -> dict:
+def report_elements(mreport: "DpMobilityReport") -> dict:
 
     report: dict = {}
     element_count, is_all_analyses = get_analysis_elements_info(
@@ -95,7 +95,7 @@ def report_elements(mreport: "MobilityReport") -> dict:
     return report
 
 
-def add_overview_elements(mreport: "MobilityReport", epsilon: float) -> dict:
+def add_overview_elements(mreport: "DpMobilityReport", epsilon: float) -> dict:
     return {
         const.DS_STATISTICS: overview.get_dataset_statistics(mreport, epsilon)
         if const.DS_STATISTICS in const.OVERVIEW_ELEMENTS
@@ -116,7 +116,7 @@ def add_overview_elements(mreport: "MobilityReport", epsilon: float) -> dict:
 
 
 def add_place_analysis_elements(
-    mreport: "MobilityReport", epsilon: float, record_count: Optional[int]
+    mreport: "DpMobilityReport", epsilon: float, record_count: Optional[int]
 ) -> dict:
     return {
         const.VISITS_PER_TILE: place_analysis.get_visits_per_tile(
@@ -133,7 +133,7 @@ def add_place_analysis_elements(
 
 
 def add_od_analysis_elements(
-    mreport: "MobilityReport",
+    mreport: "DpMobilityReport",
     _od_shape: DataFrame,
     epsilon: float,
     trip_count: Optional[int],
@@ -153,7 +153,7 @@ def add_od_analysis_elements(
     }
 
 
-def add_user_analysis_elements(mreport: "MobilityReport", epsilon: float) -> dict:
+def add_user_analysis_elements(mreport: "DpMobilityReport", epsilon: float) -> dict:
     return {
         const.TRIPS_PER_USER: user_analysis.get_trips_per_user(mreport, epsilon)
         if const.TRIPS_PER_USER in const.USER_ELEMENTS

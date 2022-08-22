@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 import matplotlib.pyplot as plt
 
 if TYPE_CHECKING:
-    from dp_mobility_report import MobilityReport
+    from dp_mobility_report import DpMobilityReport
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model.section import Section
@@ -16,7 +16,7 @@ from dp_mobility_report.report.html.html_utils import (
 from dp_mobility_report.visualization import plot, v_utils
 
 
-def render_user_analysis(mreport: "MobilityReport") -> str:
+def render_user_analysis(mreport: "DpMobilityReport") -> str:
     trips_per_user_info = f"Trips per user are limited according to the configured maximum of trips per user: {mreport.max_trips_per_user}"
     trips_per_user_hist = ""
     trips_per_user_summary_table = ""

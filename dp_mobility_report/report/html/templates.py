@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Tuple
 import pkg_resources
 
 if TYPE_CHECKING:
-    from dp_mobility_report import MobilityReport
+    from dp_mobility_report import DpMobilityReport
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.report.html import (
@@ -21,7 +21,7 @@ from dp_mobility_report.report.html import (
 
 
 def render_html(
-    mreport: "MobilityReport", output_filename: str, top_n_flows: int = 100
+    mreport: "DpMobilityReport", output_filename: str, top_n_flows: int = 100
 ) -> Tuple[str, Path]:
     template_structure = html_utils.get_template("structure.html")
     temp_map_folder = Path(os.path.join(tempfile.gettempdir(), "maps"))

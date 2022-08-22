@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 if TYPE_CHECKING:
-    from dp_mobility_report import MobilityReport
+    from dp_mobility_report import DpMobilityReport
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import m_utils
@@ -13,7 +13,7 @@ from dp_mobility_report.privacy import diff_privacy
 
 
 def get_visits_per_tile(
-    mreport: "MobilityReport", eps: Optional[float], record_count: Optional[int]
+    mreport: "DpMobilityReport", eps: Optional[float], record_count: Optional[int]
 ) -> Section:
     epsi = eps
 
@@ -98,7 +98,7 @@ def _get_hour_bin(hour: int, timewindows: np.ndarray) -> str:
 
 
 def get_visits_per_tile_timewindow(
-    mreport: "MobilityReport", eps: Optional[float], record_count: Optional[int]
+    mreport: "DpMobilityReport", eps: Optional[float], record_count: Optional[int]
 ) -> Section:
     mreport.df["timewindows"] = mreport.df[const.HOUR].apply(
         lambda x: _get_hour_bin(x, mreport.timewindows)

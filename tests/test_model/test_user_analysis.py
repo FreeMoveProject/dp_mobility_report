@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from dp_mobility_report import MobilityReport
+from dp_mobility_report import DpMobilityReport
 from dp_mobility_report.model import user_analysis
 
 
@@ -12,7 +12,7 @@ def test_mreport():
     """Create a test report."""
     test_data = pd.read_csv("tests/test_files/test_data.csv")
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
-    return MobilityReport(test_data, test_tessellation, privacy_budget=None)
+    return DpMobilityReport(test_data, test_tessellation, privacy_budget=None)
 
 
 def test_get_trips_per_user(test_mreport):
