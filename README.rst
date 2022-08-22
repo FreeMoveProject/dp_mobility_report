@@ -67,6 +67,8 @@ If the value is set to ``None`` no noise (i.e., no privacy guarantee) is applied
 The parameter ``max_trips_per_user`` specifies how many trips a user can contribute to the dataset at most. If a user is represented with more trips, a random sample is drawn according to ``max_trips_per_user``.
 If the value is set to ``None`` the full dataset is used. Note, that deriving the maximum trips per user from the data violates the differential privacy guarantee. Thus, ``None`` should only be used in combination with ``privacy_budget=None``.
 
+Please refer to the `documentation`_ for information on further parameters.
+
 Example HTMLs can be found in the examples_ folder.
 
 
@@ -77,6 +79,7 @@ This package was highly inspired by the `pandas-profiling/pandas-profiling`_ and
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
  
+.. _documentation: https://dp-mobility-report.readthedocs.io/en/latest/modules.html
 .. _examples: https://github.com/FreeMoveProject/dp_mobility_report/tree/main/examples/html
 .. _`pandas-profiling/pandas-profiling`: https://github.com/pandas-profiling/pandas-profiling
 .. _`scikit-mobility`: https://github.com/scikit-mobility
