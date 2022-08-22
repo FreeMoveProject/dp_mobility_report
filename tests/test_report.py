@@ -2,8 +2,8 @@ import geopandas as gpd
 import pandas as pd
 import pytest
 
-from dp_mobility_report import constants as const
 from dp_mobility_report import MobilityReport
+from dp_mobility_report import constants as const
 from dp_mobility_report.report import report
 
 

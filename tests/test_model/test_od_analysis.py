@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from dp_mobility_report import constants as const
 from dp_mobility_report import MobilityReport
+from dp_mobility_report import constants as const
 from dp_mobility_report.model import od_analysis
 
 

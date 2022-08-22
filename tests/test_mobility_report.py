@@ -2,8 +2,8 @@ import geopandas as gpd
 import pandas as pd
 import pytest
 
-from dp_mobility_report import constants as const
 from dp_mobility_report import MobilityReport
+from dp_mobility_report import constants as const
 
 
 @pytest.fixture
@@ -20,14 +20,10 @@ def test_tessellation():
 
 def test_MobilityReport(test_data, test_tessellation):
     """Test instance of MobilityReport is created properly with valid input and default values."""
-    mob_report = MobilityReport(
-        test_data, test_tessellation, privacy_budget=None
-    )
+    mob_report = MobilityReport(test_data, test_tessellation, privacy_budget=None)
     assert isinstance(mob_report, MobilityReport)
 
-    mob_report = MobilityReport(
-        test_data, test_tessellation, privacy_budget=0.1
-    )
+    mob_report = MobilityReport(test_data, test_tessellation, privacy_budget=0.1)
     assert isinstance(mob_report, MobilityReport)
     mob_report = MobilityReport(
         test_data, test_tessellation, privacy_budget=0.1, max_trips_per_user=None
@@ -57,23 +53,17 @@ def test_wrong_input_params_MobilityReport(test_data, test_tessellation):
     """Test if wrong input parameters are caught correctly."""
     # wrong input for privacy_butget
     with pytest.raises(TypeError):
-        MobilityReport(
-            "not a DataFrame", test_tessellation, privacy_budget=None
-        )
+        MobilityReport("not a DataFrame", test_tessellation, privacy_budget=None)
 
     # wrong input for tessellation
     with pytest.raises(TypeError):
-        MobilityReport(
-            test_data, "not a GeoDataFrame", privacy_budget=None
-        )
+        MobilityReport(test_data, "not a GeoDataFrame", privacy_budget=None)
 
     # wrong input for privacy_butget
     with pytest.raises(ValueError):
         MobilityReport(test_data, test_tessellation, privacy_budget=-1)
     with pytest.raises(TypeError):
-        MobilityReport(
-            test_data, test_tessellation, privacy_budget="not a number"
-        )
+        MobilityReport(test_data, test_tessellation, privacy_budget="not a number")
 
     # wrong input for max_trips_per_user
     with pytest.raises(ValueError):
@@ -229,9 +219,7 @@ def test_wrong_input_params_MobilityReport(test_data, test_tessellation):
 
 
 def test_report_output(test_data, test_tessellation):
-    report = MobilityReport(
-        test_data, test_tessellation, privacy_budget=None
-    ).report
+    report = MobilityReport(test_data, test_tessellation, privacy_budget=None).report
     assert isinstance(report, dict)
     assert list(report.keys()) == [
         const.DS_STATISTICS,
@@ -251,9 +239,7 @@ def test_report_output(test_data, test_tessellation):
         const.MOBILITY_ENTROPY,
     ]
 
-    report = MobilityReport(
-        test_data, test_tessellation, privacy_budget=1
-    ).report
+    report = MobilityReport(test_data, test_tessellation, privacy_budget=1).report
     assert isinstance(report, dict)
     assert list(report.keys()) == [
         const.DS_STATISTICS,
@@ -276,16 +262,11 @@ def test_report_output(test_data, test_tessellation):
 
 def test_to_html_file(test_data, test_tessellation, tmp_path):
 
-
     file_name = tmp_path / "html/test_output1.html"
     file_name.parent.mkdir()
-    MobilityReport(
-        test_data, test_tessellation, privacy_budget=None
-    ).to_file(file_name)
+    MobilityReport(test_data, test_tessellation, privacy_budget=None).to_file(file_name)
     assert file_name.is_file()
 
     file_name = tmp_path / "html/test_output2.html"
-    MobilityReport(
-        test_data, test_tessellation, privacy_budget=0.1
-    ).to_file(file_name)
+    MobilityReport(test_data, test_tessellation, privacy_budget=0.1).to_file(file_name)
     assert file_name.is_file()

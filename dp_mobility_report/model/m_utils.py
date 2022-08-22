@@ -120,7 +120,6 @@ def hist_section(
     dp_counts = diff_privacy.counts_dp(counts, epsi, sensitivity)
     moe_laplace = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
 
-
     # as percent instead of counts
     trip_counts = sum(dp_counts)
     if trip_counts > 0:
