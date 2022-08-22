@@ -1,7 +1,5 @@
-"""Top-level package for Mobility Data Report."""
+"""Top-level package for Mobility Report dp_mobility_report."""
 
 from dp_mobility_report.mobility_report import MobilityReport
 
-__author__ = """Alexandra Kapp"""
-__email__ = "alexandra.kapp@htw-berlin.de"
-__version__ = "0.1.0"
+__version__ = "0.0.4"
