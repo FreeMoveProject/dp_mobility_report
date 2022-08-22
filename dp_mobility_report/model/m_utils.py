@@ -120,10 +120,12 @@ def hist_section(
     dp_counts = diff_privacy.counts_dp(counts, epsi, sensitivity)
     moe_laplace = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
 
+
     # as percent instead of counts
     trip_counts = sum(dp_counts)
-    dp_counts = dp_counts / trip_counts * 100
-    moe_laplace = moe_laplace / trip_counts * 100
+    if trip_counts > 0:
+        dp_counts = dp_counts / trip_counts * 100
+        moe_laplace = moe_laplace / trip_counts * 100
 
     return Section(
         data=(dp_counts, bins),
