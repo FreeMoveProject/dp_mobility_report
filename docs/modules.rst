@@ -1,7 +1,10 @@
-dp_mobility_report
-==================
+===============
+API Reference
+===============
 
-.. toctree::
-   :maxdepth: 4
+.. currentmodule:: mobility_report
 
-   dp_mobility_report
+DpMobilityReport
+~~~~~~~~~~~~~~~~~~~
+.. autoclass:: dp_mobility_report.dpmreport.DpMobilityReport
+	:members: report, to_file
