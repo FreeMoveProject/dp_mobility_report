@@ -4,7 +4,7 @@ import config
 import geopandas as gpd
 import pandas as pd
 
-from dp_mobility_report import md_report
+from dp_mobility_report import MobilityReport
 
 path_data = config.path_data
 path_html_output = config.path_html_output
@@ -18,7 +18,7 @@ tessellation = gpd.read_file(os.path.join(path_data, "geolife_tessellation.gpkg"
 tessellation["tile_name"] = tessellation.tile_id
 
 
-report = md_report.MobilityDataReport(
+report = MobilityReport(
     df,
     tessellation,
     privacy_budget=None,
@@ -37,7 +37,7 @@ report.to_file(
 )
 
 
-report = md_report.MobilityDataReport(
+report = MobilityReport(
     df,
     tessellation,
     privacy_budget=50,

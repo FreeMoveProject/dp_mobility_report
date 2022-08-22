@@ -20,7 +20,7 @@ from dp_mobility_report.report.html.templates import (
 )
 
 
-class MobilityDataReport:
+class MobilityReport:
     """Generate a (differentially private) mobility report from a dataset stored as
     a pandas `DataFrame`. Expected columns: User ID `uid`, Trip ID `tid`, Timestamp `datetime`,
     Latitude and Longitude in CRS EPSG:4326 `lat` and `lng`.

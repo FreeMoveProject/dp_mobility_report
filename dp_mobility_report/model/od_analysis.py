@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from dp_mobility_report.md_report import MobilityDataReport
+    from dp_mobility_report import MobilityReport
 
 import numpy as np
 import pandas as pd
@@ -44,11 +44,11 @@ def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame) -> pd.DataFrame:
 
 def get_od_flows(
     od_shape: pd.DataFrame,
-    mdreport: "MobilityDataReport",
+    mreport: "MobilityReport",
     eps: Optional[float],
     trip_count: Optional[int],
 ) -> Section:
-    sensitivity = mdreport.max_trips_per_user
+    sensitivity = mreport.max_trips_per_user
     od_flows = (
         od_shape.groupby([const.TILE_ID, const.TILE_ID_END])
         .aggregate(flow=(const.TID, "count"))
@@ -63,7 +63,7 @@ def get_od_flows(
     )
 
     # fill all potential combinations with 0s for correct application of dp
-    full_tile_ids = np.unique(mdreport.tessellation[const.TILE_ID])
+    full_tile_ids = np.unique(mreport.tessellation[const.TILE_ID])
     full_combinations = list(map(np.ravel, np.meshgrid(full_tile_ids, full_tile_ids)))
     od_flows = pd.DataFrame(
         {"origin": full_combinations[0], "destination": full_combinations[1]}
@@ -110,7 +110,7 @@ def get_intra_tile_flows(od_flows: pd.DataFrame) -> int:
 
 
 def get_travel_time(
-    od_shape: pd.DataFrame, mdreport: "MobilityDataReport", eps: Optional[float]
+    od_shape: pd.DataFrame, mreport: "MobilityReport", eps: Optional[float]
 ) -> Section:
 
     travel_time = od_shape[const.DATETIME_END] - od_shape[const.DATETIME]
@@ -119,16 +119,16 @@ def get_travel_time(
     return m_utils.hist_section(
         travel_time,
         eps,
-        mdreport.max_trips_per_user,
-        hist_max=mdreport.max_travel_time,
-        bin_range=mdreport.bin_range_travel_time,
+        mreport.max_trips_per_user,
+        hist_max=mreport.max_travel_time,
+        bin_range=mreport.bin_range_travel_time,
         bin_type=int,
-        evalu=mdreport.evalu,
+        evalu=mreport.evalu,
     )
 
 
 def get_jump_length(
-    od_shape: pd.DataFrame, mdreport: "MobilityDataReport", eps: Optional[float]
+    od_shape: pd.DataFrame, mreport: "MobilityReport", eps: Optional[float]
 ) -> Section:
 
     # parallel computation for speed up
@@ -138,8 +138,8 @@ def get_jump_length(
     return m_utils.hist_section(
         jump_length,
         eps,
-        mdreport.max_trips_per_user,
-        hist_max=mdreport.max_jump_length,
-        bin_range=mdreport.bin_range_jump_length,
-        evalu=mdreport.evalu,
+        mreport.max_trips_per_user,
+        hist_max=mreport.max_jump_length,
+        bin_range=mreport.bin_range_jump_length,
+        evalu=mreport.evalu,
     )

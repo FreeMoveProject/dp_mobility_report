@@ -50,15 +50,13 @@ Create a mobility report as HTML:
 
         import pandas as pd
         import geopandas as gpd
-        from dp_mobility_report import md_report
+        from dp_mobility_report import MobilityReport
 
         # -- insert paths --
         df = pd.read_csv("mobility_dataset.csv")
         tessellation = gpd.read_file("tessellation.gpkg")
 
-        report = md_report.MobilityDataReport(
-            df, tessellation, privacy_budget=1, max_trips_per_user=4
-        )
+        report = MobilityReport(df, tessellation, privacy_budget=1, max_trips_per_user=4)
 
         report.to_file("my_mobility_report.html")
 

@@ -3,13 +3,13 @@ from typing import TYPE_CHECKING
 from dp_mobility_report.report.html.html_utils import fmt, get_template
 
 if TYPE_CHECKING:
-    from dp_mobility_report.md_report import MobilityDataReport
+    from dp_mobility_report import MobilityReport
 
 
-def render_config(mdreport: "MobilityDataReport") -> str:
+def render_config(mreport: "MobilityReport") -> str:
 
-    config_table = render_config_table(mdreport)
-    privacy_info = render_privacy_info(mdreport.privacy_budget is not None)
+    config_table = render_config_table(mreport)
+    privacy_info = render_privacy_info(mreport.privacy_budget is not None)
 
     template_structure = get_template("config_segment.html")
     return template_structure.render(
@@ -17,14 +17,14 @@ def render_config(mdreport: "MobilityDataReport") -> str:
     )
 
 
-def render_config_table(mdreport: "MobilityDataReport") -> str:
+def render_config_table(mreport: "MobilityReport") -> str:
 
     config_list = [
-        {"name": "Max. trips per user", "value": fmt(mdreport.max_trips_per_user)},
-        {"name": "Privacy budget", "value": fmt(mdreport.privacy_budget)},
-        {"name": "User privacy", "value": fmt(mdreport.user_privacy)},
-        {"name": "Analysis selection", "value": fmt(mdreport.analysis_selection)},
-        {"name": "Evaluation dev. mode", "value": fmt(mdreport.evalu)},
+        {"name": "Max. trips per user", "value": fmt(mreport.max_trips_per_user)},
+        {"name": "Privacy budget", "value": fmt(mreport.privacy_budget)},
+        {"name": "User privacy", "value": fmt(mreport.user_privacy)},
+        {"name": "Analysis selection", "value": fmt(mreport.analysis_selection)},
+        {"name": "Evaluation dev. mode", "value": fmt(mreport.evalu)},
     ]
 
     # create html from template

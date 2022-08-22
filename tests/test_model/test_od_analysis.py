@@ -4,16 +4,16 @@ import pandas as pd
 import pytest
 
 from dp_mobility_report import constants as const
-from dp_mobility_report.md_report import MobilityDataReport
+from dp_mobility_report import MobilityReport
 from dp_mobility_report.model import od_analysis
 
 
 @pytest.fixture
-def test_mdreport():
+def test_mreport():
     """Create a test report."""
     test_data = pd.read_csv("tests/test_files/test_data.csv")
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
-    return MobilityDataReport(test_data, test_tessellation, privacy_budget=None)
+    return MobilityReport(test_data, test_tessellation, privacy_budget=None)
 
 
 @pytest.fixture
@@ -26,8 +26,8 @@ def test_od_shape():
     )
 
 
-def test_get_od_shape(test_mdreport):
-    od_shape = od_analysis.get_od_shape(test_mdreport.df, test_mdreport.tessellation)
+def test_get_od_shape(test_mreport):
+    od_shape = od_analysis.get_od_shape(test_mreport.df, test_mreport.tessellation)
     assert len(od_shape) == 99
     assert od_shape.columns.tolist() == [
         const.TID,
@@ -52,8 +52,8 @@ def test_get_od_shape(test_mdreport):
     assert actual_tid_5_coords == expected_tid_5_coords
 
 
-def test_get_od_flows(test_od_shape, test_mdreport):
-    od_flows = od_analysis.get_od_flows(test_od_shape, test_mdreport, None, None).data
+def test_get_od_flows(test_od_shape, test_mreport):
+    od_flows = od_analysis.get_od_flows(test_od_shape, test_mreport, None, None).data
     assert od_flows.columns.tolist() == ["origin", "destination", "flow"]
     assert len(od_flows) == 2
     od_flows["flow"] = od_flows["flow"].round()
@@ -76,8 +76,8 @@ def test_get_intra_tile_flows():
     assert od_analysis.get_intra_tile_flows(od_flows) == 14
 
 
-def test_get_travel_time(test_od_shape, test_mdreport):
-    travel_time = od_analysis.get_travel_time(test_od_shape, test_mdreport, None)
+def test_get_travel_time(test_od_shape, test_mreport):
+    travel_time = od_analysis.get_travel_time(test_od_shape, test_mreport, None)
     assert travel_time.data[0].round().tolist() == [
         13.0,
         10.0,
@@ -94,9 +94,9 @@ def test_get_travel_time(test_od_shape, test_mdreport):
     assert len(travel_time.data[0]) == 10
     assert travel_time.quartiles.round().tolist() == [2.0, 29.0, 60.0, 86.0, 120.0]
 
-    test_mdreport.max_travel_time = 60
-    test_mdreport.bin_range_travel_time = 5
-    travel_time = od_analysis.get_travel_time(test_od_shape, test_mdreport, None)
+    test_mreport.max_travel_time = 60
+    test_mreport.bin_range_travel_time = 5
+    travel_time = od_analysis.get_travel_time(test_od_shape, test_mreport, None)
     assert travel_time.data[0].round().tolist() == [
         2.0,
         8.0,
@@ -132,8 +132,8 @@ def test_get_travel_time(test_od_shape, test_mdreport):
     assert travel_time.quartiles.round().tolist() == [2.0, 29.0, 60.0, 86.0, 120.0]
 
 
-def test_get_jump_length(test_od_shape, test_mdreport):
-    jump_length = od_analysis.get_jump_length(test_od_shape, test_mdreport, None)
+def test_get_jump_length(test_od_shape, test_mreport):
+    jump_length = od_analysis.get_jump_length(test_od_shape, test_mreport, None)
     assert jump_length.data[0].round().tolist() == [7, 10, 15, 17, 16, 17, 9, 5, 2, 1]
     assert jump_length.data[1].round(3).tolist() == [
         1.114,
@@ -158,9 +158,9 @@ def test_get_jump_length(test_od_shape, test_mdreport):
         8.741,
     ]
 
-    test_mdreport.max_jump_length = 4
-    test_mdreport.bin_range_jump_length = 0.5
-    jump_length = od_analysis.get_jump_length(test_od_shape, test_mdreport, None)
+    test_mreport.max_jump_length = 4
+    test_mreport.bin_range_jump_length = 0.5
+    jump_length = od_analysis.get_jump_length(test_od_shape, test_mreport, None)
     assert jump_length.data[0].round().tolist() == [
         4.0,
         3.0,
