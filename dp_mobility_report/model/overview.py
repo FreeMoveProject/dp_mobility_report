@@ -149,17 +149,17 @@ def get_trips_over_time(
         resample = "1D"
         datetime_precision = const.PREC_DATE
 
-    trip_count = pd.DataFrame(trips_over_time)
-    trip_count.loc[:, "trip_count"] = 1
-    trip_count = (
-        trip_count.set_index(const.DATETIME)
+    trips_over_time = pd.DataFrame(trips_over_time)
+    trips_over_time.loc[:, "trip_count"] = 1
+    trips_over_time = (
+        trips_over_time.set_index(const.DATETIME)
         .resample(resample, label="left")
         .count()
         .reset_index()
     )
-    trip_count[const.DATETIME] = trip_count[const.DATETIME].dt.date
-    trip_count["trip_count"] = diff_privacy.counts_dp(
-        trip_count["trip_count"].values,
+    trips_over_time[const.DATETIME] = trips_over_time[const.DATETIME].dt.date
+    trips_over_time["trip_count"] = diff_privacy.counts_dp(
+        trips_over_time["trip_count"].values,
         epsi,
         mdreport.max_trips_per_user,
     )
@@ -169,15 +169,15 @@ def get_trips_over_time(
     )
 
     # as percent instead of absolute values
-    trip_sum = np.sum(trip_count["trip_count"])
+    trip_sum = np.sum(trips_over_time["trip_count"])
     if trip_sum != 0:
-        trip_count["trip_count"] = trip_count["trip_count"] / trip_sum * 100
+        trips_over_time["trips"] = trips_over_time["trip_count"] / trip_sum * 100
         moe_laplace = moe_laplace / trip_sum * 100
 
     quartiles = pd.Series({"min": dp_bounds[0], "max": dp_bounds[1]})
 
     return Section(
-        data=trip_count,
+        data=trips_over_time,
         privacy_budget=eps,
         datetime_precision=datetime_precision,
         quartiles=quartiles,
@@ -227,7 +227,6 @@ def get_trips_per_weekday(
 
 def get_trips_per_hour(mdreport: "MobilityDataReport", eps: Optional[float]) -> Section:
 
-    # TODO: include all times (even if not present in data)
     hour_weekday = mdreport.df.groupby(
         [const.HOUR, const.IS_WEEKEND, const.POINT_TYPE]
     ).count()[const.TID]
@@ -269,11 +268,11 @@ def get_trips_per_hour(mdreport: "MobilityDataReport", eps: Optional[float]) -> 
         hour_weekday[hour_weekday.point_type == const.END]["count"]
     )  # only use ends to get sum of trips
     if trip_sum != 0:
-        hour_weekday["count"] = hour_weekday["count"] / trip_sum * 100
+        hour_weekday["perc"] = hour_weekday["count"] / trip_sum * 100
         moe = moe / trip_sum * 100
 
     return Section(
-        data=hour_weekday[[const.HOUR, const.TIME_CATEGORY, "count"]],
+        data=hour_weekday[[const.HOUR, const.TIME_CATEGORY, "perc"]],
         privacy_budget=eps,
         margin_of_error_laplace=moe,
     )

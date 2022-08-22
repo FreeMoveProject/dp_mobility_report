@@ -188,7 +188,7 @@ def render_trips_over_time(trips_over_time: Section) -> str:
     if len(trips_over_time.data) <= 14:
         chart = plot.barchart(
             x=trips_over_time.data[const.DATETIME].to_numpy(),
-            y=trips_over_time.data["trip_count"].to_numpy(),
+            y=trips_over_time.data["trips"].to_numpy(),
             margin_of_error=fmt_moe(trips_over_time.margin_of_error_laplace),
             x_axis_label="Date",
             y_axis_label="% of trips",
@@ -199,7 +199,7 @@ def render_trips_over_time(trips_over_time: Section) -> str:
         chart = plot.linechart(
             data=trips_over_time.data,
             x=const.DATETIME,
-            y="trip_count",
+            y="trips",
             x_axis_label="Date",
             y_axis_label="% of trips",
             margin_of_error=trips_over_time.margin_of_error_laplace,
@@ -216,7 +216,7 @@ def render_trips_per_weekday(trips_per_weekday: Section) -> str:
         y=trips_per_weekday.data.values,
         margin_of_error=trips_per_weekday.margin_of_error_laplace,
         x_axis_label="Weekday",
-        y_axis_label="% of trips per weekday",
+        y_axis_label="% of trips",
         rotate_label=True,
     )
     plt.close()
@@ -227,7 +227,7 @@ def render_trips_per_hour(trips_per_hour: Section) -> str:
     chart = plot.multi_linechart(
         data=trips_per_hour.data,
         x=const.HOUR,
-        y="count",
+        y="perc",
         color=const.TIME_CATEGORY,
         x_axis_label="Hour of day",
         y_axis_label="% of trips",
