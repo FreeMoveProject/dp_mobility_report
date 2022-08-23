@@ -8,7 +8,7 @@ import skmob
 from geopandas.geodataframe import GeoDataFrame
 
 if TYPE_CHECKING:
-    from dp_mobility_report.md_report import MobilityDataReport
+    from dp_mobility_report import DpMobilityReport
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import od_analysis
@@ -23,7 +23,7 @@ from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_od_analysis(
-    mdreport: "MobilityDataReport",
+    dpmreport: "DpMobilityReport",
     top_n_flows: int,
     temp_map_folder: Path,
     output_filename: str,
@@ -49,18 +49,18 @@ def render_od_analysis(
     jump_length_summary_table = ""
     jump_length_moe_info = ""
 
-    report = mdreport.report
+    report = dpmreport.report
 
     if const.OD_FLOWS in report and report[const.OD_FLOWS].data is not None:
         od_legend = render_origin_destination_flows(
             report[const.OD_FLOWS],
-            mdreport.tessellation,
+            dpmreport.tessellation,
             top_n_flows,
             THRESHOLD,
             temp_map_folder,
         )
         intra_tile_flows_info = render_intra_tile_flows(
-            report[const.OD_FLOWS], len(mdreport.tessellation)
+            report[const.OD_FLOWS], len(dpmreport.tessellation)
         )
         quartiles = report[const.OD_FLOWS].quartiles.round()
         flows_summary_table = render_summary(
@@ -69,12 +69,12 @@ def render_od_analysis(
         )
         flows_cumsum_linechart = render_flows_cumsum(report[const.OD_FLOWS])
         most_freq_flows_ranking = render_most_freq_flows_ranking(
-            report[const.OD_FLOWS], mdreport.tessellation
+            report[const.OD_FLOWS], dpmreport.tessellation
         )
 
     if const.TRAVEL_TIME in report and report[const.TRAVEL_TIME].data is not None:
         travel_time_hist_info = render_user_input_info(
-            mdreport.max_travel_time, mdreport.bin_range_travel_time
+            dpmreport.max_travel_time, dpmreport.bin_range_travel_time
         )
         travel_time_hist = render_travel_time_hist(report[const.TRAVEL_TIME])
         travel_time_summary_table = render_summary(report[const.TRAVEL_TIME].quartiles)
@@ -84,7 +84,7 @@ def render_od_analysis(
 
     if const.JUMP_LENGTH in report and report[const.JUMP_LENGTH].data is not None:
         jump_length_hist_info = render_user_input_info(
-            mdreport.max_jump_length, mdreport.bin_range_jump_length
+            dpmreport.max_jump_length, dpmreport.bin_range_jump_length
         )
         jump_length_hist = render_jump_length_hist(report[const.JUMP_LENGTH])
         jump_length_summary_table = render_summary(report[const.JUMP_LENGTH].quartiles)
@@ -140,15 +140,19 @@ def render_origin_destination_flows(
     )
 
     # tessellation_innerflow.loc[tessellation_innerflow.flow.isna(), "flow"] = 0
-    innerflow_chropleth, innerflow_legend = plot.choropleth_map(
+    innerflow_choropleth, innerflow_legend = plot.choropleth_map(
         tessellation_innerflow, "flow", "intra-tile flows"
     )  # get innerflows as color for choropleth
 
-    od_map = (
-        fdf[fdf.origin != fdf.destination]
-        .nlargest(top_n_flows, "flow")
-        .plot_flows(flow_color="red", map_f=innerflow_chropleth)
-    )
+    inter_flows = fdf[fdf.origin != fdf.destination]
+    if not inter_flows.flow.isnull().all():
+        od_map = (
+            fdf[fdf.origin != fdf.destination]
+            .nlargest(top_n_flows, "flow")
+            .plot_flows(flow_color="red", map_f=innerflow_choropleth)
+        )
+    else:  # if there are no inter flows only plot innerflow choropleth
+        od_map = innerflow_choropleth
 
     od_map.save(os.path.join(temp_map_folder, "od_map.html"))
 

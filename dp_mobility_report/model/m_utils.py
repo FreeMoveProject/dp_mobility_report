@@ -122,8 +122,9 @@ def hist_section(
 
     # as percent instead of counts
     trip_counts = sum(dp_counts)
-    dp_counts = dp_counts / trip_counts * 100
-    moe_laplace = moe_laplace / trip_counts * 100
+    if trip_counts > 0:
+        dp_counts = dp_counts / trip_counts * 100
+        moe_laplace = moe_laplace / trip_counts * 100
 
     return Section(
         data=(dp_counts, bins),

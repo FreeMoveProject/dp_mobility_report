@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Tuple
 import pkg_resources
 
 if TYPE_CHECKING:
-    from dp_mobility_report.md_report import MobilityDataReport
+    from dp_mobility_report import DpMobilityReport
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.report.html import (
@@ -21,12 +21,11 @@ from dp_mobility_report.report.html import (
 
 
 def render_html(
-    mdreport: "MobilityDataReport", output_filename: str, top_n_flows: int = 100
+    dpmreport: "DpMobilityReport", output_filename: str, top_n_flows: int = 100
 ) -> Tuple[str, Path]:
     template_structure = html_utils.get_template("structure.html")
-    temp_map_folder = Path(os.path.join("/tmp", tempfile.gettempdir())).with_name(
-        "maps"
-    )
+    temp_map_folder = Path(os.path.join(tempfile.gettempdir(), "maps"))
+
     # remove any old temp files in case there exist any
     shutil.rmtree(temp_map_folder, ignore_errors=True)
     os.mkdir(temp_map_folder)
@@ -36,23 +35,23 @@ def render_html(
     od_analysis_segment = ""
     user_analysis_segment = ""
 
-    is_all_analyses = const.ALL in mdreport.analysis_selection
+    is_all_analyses = const.ALL in dpmreport.analysis_selection
 
-    config_segment = config_templates.render_config(mdreport)
+    config_segment = config_templates.render_config(dpmreport)
 
-    if is_all_analyses | (const.OVERVIEW in mdreport.analysis_selection):
-        overview_segment = overview_templates.render_overview(mdreport.report)
+    if is_all_analyses | (const.OVERVIEW in dpmreport.analysis_selection):
+        overview_segment = overview_templates.render_overview(dpmreport.report)
 
-    if is_all_analyses | (const.PLACE_ANALYSIS in mdreport.analysis_selection):
+    if is_all_analyses | (const.PLACE_ANALYSIS in dpmreport.analysis_selection):
         place_analysis_segment = place_analysis_templates.render_place_analysis(
-            mdreport.report, mdreport.tessellation, temp_map_folder, output_filename
+            dpmreport.report, dpmreport.tessellation, temp_map_folder, output_filename
         )
-    if is_all_analyses | (const.OD_ANALYSIS in mdreport.analysis_selection):
+    if is_all_analyses | (const.OD_ANALYSIS in dpmreport.analysis_selection):
         od_analysis_segment = od_analysis_templates.render_od_analysis(
-            mdreport, top_n_flows, temp_map_folder, output_filename
+            dpmreport, top_n_flows, temp_map_folder, output_filename
         )
-    if is_all_analyses | (const.USER_ANALYSIS in mdreport.analysis_selection):
-        user_analysis_segment = user_analysis_templates.render_user_analysis(mdreport)
+    if is_all_analyses | (const.USER_ANALYSIS in dpmreport.analysis_selection):
+        user_analysis_segment = user_analysis_templates.render_user_analysis(dpmreport)
 
     return (
         template_structure.render(
