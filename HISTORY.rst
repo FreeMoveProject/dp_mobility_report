@@ -2,6 +2,11 @@ History
 *********
 
 
+0.0.5 (2022-08-26)
+------------------
+
+Bug fix: correct scaling of timewindow counts.
+
 0.0.4 (2022-08-22)
 ------------------
 
