@@ -21,7 +21,7 @@ from dp_mobility_report.report.html.templates import (
 
 
 class DpMobilityReport:
-    """Generate a (differentially private) mobility report from a mobility dataset. The report will be generated as an HTML file, using the `.to_html()` method.
+    """Generate a (differentially private) mobility report from a mobility dataset. The report will be generated as an HTML file, using the `.to_file()` method.
 
     Args:
         df: `DataFrame` containing the mobility data. Expected columns: User ID `uid`, trip ID `tid`, timestamp `datetime`, latitude `lat` and longitude `lng` in CRS EPSG:4326.

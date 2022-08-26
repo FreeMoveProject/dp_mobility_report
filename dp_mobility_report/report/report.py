@@ -76,7 +76,7 @@ def report_elements(dpmreport: "DpMobilityReport") -> dict:
         if is_all_analyses | (const.PLACE_ANALYSIS in dpmreport.analysis_selection):
             report = {
                 **report,
-                **add_place_analysis_elements(dpmreport, epsilon, record_count),
+                **add_place_analysis_elements(dpmreport, epsilon, record_count, trip_count),
             }
         pbar.update()
 
@@ -116,7 +116,7 @@ def add_overview_elements(dpmreport: "DpMobilityReport", epsilon: float) -> dict
 
 
 def add_place_analysis_elements(
-    dpmreport: "DpMobilityReport", epsilon: float, record_count: Optional[int]
+    dpmreport: "DpMobilityReport", epsilon: float, record_count: Optional[int], trip_count: Optional[int]
 ) -> dict:
     return {
         const.VISITS_PER_TILE: place_analysis.get_visits_per_tile(
@@ -125,7 +125,7 @@ def add_place_analysis_elements(
         if const.VISITS_PER_TILE in const.PLACE_ELEMENTS
         else Section(),
         const.VISITS_PER_TILE_TIMEWINDOW: place_analysis.get_visits_per_tile_timewindow(
-            dpmreport, epsilon, record_count
+            dpmreport, epsilon, trip_count
         )
         if const.VISITS_PER_TILE_TIMEWINDOW in const.PLACE_ELEMENTS
         else Section(),
