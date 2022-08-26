@@ -98,7 +98,7 @@ def _get_hour_bin(hour: int, timewindows: np.ndarray) -> str:
 
 
 def get_visits_per_tile_timewindow(
-    dpmreport: "DpMobilityReport", eps: Optional[float], record_count: Optional[int]
+    dpmreport: "DpMobilityReport", eps: Optional[float], trip_count: Optional[int]
 ) -> Section:
     dpmreport.df["timewindows"] = dpmreport.df[const.HOUR].apply(
         lambda x: _get_hour_bin(x, dpmreport.timewindows)
@@ -147,12 +147,12 @@ def get_visits_per_tile_timewindow(
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, dpmreport.max_trips_per_user)
 
     # scale to record count of overview segment
-    if (record_count is not None) and (counts_per_tile_timewindow.sum() != 0):
+    if (trip_count is not None) and (counts_per_tile_timewindow.sum() != 0):
         counts_sum = counts_per_tile_timewindow.sum()
         counts_per_tile_timewindow = (
-            counts_per_tile_timewindow / counts_sum * record_count
+            counts_per_tile_timewindow / counts_sum * trip_count
         )
-        moe = moe / counts_sum * record_count
+        moe = moe / counts_sum * trip_count
 
     return Section(
         data=counts_per_tile_timewindow.unstack(const.TILE_ID).T,
