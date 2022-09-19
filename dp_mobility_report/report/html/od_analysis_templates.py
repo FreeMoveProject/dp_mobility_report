@@ -162,7 +162,11 @@ def render_origin_destination_flows(
 
 
 def render_intra_tile_flows(od_flows: Section, n_tiles: int) -> str:
-    intra_tile_flows = round(od_analysis.get_intra_tile_flows(od_flows.data), 2)
+    od_sum = od_flows.data["flow"].sum()
+    if od_sum == 0:
+        intra_tile_flows = 0
+    else:
+        intra_tile_flows = round(od_analysis.get_intra_tile_flows(od_flows.data) / od_sum, 2)
     ci_interval_info = (
         f"(95% confidence interval ± {round(n_tiles * od_flows.margin_of_error_laplace, 2)} percentage points)"
         if od_flows.margin_of_error_laplace is not None
