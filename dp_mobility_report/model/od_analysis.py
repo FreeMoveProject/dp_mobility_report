@@ -46,7 +46,8 @@ def get_od_flows(
     od_shape: pd.DataFrame,
     dpmreport: "DpMobilityReport",
     eps: Optional[float],
-    trip_count: Optional[int],
+    # complete_trip_count: Optional[int],
+    # outlier_count = Optional[int]
 ) -> Section:
     sensitivity = dpmreport.max_trips_per_user
     od_flows = (
@@ -61,6 +62,9 @@ def get_od_flows(
         )
         .sort_values("flow", ascending=False)
     )
+
+    # margin of error
+    moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
 
     # fill all potential combinations with 0s for correct application of dp
     full_tile_ids = np.unique(dpmreport.tessellation[const.TILE_ID])
@@ -81,15 +85,26 @@ def get_od_flows(
     # remove all instances of 0 (and smaller) to reduce storage
     od_flows = od_flows[od_flows["flow"] > 0]
 
-    # margin of error
-    moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
 
-    # scale to trip count of overview segment
-    if trip_count is not None:
-        od_sum = np.sum(od_flows["flow"])
-        if od_sum != 0:
-            od_flows["flow"] = (od_flows["flow"] / od_sum * trip_count).astype(int)
-            moe = int(moe / od_sum * trip_count)
+    # scaling not working with too many cells -> too many cells < 1
+    # # plausibility check: scale total od_count if it exceeds the trip_count or goes below trip_count-outlier_count
+    # if (complete_trip_count is not None) and (np.sum(od_flows["flow"]) != 0):
+    #     od_sum = np.sum(od_flows["flow"])
+    #     scale_data = False
+
+    #     # scale down if od_sum is larger than trip_count
+    #     if od_sum > complete_trip_count:
+    #         scale_data = True
+
+    #     # scale up if od_sum is lower than trip_count-outlier_count
+    #     if outlier_count is not None and (od_sum < complete_trip_count-outlier_count):
+    #         complete_trip_count = complete_trip_count-outlier_count
+    #         scale_data = True
+
+    #     if scale_data:
+    #         od_flows["flow"] = (od_flows["flow"] / od_sum * complete_trip_count).astype(int)
+    #         moe = int(moe / od_sum * complete_trip_count)
+
 
     # TODO: distribution with or without 0s?
     # as counts are already dp, no further privacy mechanism needed

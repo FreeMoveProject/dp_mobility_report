@@ -153,9 +153,10 @@ def cumsum_simulations(
     df_cumsum = DataFrame()
     df_cumsum["n"] = np.arange(1, len(counts) + 1)
 
-    for i in range(1, nsim):
-        sim_counts = diff_privacy.counts_dp(counts, eps, sensitivity)
-        df_cumsum["cum_perc_" + str(i)] = _cumsum(sim_counts)
+    # TODO: implementation of margin of error of cumulated sum (?)
+    # for i in range(1, nsim):
+    #     sim_counts = diff_privacy.counts_dp(counts, eps, sensitivity)
+    #     df_cumsum["cum_perc_" + str(i)] = _cumsum(sim_counts)
 
     # once negative values have been used for simulations create cumsum of series without negative values
     df_cumsum["cum_perc"] = _cumsum(diff_privacy.limit_negative_values_to_zero(counts))
