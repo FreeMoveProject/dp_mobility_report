@@ -13,8 +13,8 @@ from dp_mobility_report.privacy import diff_privacy
 
 
 def get_visits_per_tile(
-    dpmreport: "DpMobilityReport", eps: Optional[float], 
-    # record_count: Optional[int]
+    dpmreport: "DpMobilityReport",
+    eps: Optional[float],
 ) -> Section:
     epsi = eps
 
@@ -62,17 +62,6 @@ def get_visits_per_tile(
     # margin of error
     moe = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
 
-    # TODO: if timewindows and ODs are not scaled, than visits should also not be scaled?
-    # scale to record count of overview segment
-    # if record_count is not None:
-    #     visits_sum = np.sum(visits_per_tile["visits"]) +  n_outliers
-    #     if visits_sum != 0:
-    #         visits_per_tile["visits"] = (
-    #             visits_per_tile["visits"] / visits_sum * record_count
-    #         ).astype(int)
-    #         n_outliers = int(n_outliers / visits_sum * record_count)
-    #         moe = int(moe / visits_sum * record_count)
-
     # as counts are already dp, no further privacy mechanism needed
     dp_quartiles = visits_per_tile.visits.describe()
 
@@ -100,7 +89,8 @@ def _get_hour_bin(hour: int, timewindows: np.ndarray) -> str:
 
 
 def get_visits_per_tile_timewindow(
-    dpmreport: "DpMobilityReport", eps: Optional[float], 
+    dpmreport: "DpMobilityReport",
+    eps: Optional[float],
     # trip_count: Optional[int], outlier_count: Optional[None]
 ) -> Section:
     dpmreport.df["timewindows"] = dpmreport.df[const.HOUR].apply(
@@ -138,9 +128,7 @@ def get_visits_per_tile_timewindow(
     )
 
     # remove instance from full_combination
-    counts_per_tile_timewindow = (
-        counts_per_tile_timewindow.dropna() - 1
-    )  
+    counts_per_tile_timewindow = counts_per_tile_timewindow.dropna() - 1
     counts_per_tile_timewindow = counts_per_tile_timewindow.unstack()
 
     counts_per_tile_timewindow = pd.Series(
@@ -149,28 +137,6 @@ def get_visits_per_tile_timewindow(
             counts_per_tile_timewindow.values, eps, dpmreport.max_trips_per_user
         ),
     )
-
-    # TODO: as int
-    # TODO: good solution?
-    # plausibility check: scale total count if it exceeds the trip_count or goes below trip_count-outlier_count
-    # if (trip_count is not None) and (counts_per_tile_timewindow.sum() != 0):
-    #     counts_sum = counts_per_tile_timewindow.sum()
-    #     scale_data = False
-
-    #     # scale down if sum of counts is lager than trip_count
-    #     if counts_sum > trip_count:
-    #         scale_data = True
-
-    #     # scale up if sum of counts is lower than trip_count-outlier_count
-    #     if outlier_count is not None and (counts_sum < trip_count-outlier_count):
-    #         trip_count = trip_count-outlier_count
-    #         scale_data = True
-
-    #     if scale_data:
-    #         counts_per_tile_timewindow = (
-    #             counts_per_tile_timewindow / counts_sum * trip_count
-    #         ).astype(int)
-    #         moe = int(moe / counts_sum * trip_count)
 
     return Section(
         data=counts_per_tile_timewindow.unstack(const.TILE_ID).T,

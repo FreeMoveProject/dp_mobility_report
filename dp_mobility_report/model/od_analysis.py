@@ -46,8 +46,6 @@ def get_od_flows(
     od_shape: pd.DataFrame,
     dpmreport: "DpMobilityReport",
     eps: Optional[float],
-    # complete_trip_count: Optional[int],
-    # outlier_count = Optional[int]
 ) -> Section:
     sensitivity = dpmreport.max_trips_per_user
     od_flows = (
@@ -84,27 +82,6 @@ def get_od_flows(
 
     # remove all instances of 0 (and smaller) to reduce storage
     od_flows = od_flows[od_flows["flow"] > 0]
-
-
-    # scaling not working with too many cells -> too many cells < 1
-    # # plausibility check: scale total od_count if it exceeds the trip_count or goes below trip_count-outlier_count
-    # if (complete_trip_count is not None) and (np.sum(od_flows["flow"]) != 0):
-    #     od_sum = np.sum(od_flows["flow"])
-    #     scale_data = False
-
-    #     # scale down if od_sum is larger than trip_count
-    #     if od_sum > complete_trip_count:
-    #         scale_data = True
-
-    #     # scale up if od_sum is lower than trip_count-outlier_count
-    #     if outlier_count is not None and (od_sum < complete_trip_count-outlier_count):
-    #         complete_trip_count = complete_trip_count-outlier_count
-    #         scale_data = True
-
-    #     if scale_data:
-    #         od_flows["flow"] = (od_flows["flow"] / od_sum * complete_trip_count).astype(int)
-    #         moe = int(moe / od_sum * complete_trip_count)
-
 
     # TODO: distribution with or without 0s?
     # as counts are already dp, no further privacy mechanism needed
