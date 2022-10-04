@@ -15,9 +15,9 @@ def test_dpmreport():
     return DpMobilityReport(test_data, test_tessellation, privacy_budget=None)
 
 
-def test_report_elements(test_mdreport):
+def test_report_elements(test_dpmreport):
 
-    elements = report.report_elements(test_mdreport)
+    elements = report.report_elements(test_dpmreport)
     assert (
         list(elements.keys())
         == const.OVERVIEW_ELEMENTS
@@ -26,38 +26,38 @@ def test_report_elements(test_mdreport):
         + const.USER_ELEMENTS
     )
 
-    test_mdreport.analysis_exclusion = (
+    test_dpmreport.analysis_exclusion = (
         const.PLACE_ELEMENTS + const.OD_ELEMENTS + const.USER_ELEMENTS
     )
-    elements = report.report_elements(test_mdreport)
+    elements = report.report_elements(test_dpmreport)
     assert list(elements.keys()) == const.OVERVIEW_ELEMENTS
 
-    test_mdreport.analysis_exclusion = (
+    test_dpmreport.analysis_exclusion = (
         const.OVERVIEW_ELEMENTS + const.OD_ELEMENTS + const.USER_ELEMENTS
     )
-    elements = report.report_elements(test_mdreport)
+    elements = report.report_elements(test_dpmreport)
     assert list(elements.keys()) == const.PLACE_ELEMENTS
 
-    test_mdreport.analysis_exclusion = (
+    test_dpmreport.analysis_exclusion = (
         const.OVERVIEW_ELEMENTS + const.PLACE_ELEMENTS + const.USER_ELEMENTS
     )
-    elements = report.report_elements(test_mdreport)
+    elements = report.report_elements(test_dpmreport)
     assert list(elements.keys()) == const.OD_ELEMENTS
 
-    test_mdreport.analysis_exclusion = (
+    test_dpmreport.analysis_exclusion = (
         const.OVERVIEW_ELEMENTS + const.PLACE_ELEMENTS + const.OD_ELEMENTS
     )
-    elements = report.report_elements(test_mdreport)
+    elements = report.report_elements(test_dpmreport)
     assert list(elements.keys()) == const.USER_ELEMENTS
 
-    test_mdreport.analysis_exclusion = const.PLACE_ELEMENTS + const.OD_ELEMENTS
-    elements = report.report_elements(test_mdreport)
+    test_dpmreport.analysis_exclusion = const.PLACE_ELEMENTS + const.OD_ELEMENTS
+    elements = report.report_elements(test_dpmreport)
     assert list(elements.keys()) == const.OVERVIEW_ELEMENTS + const.USER_ELEMENTS
 
-    test_mdreport.analysis_exclusion = (
+    test_dpmreport.analysis_exclusion = (
         [const.VISITS_PER_TILE_TIMEWINDOW] + const.OD_ELEMENTS
     )
-    elements = report.report_elements(test_mdreport)
+    elements = report.report_elements(test_dpmreport)
     assert (
         list(elements.keys())
         == const.OVERVIEW_ELEMENTS + [const.VISITS_PER_TILE] + const.USER_ELEMENTS

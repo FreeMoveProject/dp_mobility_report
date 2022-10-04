@@ -347,9 +347,11 @@ def _clean_analysis_exclusion(analysis_selection: Optional[List[str]], analysis_
             analysis_exclusion += const.USER_ELEMENTS
             analysis_exclusion.remove(const.USER_ANALYSIS)
 
-    # deduplicate in case analyses and segments were included
-    analysis_exclusion = list(set(analysis_exclusion))
-    return analysis_exclusion
+        # deduplicate in case analyses and segments were included
+        analysis_exclusion = list(set(analysis_exclusion))
+        return analysis_exclusion
+    else:
+        return []
 
 
 def _clean_budget_split(budget_split: dict, analysis_exclusion: List[str]) -> dict:
