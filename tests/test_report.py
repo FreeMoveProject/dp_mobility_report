@@ -2,17 +2,17 @@ import geopandas as gpd
 import pandas as pd
 import pytest
 
+from dp_mobility_report import DpMobilityReport
 from dp_mobility_report import constants as const
-from dp_mobility_report.md_report import MobilityDataReport
 from dp_mobility_report.report import report
 
 
 @pytest.fixture
-def test_mdreport():
+def test_dpmreport():
     """Create a test report."""
     test_data = pd.read_csv("tests/test_files/test_data.csv")
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
-    return MobilityDataReport(test_data, test_tessellation, privacy_budget=None)
+    return DpMobilityReport(test_data, test_tessellation, privacy_budget=None)
 
 
 def test_report_elements(test_mdreport):

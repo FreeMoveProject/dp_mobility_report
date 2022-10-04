@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 import matplotlib.pyplot as plt
 
 if TYPE_CHECKING:
-    from dp_mobility_report.md_report import MobilityDataReport
+    from dp_mobility_report import DpMobilityReport
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model.section import Section
@@ -17,8 +17,8 @@ from dp_mobility_report.report.html.html_utils import (
 from dp_mobility_report.visualization import plot, v_utils
 
 
-def render_user_analysis(mdreport: "MobilityDataReport") -> str:
-    trips_per_user_info = f"Trips per user are limited according to the configured maximum of trips per user: {mdreport.max_trips_per_user}"
+def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
+    trips_per_user_info = f"Trips per user are limited according to the configured maximum of trips per user: {dpmreport.max_trips_per_user}"
     trips_per_user_eps = ""
     trips_per_user_hist = ""
     trips_per_user_summary_table = ""
@@ -42,7 +42,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
     mobility_entropy_summary_table = ""
     mobility_entropy_moe_info = ""
 
-    report = mdreport.report
+    report = dpmreport.report
 
     if (const.TRIPS_PER_USER in report) and (
         report[const.TRIPS_PER_USER].data is not None
@@ -78,7 +78,7 @@ def render_user_analysis(mdreport: "MobilityDataReport") -> str:
             report[const.RADIUS_OF_GYRATION].privacy_budget
         )
         radius_of_gyration_hist_info = render_user_input_info(
-            mdreport.max_radius_of_gyration, mdreport.bin_range_radius_of_gyration
+            dpmreport.max_radius_of_gyration, dpmreport.bin_range_radius_of_gyration
         )
         radius_of_gyration_hist = render_radius_of_gyration(
             report[const.RADIUS_OF_GYRATION]

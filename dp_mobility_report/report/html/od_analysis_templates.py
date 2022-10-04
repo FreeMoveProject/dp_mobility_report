@@ -8,7 +8,7 @@ import skmob
 from geopandas.geodataframe import GeoDataFrame
 
 if TYPE_CHECKING:
-    from dp_mobility_report.md_report import MobilityDataReport
+    from dp_mobility_report import DpMobilityReport
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import od_analysis
@@ -25,7 +25,7 @@ from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_od_analysis(
-    mdreport: "MobilityDataReport",
+    dpmreport: "DpMobilityReport",
     top_n_flows: int,
     temp_map_folder: Path,
     output_filename: str,
@@ -57,7 +57,7 @@ def render_od_analysis(
     jump_length_moe_info = ""
     jump_length_summary_table = ""
 
-    report = mdreport.report
+    report = dpmreport.report
 
     if const.OD_FLOWS in report and report[const.OD_FLOWS].data is not None:
         od_eps=render_eps(report[const.OD_FLOWS].privacy_budget)
@@ -65,13 +65,13 @@ def render_od_analysis(
 
         od_legend = render_origin_destination_flows(
             report[const.OD_FLOWS],
-            mdreport.tessellation,
+            dpmreport.tessellation,
             top_n_flows,
             THRESHOLD,
             temp_map_folder,
         )
         intra_tile_flows_info = render_intra_tile_flows(
-            report[const.OD_FLOWS], len(mdreport.tessellation)
+            report[const.OD_FLOWS], len(dpmreport.tessellation)
         )
         quartiles = report[const.OD_FLOWS].quartiles.round()
         flows_summary_table = render_summary(
@@ -80,7 +80,7 @@ def render_od_analysis(
         )
         flows_cumsum_linechart = render_flows_cumsum(report[const.OD_FLOWS])
         most_freq_flows_ranking = render_most_freq_flows_ranking(
-            report[const.OD_FLOWS], mdreport.tessellation
+            report[const.OD_FLOWS], dpmreport.tessellation
         )
 
     if const.TRAVEL_TIME in report and report[const.TRAVEL_TIME].data is not None:
@@ -88,7 +88,7 @@ def render_od_analysis(
         travel_time_moe=fmt_moe(report[const.TRAVEL_TIME].margin_of_error_laplace)
 
         travel_time_hist_info = render_user_input_info(
-            mdreport.max_travel_time, mdreport.bin_range_travel_time
+            dpmreport.max_travel_time, dpmreport.bin_range_travel_time
         )
         travel_time_hist = render_travel_time_hist(report[const.TRAVEL_TIME])
         travel_time_moe_info = render_moe_info(
@@ -101,7 +101,7 @@ def render_od_analysis(
         jump_length_moe=fmt_moe(report[const.JUMP_LENGTH].margin_of_error_laplace)
 
         jump_length_hist_info = render_user_input_info(
-            mdreport.max_jump_length, mdreport.bin_range_jump_length
+            dpmreport.max_jump_length, dpmreport.bin_range_jump_length
         )
         jump_length_hist = render_jump_length_hist(report[const.JUMP_LENGTH])
         jump_length_moe_info = render_moe_info(
@@ -163,15 +163,19 @@ def render_origin_destination_flows(
     )
 
     # tessellation_innerflow.loc[tessellation_innerflow.flow.isna(), "flow"] = 0
-    innerflow_chropleth, innerflow_legend = plot.choropleth_map(
+    innerflow_choropleth, innerflow_legend = plot.choropleth_map(
         tessellation_innerflow, "flow", "intra-tile flows"
     )  # get innerflows as color for choropleth
 
-    od_map = (
-        fdf[fdf.origin != fdf.destination]
-        .nlargest(top_n_flows, "flow")
-        .plot_flows(flow_color="red", map_f=innerflow_chropleth)
-    )
+    inter_flows = fdf[fdf.origin != fdf.destination]
+    if not inter_flows.flow.isnull().all():
+        od_map = (
+            fdf[fdf.origin != fdf.destination]
+            .nlargest(top_n_flows, "flow")
+            .plot_flows(flow_color="red", map_f=innerflow_choropleth)
+        )
+    else:  # if there are no inter flows only plot innerflow choropleth
+        od_map = innerflow_choropleth
 
     od_map.save(os.path.join(temp_map_folder, "od_map.html"))
 
@@ -181,14 +185,23 @@ def render_origin_destination_flows(
 
 
 def render_intra_tile_flows(od_flows: Section, n_tiles: int) -> str:
-    intra_tile_flows = round(od_analysis.get_intra_tile_flows(od_flows.data), 2)
+    od_sum = od_flows.data["flow"].sum()
+    if od_sum == 0:
+        intra_tile_flows_perc = 0
+        moe_info = 0
+    else:
+        intra_tile_flows_perc = round(
+            od_analysis.get_intra_tile_flows(od_flows.data) / od_sum * 100, 2
+        )
+        # TODO: is this actually a correct estimation? -> the more noise the more non-intra tile flows are overestimated...
+        moe_info = round(n_tiles * od_flows.margin_of_error_laplace / od_sum * 100, 2)
     ci_interval_info = (
-        f"(95% confidence interval ± {round(n_tiles * od_flows.margin_of_error_laplace, 2)} percentage points)"
+        f"(95% confidence interval ± {moe_info} percentage points)"
         if od_flows.margin_of_error_laplace is not None
         else ""
     )
 
-    return f"{intra_tile_flows}% of flows start and end within the same cell {ci_interval_info}."
+    return f"{intra_tile_flows_perc}% of flows start and end within the same cell {ci_interval_info}."
 
 
 def render_flows_cumsum(od_flows: Section) -> str:

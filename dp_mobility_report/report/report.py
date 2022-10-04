@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING, Tuple
 
 from pandas import DataFrame
 from tqdm.auto import tqdm
@@ -6,7 +6,7 @@ from tqdm.auto import tqdm
 from dp_mobility_report.model.section import Section
 
 if TYPE_CHECKING:
-    from dp_mobility_report.md_report import MobilityDataReport
+    from dp_mobility_report import DpMobilityReport
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import (
@@ -17,7 +17,7 @@ from dp_mobility_report.model import (
 )
 
 
-def report_elements(mdreport: "MobilityDataReport") -> dict:
+def report_elements(dpmreport: "DpMobilityReport") -> dict:
 
     report: dict = {}
 
@@ -25,49 +25,43 @@ def report_elements(mdreport: "MobilityDataReport") -> dict:
     # plus budget for each custom assigned analysis budget
     budget_split_sum = (
         len(const.ELEMENTS)
-        - len(mdreport.analysis_exclusion)
-        - len(mdreport.budget_split.keys())
-        + sum(mdreport.budget_split.values())
+        - len(dpmreport.analysis_exclusion)
+        - len(dpmreport.budget_split.keys())
+        + sum(dpmreport.budget_split.values())
     )
 
     # get privacy budget for each report element
-    if mdreport.privacy_budget is None or mdreport.evalu:
-        eps_factor = mdreport.privacy_budget
+    if dpmreport.privacy_budget is None or dpmreport.evalu:
+        eps_factor = dpmreport.privacy_budget
     else:
         eps_factor = (
-            mdreport.privacy_budget / budget_split_sum
+            dpmreport.privacy_budget / budget_split_sum
             if budget_split_sum > 0
-            else mdreport.privacy_budget
+            else dpmreport.privacy_budget
         )
 
     with tqdm(  # progress bar
-        total=4, desc="Create report", disable=mdreport.disable_progress_bar
+        total=4, desc="Create report", disable=dpmreport.disable_progress_bar
     ) as pbar:
 
-        report = {**report, **add_overview_elements(mdreport, eps_factor)}
-        if const.DS_STATISTICS in mdreport.analysis_exclusion:
-            record_count = None
-            trip_count = None
-        else:
-            record_count = report[const.DS_STATISTICS].data["n_records"]
-            trip_count = report[const.DS_STATISTICS].data["n_trips"]
+        report = {**report, **add_overview_elements(dpmreport, eps_factor)}
         pbar.update()
 
         report = {
             **report,
-            **add_place_analysis_elements(mdreport, eps_factor, record_count),
+            **add_place_analysis_elements(dpmreport, eps_factor),
         }
         pbar.update()
 
-        if not set(const.OD_ELEMENTS).issubset(mdreport.analysis_exclusion):
-            _od_shape = od_analysis.get_od_shape(mdreport.df, mdreport.tessellation)
+        if not set(const.OD_ELEMENTS).issubset(dpmreport.analysis_exclusion):
+            _od_shape = od_analysis.get_od_shape(dpmreport.df, dpmreport.tessellation)
             report = {
                 **report,
-                **add_od_analysis_elements(mdreport, _od_shape, eps_factor, trip_count),
+                **add_od_analysis_elements(dpmreport, _od_shape, eps_factor),
             }
         pbar.update()
 
-        report = {**report, **add_user_analysis_elements(mdreport, eps_factor)}
+        report = {**report, **add_user_analysis_elements(dpmreport, eps_factor)}
         pbar.update()
 
     return report
@@ -84,163 +78,159 @@ def _get_eps(eps_factor: float, analysis_name: str, budget_split: dict) -> float
         return budget_split[analysis_name] * eps_factor
 
 
-def add_overview_elements(mdreport: "MobilityDataReport", eps_factor: float) -> dict:
+def add_overview_elements(dpmreport: "DpMobilityReport", eps_factor: float) -> dict:
     overview_elements = {}
 
     if (const.DS_STATISTICS in const.OVERVIEW_ELEMENTS) and (
-        const.DS_STATISTICS not in mdreport.analysis_exclusion
+        const.DS_STATISTICS not in dpmreport.analysis_exclusion
     ):
         overview_elements[const.DS_STATISTICS] = overview.get_dataset_statistics(
-            mdreport, _get_eps(eps_factor, const.DS_STATISTICS, mdreport.budget_split)
+            dpmreport, _get_eps(eps_factor, const.DS_STATISTICS, dpmreport.budget_split)
         )
 
     if (const.MISSING_VALUES in const.OVERVIEW_ELEMENTS) and (
-        const.MISSING_VALUES not in mdreport.analysis_exclusion
+        const.MISSING_VALUES not in dpmreport.analysis_exclusion
     ):
         overview_elements[const.MISSING_VALUES] = overview.get_missing_values(
-            mdreport, _get_eps(eps_factor, const.MISSING_VALUES, mdreport.budget_split)
+            dpmreport, _get_eps(eps_factor, const.MISSING_VALUES, dpmreport.budget_split)
         )
 
     if (const.TRIPS_OVER_TIME in const.OVERVIEW_ELEMENTS) and (
-        const.TRIPS_OVER_TIME not in mdreport.analysis_exclusion
+        const.TRIPS_OVER_TIME not in dpmreport.analysis_exclusion
     ):
         overview_elements[const.TRIPS_OVER_TIME] = overview.get_trips_over_time(
-            mdreport, _get_eps(eps_factor, const.TRIPS_OVER_TIME, mdreport.budget_split)
+            dpmreport, _get_eps(eps_factor, const.TRIPS_OVER_TIME, dpmreport.budget_split)
         )
 
     if (const.TRIPS_PER_WEEKDAY in const.TRIPS_PER_WEEKDAY) and (
-        const.TRIPS_PER_WEEKDAY not in mdreport.analysis_exclusion
+        const.TRIPS_PER_WEEKDAY not in dpmreport.analysis_exclusion
     ):
         overview_elements[const.TRIPS_PER_WEEKDAY] = overview.get_trips_per_weekday(
-            mdreport,
-            _get_eps(eps_factor, const.TRIPS_PER_WEEKDAY, mdreport.budget_split),
+            dpmreport,
+            _get_eps(eps_factor, const.TRIPS_PER_WEEKDAY, dpmreport.budget_split),
         )
 
     if (const.TRIPS_PER_HOUR in const.OVERVIEW_ELEMENTS) and (
-        const.TRIPS_PER_HOUR not in mdreport.analysis_exclusion
+        const.TRIPS_PER_HOUR not in dpmreport.analysis_exclusion
     ):
         overview_elements[const.TRIPS_PER_HOUR] = overview.get_trips_per_hour(
-            mdreport, _get_eps(eps_factor, const.TRIPS_PER_HOUR, mdreport.budget_split)
+            dpmreport, _get_eps(eps_factor, const.TRIPS_PER_HOUR, dpmreport.budget_split)
         )
     return overview_elements
 
 
 def add_place_analysis_elements(
-    mdreport: "MobilityDataReport", eps_factor: float, record_count: Optional[int]
+    dpmreport: "DpMobilityReport", eps_factor: float,
 ) -> dict:
     place_analysis_elements = {}
 
     if (const.VISITS_PER_TILE in const.PLACE_ELEMENTS) and (
-        const.VISITS_PER_TILE not in mdreport.analysis_exclusion
+        const.VISITS_PER_TILE not in dpmreport.analysis_exclusion
     ):
         place_analysis_elements[
             const.VISITS_PER_TILE
         ] = place_analysis.get_visits_per_tile(
-            mdreport,
-            _get_eps(eps_factor, const.VISITS_PER_TILE, mdreport.budget_split),
-            record_count,
+            dpmreport,
+            _get_eps(eps_factor, const.VISITS_PER_TILE, dpmreport.budget_split)
         )
 
     if (const.VISITS_PER_TILE_TIMEWINDOW in const.PLACE_ELEMENTS) and (
-        const.VISITS_PER_TILE_TIMEWINDOW not in mdreport.analysis_exclusion
+        const.VISITS_PER_TILE_TIMEWINDOW not in dpmreport.analysis_exclusion
     ):
         place_analysis_elements[
             const.VISITS_PER_TILE_TIMEWINDOW
         ] = place_analysis.get_visits_per_tile_timewindow(
-            mdreport,
+            dpmreport,
             _get_eps(
-                eps_factor, const.VISITS_PER_TILE_TIMEWINDOW, mdreport.budget_split
+                eps_factor, const.VISITS_PER_TILE_TIMEWINDOW, dpmreport.budget_split
             ),
-            record_count,
         )
     return place_analysis_elements
 
 
 def add_od_analysis_elements(
-    mdreport: "MobilityDataReport",
+    dpmreport: "DpMobilityReport",
     _od_shape: DataFrame,
     eps_factor: float,
-    trip_count: Optional[int],
 ) -> dict:
     od_analysis_elements = {}
 
     if (const.OD_FLOWS in const.OD_ELEMENTS) and (
-        const.OD_FLOWS not in mdreport.analysis_exclusion
+        const.OD_FLOWS not in dpmreport.analysis_exclusion
     ):
         od_analysis_elements[const.OD_FLOWS] = od_analysis.get_od_flows(
             _od_shape,
-            mdreport,
-            _get_eps(eps_factor, const.OD_FLOWS, mdreport.budget_split),
-            trip_count,
+            dpmreport,
+            _get_eps(eps_factor, const.OD_FLOWS, dpmreport.budget_split)
         )
 
     if (const.TRAVEL_TIME in const.OD_ELEMENTS) and (
-        const.TRAVEL_TIME not in mdreport.analysis_exclusion
+        const.TRAVEL_TIME not in dpmreport.analysis_exclusion
     ):
         od_analysis_elements[const.TRAVEL_TIME] = od_analysis.get_travel_time(
             _od_shape,
-            mdreport,
-            _get_eps(eps_factor, const.TRAVEL_TIME, mdreport.budget_split),
+            dpmreport,
+            _get_eps(eps_factor, const.TRAVEL_TIME, dpmreport.budget_split),
         )
 
     if (const.JUMP_LENGTH in const.OD_ELEMENTS) and (
-        const.JUMP_LENGTH not in mdreport.analysis_exclusion
+        const.JUMP_LENGTH not in dpmreport.analysis_exclusion
     ):
         od_analysis_elements[const.JUMP_LENGTH] = od_analysis.get_jump_length(
             _od_shape,
-            mdreport,
-            _get_eps(eps_factor, const.JUMP_LENGTH, mdreport.budget_split),
+            dpmreport,
+            _get_eps(eps_factor, const.JUMP_LENGTH, dpmreport.budget_split),
         )
 
     return od_analysis_elements
 
 
 def add_user_analysis_elements(
-    mdreport: "MobilityDataReport", eps_factor: float
+    dpmreport: "DpMobilityReport", eps_factor: float
 ) -> dict:
     user_analysis_elements = {}
     if (const.TRIPS_PER_USER in const.USER_ELEMENTS) and (
-        const.TRIPS_PER_USER not in mdreport.analysis_exclusion
+        const.TRIPS_PER_USER not in dpmreport.analysis_exclusion
     ):
         user_analysis_elements[const.TRIPS_PER_USER] = user_analysis.get_trips_per_user(
-            mdreport, _get_eps(eps_factor, const.TRIPS_PER_USER, mdreport.budget_split)
+            dpmreport, _get_eps(eps_factor, const.TRIPS_PER_USER, dpmreport.budget_split)
         )
 
     if (const.USER_TIME_DELTA in const.USER_ELEMENTS) and (
-        const.USER_TIME_DELTA not in mdreport.analysis_exclusion
+        const.USER_TIME_DELTA not in dpmreport.analysis_exclusion
     ):
         user_analysis_elements[
             const.USER_TIME_DELTA
         ] = user_analysis.get_user_time_delta(
-            mdreport, _get_eps(eps_factor, const.USER_TIME_DELTA, mdreport.budget_split)
+            dpmreport, _get_eps(eps_factor, const.USER_TIME_DELTA, dpmreport.budget_split)
         )
 
     if (const.RADIUS_OF_GYRATION in const.USER_ELEMENTS) and (
-        const.RADIUS_OF_GYRATION not in mdreport.analysis_exclusion
+        const.RADIUS_OF_GYRATION not in dpmreport.analysis_exclusion
     ):
         user_analysis_elements[
             const.RADIUS_OF_GYRATION
         ] = user_analysis.get_radius_of_gyration(
-            mdreport,
-            _get_eps(eps_factor, const.RADIUS_OF_GYRATION, mdreport.budget_split),
+            dpmreport,
+            _get_eps(eps_factor, const.RADIUS_OF_GYRATION, dpmreport.budget_split),
         )
 
     if (const.USER_TILE_COUNT in const.USER_ELEMENTS) and (
-        const.USER_TILE_COUNT not in mdreport.analysis_exclusion
+        const.USER_TILE_COUNT not in dpmreport.analysis_exclusion
     ):
         user_analysis_elements[
             const.USER_TILE_COUNT
         ] = user_analysis.get_user_tile_count(
-            mdreport, _get_eps(eps_factor, const.USER_TILE_COUNT, mdreport.budget_split)
+            dpmreport, _get_eps(eps_factor, const.USER_TILE_COUNT, dpmreport.budget_split)
         )
 
     if (const.MOBILITY_ENTROPY in const.USER_ELEMENTS) and (
-        const.MOBILITY_ENTROPY not in mdreport.analysis_exclusion
+        const.MOBILITY_ENTROPY not in dpmreport.analysis_exclusion
     ):
         user_analysis_elements[
             const.MOBILITY_ENTROPY
         ] = user_analysis.get_mobility_entropy(
-            mdreport,
-            _get_eps(eps_factor, const.MOBILITY_ENTROPY, mdreport.budget_split),
+            dpmreport,
+            _get_eps(eps_factor, const.MOBILITY_ENTROPY, dpmreport.budget_split),
         )
     return user_analysis_elements
