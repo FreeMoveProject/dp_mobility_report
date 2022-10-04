@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING, Tuple
 
 from pandas import DataFrame
 from tqdm.auto import tqdm
@@ -51,9 +51,6 @@ def report_elements(dpmreport: "DpMobilityReport") -> dict:
     element_count, is_all_analyses = get_analysis_elements_info(
         dpmreport.analysis_selection
     )
-    record_count = None
-    trip_count = None
-
     # get privacy budget for each report element
     if dpmreport.privacy_budget is None or dpmreport.evalu is True:
         epsilon = dpmreport.privacy_budget
@@ -69,14 +66,15 @@ def report_elements(dpmreport: "DpMobilityReport") -> dict:
     ) as pbar:
         if is_all_analyses | (const.OVERVIEW in dpmreport.analysis_selection):
             report = {**report, **add_overview_elements(dpmreport, epsilon)}
-            record_count = report[const.DS_STATISTICS].data["n_records"]
-            trip_count = report[const.DS_STATISTICS].data["n_trips"]
         pbar.update()
 
         if is_all_analyses | (const.PLACE_ANALYSIS in dpmreport.analysis_selection):
             report = {
                 **report,
-                **add_place_analysis_elements(dpmreport, epsilon, record_count, trip_count),
+                **add_place_analysis_elements(
+                    dpmreport,
+                    epsilon,
+                ),
             }
         pbar.update()
 
@@ -84,7 +82,11 @@ def report_elements(dpmreport: "DpMobilityReport") -> dict:
             _od_shape = od_analysis.get_od_shape(dpmreport.df, dpmreport.tessellation)
             report = {
                 **report,
-                **add_od_analysis_elements(dpmreport, _od_shape, epsilon, trip_count),
+                **add_od_analysis_elements(
+                    dpmreport,
+                    _od_shape,
+                    epsilon,
+                ),
             }
         pbar.update()
 
@@ -116,16 +118,19 @@ def add_overview_elements(dpmreport: "DpMobilityReport", epsilon: float) -> dict
 
 
 def add_place_analysis_elements(
-    dpmreport: "DpMobilityReport", epsilon: float, record_count: Optional[int], trip_count: Optional[int]
+    dpmreport: "DpMobilityReport",
+    epsilon: float,  # record_count: Optional[int], trip_count: Optional[int]
 ) -> dict:
     return {
         const.VISITS_PER_TILE: place_analysis.get_visits_per_tile(
-            dpmreport, epsilon, record_count
+            dpmreport,
+            epsilon,  # record_count
         )
         if const.VISITS_PER_TILE in const.PLACE_ELEMENTS
         else Section(),
         const.VISITS_PER_TILE_TIMEWINDOW: place_analysis.get_visits_per_tile_timewindow(
-            dpmreport, epsilon, trip_count
+            dpmreport,
+            epsilon,  # trip_count
         )
         if const.VISITS_PER_TILE_TIMEWINDOW in const.PLACE_ELEMENTS
         else Section(),
@@ -136,11 +141,13 @@ def add_od_analysis_elements(
     dpmreport: "DpMobilityReport",
     _od_shape: DataFrame,
     epsilon: float,
-    trip_count: Optional[int],
+    # trip_count: Optional[int],
 ) -> dict:
     return {
         const.OD_FLOWS: od_analysis.get_od_flows(
-            _od_shape, dpmreport, epsilon, trip_count
+            _od_shape,
+            dpmreport,
+            epsilon,  # trip_count
         )
         if const.OD_FLOWS in const.OD_ELEMENTS
         else Section(),

@@ -162,14 +162,23 @@ def render_origin_destination_flows(
 
 
 def render_intra_tile_flows(od_flows: Section, n_tiles: int) -> str:
-    intra_tile_flows = round(od_analysis.get_intra_tile_flows(od_flows.data), 2)
+    od_sum = od_flows.data["flow"].sum()
+    if od_sum == 0:
+        intra_tile_flows_perc = 0
+        moe_info = 0
+    else:
+        intra_tile_flows_perc = round(
+            od_analysis.get_intra_tile_flows(od_flows.data) / od_sum * 100, 2
+        )
+        # TODO: is this actually a correct estimation? -> the more noise the more non-intra tile flows are overestimated...
+        moe_info = round(n_tiles * od_flows.margin_of_error_laplace / od_sum * 100, 2)
     ci_interval_info = (
-        f"(95% confidence interval ± {round(n_tiles * od_flows.margin_of_error_laplace, 2)} percentage points)"
+        f"(95% confidence interval ± {moe_info} percentage points)"
         if od_flows.margin_of_error_laplace is not None
         else ""
     )
 
-    return f"{intra_tile_flows}% of flows start and end within the same cell {ci_interval_info}."
+    return f"{intra_tile_flows_perc}% of flows start and end within the same cell {ci_interval_info}."
 
 
 def render_flows_cumsum(od_flows: Section) -> str:

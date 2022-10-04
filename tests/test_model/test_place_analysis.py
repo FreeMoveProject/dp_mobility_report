@@ -16,7 +16,7 @@ def test_dpmreport():
 
 def test_get_visits_per_tile(test_dpmreport):
     """Correct visits per tile values without noise."""
-    visits_per_location = place_analysis.get_visits_per_tile(test_dpmreport, None, None)
+    visits_per_location = place_analysis.get_visits_per_tile(test_dpmreport, None)
     assert visits_per_location.quartiles[["min", "25%", "50%", "75%", "max"]].round(
         2
     ).tolist() == [49, 49.75, 50, 50, 50]
@@ -26,7 +26,7 @@ def test_get_visits_per_tile(test_dpmreport):
 
 def test_get_visits_per_tile_timewindow(test_dpmreport):
     visits_timewindow = place_analysis.get_visits_per_tile_timewindow(
-        test_dpmreport, None, None
+        test_dpmreport, None
     ).data
     assert len(visits_timewindow.columns) == 12
     assert len(visits_timewindow.index) == 4

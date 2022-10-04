@@ -196,7 +196,7 @@ def render_trips_per_weekday(trips_per_weekday: Section) -> str:
         y=trips_per_weekday.data.values,
         margin_of_error=trips_per_weekday.margin_of_error_laplace,
         x_axis_label="Weekday",
-        y_axis_label="% of trips per weekday",
+        y_axis_label="% of trips",
         rotate_label=True,
     )
     plt.close()

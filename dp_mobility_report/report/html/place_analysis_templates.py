@@ -73,7 +73,8 @@ def render_place_analysis(
 
 
 def render_points_outside_tess(visits_per_tile: Section) -> str:
-    return f"""{round(visits_per_tile.n_outliers)} ({round(visits_per_tile.n_outliers, 2)}%) of points are outside the given tessellation 
+    return f"""{round(visits_per_tile.n_outliers)} ({round(visits_per_tile.n_outliers / (visits_per_tile.data["visits"].sum()
+ + visits_per_tile.n_outliers) * 100, 2)}%) points are outside the given tessellation 
     (95% confidence interval ± {round(visits_per_tile.margin_of_error_laplace)})."""
 
 

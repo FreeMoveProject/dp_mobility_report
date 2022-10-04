@@ -53,7 +53,7 @@ def test_get_od_shape(test_dpmreport):
 
 
 def test_get_od_flows(test_od_shape, test_dpmreport):
-    od_flows = od_analysis.get_od_flows(test_od_shape, test_dpmreport, None, None).data
+    od_flows = od_analysis.get_od_flows(test_od_shape, test_dpmreport, None).data
     assert od_flows.columns.tolist() == ["origin", "destination", "flow"]
     assert len(od_flows) == 2
     od_flows["flow"] = od_flows["flow"].round()

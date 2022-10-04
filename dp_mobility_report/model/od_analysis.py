@@ -46,7 +46,6 @@ def get_od_flows(
     od_shape: pd.DataFrame,
     dpmreport: "DpMobilityReport",
     eps: Optional[float],
-    trip_count: Optional[int],
 ) -> Section:
     sensitivity = dpmreport.max_trips_per_user
     od_flows = (
@@ -61,6 +60,9 @@ def get_od_flows(
         )
         .sort_values("flow", ascending=False)
     )
+
+    # margin of error
+    moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
 
     # fill all potential combinations with 0s for correct application of dp
     full_tile_ids = np.unique(dpmreport.tessellation[const.TILE_ID])
@@ -80,16 +82,6 @@ def get_od_flows(
 
     # remove all instances of 0 (and smaller) to reduce storage
     od_flows = od_flows[od_flows["flow"] > 0]
-
-    # margin of error
-    moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
-
-    # scale to trip count of overview segment
-    if trip_count is not None:
-        od_sum = np.sum(od_flows["flow"])
-        if od_sum != 0:
-            od_flows["flow"] = (od_flows["flow"] / od_sum * trip_count).astype(int)
-            moe = int(moe / od_sum * trip_count)
 
     # TODO: distribution with or without 0s?
     # as counts are already dp, no further privacy mechanism needed
