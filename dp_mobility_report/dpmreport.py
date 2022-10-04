@@ -63,8 +63,7 @@ class DpMobilityReport:
         max_trips_per_user: Optional[int] = None,
         analysis_selection: Optional[List[str]] = None,
         analysis_exclusion: Optional[List[str]] = None,
-        budget_split: dict = {
-        },
+        budget_split: dict = {},
         timewindows: Union[List[int], np.ndarray] = [2, 6, 10, 14, 18, 22],
         max_travel_time: Optional[int] = None,
         bin_range_travel_time: Optional[int] = None,
@@ -129,7 +128,9 @@ class DpMobilityReport:
         self.bin_range_travel_time = bin_range_travel_time
         self.max_radius_of_gyration = max_radius_of_gyration
         self.bin_range_radius_of_gyration = bin_range_radius_of_gyration
-        self.analysis_exclusion = _clean_analysis_exclusion(analysis_selection, analysis_exclusion)
+        self.analysis_exclusion = _clean_analysis_exclusion(
+            analysis_selection, analysis_exclusion
+        )
         self.budget_split = _clean_budget_split(budget_split, self.analysis_exclusion)
         self.evalu = evalu
         self.disable_progress_bar = disable_progress_bar
@@ -231,16 +232,18 @@ def _validate_input(
 
     if analysis_selection is not None and analysis_exclusion is not None:
         warnings.warn(
-            "The parameter `analysis_exclusion' will be ignored, as `analysis_selection' is set as well."    
+            "The parameter `analysis_exclusion' will be ignored, as `analysis_selection' is set as well."
         )
         analysis_exclusion = None
-    
+
     if analysis_selection is not None:
-        if not isinstance(analysis_exclusion, list):
+        if not isinstance(analysis_selection, list):
             raise TypeError("'analysis_selection' is not a list.")
-        if not set(analysis_exclusion).issubset(const.SEGMENTS_AND_ELEMENTS):
+        if not set(analysis_selection).issubset(
+            const.SEGMENTS_AND_ELEMENTS + [const.ALL]
+        ):
             raise ValueError(
-                f"Unknown analyses in {analysis_selection}. Only elements from {const.SEGMENTS_AND_ELEMENTS} are valid inputs."
+                f"Unknown analyses in {analysis_selection}. Only elements from {const.SEGMENTS_AND_ELEMENTS + [const.ALL]} are valid inputs."
             )
 
     if analysis_exclusion is not None:
@@ -306,29 +309,39 @@ def _validate_bool(var: Any, name: str) -> None:
         raise TypeError(f"'{name}' is not type boolean.")
 
 
-def _clean_analysis_exclusion(analysis_selection: Optional[List[str]], analysis_exclusion: Optional[List[str]]) -> List[str]:
+# unify different input options of analyses (segments and elements) to be included / excluded as excluded elements, i.e., 'analysis_exclusion'
+def _clean_analysis_exclusion(
+    analysis_selection: Optional[List[str]], analysis_exclusion: Optional[List[str]]
+) -> List[str]:
     # TODO: without timestamp: add w/o timestamp analyses to exclude_analysis
-    # deduplicate list in case gave duplicates as input (otherwise `remove` might fail)
 
-    # TODO: negate analysis_selection (rather the other way round?)
-    # if analysis_selection is not None:
-    #     analysis_selection = list(set(analysis_selection))
-    #     analysis_exclusion = const.SEGMENTS_AND_ELEMENTS
-    #     analysis_exclusion = negative list of const.ELEMENTS and analysis_selection
+    def _remove_elements(l, remove_list):
+        return [e for e in l if e not in remove_list]
 
-    #     if const.OVERVIEW in analysis_selection:
-    #         analysis_exclusion.remove(const.OVERVIEW_ELEMENTS)
+    if analysis_selection is not None:
+        analysis_exclusion = const.ELEMENTS
 
-    #     if const.PLACE_ANALYSIS in analysis_selection:
-    #         analysis_exclusion.remove(const.PLACE_ELEMENTS)
+        # remove all elements of segments
+        if const.OVERVIEW in analysis_selection:
+            analysis_exclusion = _remove_elements(
+                analysis_exclusion, const.OVERVIEW_ELEMENTS
+            )
+        if const.PLACE_ANALYSIS in analysis_selection:
+            analysis_exclusion = _remove_elements(
+                analysis_exclusion, const.PLACE_ELEMENTS
+            )
+        if const.OD_ANALYSIS in analysis_selection:
+            analysis_exclusion = _remove_elements(analysis_exclusion, const.OD_ELEMENTS)
+        if const.USER_ANALYSIS in analysis_selection:
+            analysis_exclusion = _remove_elements(
+                analysis_exclusion, const.USER_ELEMENTS
+            )
 
-    #     if const.OD_ANALYSIS in analysis_selection:
-    #         analysis_exclusion.remove(const.OD_ELEMENTS)
+        # remove single elements
+        analysis_exclusion = _remove_elements(analysis_exclusion, analysis_selection)
 
-    #     if const.USER_ANALYSIS in analysis_selection:
-    #         analysis_exclusion.remove(const.USER_ELEMENTS)
-
-    if analysis_exclusion is not None:
+    elif analysis_exclusion is not None:
+        # deduplicate list in case there are duplicates as input (otherwise `remove` might fail)
         analysis_exclusion = list(set(analysis_exclusion))
 
         if const.OVERVIEW in analysis_exclusion:
@@ -349,9 +362,11 @@ def _clean_analysis_exclusion(analysis_selection: Optional[List[str]], analysis_
 
         # deduplicate in case analyses and segments were included
         analysis_exclusion = list(set(analysis_exclusion))
-        return analysis_exclusion
+
     else:
-        return []
+        analysis_exclusion = []
+
+    return analysis_exclusion
 
 
 def _clean_budget_split(budget_split: dict, analysis_exclusion: List[str]) -> dict:
@@ -361,8 +376,8 @@ def _clean_budget_split(budget_split: dict, analysis_exclusion: List[str]) -> di
             f"A `budget_split`is specified for the analyses {intersec} even though they are excluded."
             "As they will be excluded, the `budget_split` specification will be ignored for these analyses."
         )
-    
+
     # remove all analyses that are excluded according to `analysis_exclusion``
     remaining_analyses = set(budget_split.keys()) - set(analysis_exclusion)
-    budget_split = { analysis: budget_split[analysis] for analysis in remaining_analyses }
+    budget_split = {analysis: budget_split[analysis] for analysis in remaining_analyses}
     return budget_split
