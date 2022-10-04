@@ -92,14 +92,16 @@ def add_overview_elements(dpmreport: "DpMobilityReport", eps_factor: float) -> d
         const.MISSING_VALUES not in dpmreport.analysis_exclusion
     ):
         overview_elements[const.MISSING_VALUES] = overview.get_missing_values(
-            dpmreport, _get_eps(eps_factor, const.MISSING_VALUES, dpmreport.budget_split)
+            dpmreport,
+            _get_eps(eps_factor, const.MISSING_VALUES, dpmreport.budget_split),
         )
 
     if (const.TRIPS_OVER_TIME in const.OVERVIEW_ELEMENTS) and (
         const.TRIPS_OVER_TIME not in dpmreport.analysis_exclusion
     ):
         overview_elements[const.TRIPS_OVER_TIME] = overview.get_trips_over_time(
-            dpmreport, _get_eps(eps_factor, const.TRIPS_OVER_TIME, dpmreport.budget_split)
+            dpmreport,
+            _get_eps(eps_factor, const.TRIPS_OVER_TIME, dpmreport.budget_split),
         )
 
     if (const.TRIPS_PER_WEEKDAY in const.TRIPS_PER_WEEKDAY) and (
@@ -114,13 +116,15 @@ def add_overview_elements(dpmreport: "DpMobilityReport", eps_factor: float) -> d
         const.TRIPS_PER_HOUR not in dpmreport.analysis_exclusion
     ):
         overview_elements[const.TRIPS_PER_HOUR] = overview.get_trips_per_hour(
-            dpmreport, _get_eps(eps_factor, const.TRIPS_PER_HOUR, dpmreport.budget_split)
+            dpmreport,
+            _get_eps(eps_factor, const.TRIPS_PER_HOUR, dpmreport.budget_split),
         )
     return overview_elements
 
 
 def add_place_analysis_elements(
-    dpmreport: "DpMobilityReport", eps_factor: float,
+    dpmreport: "DpMobilityReport",
+    eps_factor: float,
 ) -> dict:
     place_analysis_elements = {}
 
@@ -131,7 +135,7 @@ def add_place_analysis_elements(
             const.VISITS_PER_TILE
         ] = place_analysis.get_visits_per_tile(
             dpmreport,
-            _get_eps(eps_factor, const.VISITS_PER_TILE, dpmreport.budget_split)
+            _get_eps(eps_factor, const.VISITS_PER_TILE, dpmreport.budget_split),
         )
 
     if (const.VISITS_PER_TILE_TIMEWINDOW in const.PLACE_ELEMENTS) and (
@@ -161,7 +165,7 @@ def add_od_analysis_elements(
         od_analysis_elements[const.OD_FLOWS] = od_analysis.get_od_flows(
             _od_shape,
             dpmreport,
-            _get_eps(eps_factor, const.OD_FLOWS, dpmreport.budget_split)
+            _get_eps(eps_factor, const.OD_FLOWS, dpmreport.budget_split),
         )
 
     if (const.TRAVEL_TIME in const.OD_ELEMENTS) and (
@@ -193,7 +197,8 @@ def add_user_analysis_elements(
         const.TRIPS_PER_USER not in dpmreport.analysis_exclusion
     ):
         user_analysis_elements[const.TRIPS_PER_USER] = user_analysis.get_trips_per_user(
-            dpmreport, _get_eps(eps_factor, const.TRIPS_PER_USER, dpmreport.budget_split)
+            dpmreport,
+            _get_eps(eps_factor, const.TRIPS_PER_USER, dpmreport.budget_split),
         )
 
     if (const.USER_TIME_DELTA in const.USER_ELEMENTS) and (
@@ -202,7 +207,8 @@ def add_user_analysis_elements(
         user_analysis_elements[
             const.USER_TIME_DELTA
         ] = user_analysis.get_user_time_delta(
-            dpmreport, _get_eps(eps_factor, const.USER_TIME_DELTA, dpmreport.budget_split)
+            dpmreport,
+            _get_eps(eps_factor, const.USER_TIME_DELTA, dpmreport.budget_split),
         )
 
     if (const.RADIUS_OF_GYRATION in const.USER_ELEMENTS) and (
@@ -221,7 +227,8 @@ def add_user_analysis_elements(
         user_analysis_elements[
             const.USER_TILE_COUNT
         ] = user_analysis.get_user_tile_count(
-            dpmreport, _get_eps(eps_factor, const.USER_TILE_COUNT, dpmreport.budget_split)
+            dpmreport,
+            _get_eps(eps_factor, const.USER_TILE_COUNT, dpmreport.budget_split),
         )
 
     if (const.MOBILITY_ENTROPY in const.USER_ELEMENTS) and (

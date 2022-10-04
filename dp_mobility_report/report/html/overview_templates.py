@@ -17,16 +17,16 @@ def render_overview(report: dict) -> str:
     dataset_stats_table = ""
     missing_values_table = ""
     trips_over_time_eps = ""
-    trips_over_time_moe= "",
+    trips_over_time_moe = ""
     trips_over_time_info = ""
     trips_over_time_linechart = ""
     trips_over_time_moe_info = ""
     trips_over_time_summary_table = ""
     trips_per_weekday_eps = ""
-    trips_per_weekday_moe= "",
+    trips_per_weekday_moe = ""
     trips_per_weekday_barchart = ""
     trips_per_hour_eps = ""
-    trips_per_hour_moe= "",
+    trips_per_hour_moe = ""
     trips_per_hour_linechart = ""
 
     if const.DS_STATISTICS in report and report[const.DS_STATISTICS].data is not None:
@@ -40,7 +40,9 @@ def render_overview(report: dict) -> str:
         and report[const.TRIPS_OVER_TIME].data is not None
     ):
         trips_over_time_eps = render_eps(report[const.TRIPS_OVER_TIME].privacy_budget)
-        trips_over_time_moe = fmt_moe(report[const.TRIPS_OVER_TIME].margin_of_error_laplace)
+        trips_over_time_moe = fmt_moe(
+            report[const.TRIPS_OVER_TIME].margin_of_error_laplace
+        )
         trips_over_time_info = render_trips_over_time_info(
             report[const.TRIPS_OVER_TIME].datetime_precision
         )
@@ -54,25 +56,27 @@ def render_overview(report: dict) -> str:
             report[const.TRIPS_OVER_TIME].quartiles
         )
 
-
     if (
         const.TRIPS_PER_WEEKDAY in report
         and report[const.TRIPS_PER_WEEKDAY].data is not None
     ):
-        trips_per_weekday_eps=render_eps(
+        trips_per_weekday_eps = render_eps(
             report[const.TRIPS_PER_WEEKDAY].privacy_budget
         )
-        trips_per_weekday_moe=fmt_moe(report[const.TRIPS_PER_HOUR].margin_of_error_laplace)
+        trips_per_weekday_moe = fmt_moe(
+            report[const.TRIPS_PER_HOUR].margin_of_error_laplace
+        )
 
         trips_per_weekday_barchart = render_trips_per_weekday(
             report[const.TRIPS_PER_WEEKDAY]
         )
 
     if const.TRIPS_PER_HOUR in report and report[const.TRIPS_PER_HOUR].data is not None:
-        trips_per_hour_eps=render_eps(report[const.TRIPS_PER_HOUR].privacy_budget)
-        trips_per_hour_moe=fmt_moe(report[const.TRIPS_PER_HOUR].margin_of_error_laplace)
+        trips_per_hour_eps = render_eps(report[const.TRIPS_PER_HOUR].privacy_budget)
+        trips_per_hour_moe = fmt_moe(
+            report[const.TRIPS_PER_HOUR].margin_of_error_laplace
+        )
         trips_per_hour_linechart = render_trips_per_hour(report[const.TRIPS_PER_HOUR])
-
 
     template_structure = get_template("overview_segment.html")
     return template_structure.render(
@@ -88,7 +92,7 @@ def render_overview(report: dict) -> str:
         trips_per_weekday_moe=trips_per_weekday_moe,
         trips_per_weekday_barchart=trips_per_weekday_barchart,
         trips_per_hour_eps=trips_per_hour_eps,
-        trips_per_hour_moe= trips_per_hour_moe,
+        trips_per_hour_moe=trips_per_hour_moe,
         trips_per_hour_linechart=trips_per_hour_linechart,
     )
 
@@ -147,7 +151,6 @@ def render_missing_values(missing_values: Section) -> str:
             "name": "User ID (uid)",
             "estimate": fmt(data[const.UID]),
             "margin_of_error": fmt_moe(moe),
-
         },
         {
             "name": "Trip ID (tid)",

@@ -47,7 +47,7 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
     if (const.TRIPS_PER_USER in report) and (
         report[const.TRIPS_PER_USER].data is not None
     ):
-        trips_per_user_eps=render_eps(report[const.TRIPS_PER_USER].privacy_budget)
+        trips_per_user_eps = render_eps(report[const.TRIPS_PER_USER].privacy_budget)
         trips_per_user_hist = render_trips_per_user(report[const.TRIPS_PER_USER])
         trips_per_user_summary_table = render_summary(
             report[const.TRIPS_PER_USER].quartiles
@@ -61,7 +61,7 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
         and (report[const.USER_TIME_DELTA] is not None)
         and (report[const.USER_TIME_DELTA].quartiles is not None)
     ):
-        time_between_traj_eps=render_eps(report[const.USER_TIME_DELTA].privacy_budget)
+        time_between_traj_eps = render_eps(report[const.USER_TIME_DELTA].privacy_budget)
         overlapping_trips_info = render_overlapping_trips(report[const.USER_TIME_DELTA])
         time_between_traj_hist = render_time_between_traj(report[const.USER_TIME_DELTA])
         time_between_traj_summary_table = render_summary(
@@ -93,7 +93,7 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
     if (const.USER_TILE_COUNT in report) and (
         report[const.USER_TILE_COUNT].data is not None
     ):
-        distinct_tiles_user_eps=render_eps(
+        distinct_tiles_user_eps = render_eps(
             report[const.USER_TILE_COUNT].privacy_budget
         )
         distinct_tiles_user_hist = render_distinct_tiles_user(
@@ -109,7 +109,7 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
     if (const.MOBILITY_ENTROPY in report) and (
         report[const.MOBILITY_ENTROPY].data is not None
     ):
-        mobility_entropy_eps=render_eps(report[const.MOBILITY_ENTROPY].privacy_budget)
+        mobility_entropy_eps = render_eps(report[const.MOBILITY_ENTROPY].privacy_budget)
         mobility_entropy_hist = render_mobility_entropy(report[const.MOBILITY_ENTROPY])
         mobility_entropy_summary_table = render_summary(
             report[const.MOBILITY_ENTROPY].quartiles

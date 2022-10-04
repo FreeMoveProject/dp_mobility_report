@@ -86,7 +86,7 @@ def get_dataset_statistics(
         "n_users": n_users,
         "n_locations": n_locations,
     }
-    
+
     moe = {
         "records": moe_records,
         "trips": moe_trips,

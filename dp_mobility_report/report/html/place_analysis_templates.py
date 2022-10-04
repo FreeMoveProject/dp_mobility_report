@@ -34,15 +34,17 @@ def render_place_analysis(
     visits_per_tile_summary_table = ""
     visits_per_tile_cumsum_linechart = ""
     most_freq_tiles_ranking = ""
-    visits_per_tile_timewindow_eps= ""
+    visits_per_tile_timewindow_eps = ""
     visits_per_tile_timewindow_moe = ""
     visits_per_tile_time_map = ""
 
     if (const.VISITS_PER_TILE in report) and (
         report[const.VISITS_PER_TILE].data is not None
     ):
-        visits_per_tile_eps=render_eps(report[const.VISITS_PER_TILE].privacy_budget)
-        visits_per_tile_moe=fmt_moe(report[const.VISITS_PER_TILE].margin_of_error_laplace)
+        visits_per_tile_eps = render_eps(report[const.VISITS_PER_TILE].privacy_budget)
+        visits_per_tile_moe = fmt_moe(
+            report[const.VISITS_PER_TILE].margin_of_error_laplace
+        )
 
         points_outside_tessellation_info = render_points_outside_tess(
             report[const.VISITS_PER_TILE]
@@ -66,10 +68,12 @@ def render_place_analysis(
     if (const.VISITS_PER_TILE_TIMEWINDOW in report) and (
         report[const.VISITS_PER_TILE_TIMEWINDOW] is not None
     ):
-        visits_per_tile_timewindow_eps=render_eps(
+        visits_per_tile_timewindow_eps = render_eps(
             report[const.VISITS_PER_TILE_TIMEWINDOW].privacy_budget
         )
-        visits_per_tile_timewindow_moe=fmt_moe(report[const.VISITS_PER_TILE_TIMEWINDOW].margin_of_error_laplace)
+        visits_per_tile_timewindow_moe = fmt_moe(
+            report[const.VISITS_PER_TILE_TIMEWINDOW].margin_of_error_laplace
+        )
 
         visits_per_tile_time_map = render_visits_per_tile_timewindow(
             report[const.VISITS_PER_TILE_TIMEWINDOW], tessellation, THRESHOLD

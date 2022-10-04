@@ -60,8 +60,8 @@ def render_od_analysis(
     report = dpmreport.report
 
     if const.OD_FLOWS in report and report[const.OD_FLOWS].data is not None:
-        od_eps=render_eps(report[const.OD_FLOWS].privacy_budget)
-        od_moe=fmt_moe(report[const.OD_FLOWS].margin_of_error_laplace)
+        od_eps = render_eps(report[const.OD_FLOWS].privacy_budget)
+        od_moe = fmt_moe(report[const.OD_FLOWS].margin_of_error_laplace)
 
         od_legend = render_origin_destination_flows(
             report[const.OD_FLOWS],
@@ -84,8 +84,8 @@ def render_od_analysis(
         )
 
     if const.TRAVEL_TIME in report and report[const.TRAVEL_TIME].data is not None:
-        travel_time_eps=render_eps(report[const.TRAVEL_TIME].privacy_budget)
-        travel_time_moe=fmt_moe(report[const.TRAVEL_TIME].margin_of_error_laplace)
+        travel_time_eps = render_eps(report[const.TRAVEL_TIME].privacy_budget)
+        travel_time_moe = fmt_moe(report[const.TRAVEL_TIME].margin_of_error_laplace)
 
         travel_time_hist_info = render_user_input_info(
             dpmreport.max_travel_time, dpmreport.bin_range_travel_time
@@ -97,8 +97,8 @@ def render_od_analysis(
         travel_time_summary_table = render_summary(report[const.TRAVEL_TIME].quartiles)
 
     if const.JUMP_LENGTH in report and report[const.JUMP_LENGTH].data is not None:
-        jump_length_eps=render_eps(report[const.JUMP_LENGTH].privacy_budget)
-        jump_length_moe=fmt_moe(report[const.JUMP_LENGTH].margin_of_error_laplace)
+        jump_length_eps = render_eps(report[const.JUMP_LENGTH].privacy_budget)
+        jump_length_moe = fmt_moe(report[const.JUMP_LENGTH].margin_of_error_laplace)
 
         jump_length_hist_info = render_user_input_info(
             dpmreport.max_jump_length, dpmreport.bin_range_jump_length
