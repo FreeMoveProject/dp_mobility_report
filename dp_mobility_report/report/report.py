@@ -25,7 +25,7 @@ def report_elements(mdreport: "MobilityDataReport") -> dict:
     # plus budget for each custom assigned analysis budget
     budget_split_sum = (
         len(const.ELEMENTS)
-        - len(mdreport.exclude_analyses)
+        - len(mdreport.analysis_exclusion)
         - len(mdreport.budget_split.keys())
         + sum(mdreport.budget_split.values())
     )
@@ -45,7 +45,7 @@ def report_elements(mdreport: "MobilityDataReport") -> dict:
     ) as pbar:
 
         report = {**report, **add_overview_elements(mdreport, eps_factor)}
-        if const.DS_STATISTICS in mdreport.exclude_analyses:
+        if const.DS_STATISTICS in mdreport.analysis_exclusion:
             record_count = None
             trip_count = None
         else:
@@ -59,7 +59,7 @@ def report_elements(mdreport: "MobilityDataReport") -> dict:
         }
         pbar.update()
 
-        if not set(const.OD_ELEMENTS).issubset(mdreport.exclude_analyses):
+        if not set(const.OD_ELEMENTS).issubset(mdreport.analysis_exclusion):
             _od_shape = od_analysis.get_od_shape(mdreport.df, mdreport.tessellation)
             report = {
                 **report,
@@ -88,28 +88,28 @@ def add_overview_elements(mdreport: "MobilityDataReport", eps_factor: float) -> 
     overview_elements = {}
 
     if (const.DS_STATISTICS in const.OVERVIEW_ELEMENTS) and (
-        const.DS_STATISTICS not in mdreport.exclude_analyses
+        const.DS_STATISTICS not in mdreport.analysis_exclusion
     ):
         overview_elements[const.DS_STATISTICS] = overview.get_dataset_statistics(
             mdreport, _get_eps(eps_factor, const.DS_STATISTICS, mdreport.budget_split)
         )
 
     if (const.MISSING_VALUES in const.OVERVIEW_ELEMENTS) and (
-        const.MISSING_VALUES not in mdreport.exclude_analyses
+        const.MISSING_VALUES not in mdreport.analysis_exclusion
     ):
         overview_elements[const.MISSING_VALUES] = overview.get_missing_values(
             mdreport, _get_eps(eps_factor, const.MISSING_VALUES, mdreport.budget_split)
         )
 
     if (const.TRIPS_OVER_TIME in const.OVERVIEW_ELEMENTS) and (
-        const.TRIPS_OVER_TIME not in mdreport.exclude_analyses
+        const.TRIPS_OVER_TIME not in mdreport.analysis_exclusion
     ):
         overview_elements[const.TRIPS_OVER_TIME] = overview.get_trips_over_time(
             mdreport, _get_eps(eps_factor, const.TRIPS_OVER_TIME, mdreport.budget_split)
         )
 
     if (const.TRIPS_PER_WEEKDAY in const.TRIPS_PER_WEEKDAY) and (
-        const.TRIPS_PER_WEEKDAY not in mdreport.exclude_analyses
+        const.TRIPS_PER_WEEKDAY not in mdreport.analysis_exclusion
     ):
         overview_elements[const.TRIPS_PER_WEEKDAY] = overview.get_trips_per_weekday(
             mdreport,
@@ -117,7 +117,7 @@ def add_overview_elements(mdreport: "MobilityDataReport", eps_factor: float) -> 
         )
 
     if (const.TRIPS_PER_HOUR in const.OVERVIEW_ELEMENTS) and (
-        const.TRIPS_PER_HOUR not in mdreport.exclude_analyses
+        const.TRIPS_PER_HOUR not in mdreport.analysis_exclusion
     ):
         overview_elements[const.TRIPS_PER_HOUR] = overview.get_trips_per_hour(
             mdreport, _get_eps(eps_factor, const.TRIPS_PER_HOUR, mdreport.budget_split)
@@ -131,7 +131,7 @@ def add_place_analysis_elements(
     place_analysis_elements = {}
 
     if (const.VISITS_PER_TILE in const.PLACE_ELEMENTS) and (
-        const.VISITS_PER_TILE not in mdreport.exclude_analyses
+        const.VISITS_PER_TILE not in mdreport.analysis_exclusion
     ):
         place_analysis_elements[
             const.VISITS_PER_TILE
@@ -142,7 +142,7 @@ def add_place_analysis_elements(
         )
 
     if (const.VISITS_PER_TILE_TIMEWINDOW in const.PLACE_ELEMENTS) and (
-        const.VISITS_PER_TILE_TIMEWINDOW not in mdreport.exclude_analyses
+        const.VISITS_PER_TILE_TIMEWINDOW not in mdreport.analysis_exclusion
     ):
         place_analysis_elements[
             const.VISITS_PER_TILE_TIMEWINDOW
@@ -165,7 +165,7 @@ def add_od_analysis_elements(
     od_analysis_elements = {}
 
     if (const.OD_FLOWS in const.OD_ELEMENTS) and (
-        const.OD_FLOWS not in mdreport.exclude_analyses
+        const.OD_FLOWS not in mdreport.analysis_exclusion
     ):
         od_analysis_elements[const.OD_FLOWS] = od_analysis.get_od_flows(
             _od_shape,
@@ -175,7 +175,7 @@ def add_od_analysis_elements(
         )
 
     if (const.TRAVEL_TIME in const.OD_ELEMENTS) and (
-        const.TRAVEL_TIME not in mdreport.exclude_analyses
+        const.TRAVEL_TIME not in mdreport.analysis_exclusion
     ):
         od_analysis_elements[const.TRAVEL_TIME] = od_analysis.get_travel_time(
             _od_shape,
@@ -184,7 +184,7 @@ def add_od_analysis_elements(
         )
 
     if (const.JUMP_LENGTH in const.OD_ELEMENTS) and (
-        const.JUMP_LENGTH not in mdreport.exclude_analyses
+        const.JUMP_LENGTH not in mdreport.analysis_exclusion
     ):
         od_analysis_elements[const.JUMP_LENGTH] = od_analysis.get_jump_length(
             _od_shape,
@@ -200,14 +200,14 @@ def add_user_analysis_elements(
 ) -> dict:
     user_analysis_elements = {}
     if (const.TRIPS_PER_USER in const.USER_ELEMENTS) and (
-        const.TRIPS_PER_USER not in mdreport.exclude_analyses
+        const.TRIPS_PER_USER not in mdreport.analysis_exclusion
     ):
         user_analysis_elements[const.TRIPS_PER_USER] = user_analysis.get_trips_per_user(
             mdreport, _get_eps(eps_factor, const.TRIPS_PER_USER, mdreport.budget_split)
         )
 
     if (const.USER_TIME_DELTA in const.USER_ELEMENTS) and (
-        const.USER_TIME_DELTA not in mdreport.exclude_analyses
+        const.USER_TIME_DELTA not in mdreport.analysis_exclusion
     ):
         user_analysis_elements[
             const.USER_TIME_DELTA
@@ -216,7 +216,7 @@ def add_user_analysis_elements(
         )
 
     if (const.RADIUS_OF_GYRATION in const.USER_ELEMENTS) and (
-        const.RADIUS_OF_GYRATION not in mdreport.exclude_analyses
+        const.RADIUS_OF_GYRATION not in mdreport.analysis_exclusion
     ):
         user_analysis_elements[
             const.RADIUS_OF_GYRATION
@@ -226,7 +226,7 @@ def add_user_analysis_elements(
         )
 
     if (const.USER_TILE_COUNT in const.USER_ELEMENTS) and (
-        const.USER_TILE_COUNT not in mdreport.exclude_analyses
+        const.USER_TILE_COUNT not in mdreport.analysis_exclusion
     ):
         user_analysis_elements[
             const.USER_TILE_COUNT
@@ -235,7 +235,7 @@ def add_user_analysis_elements(
         )
 
     if (const.MOBILITY_ENTROPY in const.USER_ELEMENTS) and (
-        const.MOBILITY_ENTROPY not in mdreport.exclude_analyses
+        const.MOBILITY_ENTROPY not in mdreport.analysis_exclusion
     ):
         user_analysis_elements[
             const.MOBILITY_ENTROPY

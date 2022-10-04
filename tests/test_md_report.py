@@ -52,6 +52,17 @@ def test_MobilityDataReport(test_data, test_tessellation):
     )
     assert isinstance(mob_report, md_report.MobilityDataReport)
 
+    # TODO: test variations of exclude_analysis
+
+    # variations of exclude_analysis
+    mob_report = md_report.MobilityDataReport(
+        test_data, test_tessellation, privacy_budget=None, analysis_exclusion=[const.MISSING_VALUES]
+    )
+    assert isinstance(mob_report, md_report.MobilityDataReport)
+
+    # TODO: test variations of exclude_analysis
+    
+
 
 def test_wrong_input_params_MobilityDataReport(test_data, test_tessellation):
     """Test if wrong input parameters are caught correctly."""
@@ -67,7 +78,7 @@ def test_wrong_input_params_MobilityDataReport(test_data, test_tessellation):
             test_data, "not a GeoDataFrame", privacy_budget=None
         )
 
-    # wrong input for privacy_butget
+    # wrong input for privacy_budget
     with pytest.raises(ValueError):
         md_report.MobilityDataReport(test_data, test_tessellation, privacy_budget=-1)
     with pytest.raises(TypeError):
@@ -92,19 +103,64 @@ def test_wrong_input_params_MobilityDataReport(test_data, test_tessellation):
             test_data, test_tessellation, max_trips_per_user=3.1, privacy_budget=None
         )
 
-    # wrong analysis selection
+    # wrong analysis_exclusion
     with pytest.raises(TypeError):
         md_report.MobilityDataReport(
             test_data,
             test_tessellation,
-            analysis_selection=const.ALL,
+            analysis_exclusion="not a list",
             privacy_budget=None,
         )
+
     with pytest.raises(ValueError):
         md_report.MobilityDataReport(
             test_data,
             test_tessellation,
-            analysis_selection=[const.OVERVIEW, "wrong input"],
+            analysis_exclusion=[const.OVERVIEW, "wrong input"],
+            privacy_budget=None,
+        )
+
+    # wrong budget split
+    with pytest.raises(TypeError):
+        md_report.MobilityDataReport(
+            test_data,
+            test_tessellation,
+            budget_split="something else than a dict",
+            privacy_budget=None,
+        )
+
+    with pytest.raises(ValueError):
+        md_report.MobilityDataReport(
+            test_data,
+            test_tessellation,
+            budget_split={"wrong key": 10},
+            privacy_budget=None,
+        )
+
+    with pytest.raises(ValueError):
+        md_report.MobilityDataReport(
+            test_data,
+            test_tessellation,
+            budget_split={const.OD_FLOWS: "not an int"},
+            privacy_budget=None,
+        )
+
+    # warning with analysis in budget_split and exclude_analysis
+    with pytest.warns(Warning):
+        md_report.MobilityDataReport(
+            test_data,
+            test_tessellation,
+            analysis_exclusion=[const.OD_FLOWS, const.RADIUS_OF_GYRATION],
+            budget_split={const.OD_FLOWS: 100},
+            privacy_budget=None,
+        )
+
+    with pytest.warns(Warning):
+        md_report.MobilityDataReport(
+            test_data,
+            test_tessellation,
+            analysis_exclusion=[const.OD_ANALYSIS],
+            budget_split={const.OD_FLOWS: 100},
             privacy_budget=None,
         )
 
@@ -276,16 +332,36 @@ def test_report_output(test_data, test_tessellation):
 
 def test_to_html_file(test_data, test_tessellation, tmp_path):
 
+    # md_report.MobilityDataReport(
+    #     test_data, test_tessellation, privacy_budget=None
+    # ).to_file("test1.html")
 
-    file_name = tmp_path / "html/test_output1.html"
-    file_name.parent.mkdir()
     md_report.MobilityDataReport(
-        test_data, test_tessellation, privacy_budget=None
-    ).to_file(file_name)
-    assert file_name.is_file()
+        test_data,
+        test_tessellation,
+        analysis_exclusion=[],
+        privacy_budget=1000,
+        max_travel_time=30,
+    ).to_file("test2.html")
 
-    file_name = tmp_path / "html/test_output2.html"
+    # file_name = tmp_path / "html/test_output1.html"
+    # file_name.parent.mkdir()
+    # md_report.MobilityDataReport(
+    #     test_data, test_tessellation, privacy_budget=None
+    # ).to_file(file_name)
+    # assert file_name.is_file()
+
+    # file_name = tmp_path / "html/test_output2.html"
+    # md_report.MobilityDataReport(
+    #     test_data, test_tessellation, privacy_budget=0.1
+    # ).to_file(file_name)
+    # assert file_name.is_file()
+
+
+    file_name = tmp_path / "html/test_output3.html"
     md_report.MobilityDataReport(
-        test_data, test_tessellation, privacy_budget=0.1
+        test_data, test_tessellation, 
+        analysis_exclusion=[const.RADIUS_OF_GYRATION, const.MOBILITY_ENTROPY, const.TRIPS_PER_USER],
+        privacy_budget=None
     ).to_file(file_name)
     assert file_name.is_file()

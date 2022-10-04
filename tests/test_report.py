@@ -16,7 +16,7 @@ def test_mdreport():
 
 
 def test_report_elements(test_mdreport):
-    test_mdreport.analysis_selection = [const.ALL]
+
     elements = report.report_elements(test_mdreport)
     assert (
         list(elements.keys())
@@ -26,22 +26,39 @@ def test_report_elements(test_mdreport):
         + const.USER_ELEMENTS
     )
 
-    test_mdreport.analysis_selection = [const.OVERVIEW]
+    test_mdreport.analysis_exclusion = (
+        const.PLACE_ELEMENTS + const.OD_ELEMENTS + const.USER_ELEMENTS
+    )
     elements = report.report_elements(test_mdreport)
     assert list(elements.keys()) == const.OVERVIEW_ELEMENTS
 
-    test_mdreport.analysis_selection = [const.PLACE_ANALYSIS]
+    test_mdreport.analysis_exclusion = (
+        const.OVERVIEW_ELEMENTS + const.OD_ELEMENTS + const.USER_ELEMENTS
+    )
     elements = report.report_elements(test_mdreport)
     assert list(elements.keys()) == const.PLACE_ELEMENTS
 
-    test_mdreport.analysis_selection = [const.OD_ANALYSIS]
+    test_mdreport.analysis_exclusion = (
+        const.OVERVIEW_ELEMENTS + const.PLACE_ELEMENTS + const.USER_ELEMENTS
+    )
     elements = report.report_elements(test_mdreport)
     assert list(elements.keys()) == const.OD_ELEMENTS
 
-    test_mdreport.analysis_selection = [const.USER_ANALYSIS]
+    test_mdreport.analysis_exclusion = (
+        const.OVERVIEW_ELEMENTS + const.PLACE_ELEMENTS + const.OD_ELEMENTS
+    )
     elements = report.report_elements(test_mdreport)
     assert list(elements.keys()) == const.USER_ELEMENTS
 
-    test_mdreport.analysis_selection = [const.OVERVIEW, const.USER_ANALYSIS]
+    test_mdreport.analysis_exclusion = const.PLACE_ELEMENTS + const.OD_ELEMENTS
     elements = report.report_elements(test_mdreport)
     assert list(elements.keys()) == const.OVERVIEW_ELEMENTS + const.USER_ELEMENTS
+
+    test_mdreport.analysis_exclusion = (
+        [const.VISITS_PER_TILE_TIMEWINDOW] + const.OD_ELEMENTS
+    )
+    elements = report.report_elements(test_mdreport)
+    assert (
+        list(elements.keys())
+        == const.OVERVIEW_ELEMENTS + [const.VISITS_PER_TILE] + const.USER_ELEMENTS
+    )

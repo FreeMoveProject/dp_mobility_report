@@ -87,7 +87,7 @@ def test_get_trips_per_hour(test_mdreport):
         "weekend_end",
         "weekend_start",
     ]
-    assert trips_per_hour.columns.tolist() == [const.HOUR, const.TIME_CATEGORY, "count"]
+    assert trips_per_hour.columns.tolist() == [const.HOUR, const.TIME_CATEGORY, "perc"]
     assert len(trips_per_hour) == 96
 
     # test that all hours are created even if not present in data
