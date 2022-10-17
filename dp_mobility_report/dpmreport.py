@@ -333,7 +333,7 @@ def _clean_analysis_exclusion(
 ) -> List[str]:
     # TODO: without timestamp: add w/o timestamp analyses to exclude_analysis
 
-    def _remove_elements(elements, remove_list):
+    def _remove_elements(elements: list, remove_list: list) -> list:
         return [e for e in elements if e not in remove_list]
 
     if analysis_selection is not None:
