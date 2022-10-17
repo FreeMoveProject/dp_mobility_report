@@ -325,7 +325,7 @@ def test_analysis_exclusion(test_data, test_tessellation):
         privacy_budget=None,
         analysis_exclusion=[const.OVERVIEW],
     )
-    assert set(list(dpmr.analysis_exclusion)) == {
+    assert set(dpmr.analysis_exclusion) == {
         const.DS_STATISTICS,
         const.MISSING_VALUES,
         const.TRIPS_OVER_TIME,
@@ -351,7 +351,7 @@ def test_analysis_exclusion(test_data, test_tessellation):
         privacy_budget=None,
         analysis_exclusion=[const.OVERVIEW, const.DS_STATISTICS],
     )
-    assert set(list(dpmr.analysis_exclusion)) == {
+    assert set(dpmr.analysis_exclusion) == {
         const.DS_STATISTICS,
         const.MISSING_VALUES,
         const.TRIPS_OVER_TIME,
@@ -377,7 +377,7 @@ def test_analysis_exclusion(test_data, test_tessellation):
         privacy_budget=None,
         analysis_exclusion=[const.JUMP_LENGTH, const.MOBILITY_ENTROPY],
     )
-    assert set(list(dpmr.analysis_exclusion)) == {
+    assert set(dpmr.analysis_exclusion) == {
         const.JUMP_LENGTH,
         const.MOBILITY_ENTROPY,
     }
@@ -406,7 +406,7 @@ def test_analysis_selection(test_data, test_tessellation):
         privacy_budget=None,
         analysis_selection=[const.OVERVIEW],
     )
-    assert set(list(dpmr.analysis_exclusion)) == {
+    assert set(dpmr.analysis_exclusion) == {
         const.VISITS_PER_TILE,
         const.VISITS_PER_TILE_TIMEWINDOW,
         const.OD_FLOWS,
@@ -432,7 +432,7 @@ def test_analysis_selection(test_data, test_tessellation):
         privacy_budget=None,
         analysis_selection=[const.OVERVIEW, const.DS_STATISTICS],
     )
-    assert set(list(dpmr.analysis_exclusion)) == {
+    assert set(dpmr.analysis_exclusion) == {
         const.VISITS_PER_TILE,
         const.VISITS_PER_TILE_TIMEWINDOW,
         const.OD_FLOWS,
@@ -458,7 +458,7 @@ def test_analysis_selection(test_data, test_tessellation):
         privacy_budget=None,
         analysis_selection=[const.JUMP_LENGTH, const.MOBILITY_ENTROPY],
     )
-    assert set(list(dpmr.analysis_exclusion)) == {
+    assert set(dpmr.analysis_exclusion) == {
         const.DS_STATISTICS,
         const.MISSING_VALUES,
         const.TRIPS_OVER_TIME,
@@ -501,16 +501,21 @@ def test_to_html_file(test_data, test_tessellation, tmp_path):
     )
     assert file_name.is_file()
 
-    # file_name = tmp_path / "html/test_output2.html"
-    # DpMobilityReport(
-    #     test_data, test_tessellation, privacy_budget=0.1
-    # ).to_file(file_name)
-    # assert file_name.is_file()
+    file_name = tmp_path / "html/test_output2.html"
+    DpMobilityReport(test_data, test_tessellation, privacy_budget=0.1).to_file(
+        file_name
+    )
+    assert file_name.is_file()
 
-    # file_name = tmp_path / "html/test_output3.html"
-    # DpMobilityReport(
-    #     test_data, test_tessellation,
-    #     analysis_exclusion=[const.RADIUS_OF_GYRATION, const.MOBILITY_ENTROPY, const.TRIPS_PER_USER],
-    #     privacy_budget=None
-    # ).to_file(file_name)
-    # assert file_name.is_file()
+    file_name = tmp_path / "html/test_output3.html"
+    DpMobilityReport(
+        test_data,
+        test_tessellation,
+        analysis_exclusion=[
+            const.RADIUS_OF_GYRATION,
+            const.MOBILITY_ENTROPY,
+            const.TRIPS_PER_USER,
+        ],
+        privacy_budget=None,
+    ).to_file(file_name)
+    assert file_name.is_file()

@@ -1,9 +1,7 @@
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 
 from pandas import DataFrame
 from tqdm.auto import tqdm
-
-from dp_mobility_report.model.section import Section
 
 if TYPE_CHECKING:
     from dp_mobility_report import DpMobilityReport

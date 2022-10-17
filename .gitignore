@@ -1,5 +1,6 @@
 examples/html/old/*
 examples/config.py
+examples/budget_split*
 
 *.code-workspace
 *.DS_Store
