@@ -2,7 +2,7 @@ import os
 import warnings
 from pathlib import Path
 from shutil import rmtree
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Tuple, Union
 
 import numpy as np
 from geopandas import GeoDataFrame
@@ -92,6 +92,10 @@ class DpMobilityReport:
             bin_range_jump_length,
             max_radius_of_gyration,
             bin_range_radius_of_gyration,
+        )
+
+        analysis_selection, analysis_exclusion = _validate_inclusion_exclusion(
+            analysis_selection, analysis_exclusion
         )
 
         self.user_privacy = user_privacy
@@ -200,6 +204,25 @@ class DpMobilityReport:
         output_file.write_text(data, encoding="utf-8")
 
 
+def _validate_inclusion_exclusion(
+    analysis_selection: Optional[List[str]], analysis_exclusion: Optional[List[str]]
+) -> Tuple[Optional[List[str]], Optional[List[str]]]:
+
+    if analysis_selection is not None and analysis_exclusion is not None:
+        warnings.warn(
+            "The parameter `analysis_exclusion' will be ignored, as `analysis_selection' is set as well."
+        )
+        analysis_exclusion = None
+
+    if analysis_selection == [const.ALL]:
+        warnings.warn(
+            "['all'] as input is deprecated. Use 'None' (default) instead to include all analyses."
+        )
+        analysis_selection = None
+
+    return analysis_selection, analysis_exclusion
+
+
 def _validate_input(
     df: DataFrame,
     tessellation: GeoDataFrame,
@@ -230,20 +253,15 @@ def _validate_input(
     if (max_trips_per_user is not None) and (max_trips_per_user < 1):
         raise ValueError("'max_trips_per_user' has to be greater 0.")
 
-    if analysis_selection is not None and analysis_exclusion is not None:
-        warnings.warn(
-            "The parameter `analysis_exclusion' will be ignored, as `analysis_selection' is set as well."
-        )
-        analysis_exclusion = None
-
     if analysis_selection is not None:
         if not isinstance(analysis_selection, list):
             raise TypeError("'analysis_selection' is not a list.")
+
         if not set(analysis_selection).issubset(
             const.SEGMENTS_AND_ELEMENTS + [const.ALL]
         ):
             raise ValueError(
-                f"Unknown analyses in {analysis_selection}. Only elements from {const.SEGMENTS_AND_ELEMENTS + [const.ALL]} are valid inputs."
+                f"Unknown analyses in {analysis_selection}. Only elements from {const.SEGMENTS_AND_ELEMENTS} are valid inputs."
             )
 
     if analysis_exclusion is not None:
