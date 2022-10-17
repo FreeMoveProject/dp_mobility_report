@@ -2,4 +2,4 @@
 
 from dp_mobility_report.dpmreport import DpMobilityReport
 
-__version__ = "0.0.6"
+__version__ = "0.0.7"

@@ -1,6 +1,17 @@
 History
 *********
 
+0.0.7 (2022-10-17)
+------------------
+
+* parameter for a custom split of the privacy budget between different analyses
+* extend 'analysis_selction' to include single analyses instead of entire segments
+* parameter for 'analysis_exclusion' instead of selection
+* bug fix: include all possible categories for days and hour of days
+* bug fix: show correct percentage of outliers
+* show 95% confidence-interval instead of upper and lower bound
+* show privacy budget and confidence interval for each analysis
+
 0.0.6 (2022-09-30)
 ------------------
 
