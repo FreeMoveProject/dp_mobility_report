@@ -10,13 +10,13 @@ if TYPE_CHECKING:
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import m_utils
-from dp_mobility_report.model.section import Section
+from dp_mobility_report.model.section import DfSection, DictSection, SeriesSection
 from dp_mobility_report.privacy import diff_privacy
 
 
 def get_dataset_statistics(
     dpmreport: "DpMobilityReport", eps: Optional[float]
-) -> Section:
+) -> DictSection:
     epsi = m_utils.get_epsi(dpmreport.evalu, eps, 4)
 
     # counts for complete and incomplete trips
@@ -96,10 +96,12 @@ def get_dataset_statistics(
         "locations": moe_locations,
     }
 
-    return Section(data=stats, privacy_budget=eps, margin_of_errors_laplace=moe)
+    return DictSection(data=stats, privacy_budget=eps, margin_of_errors_laplace=moe)
 
 
-def get_missing_values(dpmreport: "DpMobilityReport", eps: Optional[float]) -> Section:
+def get_missing_values(
+    dpmreport: "DpMobilityReport", eps: Optional[float]
+) -> DictSection:
     columns = [const.UID, const.TID, const.DATETIME, const.LAT, const.LNG]
     epsi = m_utils.get_epsi(dpmreport.evalu, eps, len(columns))
 
@@ -115,10 +117,12 @@ def get_missing_values(dpmreport: "DpMobilityReport", eps: Optional[float]) -> S
         )
         conf_interval["ci95_" + col] = diff_privacy.conf_interval(missings[col], moe)
 
-    return Section(data=missings, privacy_budget=eps, margin_of_error_laplace=moe)
+    return DictSection(data=missings, privacy_budget=eps, margin_of_error_laplace=moe)
 
 
-def get_trips_over_time(dpmreport: "DpMobilityReport", eps: Optional[float]) -> Section:
+def get_trips_over_time(
+    dpmreport: "DpMobilityReport", eps: Optional[float]
+) -> DfSection:
     epsi = m_utils.get_epsi(dpmreport.evalu, eps, 3)
     epsi_limits = epsi * 2 if epsi is not None else None
 
@@ -130,12 +134,12 @@ def get_trips_over_time(dpmreport: "DpMobilityReport", eps: Optional[float]) -> 
     )
 
     # cut based on dp min and max values
-    (
-        trips_over_time
-    ) = m_utils.cut_outliers(  # don't disclose outliers to the as the boundaries are not defined through user input
-        df_trip[const.DATETIME],
-        min_value=dp_bounds[0],
-        max_value=dp_bounds[1],
+    (trips_over_time) = pd.DataFrame(
+        m_utils.cut_outliers(  # don't disclose outliers to the as the boundaries are not defined through user input
+            df_trip[const.DATETIME],
+            min_value=dp_bounds[0],
+            max_value=dp_bounds[1],
+        )
     )
 
     # only use date and remove time
@@ -153,7 +157,6 @@ def get_trips_over_time(dpmreport: "DpMobilityReport", eps: Optional[float]) -> 
         resample = "1D"
         datetime_precision = const.PREC_DATE
 
-    trips_over_time = pd.DataFrame(trips_over_time)
     trips_over_time.loc[:, "trip_count"] = 1
     trips_over_time = (
         trips_over_time.set_index(const.DATETIME)
@@ -180,7 +183,7 @@ def get_trips_over_time(dpmreport: "DpMobilityReport", eps: Optional[float]) -> 
 
     quartiles = pd.Series({"min": dp_bounds[0], "max": dp_bounds[1]})
 
-    return Section(
+    return DfSection(
         data=trips_over_time,
         privacy_budget=eps,
         datetime_precision=datetime_precision,
@@ -191,7 +194,7 @@ def get_trips_over_time(dpmreport: "DpMobilityReport", eps: Optional[float]) -> 
 
 def get_trips_per_weekday(
     dpmreport: "DpMobilityReport", eps: Optional[float]
-) -> Section:
+) -> SeriesSection:
     dpmreport.df.loc[:, const.DATE] = dpmreport.df[const.DATETIME].dt.date
     dpmreport.df.loc[:, const.DAY_NAME] = dpmreport.df[const.DATETIME].dt.day_name()
     dpmreport.df.loc[:, const.WEEKDAY] = dpmreport.df[const.DATETIME].dt.weekday
@@ -220,17 +223,20 @@ def get_trips_per_weekday(
     )
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, dpmreport.max_trips_per_user)
 
+    # as percent instead of absolute values
     trip_sum = np.sum(trips_per_weekday)
     if trip_sum != 0:
         trips_per_weekday = trips_per_weekday / trip_sum * 100
         moe = moe / trip_sum * 100
 
-    return Section(
+    return SeriesSection(
         data=trips_per_weekday, privacy_budget=eps, margin_of_error_laplace=moe
     )
 
 
-def get_trips_per_hour(dpmreport: "DpMobilityReport", eps: Optional[float]) -> Section:
+def get_trips_per_hour(
+    dpmreport: "DpMobilityReport", eps: Optional[float]
+) -> DfSection:
     hour_weekday = dpmreport.df.groupby(
         [const.HOUR, const.IS_WEEKEND, const.POINT_TYPE]
     ).count()[const.TID]
@@ -275,7 +281,7 @@ def get_trips_per_hour(dpmreport: "DpMobilityReport", eps: Optional[float]) -> S
         hour_weekday["perc"] = hour_weekday["count"] / trip_sum * 100
         moe = moe / trip_sum * 100
 
-    return Section(
+    return DfSection(
         data=hour_weekday[[const.HOUR, const.TIME_CATEGORY, "perc"]],
         privacy_budget=eps,
         margin_of_error_laplace=moe,

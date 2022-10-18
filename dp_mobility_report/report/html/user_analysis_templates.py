@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from dp_mobility_report import DpMobilityReport
 
 from dp_mobility_report import constants as const
-from dp_mobility_report.model.section import Section
+from dp_mobility_report.model.section import TupleSection
 from dp_mobility_report.report.html.html_utils import (
     get_template,
     render_eps,
@@ -19,25 +19,25 @@ from dp_mobility_report.visualization import plot, v_utils
 
 def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
     trips_per_user_info = f"Trips per user are limited according to the configured maximum of trips per user: {dpmreport.max_trips_per_user}"
-    trips_per_user_eps = ""
+    trips_per_user_eps = None
     trips_per_user_hist = ""
     trips_per_user_summary_table = ""
     trips_per_user_moe_info = ""
-    time_between_traj_eps = ""
+    time_between_traj_eps = None
     overlapping_trips_info = ""
     time_between_traj_hist = ""
     time_between_traj_summary_table = ""
     time_between_traj_moe_info = ""
-    radius_of_gyration_eps = ""
+    radius_of_gyration_eps = None
     radius_of_gyration_hist_info = ""
     radius_of_gyration_hist = ""
     radius_of_gyration_summary_table = ""
     radius_of_gyration_moe_info = ""
-    distinct_tiles_user_eps = ""
+    distinct_tiles_user_eps = None
     distinct_tiles_user_hist = ""
     distinct_tiles_user_summary_table = ""
     distinct_tiles_moe_info = ""
-    mobility_entropy_eps = ""
+    mobility_entropy_eps = None
     mobility_entropy_hist = ""
     mobility_entropy_summary_table = ""
     mobility_entropy_moe_info = ""
@@ -147,7 +147,7 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
     )
 
 
-def render_trips_per_user(trips_per_user_hist: Section) -> str:
+def render_trips_per_user(trips_per_user_hist: TupleSection) -> str:
     hist = plot.histogram(
         trips_per_user_hist.data,
         x_axis_label="Number of trips per user",
@@ -158,7 +158,7 @@ def render_trips_per_user(trips_per_user_hist: Section) -> str:
     return v_utils.fig_to_html(hist)
 
 
-def render_time_between_traj(time_between_traj_hist: Section) -> str:
+def render_time_between_traj(time_between_traj_hist: TupleSection) -> str:
     hist = plot.histogram(
         time_between_traj_hist.data,
         x_axis_label="Hours between consecutive trips",
@@ -172,7 +172,7 @@ def render_time_between_traj(time_between_traj_hist: Section) -> str:
     return html
 
 
-def render_overlapping_trips(n_traj_overlaps: Section) -> str:
+def render_overlapping_trips(n_traj_overlaps: TupleSection) -> str:
     if n_traj_overlaps.n_outliers is None:
         return ""
     ci_interval_info = (
@@ -192,7 +192,7 @@ def render_overlapping_trips(n_traj_overlaps: Section) -> str:
     """
 
 
-def render_radius_of_gyration(radius_of_gyration_hist: Section) -> str:
+def render_radius_of_gyration(radius_of_gyration_hist: TupleSection) -> str:
     hist = plot.histogram(
         radius_of_gyration_hist.data,
         x_axis_label="radius of gyration (in km)",
@@ -205,7 +205,7 @@ def render_radius_of_gyration(radius_of_gyration_hist: Section) -> str:
     return html
 
 
-def render_distinct_tiles_user(user_tile_count_hist: Section) -> str:
+def render_distinct_tiles_user(user_tile_count_hist: TupleSection) -> str:
     hist = plot.histogram(
         user_tile_count_hist.data,
         x_axis_label="number of distinct tiles a user has visited",
@@ -218,7 +218,7 @@ def render_distinct_tiles_user(user_tile_count_hist: Section) -> str:
     return html
 
 
-def render_mobility_entropy(mobility_entropy: Section) -> str:
+def render_mobility_entropy(mobility_entropy: TupleSection) -> str:
     hist = plot.histogram(
         (mobility_entropy.data[0], mobility_entropy.data[1].round(2)),
         x_axis_label="mobility entropy",

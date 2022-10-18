@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Tuple
 
-import pkg_resources
+import pkg_resources  # type: ignore
 
 if TYPE_CHECKING:
     from dp_mobility_report import DpMobilityReport

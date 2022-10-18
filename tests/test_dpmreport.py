@@ -482,17 +482,17 @@ def test_analysis_selection(test_data, test_tessellation):
 
 def test_to_html_file(test_data, test_tessellation, tmp_path):
 
-    # DpMobilityReport(
-    #     test_data, test_tessellation, privacy_budget=None
-    # ).to_file("test1.html")
+    # DpMobilityReport( # type: ignore
+    #     test_data, test_tessellation, privacy_budget=None  # type: ignore
+    # ).to_file("test1.html")  # type: ignore
 
-    # DpMobilityReport(
-    #     test_data,
-    #     test_tessellation,
-    #     analysis_exclusion=[],
-    #     privacy_budget=1000,
-    #     max_travel_time=30,
-    # ).to_file("test2.html")
+    # DpMobilityReport(  # type: ignore
+    #     test_data,   # type: ignore
+    #     test_tessellation,  # type: ignore
+    #     analysis_exclusion=[],  # type: ignore
+    #     privacy_budget=1000,  # type: ignore
+    #     max_travel_time=30,  # type: ignore
+    # ).to_file("test2.html")  # type: ignore
 
     file_name = tmp_path / "html/test_output1.html"
     file_name.parent.mkdir()

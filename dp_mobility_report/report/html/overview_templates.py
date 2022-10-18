@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 from dp_mobility_report import constants as const
-from dp_mobility_report.model.section import Section
+from dp_mobility_report.model.section import DfSection, DictSection, SeriesSection
 from dp_mobility_report.report.html.html_utils import (
     fmt,
     fmt_moe,
@@ -14,20 +14,20 @@ from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_overview(report: dict) -> str:
-    dataset_stats_table = ""
-    missing_values_table = ""
-    trips_over_time_eps = ""
-    trips_over_time_moe = ""
-    trips_over_time_info = ""
-    trips_over_time_linechart = ""
-    trips_over_time_moe_info = ""
-    trips_over_time_summary_table = ""
-    trips_per_weekday_eps = ""
-    trips_per_weekday_moe = ""
-    trips_per_weekday_barchart = ""
-    trips_per_hour_eps = ""
-    trips_per_hour_moe = ""
-    trips_per_hour_linechart = ""
+    dataset_stats_table= ""
+    missing_values_table= ""
+    trips_over_time_eps= None
+    trips_over_time_moe= None
+    trips_over_time_info= ""
+    trips_over_time_linechart= ""
+    trips_over_time_moe_info= ""
+    trips_over_time_summary_table= ""
+    trips_per_weekday_eps= None
+    trips_per_weekday_moe= None
+    trips_per_weekday_barchart= ""
+    trips_per_hour_eps= None
+    trips_per_hour_moe= None
+    trips_per_hour_linechart= ""
 
     if const.DS_STATISTICS in report and report[const.DS_STATISTICS].data is not None:
         dataset_stats_table = render_dataset_statistics(report[const.DS_STATISTICS])
@@ -97,7 +97,7 @@ def render_overview(report: dict) -> str:
     )
 
 
-def render_dataset_statistics(dataset_statistics: Section) -> str:
+def render_dataset_statistics(dataset_statistics: DictSection) -> str:
     moe = dataset_statistics.margin_of_errors_laplace
     data = dataset_statistics.data
     dataset_stats_list = [
@@ -143,7 +143,7 @@ def render_dataset_statistics(dataset_statistics: Section) -> str:
     return dataset_stats_html
 
 
-def render_missing_values(missing_values: Section) -> str:
+def render_missing_values(missing_values: DictSection) -> str:
     moe = round(missing_values.margin_of_error_laplace, 1)
     data = missing_values.data
     missing_values_list = [
@@ -183,11 +183,11 @@ def render_missing_values(missing_values: Section) -> str:
     return missing_values_html
 
 
-def render_trips_over_time_info(datetime_precision: str) -> str:
+def render_trips_over_time_info(datetime_precision= "") -> str:
     return f"Timestamps have been aggregated by {datetime_precision}."
 
 
-def render_trips_over_time(trips_over_time: Section) -> str:
+def render_trips_over_time(trips_over_time: DfSection) -> str:
     if len(trips_over_time.data) <= 14:
         chart = plot.barchart(
             x=trips_over_time.data[const.DATETIME].to_numpy(),
@@ -213,7 +213,7 @@ def render_trips_over_time(trips_over_time: Section) -> str:
     return html
 
 
-def render_trips_per_weekday(trips_per_weekday: Section) -> str:
+def render_trips_per_weekday(trips_per_weekday: SeriesSection) -> str:
     chart = plot.barchart(
         x=trips_per_weekday.data.index.to_numpy(),
         y=trips_per_weekday.data.values,
@@ -226,7 +226,7 @@ def render_trips_per_weekday(trips_per_weekday: Section) -> str:
     return v_utils.fig_to_html(chart)
 
 
-def render_trips_per_hour(trips_per_hour: Section) -> str:
+def render_trips_per_hour(trips_per_hour: DfSection) -> str:
     chart = plot.multi_linechart(
         data=trips_per_hour.data,
         x=const.HOUR,

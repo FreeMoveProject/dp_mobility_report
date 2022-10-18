@@ -101,14 +101,11 @@ def linechart(
     y: str,
     x_axis_label: str,
     y_axis_label: str,
-    simulations: list = None,
     margin_of_error: float = None,
     add_diagonal: bool = False,
     rotate_label: bool = False,
 ) -> mpl.figure.Figure:
     fig, ax = plt.subplots()
-    if simulations is not None:
-        ax.plot(data[x], data[simulations], light_grey)
     if margin_of_error is not None:
         ax.fill_between(
             data[x],

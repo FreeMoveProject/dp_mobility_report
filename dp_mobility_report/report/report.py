@@ -77,7 +77,7 @@ def _get_eps(eps_factor: float, analysis_name: str, budget_split: dict) -> float
 
 
 def add_overview_elements(dpmreport: "DpMobilityReport", eps_factor: float) -> dict:
-    overview_elements = {}
+    overview_elements: dict = {}
 
     if (const.DS_STATISTICS in const.OVERVIEW_ELEMENTS) and (
         const.DS_STATISTICS not in dpmreport.analysis_exclusion
@@ -124,7 +124,7 @@ def add_place_analysis_elements(
     dpmreport: "DpMobilityReport",
     eps_factor: float,
 ) -> dict:
-    place_analysis_elements = {}
+    place_analysis_elements: dict = {}
 
     if (const.VISITS_PER_TILE in const.PLACE_ELEMENTS) and (
         const.VISITS_PER_TILE not in dpmreport.analysis_exclusion
@@ -155,7 +155,7 @@ def add_od_analysis_elements(
     _od_shape: DataFrame,
     eps_factor: float,
 ) -> dict:
-    od_analysis_elements = {}
+    od_analysis_elements: dict = {}
 
     if (const.OD_FLOWS in const.OD_ELEMENTS) and (
         const.OD_FLOWS not in dpmreport.analysis_exclusion

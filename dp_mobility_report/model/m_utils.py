@@ -5,7 +5,7 @@ import pandas as pd
 from haversine import haversine
 from pandas import DataFrame, Series
 
-from dp_mobility_report.model.section import Section
+from dp_mobility_report.model.section import TupleSection
 from dp_mobility_report.privacy import diff_privacy
 
 
@@ -36,7 +36,7 @@ def hist_section(
     bin_range: Optional[Union[float, int]] = None,
     bin_type: Type = float,
     evalu: bool = False,
-) -> Section:
+) -> TupleSection:
     epsi = get_epsi(evalu, eps, 6)
     epsi_quant = epsi * 5 if epsi is not None else None
 
@@ -126,7 +126,7 @@ def hist_section(
         dp_counts = dp_counts / trip_counts * 100
         moe_laplace = moe_laplace / trip_counts * 100
 
-    return Section(
+    return TupleSection(
         data=(dp_counts, bins),
         privacy_budget=eps,
         quartiles=quartiles,
@@ -147,19 +147,12 @@ def _cumsum(array: np.array) -> np.array:
     return (array.cumsum() / array.sum()).round(2)
 
 
-def cumsum_simulations(
+def cumsum(
     counts: np.array, eps: float, sensitivity: int, nsim: int = 10, nrow: int = 100
 ) -> DataFrame:
     df_cumsum = DataFrame()
     df_cumsum["n"] = np.arange(1, len(counts) + 1)
-
-    # TODO: implementation of margin of error of cumulated sum?‚
-    # for i in range(1, nsim):
-    #     sim_counts = diff_privacy.counts_dp(counts, eps, sensitivity)
-    #     df_cumsum["cum_perc_" + str(i)] = _cumsum(sim_counts)
-
-    # once negative values have been used for simulations create cumsum of series without negative values
-    df_cumsum["cum_perc"] = _cumsum(diff_privacy.limit_negative_values_to_zero(counts))
+    df_cumsum["cum_perc"] = _cumsum(counts)
 
     # reuduce df size by only keeping max 100 values
     if len(df_cumsum) > nrow:

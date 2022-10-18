@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Tuple, Union
+from typing import Any, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -13,7 +13,7 @@ class Section:
     Potential further attributes: `quartiles`, `datetime_precision`.
     """
 
-    data: Optional[Union[Tuple, dict, pd.Series, pd.DataFrame]] = None
+    data: Any = None
     privacy_budget: Optional[float] = None
     sensitivity: Optional[Union[int, float]] = None
     # TODO: remove outliers (?)
@@ -23,4 +23,20 @@ class Section:
     margin_of_error_laplace: Optional[float] = None
     margin_of_errors_laplace: Optional[dict] = None
     margin_of_error_expmech: Optional[int] = None
-    cumsum_simulations: pd.DataFrame = None
+    cumsum: pd.DataFrame = None
+
+
+class DictSection(Section):
+    data: dict
+
+
+class SeriesSection(Section):
+    data: pd.Series
+
+
+class DfSection(Section):
+    data: pd.DataFrame
+
+
+class TupleSection(Section):
+    data: Tuple

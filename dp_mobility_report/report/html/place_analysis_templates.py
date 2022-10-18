@@ -6,7 +6,7 @@ import pandas as pd
 from geopandas import GeoDataFrame
 
 from dp_mobility_report import constants as const
-from dp_mobility_report.model.section import Section
+from dp_mobility_report.model.section import DfSection
 from dp_mobility_report.report.html.html_utils import (
     fmt_moe,
     get_template,
@@ -27,15 +27,15 @@ def render_place_analysis(
     privacy_info = f"""Tiles below a certain threshold are grayed out: 
         Due to the applied noise, tiles with a low visit count are likely to contain a high percentage of noise. 
         For usability reasons, such unrealistic values are grayed out. 
-        More specifically: The threshold is set so that values for tiles with a 5% chance of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are not shown."""
-    visits_per_tile_eps = ""
-    visits_per_tile_moe = ""
+        More specifically: The threshold is set so that values for tiles with a 5% chance (or higher) of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are not shown."""
+    visits_per_tile_eps = None
+    visits_per_tile_moe = None
     visits_per_tile_legend = ""
     visits_per_tile_summary_table = ""
     visits_per_tile_cumsum_linechart = ""
     most_freq_tiles_ranking = ""
-    visits_per_tile_timewindow_eps = ""
-    visits_per_tile_timewindow_moe = ""
+    visits_per_tile_timewindow_eps = None
+    visits_per_tile_timewindow_moe = None
     visits_per_tile_time_map = ""
 
     if (const.VISITS_PER_TILE in report) and (
@@ -97,14 +97,14 @@ def render_place_analysis(
     )
 
 
-def render_points_outside_tess(visits_per_tile: Section) -> str:
+def render_points_outside_tess(visits_per_tile: DfSection) -> str:
     return f"""{round(visits_per_tile.n_outliers)} ({round(visits_per_tile.n_outliers / (visits_per_tile.data["visits"].sum()
  + visits_per_tile.n_outliers) * 100, 2)}%) points are outside the given tessellation 
     (95% confidence interval ± {round(visits_per_tile.margin_of_error_laplace)})."""
 
 
 def render_visits_per_tile(
-    visits_per_tile: Section,
+    visits_per_tile: DfSection,
     tessellation: GeoDataFrame,
     threshold: float,
     temp_map_folder: Path,
@@ -139,8 +139,8 @@ def render_visits_per_tile(
     return legend_html
 
 
-def render_visits_per_tile_cumsum(counts_per_tile: Section) -> str:
-    df_cumsum = counts_per_tile.cumsum_simulations
+def render_visits_per_tile_cumsum(counts_per_tile: DfSection) -> str:
+    df_cumsum = counts_per_tile.cumsum
 
     chart = plot.linechart(
         df_cumsum,
@@ -148,7 +148,6 @@ def render_visits_per_tile_cumsum(counts_per_tile: Section) -> str:
         "cum_perc",
         "Number of tiles",
         "Cumulated sum of visits per tile",
-        # simulations=df_cumsum.columns[2:52],
         add_diagonal=True,
     )
     html = v_utils.fig_to_html(chart)
@@ -156,8 +155,8 @@ def render_visits_per_tile_cumsum(counts_per_tile: Section) -> str:
     return html
 
 
-def render_most_freq_tiles_ranking(perc_per_tile: Section, top_x: int = 10) -> str:
-    topx_tiles = perc_per_tile.data.nlargest(top_x, "visits")
+def render_most_freq_tiles_ranking(visits_per_tile: DfSection, top_x: int = 10) -> str:
+    topx_tiles = visits_per_tile.data.nlargest(top_x, "visits")
     topx_tiles["rank"] = list(range(1, len(topx_tiles) + 1))
     labels = (
         topx_tiles["rank"].astype(str)
@@ -172,7 +171,7 @@ def render_most_freq_tiles_ranking(perc_per_tile: Section, top_x: int = 10) -> s
         round(topx_tiles.visits),
         "number of visits per tile",
         y_labels=labels,
-        margin_of_error=perc_per_tile.margin_of_error_laplace,
+        margin_of_error=visits_per_tile.margin_of_error_laplace,
     )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close()
@@ -180,17 +179,17 @@ def render_most_freq_tiles_ranking(perc_per_tile: Section, top_x: int = 10) -> s
 
 
 def render_visits_per_tile_timewindow(
-    counts_per_tile_timewindow: Section, tessellation: GeoDataFrame, threshold: int
+    counts_per_tile_timewindow: DfSection, tessellation: GeoDataFrame, threshold: float
 ) -> str:
     data = counts_per_tile_timewindow.data
-    moe_counts_per_tile_timewindow = (
+    moe_perc_per_tile_timewindow = (
         counts_per_tile_timewindow.margin_of_error_laplace / data
     )
 
     if data is None:
         return None
 
-    data[moe_counts_per_tile_timewindow > threshold] = None
+    data[moe_perc_per_tile_timewindow > threshold] = None
 
     output_html = ""
     if "weekday" in data.columns:

@@ -8,14 +8,14 @@ if TYPE_CHECKING:
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import m_utils
-from dp_mobility_report.model.section import Section
+from dp_mobility_report.model.section import DfSection
 from dp_mobility_report.privacy import diff_privacy
 
 
 def get_visits_per_tile(
     dpmreport: "DpMobilityReport",
     eps: Optional[float],
-) -> Section:
+) -> DfSection:
     epsi = eps
 
     sensitivity = 2 * dpmreport.max_trips_per_user
@@ -44,19 +44,14 @@ def get_visits_per_tile(
         visits_per_tile["visits"].values,
         epsi,
         sensitivity,
-        allow_negative=True,  # allow negative values for cum_sum simulations
+        allow_negative=False,
     )
-    n_outliers = diff_privacy.count_dp(n_outliers, epsi, sensitivity)  # type: ignore
+    n_outliers = diff_privacy.count_dp(n_outliers, epsi, sensitivity)
 
-    cumsum_simulations = m_utils.cumsum_simulations(
+    cumsum = m_utils.cumsum(
         visits_per_tile.visits.copy().to_numpy(),
         epsi,
         sensitivity,
-    )
-
-    # remove all negative values (needed for cumsum)
-    visits_per_tile["visits"] = visits_per_tile["visits"].apply(
-        diff_privacy.limit_negative_value_to_zero
     )
 
     # margin of error
@@ -65,14 +60,14 @@ def get_visits_per_tile(
     # as counts are already dp, no further privacy mechanism needed
     dp_quartiles = visits_per_tile.visits.describe()
 
-    return Section(
+    return DfSection(
         data=visits_per_tile,
         privacy_budget=eps,
         sensitivity=sensitivity,
         n_outliers=n_outliers,
         quartiles=dp_quartiles,
         margin_of_error_laplace=moe,
-        cumsum_simulations=cumsum_simulations,
+        cumsum=cumsum,
     )
 
 
@@ -92,7 +87,7 @@ def get_visits_per_tile_timewindow(
     dpmreport: "DpMobilityReport",
     eps: Optional[float],
     # trip_count: Optional[int], outlier_count: Optional[None]
-) -> Section:
+) -> DfSection:
     dpmreport.df["timewindows"] = dpmreport.df[const.HOUR].apply(
         lambda x: _get_hour_bin(x, dpmreport.timewindows)
     )
@@ -138,7 +133,7 @@ def get_visits_per_tile_timewindow(
         ),
     )
 
-    return Section(
+    return DfSection(
         data=counts_per_tile_timewindow.unstack(const.TILE_ID).T,
         privacy_budget=eps,
         margin_of_error_laplace=moe,
