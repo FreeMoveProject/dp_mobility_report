@@ -20,7 +20,7 @@ Differentially Private Mobility Data Report
 * Documentation: https://dp-mobility-report.readthedocs.io.
 
 
-``dp_mobility_report``: A python package to create a mobility report with differential privacy guarentees, especially for urban human mobility data.
+``dp_mobility_report``: A python package to create a mobility report with differential privacy guarentees, especially for urban human mobility data. 
 
 
 Install
