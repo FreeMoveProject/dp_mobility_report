@@ -23,7 +23,6 @@ report = DpMobilityReport(
     df,
     tessellation,
     privacy_budget=None,
-    analysis_selection=["all"],
     max_trips_per_user=None,
     max_travel_time=90,
     bin_range_travel_time=5,
