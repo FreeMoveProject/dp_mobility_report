@@ -9,7 +9,7 @@ from geopandas import GeoDataFrame
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import m_utils
-from dp_mobility_report.model.section import Section
+from dp_mobility_report.model.section import DfSection, TupleSection
 from dp_mobility_report.privacy import diff_privacy
 
 
@@ -46,7 +46,7 @@ def get_od_flows(
     od_shape: pd.DataFrame,
     dpmreport: "DpMobilityReport",
     eps: Optional[float],
-) -> Section:
+) -> DfSection:
     sensitivity = dpmreport.max_trips_per_user
     od_flows = (
         od_shape.groupby([const.TILE_ID, const.TILE_ID_END])
@@ -76,24 +76,22 @@ def get_od_flows(
         od_flows["flow"].to_numpy(), eps, sensitivity, allow_negative=True
     )
 
-    cumsum_simulations = m_utils.cumsum_simulations(
-        od_flows.flow.copy().to_numpy(), eps, sensitivity
-    )
-
     # remove all instances of 0 (and smaller) to reduce storage
     od_flows = od_flows[od_flows["flow"] > 0]
+
+    cumsum = m_utils.cumsum(od_flows.flow.copy().to_numpy(), eps, sensitivity)
 
     # TODO: distribution with or without 0s?
     # as counts are already dp, no further privacy mechanism needed
     dp_quartiles = od_flows.flow.describe()
 
-    return Section(
+    return DfSection(
         data=od_flows,
         quartiles=dp_quartiles,
         privacy_budget=eps,
         margin_of_error_laplace=moe,
         sensitivity=sensitivity,
-        cumsum_simulations=cumsum_simulations,
+        cumsum=cumsum,
     )
 
 
@@ -103,7 +101,7 @@ def get_intra_tile_flows(od_flows: pd.DataFrame) -> int:
 
 def get_travel_time(
     od_shape: pd.DataFrame, dpmreport: "DpMobilityReport", eps: Optional[float]
-) -> Section:
+) -> TupleSection:
 
     travel_time = od_shape[const.DATETIME_END] - od_shape[const.DATETIME]
     travel_time = travel_time.dt.seconds / 60  # as minutes
@@ -121,7 +119,7 @@ def get_travel_time(
 
 def get_jump_length(
     od_shape: pd.DataFrame, dpmreport: "DpMobilityReport", eps: Optional[float]
-) -> Section:
+) -> TupleSection:
 
     # parallel computation for speed up
     jump_length = od_shape[

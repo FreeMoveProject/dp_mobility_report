@@ -5,7 +5,7 @@ OVERVIEW = "overview"
 PLACE_ANALYSIS = "place_analysis"
 OD_ANALYSIS = "od_analysis"
 USER_ANALYSIS = "user_analysis"
-ANALYSIS_SELECTION = [ALL, OVERVIEW, PLACE_ANALYSIS, OD_ANALYSIS, USER_ANALYSIS]
+SEGMENTS = [OVERVIEW, PLACE_ANALYSIS, OD_ANALYSIS, USER_ANALYSIS]
 
 DS_STATISTICS = "ds_statistics"
 MISSING_VALUES = "missing_values"
@@ -39,6 +39,10 @@ USER_ELEMENTS = [
     MOBILITY_ENTROPY,
 ]
 
+ELEMENTS = OVERVIEW_ELEMENTS + PLACE_ELEMENTS + OD_ELEMENTS + USER_ELEMENTS
+
+SEGMENTS_AND_ELEMENTS = SEGMENTS + ELEMENTS
+
 ID = "id"
 UID = "uid"
 TID = "tid"
@@ -51,9 +55,10 @@ LAT_END = "lat_end"
 DATETIME_END = "datetime_end"
 DATE = "date"
 DAY_NAME = "day_name"
-WEEKDAY = "weekday"
 HOUR = "hour"
 IS_WEEKEND = "is_weekend"
+WEEKDAY = "weekday"
+WEEKEND = "weekend"
 TIME_CATEGORY = "time_category"
 POINT_TYPE = "point_type"
 START = "start"

@@ -10,11 +10,13 @@ from scipy import stats
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import m_utils
-from dp_mobility_report.model.section import Section
+from dp_mobility_report.model.section import TupleSection
 from dp_mobility_report.privacy import diff_privacy
 
 
-def get_trips_per_user(dpmreport: "DpMobilityReport", eps: Optional[float]) -> Section:
+def get_trips_per_user(
+    dpmreport: "DpMobilityReport", eps: Optional[float]
+) -> TupleSection:
     user_nunique = dpmreport.df.groupby(const.UID).nunique()[const.TID]
     max_trips = dpmreport.max_trips_per_user if dpmreport.user_privacy else None
 
@@ -30,7 +32,7 @@ def get_trips_per_user(dpmreport: "DpMobilityReport", eps: Optional[float]) -> S
 
 def get_user_time_delta(
     dpmreport: "DpMobilityReport", eps: Optional[float]
-) -> Optional[Section]:
+) -> Optional[TupleSection]:
     epsi = m_utils.get_epsi(dpmreport.evalu, eps, 6)
 
     dpmreport.df = dpmreport.df.sort_values(
@@ -71,7 +73,7 @@ def get_user_time_delta(
 
 def get_radius_of_gyration(
     dpmreport: "DpMobilityReport", eps: Optional[float]
-) -> Section:
+) -> TupleSection:
     rg = _radius_of_gyration(dpmreport.df)
     return m_utils.hist_section(
         rg,
@@ -121,7 +123,9 @@ def _tile_visits_by_user(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def get_user_tile_count(dpmreport: "DpMobilityReport", eps: Optional[float]) -> Section:
+def get_user_tile_count(
+    dpmreport: "DpMobilityReport", eps: Optional[float]
+) -> TupleSection:
     user_tile_count = dpmreport.df.groupby(const.UID).nunique()[const.TILE_ID]
 
     return m_utils.hist_section(
@@ -159,7 +163,7 @@ def _mobility_entropy(df: pd.DataFrame) -> np.ndarray:
 
 def get_mobility_entropy(
     dpmreport: "DpMobilityReport", eps: Optional[float]
-) -> Section:
+) -> TupleSection:
     mobility_entropy = _mobility_entropy(dpmreport.df)
 
     return m_utils.hist_section(

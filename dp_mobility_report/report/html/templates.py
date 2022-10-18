@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Tuple
 
-import pkg_resources
+import pkg_resources  # type: ignore
 
 if TYPE_CHECKING:
     from dp_mobility_report import DpMobilityReport
@@ -35,22 +35,20 @@ def render_html(
     od_analysis_segment = ""
     user_analysis_segment = ""
 
-    is_all_analyses = const.ALL in dpmreport.analysis_selection
-
     config_segment = config_templates.render_config(dpmreport)
 
-    if is_all_analyses | (const.OVERVIEW in dpmreport.analysis_selection):
+    if not set(const.OVERVIEW_ELEMENTS).issubset(dpmreport.analysis_exclusion):
         overview_segment = overview_templates.render_overview(dpmreport.report)
 
-    if is_all_analyses | (const.PLACE_ANALYSIS in dpmreport.analysis_selection):
+    if not set(const.PLACE_ELEMENTS).issubset(dpmreport.analysis_exclusion):
         place_analysis_segment = place_analysis_templates.render_place_analysis(
             dpmreport.report, dpmreport.tessellation, temp_map_folder, output_filename
         )
-    if is_all_analyses | (const.OD_ANALYSIS in dpmreport.analysis_selection):
+    if not set(const.OD_ELEMENTS).issubset(dpmreport.analysis_exclusion):
         od_analysis_segment = od_analysis_templates.render_od_analysis(
             dpmreport, top_n_flows, temp_map_folder, output_filename
         )
-    if is_all_analyses | (const.USER_ANALYSIS in dpmreport.analysis_selection):
+    if not set(const.USER_ELEMENTS).issubset(dpmreport.analysis_exclusion):
         user_analysis_segment = user_analysis_templates.render_user_analysis(dpmreport)
 
     return (

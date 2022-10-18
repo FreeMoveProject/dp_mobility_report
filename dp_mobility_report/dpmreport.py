@@ -2,7 +2,7 @@ import os
 import warnings
 from pathlib import Path
 from shutil import rmtree
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Tuple, Union
 
 import numpy as np
 from geopandas import GeoDataFrame
@@ -29,7 +29,18 @@ class DpMobilityReport:
         privacy_budget: privacy_budget for the differentially private report
         user_privacy: Whether item-level or user-level privacy is applied. Defaults to True (user-level privacy).
         max_trips_per_user: maximum number of trips a user shall contribute to the data. Dataset will be sampled accordingly.
-        analysis_selection: Select only needed analyses. A selection reduces computation time and leaves more privacy budget for higher accuracy of other analyses. Options are `overview`, `place_analysis`, `od_analysis`, `user_analysis` and `all`. Defaults to [`all`].
+        analysis_selection:  Select only needed analyses. A selection reduces computation time and leaves more privacy budget
+            for higher accuracy of other analyses. `analysis_selection` takes a list of all analyses to be included. Alternatively, a list of analyses to be excluded can be set with `analysis_exclusion'.
+            Either entire segments can be included: `const.OVERVIEW`, `const.PLACE_ANALYSIS`, `const.OD_ANALYSIS`, `const.USER_ANALYSIS`
+            or any single analysis can be included: `const.DS_STATISTICS`, `const.MISSING_VALUES`, `const.TRIPS_OVER_TIME`, `const.TRIPS_PER_WEEKDAY`, `const.TRIPS_PER_HOUR`, `const.VISITS_PER_TILE`, `const.VISITS_PER_TILE_TIMEWINDOW`, `const.OD_FLOWS`, `const.TRAVEL_TIME`, `const.JUMP_LENGTH`, `const.TRIPS_PER_USER`, `const.USER_TIME_DELTA`, `const.RADIUS_OF_GYRATION`, `const.USER_TILE_COUNT`, `const.MOBILITY_ENTROPY`
+            Default is None, i.e., all analyses are included.
+        analysis_exclusion: Ignored, if `analysis_selection' is set! `analysis_exclusion` takes a list of all analyses to be excluded.
+            Either entire segments can be excluded: `const.OVERVIEW`, `const.PLACE_ANALYSIS`, `const.OD_ANALYSIS`, `const.USER_ANALYSIS`
+            or any single analysis can be excluded: `const.DS_STATISTICS`, `const.MISSING_VALUES`, `const.TRIPS_OVER_TIME`, `const.TRIPS_PER_WEEKDAY`, `const.TRIPS_PER_HOUR`, `const.VISITS_PER_TILE`, `const.VISITS_PER_TILE_TIMEWINDOW`, `const.OD_FLOWS`, `const.TRAVEL_TIME`, `const.JUMP_LENGTH`, `const.TRIPS_PER_USER`, `const.USER_TIME_DELTA`, `const.RADIUS_OF_GYRATION`, `const.USER_TILE_COUNT`, `const.MOBILITY_ENTROPY`
+        budget_split: `dict`to customize how much privacy budget is assigned to which analysis. Each key needs to be named according to an analysis and the value needs to be an integer indicating the weight for the privacy budget.
+            If no weight is assigned, a default weight of 1 is set.
+            For example, if `budget_split = {const.VISITS_PER_TILE: 10}, then the privacy budget for `visits_per_tile` is 10 times higher than for every other analysis, which all get a default weight of 1.
+            Possible `dict` keys (all analyses): `const.DS_STATISTICS`, `const.MISSING_VALUES`, `const.TRIPS_OVER_TIME`, `const.TRIPS_PER_WEEKDAY`, `const.TRIPS_PER_HOUR`, `const.VISITS_PER_TILE`, `const.VISITS_PER_TILE_TIMEWINDOW`, `const.OD_FLOWS`, `const.TRAVEL_TIME`, `const.JUMP_LENGTH`, `const.TRIPS_PER_USER`, `const.USER_TIME_DELTA`, `const.RADIUS_OF_GYRATION`, `const.USER_TILE_COUNT`, `const.MOBILITY_ENTROPY`
         timewindows: List of hours as `int` that define the timewindows for the spatial analysis for single time windows. Defaults to [2, 6, 10, 14, 18, 22].
         max_travel_time: Upper bound for travel time histogram. If None is given, no upper bound is set. Defaults to None.
         bin_range_travel_time: The range a single histogram bin spans for travel time (e.g., 5 for 5 min bins). If None is given, the histogram bins will be determined automatically. Defaults to None.
@@ -50,7 +61,9 @@ class DpMobilityReport:
         privacy_budget: Optional[Union[int, float]],
         user_privacy: bool = True,
         max_trips_per_user: Optional[int] = None,
-        analysis_selection: List[str] = [const.ALL],
+        analysis_selection: Optional[List[str]] = None,
+        analysis_exclusion: Optional[List[str]] = None,
+        budget_split: dict = {},
         timewindows: Union[List[int], np.ndarray] = [2, 6, 10, 14, 18, 22],
         max_travel_time: Optional[int] = None,
         bin_range_travel_time: Optional[int] = None,
@@ -67,6 +80,8 @@ class DpMobilityReport:
             privacy_budget,
             max_trips_per_user,
             analysis_selection,
+            analysis_exclusion,
+            budget_split,
             disable_progress_bar,
             evalu,
             user_privacy,
@@ -77,6 +92,10 @@ class DpMobilityReport:
             bin_range_jump_length,
             max_radius_of_gyration,
             bin_range_radius_of_gyration,
+        )
+
+        analysis_selection, analysis_exclusion = _validate_inclusion_exclusion(
+            analysis_selection, analysis_exclusion
         )
 
         self.user_privacy = user_privacy
@@ -113,7 +132,10 @@ class DpMobilityReport:
         self.bin_range_travel_time = bin_range_travel_time
         self.max_radius_of_gyration = max_radius_of_gyration
         self.bin_range_radius_of_gyration = bin_range_radius_of_gyration
-        self.analysis_selection = analysis_selection
+        self.analysis_exclusion = _clean_analysis_exclusion(
+            analysis_selection, analysis_exclusion
+        )
+        self.budget_split = _clean_budget_split(budget_split, self.analysis_exclusion)
         self.evalu = evalu
         self.disable_progress_bar = disable_progress_bar
 
@@ -182,12 +204,33 @@ class DpMobilityReport:
         output_file.write_text(data, encoding="utf-8")
 
 
+def _validate_inclusion_exclusion(
+    analysis_selection: Optional[List[str]], analysis_exclusion: Optional[List[str]]
+) -> Tuple[Optional[List[str]], Optional[List[str]]]:
+
+    if analysis_selection is not None and analysis_exclusion is not None:
+        warnings.warn(
+            "The parameter `analysis_exclusion' will be ignored, as `analysis_selection' is set as well."
+        )
+        analysis_exclusion = None
+
+    if analysis_selection == [const.ALL]:
+        warnings.warn(
+            "['all'] as input is deprecated. Use 'None' (default) instead to include all analyses."
+        )
+        analysis_selection = None
+
+    return analysis_selection, analysis_exclusion
+
+
 def _validate_input(
     df: DataFrame,
     tessellation: GeoDataFrame,
     privacy_budget: Optional[Union[int, float]],
     max_trips_per_user: Optional[int],
-    analysis_selection: List[str],
+    analysis_selection: Optional[List[str]],
+    analysis_exclusion: Optional[List[str]],
+    budget_split: dict,
     disable_progress_bar: bool,
     evalu: bool,
     user_privacy: bool,
@@ -210,11 +253,34 @@ def _validate_input(
     if (max_trips_per_user is not None) and (max_trips_per_user < 1):
         raise ValueError("'max_trips_per_user' has to be greater 0.")
 
-    if not ((analysis_selection is None) or isinstance(analysis_selection, list)):
-        raise TypeError("'analysis_selection' is not a list.")
-    if not set(analysis_selection).issubset(const.ANALYSIS_SELECTION):
+    if analysis_selection is not None:
+        if not isinstance(analysis_selection, list):
+            raise TypeError("'analysis_selection' is not a list.")
+
+        if not set(analysis_selection).issubset(
+            const.SEGMENTS_AND_ELEMENTS + [const.ALL]
+        ):
+            raise ValueError(
+                f"Unknown analyses in {analysis_selection}. Only elements from {const.SEGMENTS_AND_ELEMENTS} are valid inputs."
+            )
+
+    if analysis_exclusion is not None:
+        if not isinstance(analysis_exclusion, list):
+            raise TypeError("'analysis_exclusion' is not a list.")
+        if not set(analysis_exclusion).issubset(const.SEGMENTS_AND_ELEMENTS):
+            raise ValueError(
+                f"Unknown analyses in {analysis_exclusion}. Only elements from {const.SEGMENTS_AND_ELEMENTS} are valid inputs."
+            )
+
+    if not isinstance(budget_split, dict):
+        raise TypeError("'budget_split' is not a dict.")
+    if not set(budget_split.keys()).issubset(const.ELEMENTS):
         raise ValueError(
-            f"Unknown analysis selection {analysis_selection}. Only elements from {const.ANALYSIS_SELECTION} are valid inputs."
+            f"Unknown analyses in {budget_split}. Only elements from {const.ELEMENTS} are valid inputs as dictionary keys."
+        )
+    if not all(isinstance(x, int) for x in list(budget_split.values())):
+        raise ValueError(
+            f"Not all elements in 'budget_split' are integers: {list(budget_split.values())}."
         )
 
     if not isinstance(timewindows, (list, np.ndarray)):
@@ -259,3 +325,77 @@ def _validate_numeric_greater_zero(var: Any, name: str) -> None:
 def _validate_bool(var: Any, name: str) -> None:
     if not isinstance(var, bool):
         raise TypeError(f"'{name}' is not type boolean.")
+
+
+# unify different input options of analyses (segments and elements) to be included / excluded as excluded elements, i.e., 'analysis_exclusion'
+def _clean_analysis_exclusion(
+    analysis_selection: Optional[List[str]], analysis_exclusion: Optional[List[str]]
+) -> List[str]:
+    # TODO: without timestamp: add w/o timestamp analyses to exclude_analysis
+
+    def _remove_elements(elements: list, remove_list: list) -> list:
+        return [e for e in elements if e not in remove_list]
+
+    if analysis_selection is not None:
+        analysis_exclusion = const.ELEMENTS
+
+        # remove all elements of segments
+        if const.OVERVIEW in analysis_selection:
+            analysis_exclusion = _remove_elements(
+                analysis_exclusion, const.OVERVIEW_ELEMENTS
+            )
+        if const.PLACE_ANALYSIS in analysis_selection:
+            analysis_exclusion = _remove_elements(
+                analysis_exclusion, const.PLACE_ELEMENTS
+            )
+        if const.OD_ANALYSIS in analysis_selection:
+            analysis_exclusion = _remove_elements(analysis_exclusion, const.OD_ELEMENTS)
+        if const.USER_ANALYSIS in analysis_selection:
+            analysis_exclusion = _remove_elements(
+                analysis_exclusion, const.USER_ELEMENTS
+            )
+
+        # remove single elements
+        analysis_exclusion = _remove_elements(analysis_exclusion, analysis_selection)
+
+    elif analysis_exclusion is not None:
+        # deduplicate list in case there are duplicates as input (otherwise `remove` might fail)
+        analysis_exclusion = list(set(analysis_exclusion))
+
+        if const.OVERVIEW in analysis_exclusion:
+            analysis_exclusion += const.OVERVIEW_ELEMENTS
+            analysis_exclusion.remove(const.OVERVIEW)
+
+        if const.PLACE_ANALYSIS in analysis_exclusion:
+            analysis_exclusion += const.PLACE_ELEMENTS
+            analysis_exclusion.remove(const.PLACE_ANALYSIS)
+
+        if const.OD_ANALYSIS in analysis_exclusion:
+            analysis_exclusion += const.OD_ELEMENTS
+            analysis_exclusion.remove(const.OD_ANALYSIS)
+
+        if const.USER_ANALYSIS in analysis_exclusion:
+            analysis_exclusion += const.USER_ELEMENTS
+            analysis_exclusion.remove(const.USER_ANALYSIS)
+
+        # deduplicate in case analyses and segments were included
+        analysis_exclusion = list(set(analysis_exclusion))
+
+    else:
+        analysis_exclusion = []
+
+    return analysis_exclusion
+
+
+def _clean_budget_split(budget_split: dict, analysis_exclusion: List[str]) -> dict:
+    intersec = set(budget_split.keys()).intersection(analysis_exclusion)
+    if len(intersec) != 0:
+        warnings.warn(
+            f"A `budget_split`is specified for the analyses {intersec} even though they are excluded."
+            "As they will be excluded, the `budget_split` specification will be ignored for these analyses."
+        )
+
+    # remove all analyses that are excluded according to `analysis_exclusion``
+    remaining_analyses = set(budget_split.keys()) - set(analysis_exclusion)
+    budget_split = {analysis: budget_split[analysis] for analysis in remaining_analyses}
+    return budget_split

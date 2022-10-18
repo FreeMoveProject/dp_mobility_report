@@ -5,7 +5,9 @@ import geopandas as gpd
 import pandas as pd
 
 from dp_mobility_report import DpMobilityReport
+from dp_mobility_report import constants as const
 
+# set paths to data and output (either with config file or hardcoded)
 path_data = config.path_data
 path_html_output = config.path_html_output
 
@@ -22,7 +24,6 @@ report = DpMobilityReport(
     df,
     tessellation,
     privacy_budget=None,
-    analysis_selection=["all"],
     max_trips_per_user=None,
     max_travel_time=90,
     bin_range_travel_time=5,
@@ -41,6 +42,7 @@ report = DpMobilityReport(
     tessellation,
     privacy_budget=50,
     analysis_selection=["overview", "place_analysis"],
+    budget_split={const.VISITS_PER_TILE: 10},
     max_trips_per_user=5,
     max_travel_time=90,
     bin_range_travel_time=5,

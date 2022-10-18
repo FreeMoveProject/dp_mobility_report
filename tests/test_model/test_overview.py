@@ -62,6 +62,19 @@ def test_get_trips_per_weekday(test_dpmreport):
     assert trips_per_weekday["Saturday"] == 3
     assert trips_per_weekday["Sunday"] == 15
 
+    # test that all days are created even if not present in data
+    test_dpmreport.df = test_dpmreport.df[test_dpmreport.df[const.DAY_NAME] == "Monday"]
+    trips_per_weekday = overview.get_trips_per_weekday(test_dpmreport, None).data
+    assert trips_per_weekday.index.tolist() == [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+    ]
+
 
 def test_get_trips_per_hour(test_dpmreport):
     """Correct trips per hour values without noise."""
@@ -74,5 +87,11 @@ def test_get_trips_per_hour(test_dpmreport):
         "weekend_end",
         "weekend_start",
     ]
-    assert trips_per_hour.columns.tolist() == [const.HOUR, const.TIME_CATEGORY, "count"]
-    assert len(trips_per_hour) == 73
+    assert trips_per_hour.columns.tolist() == [const.HOUR, const.TIME_CATEGORY, "perc"]
+    assert len(trips_per_hour) == 96
+
+    # test that all hours are created even if not present in data
+    test_dpmreport.df = test_dpmreport.df[test_dpmreport.df[const.HOUR] == 16]
+    trips_per_hour = overview.get_trips_per_hour(test_dpmreport, None).data
+    assert len(trips_per_hour) == 96
+    assert trips_per_hour[const.HOUR].unique().tolist() == list(range(0, 24))
