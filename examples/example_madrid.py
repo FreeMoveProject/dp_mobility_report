@@ -6,6 +6,7 @@ import pandas as pd
 
 from dp_mobility_report import DpMobilityReport
 
+# set paths to data and output (either with config file or hardcoded)
 path_data = config.path_data
 path_html_output = config.path_html_output
 
