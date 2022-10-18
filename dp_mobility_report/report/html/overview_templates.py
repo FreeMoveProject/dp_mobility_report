@@ -14,20 +14,20 @@ from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_overview(report: dict) -> str:
-    dataset_stats_table= ""
-    missing_values_table= ""
-    trips_over_time_eps= None
-    trips_over_time_moe= None
-    trips_over_time_info= ""
-    trips_over_time_linechart= ""
-    trips_over_time_moe_info= ""
-    trips_over_time_summary_table= ""
-    trips_per_weekday_eps= None
-    trips_per_weekday_moe= None
-    trips_per_weekday_barchart= ""
-    trips_per_hour_eps= None
-    trips_per_hour_moe= None
-    trips_per_hour_linechart= ""
+    dataset_stats_table = ""
+    missing_values_table = ""
+    trips_over_time_eps = None
+    trips_over_time_moe = None
+    trips_over_time_info = ""
+    trips_over_time_linechart = ""
+    trips_over_time_moe_info = ""
+    trips_over_time_summary_table = ""
+    trips_per_weekday_eps = None
+    trips_per_weekday_moe = None
+    trips_per_weekday_barchart = ""
+    trips_per_hour_eps = None
+    trips_per_hour_moe = None
+    trips_per_hour_linechart = ""
 
     if const.DS_STATISTICS in report and report[const.DS_STATISTICS].data is not None:
         dataset_stats_table = render_dataset_statistics(report[const.DS_STATISTICS])
@@ -183,7 +183,7 @@ def render_missing_values(missing_values: DictSection) -> str:
     return missing_values_html
 
 
-def render_trips_over_time_info(datetime_precision= "") -> str:
+def render_trips_over_time_info(datetime_precision: str) -> str:
     return f"Timestamps have been aggregated by {datetime_precision}."
 
 

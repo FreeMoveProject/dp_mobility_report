@@ -42,7 +42,7 @@ report = DpMobilityReport(
     tessellation,
     privacy_budget=50,
     analysis_selection=["overview", "place_analysis"],
-    budget_split = {const.VISITS_PER_TILE: 10},
+    budget_split={const.VISITS_PER_TILE: 10},
     max_trips_per_user=5,
     max_travel_time=90,
     bin_range_travel_time=5,
@@ -52,4 +52,3 @@ report = DpMobilityReport(
     bin_range_radius_of_gyration=1.5,
 )
 report.to_file(os.path.join(path_html_output, "geolife.html"), top_n_flows=100)
-
