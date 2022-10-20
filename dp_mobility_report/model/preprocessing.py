@@ -58,6 +58,7 @@ def preprocess_data(
     tessellation: gpd.GeoDataFrame,
     max_trips_per_user: int,
     user_privacy: bool,
+    seed: int,
 ) -> pd.DataFrame:
     df = _validate_columns(df)
 
@@ -102,7 +103,7 @@ def preprocess_data(
         )
         df.tile_id = df.tile_id.astype(str)
 
-    df = sample_trips(df, max_trips_per_user, user_privacy)
+    df = sample_trips(df, max_trips_per_user, user_privacy, seed)
     return df
 
 
@@ -126,9 +127,14 @@ def assign_points_to_tessellation(
 
 
 def sample_trips(
-    df: pd.DataFrame, max_trips_per_user: int, user_privacy: bool
+    df: pd.DataFrame,
+    max_trips_per_user: int,
+    user_privacy: bool,
+    seed: int = None,
 ) -> pd.DataFrame:
     if user_privacy:
+        if seed is not None:
+            np.random.seed(seed)
         tid_sample = (
             df[[const.UID, const.TID]]
             .drop_duplicates(const.TID)

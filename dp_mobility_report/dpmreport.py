@@ -49,6 +49,7 @@ class DpMobilityReport:
         max_radius_of_gyration: Upper bound for radius of gyration histogram. If None is given, no upper bound is set. Defaults to None.
         bin_range_radius_of_gyration: The range a single histogram bin spans for the radius of gyration (e.g., 1 for 1 km bins). If None is given, the histogram bins will be determined automatically. Defaults to None.
         disable_progress_bar: Whether progress bars should be shown. Defaults to False.
+        seed_sampling: Provide seed for down-sampling of dataset (according to 'max_trips_per_user') so that the sampling is reproducible. Defaults to 'None', i.e., no seed.
         evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to False."""
 
     _report: dict = {}
@@ -72,6 +73,7 @@ class DpMobilityReport:
         max_radius_of_gyration: Optional[Union[int, float]] = None,
         bin_range_radius_of_gyration: Optional[Union[int, float]] = None,
         disable_progress_bar: bool = False,
+        seed_sampling: int = None,
         evalu: bool = False,
     ) -> None:
         _validate_input(
@@ -92,6 +94,7 @@ class DpMobilityReport:
             bin_range_jump_length,
             max_radius_of_gyration,
             bin_range_radius_of_gyration,
+            seed_sampling,
         )
 
         analysis_selection, analysis_exclusion = _validate_inclusion_exclusion(
@@ -118,6 +121,7 @@ class DpMobilityReport:
                 tessellation,
                 self.max_trips_per_user,
                 self.user_privacy,
+                seed_sampling,
             )
             pbar.update()
 
@@ -241,6 +245,7 @@ def _validate_input(
     bin_range_jump_length: Optional[Union[int, float]],
     max_radius_of_gyration: Optional[Union[int, float]],
     bin_range_radius_of_gyration: Optional[Union[int, float]],
+    seed_sampling: Optional[int],
 ) -> None:
     if not isinstance(df, DataFrame):
         raise TypeError("'df' is not a Pandas DataFrame.")
@@ -313,6 +318,11 @@ def _validate_input(
     _validate_bool(user_privacy, f"{user_privacy=}".split("=")[0])
     _validate_bool(evalu, f"{user_privacy=}".split("=")[0])
     _validate_bool(disable_progress_bar, f"{user_privacy=}".split("=")[0])
+
+    if not ((seed_sampling is None) or isinstance(seed_sampling, int)):
+        raise TypeError("'seed_sampling' is not an integer.")
+    if (seed_sampling is not None) and (seed_sampling <= 0):
+        raise ValueError("'seed_sampling' has to be greater 0.")
 
 
 def _validate_numeric_greater_zero(var: Any, name: str) -> None:

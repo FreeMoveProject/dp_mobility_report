@@ -48,8 +48,16 @@ def test_DpMobilityReport(test_data, test_tessellation):
     )
     assert isinstance(mob_report, DpMobilityReport)
 
-    # TODO: test variations of exclude_analysis
+    # TODO: test variations of analysis_inclusion
+    mob_report = DpMobilityReport(
+        test_data,
+        test_tessellation,
+        privacy_budget=None,
+        analysis_selection=[const.OVERVIEW],
+    )
+    assert isinstance(mob_report, DpMobilityReport)
 
+    # TODO: test variations of exclude_analysis
     # variations of exclude_analysis
     mob_report = DpMobilityReport(
         test_data,
@@ -59,7 +67,23 @@ def test_DpMobilityReport(test_data, test_tessellation):
     )
     assert isinstance(mob_report, DpMobilityReport)
 
-    # TODO: test variations of exclude_analysis
+    # test sampling
+    mob_report1 = DpMobilityReport(
+        test_data,
+        test_tessellation,
+        privacy_budget=None,
+        max_trips_per_user=1,
+        seed_sampling=100,
+    )
+
+    mob_report2 = DpMobilityReport(
+        test_data,
+        test_tessellation,
+        privacy_budget=None,
+        max_trips_per_user=1,
+        seed_sampling=100,
+    )
+    assert mob_report1.df.equals(mob_report2.df)
 
 
 def test_wrong_input_params_DpMobilityReport(test_data, test_tessellation):
@@ -273,6 +297,20 @@ def test_wrong_input_params_DpMobilityReport(test_data, test_tessellation):
             test_tessellation,
             timewindows=["not an int", 2, 3],
             privacy_budget=None,
+        )
+
+    # wrong input for seed
+    with pytest.raises(TypeError):
+        DpMobilityReport(
+            test_data,
+            test_tessellation,
+            privacy_budget=None,
+            seed_sampling="not an int",
+        )
+
+    with pytest.raises(ValueError):
+        DpMobilityReport(
+            test_data, test_tessellation, privacy_budget=None, seed_sampling=-3
         )
 
 
