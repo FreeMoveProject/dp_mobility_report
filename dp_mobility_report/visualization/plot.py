@@ -218,6 +218,7 @@ def choropleth_map(
     # colorbar object to create custom legend
     colorbar, ax = plt.subplots(figsize=(6, 1))
     colorbar.subplots_adjust(bottom=0.5)
+    ax.grid(False)
     colorbar.colorbar(
         mpl.cm.ScalarMappable(norm=norm, cmap=cmap),
         cax=ax,
@@ -267,6 +268,8 @@ def multi_choropleth_map(
         else:
             ax = axes[facet_row][i % plots_per_row]
         ax.axis("off")
+        ax.grid(False)
+
         if i < (
             counts_per_tile_timewindow.shape[1] - 2
         ):  # there might be more subplots than data - skip in that case
@@ -288,6 +291,7 @@ def multi_choropleth_map(
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm._A = []  # add the colorbar to the figure
     # set the range for the choropleth
+    plt.rcParams["axes.grid"] = False
     fig.colorbar(sm, ax=axes)
     return fig
 
