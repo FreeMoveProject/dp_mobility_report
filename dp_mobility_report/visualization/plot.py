@@ -247,9 +247,9 @@ def multi_choropleth_map(
 
     # upper and lower bound
     vmin = counts_per_tile_timewindow.iloc[:, 2:].min().min()
-    vmin = vmin if vmin is not np.nan else 0
+    vmin = vmin if not math.isnan(vmin) else 0
     vmax = counts_per_tile_timewindow.iloc[:, 2:].max().max()
-    vmax = vmax if vmax is not np.nan else 2
+    vmax = vmax if not math.isnan(vmax) else 2
 
     # color
     if diverging_cmap:
@@ -268,7 +268,6 @@ def multi_choropleth_map(
         else:
             ax = axes[facet_row][i % plots_per_row]
         ax.axis("off")
-        ax.grid(False)
 
         if i < (
             counts_per_tile_timewindow.shape[1] - 2
@@ -291,8 +290,10 @@ def multi_choropleth_map(
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm._A = []  # add the colorbar to the figure
     # set the range for the choropleth
-    plt.rcParams["axes.grid"] = False
+    plt.rcParams["axes.grid"] = False   # silence matplotlib warning
     fig.colorbar(sm, ax=axes)
+    plt.rcParams["axes.grid"] = True
+
     return fig
 
 

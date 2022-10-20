@@ -207,7 +207,10 @@ def get_trips_per_weekday(
         .count()[const.TID]
     )
     missing_days = set(calendar.day_name) - set(trips_per_weekday.index.tolist())
-    trips_per_weekday = trips_per_weekday.append(pd.Series(0, index=list(missing_days)))
+    trips_per_weekday = pd.concat(
+        [trips_per_weekday, pd.Series(0, index=list(missing_days))]
+    )
+
     trips_per_weekday.index = pd.Categorical(
         trips_per_weekday.index, list(calendar.day_name)
     )
