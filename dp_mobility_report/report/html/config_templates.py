@@ -10,10 +10,16 @@ def render_config(dpmreport: "DpMobilityReport") -> str:
 
     config_table = render_config_table(dpmreport)
     privacy_info = render_privacy_info(dpmreport.privacy_budget is not None)
-
+    tessellation_info = (
+        ""
+        if (dpmreport.tessellation is not None)
+        else "<br> <br>No tessellation has been provided. All analyses based on the tessellation have been excluded."
+    )
     template_structure = get_template("config_segment.html")
     return template_structure.render(
-        config_table=config_table, privacy_info=privacy_info
+        config_table=config_table,
+        privacy_info=privacy_info,
+        tessellation_info=tessellation_info,
     )
 
 

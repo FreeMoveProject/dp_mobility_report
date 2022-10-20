@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 import geopandas as gpd
 import numpy as np
@@ -55,10 +56,10 @@ def _validate_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 def preprocess_data(
     df: pd.DataFrame,
-    tessellation: gpd.GeoDataFrame,
+    tessellation: Optional[gpd.GeoDataFrame],
     max_trips_per_user: int,
     user_privacy: bool,
-    seed: int,
+    seed: Optional[int],
 ) -> pd.DataFrame:
     df = _validate_columns(df)
 
@@ -95,13 +96,14 @@ def preprocess_data(
     ] = "end"
 
     # if tile assignment isn't already provided, recompute assignment
-    if const.TILE_ID not in df.columns:
-        df = assign_points_to_tessellation(df, tessellation)
-    else:
-        logging.info(
-            "'tile_id' present in data. No new assignment of points to tessellation."
-        )
-        df.tile_id = df.tile_id.astype(str)
+    if tessellation is not None:
+        if const.TILE_ID not in df.columns:
+            df = assign_points_to_tessellation(df, tessellation)
+        else:
+            logging.info(
+                "'tile_id' present in data. No new assignment of points to tessellation."
+            )
+            df.tile_id = df.tile_id.astype(str)
 
     df = sample_trips(df, max_trips_per_user, user_privacy, seed)
     return df
@@ -130,7 +132,7 @@ def sample_trips(
     df: pd.DataFrame,
     max_trips_per_user: int,
     user_privacy: bool,
-    seed: int = None,
+    seed: Optional[int],
 ) -> pd.DataFrame:
     if user_privacy:
         if seed is not None:

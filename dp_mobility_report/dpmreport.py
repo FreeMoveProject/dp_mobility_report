@@ -26,7 +26,7 @@ class DpMobilityReport:
     Args:
         df: `DataFrame` containing the mobility data. Expected columns: User ID `uid`, trip ID `tid`, timestamp `datetime`, latitude `lat` and longitude `lng` in CRS EPSG:4326.
         tessellation: Geopandas `GeoDataFrame` containing the tessellation for spatial aggregations. Expected columns: `tile_id`. If tessellation is not provided in the expected default CRS EPSG:4326 it will automatically be transformed.
-        privacy_budget: privacy_budget for the differentially private report
+        privacy_budget: privacy_budget for the differentially private report. Defaults to None, i.e., no privacy guarantee is provided.
         user_privacy: Whether item-level or user-level privacy is applied. Defaults to True (user-level privacy).
         max_trips_per_user: maximum number of trips a user shall contribute to the data. Dataset will be sampled accordingly.
         analysis_selection:  Select only needed analyses. A selection reduces computation time and leaves more privacy budget
@@ -58,8 +58,8 @@ class DpMobilityReport:
     def __init__(
         self,
         df: DataFrame,
-        tessellation: GeoDataFrame,
-        privacy_budget: Optional[Union[int, float]],
+        tessellation: Optional[GeoDataFrame] = None,
+        privacy_budget: Optional[Union[int, float]] = None,
         user_privacy: bool = True,
         max_trips_per_user: Optional[int] = None,
         analysis_selection: Optional[List[str]] = None,
@@ -98,14 +98,19 @@ class DpMobilityReport:
         )
 
         analysis_selection, analysis_exclusion = _validate_inclusion_exclusion(
-            analysis_selection, analysis_exclusion
+            analysis_selection,
+            analysis_exclusion,
         )
 
         self.user_privacy = user_privacy
         with tqdm(  # progress bar
             total=2, desc="Preprocess data", disable=disable_progress_bar
         ) as pbar:
-            self.tessellation = preprocessing.preprocess_tessellation(tessellation)
+            self.tessellation = (
+                None
+                if tessellation is None
+                else preprocessing.preprocess_tessellation(tessellation)
+            )
             pbar.update()
 
             self.max_trips_per_user = (
@@ -137,7 +142,7 @@ class DpMobilityReport:
         self.max_radius_of_gyration = max_radius_of_gyration
         self.bin_range_radius_of_gyration = bin_range_radius_of_gyration
         self.analysis_exclusion = _clean_analysis_exclusion(
-            analysis_selection, analysis_exclusion
+            analysis_selection, analysis_exclusion, (tessellation is not None)
         )
         self.budget_split = _clean_budget_split(budget_split, self.analysis_exclusion)
         self.evalu = evalu
@@ -229,7 +234,7 @@ def _validate_inclusion_exclusion(
 
 def _validate_input(
     df: DataFrame,
-    tessellation: GeoDataFrame,
+    tessellation: Optional[GeoDataFrame],
     privacy_budget: Optional[Union[int, float]],
     max_trips_per_user: Optional[int],
     analysis_selection: Optional[List[str]],
@@ -250,7 +255,12 @@ def _validate_input(
     if not isinstance(df, DataFrame):
         raise TypeError("'df' is not a Pandas DataFrame.")
 
-    if not isinstance(tessellation, GeoDataFrame):
+    if tessellation is None:
+        warnings.warn(
+            "No tessellation has been specified. All analyses based on the tessallation will be omitted."
+        )
+
+    if not ((tessellation is None) or isinstance(tessellation, GeoDataFrame)):
         raise TypeError("'tessellation' is not a Geopandas GeoDataFrame.")
 
     if not ((max_trips_per_user is None) or isinstance(max_trips_per_user, int)):
@@ -339,7 +349,9 @@ def _validate_bool(var: Any, name: str) -> None:
 
 # unify different input options of analyses (segments and elements) to be included / excluded as excluded elements, i.e., 'analysis_exclusion'
 def _clean_analysis_exclusion(
-    analysis_selection: Optional[List[str]], analysis_exclusion: Optional[List[str]]
+    analysis_selection: Optional[List[str]],
+    analysis_exclusion: Optional[List[str]],
+    has_tessellation: bool,
 ) -> List[str]:
     # TODO: without timestamp: add w/o timestamp analyses to exclude_analysis
 
@@ -388,11 +400,14 @@ def _clean_analysis_exclusion(
             analysis_exclusion += const.USER_ELEMENTS
             analysis_exclusion.remove(const.USER_ANALYSIS)
 
-        # deduplicate in case analyses and segments were included
-        analysis_exclusion = list(set(analysis_exclusion))
-
     else:
         analysis_exclusion = []
+
+    if not has_tessellation:
+        analysis_exclusion += const.TESSELLATION_ELEMENTS
+
+    # deduplicate in case analyses and segments were included
+    analysis_exclusion = list(set(analysis_exclusion))
 
     return analysis_exclusion
 

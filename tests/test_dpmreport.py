@@ -355,6 +355,20 @@ def test_report_output(test_data, test_tessellation):
         const.MOBILITY_ENTROPY,
     ]
 
+    # without tessellation
+    report = DpMobilityReport(test_data, privacy_budget=None).report
+    assert isinstance(report, dict)
+    assert list(report.keys()) == [
+        const.DS_STATISTICS,
+        const.MISSING_VALUES,
+        const.TRIPS_OVER_TIME,
+        const.TRIPS_PER_WEEKDAY,
+        const.TRIPS_PER_HOUR,
+        const.TRIPS_PER_USER,
+        const.USER_TIME_DELTA,
+        const.RADIUS_OF_GYRATION,
+    ]
+
 
 def test_analysis_exclusion(test_data, test_tessellation):
     dpmr = DpMobilityReport(
@@ -521,7 +535,7 @@ def test_analysis_selection(test_data, test_tessellation):
 def test_to_html_file(test_data, test_tessellation, tmp_path):
 
     # DpMobilityReport( # type: ignore
-    #     test_data, test_tessellation, privacy_budget=None  # type: ignore
+    #     test_data, privacy_budget=None  # type: ignore
     # ).to_file("test1.html")  # type: ignore
 
     # DpMobilityReport(  # type: ignore
@@ -556,4 +570,9 @@ def test_to_html_file(test_data, test_tessellation, tmp_path):
         ],
         privacy_budget=None,
     ).to_file(file_name)
+    assert file_name.is_file()
+
+    # without tessellation
+    file_name = tmp_path / "html/test_output4.html"
+    DpMobilityReport(test_data).to_file(file_name)
     assert file_name.is_file()

@@ -148,20 +148,20 @@ def test_assign_points_to_tessellation(test_data, test_tessellation):
 def test_sample_trips(test_data):
     # same length, if max_trips_per_user are max
     sampled_data = preprocessing.sample_trips(
-        test_data, test_data.groupby(const.UID).nunique()[const.TID].max(), True
+        test_data, test_data.groupby(const.UID).nunique()[const.TID].max(), True, None
     )
     assert len(sampled_data) == len(test_data)
 
     # no sampling if user_privacy is false
-    sampled_data = preprocessing.sample_trips(test_data, 1, False)
+    sampled_data = preprocessing.sample_trips(test_data, 1, False, None)
     assert len(sampled_data) == len(test_data)
 
-    sampled_data = preprocessing.sample_trips(test_data, 2, True)
+    sampled_data = preprocessing.sample_trips(test_data, 2, True, None)
     assert sampled_data.groupby(const.UID).nunique()[const.TID].sum() == 39
     assert sampled_data.groupby(const.UID).nunique()[const.TID].max() == 2
 
     # no duplicates drawn from sample
-    sampled_data = preprocessing.sample_trips(test_data, 100, True)
+    sampled_data = preprocessing.sample_trips(test_data, 100, True, None)
     assert len(sampled_data[sampled_data.duplicated()]) == 0
 
     # test seed
