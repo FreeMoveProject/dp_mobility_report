@@ -4,7 +4,7 @@ diffprivlib
 folium==0.12.1.post1
 haversine
 Jinja2
-matplotlib
+matplotlib==3.6.0
 numpy
 pandarallel
 pandas
