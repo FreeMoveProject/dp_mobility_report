@@ -1,5 +1,8 @@
 from typing import TYPE_CHECKING
 
+import pandas as pd
+
+import dp_mobility_report.constants as const
 from dp_mobility_report.report.html.html_utils import fmt, get_template
 
 if TYPE_CHECKING:
@@ -15,11 +18,17 @@ def render_config(dpmreport: "DpMobilityReport") -> str:
         if (dpmreport.tessellation is not None)
         else "<br> <br>No tessellation has been provided. All analyses based on the tessellation have been excluded."
     )
+    timestamp_info = (
+        ""
+        if pd.core.dtypes.common.is_datetime64_dtype(dpmreport.df[const.DATETIME])
+        else "<br> <br>Dataframe does not contain timestamps. All analyses based on timestamps have been excluded."
+    )
     template_structure = get_template("config_segment.html")
     return template_structure.render(
         config_table=config_table,
         privacy_info=privacy_info,
         tessellation_info=tessellation_info,
+        timestamp_info=timestamp_info,
     )
 
 

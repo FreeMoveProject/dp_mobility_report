@@ -2,9 +2,10 @@ import os
 import warnings
 from pathlib import Path
 from shutil import rmtree
-from typing import Any, List, Optional, Tuple, Union
+from typing import List, Optional, Union
 
 import numpy as np
+import pandas as pd
 from geopandas import GeoDataFrame
 from pandarallel import pandarallel
 from pandas import DataFrame
@@ -24,7 +25,7 @@ class DpMobilityReport:
     """Generate a (differentially private) mobility report from a mobility dataset. The report will be generated as an HTML file, using the `.to_file()` method.
 
     Args:
-        df: `DataFrame` containing the mobility data. Expected columns: User ID `uid`, trip ID `tid`, timestamp `datetime`, latitude `lat` and longitude `lng` in CRS EPSG:4326.
+        df: `DataFrame` containing the mobility data. Expected columns: User ID `uid`, trip ID `tid`, timestamp `datetime` (or `int`to indicate sequence position, if dataset only consists of sequences without timestamps), latitude `lat` and longitude `lng` in CRS EPSG:4326.
         tessellation: Geopandas `GeoDataFrame` containing the tessellation for spatial aggregations. Expected columns: `tile_id`. If tessellation is not provided in the expected default CRS EPSG:4326 it will automatically be transformed.
         privacy_budget: privacy_budget for the differentially private report. Defaults to None, i.e., no privacy guarantee is provided.
         user_privacy: Whether item-level or user-level privacy is applied. Defaults to True (user-level privacy).
@@ -76,7 +77,7 @@ class DpMobilityReport:
         seed_sampling: int = None,
         evalu: bool = False,
     ) -> None:
-        _validate_input(
+        preprocessing.validate_input(
             df,
             tessellation,
             privacy_budget,
@@ -97,7 +98,10 @@ class DpMobilityReport:
             seed_sampling,
         )
 
-        analysis_selection, analysis_exclusion = _validate_inclusion_exclusion(
+        (
+            analysis_selection,
+            analysis_exclusion,
+        ) = preprocessing.validate_inclusion_exclusion(
             analysis_selection,
             analysis_exclusion,
         )
@@ -123,7 +127,7 @@ class DpMobilityReport:
                 self.max_trips_per_user = 1
             self.df = preprocessing.preprocess_data(
                 df.copy(),  # copy, to not overwrite users instance of df
-                tessellation,
+                self.tessellation,
                 self.max_trips_per_user,
                 self.user_privacy,
                 seed_sampling,
@@ -141,10 +145,15 @@ class DpMobilityReport:
         self.bin_range_travel_time = bin_range_travel_time
         self.max_radius_of_gyration = max_radius_of_gyration
         self.bin_range_radius_of_gyration = bin_range_radius_of_gyration
-        self.analysis_exclusion = _clean_analysis_exclusion(
-            analysis_selection, analysis_exclusion, (tessellation is not None)
+        self.analysis_exclusion = preprocessing.clean_analysis_exclusion(
+            analysis_selection,
+            analysis_exclusion,
+            (tessellation is not None),
+            pd.core.dtypes.common.is_datetime64_dtype(self.df[const.DATETIME]),
         )
-        self.budget_split = _clean_budget_split(budget_split, self.analysis_exclusion)
+        self.budget_split = preprocessing.clean_budget_split(
+            budget_split, self.analysis_exclusion
+        )
         self.evalu = evalu
         self.disable_progress_bar = disable_progress_bar
 
@@ -211,216 +220,3 @@ class DpMobilityReport:
         rmtree(temp_map_folder, ignore_errors=True)
 
         output_file.write_text(data, encoding="utf-8")
-
-
-def _validate_inclusion_exclusion(
-    analysis_selection: Optional[List[str]], analysis_exclusion: Optional[List[str]]
-) -> Tuple[Optional[List[str]], Optional[List[str]]]:
-
-    if analysis_selection is not None and analysis_exclusion is not None:
-        warnings.warn(
-            "The parameter `analysis_exclusion' will be ignored, as `analysis_selection' is set as well."
-        )
-        analysis_exclusion = None
-
-    if analysis_selection == [const.ALL]:
-        warnings.warn(
-            "['all'] as input is deprecated. Use 'None' (default) instead to include all analyses."
-        )
-        analysis_selection = None
-
-    return analysis_selection, analysis_exclusion
-
-
-def _validate_input(
-    df: DataFrame,
-    tessellation: Optional[GeoDataFrame],
-    privacy_budget: Optional[Union[int, float]],
-    max_trips_per_user: Optional[int],
-    analysis_selection: Optional[List[str]],
-    analysis_exclusion: Optional[List[str]],
-    budget_split: dict,
-    disable_progress_bar: bool,
-    evalu: bool,
-    user_privacy: bool,
-    timewindows: Union[List[int], np.ndarray],
-    max_travel_time: Optional[int],
-    bin_range_travel_time: Optional[int],
-    max_jump_length: Optional[Union[int, float]],
-    bin_range_jump_length: Optional[Union[int, float]],
-    max_radius_of_gyration: Optional[Union[int, float]],
-    bin_range_radius_of_gyration: Optional[Union[int, float]],
-    seed_sampling: Optional[int],
-) -> None:
-    if not isinstance(df, DataFrame):
-        raise TypeError("'df' is not a Pandas DataFrame.")
-
-    if tessellation is None:
-        warnings.warn(
-            "No tessellation has been specified. All analyses based on the tessallation will be omitted."
-        )
-
-    if not ((tessellation is None) or isinstance(tessellation, GeoDataFrame)):
-        raise TypeError("'tessellation' is not a Geopandas GeoDataFrame.")
-
-    if not ((max_trips_per_user is None) or isinstance(max_trips_per_user, int)):
-        raise TypeError("'max_trips_per_user' is not numeric.")
-    if (max_trips_per_user is not None) and (max_trips_per_user < 1):
-        raise ValueError("'max_trips_per_user' has to be greater 0.")
-
-    if analysis_selection is not None:
-        if not isinstance(analysis_selection, list):
-            raise TypeError("'analysis_selection' is not a list.")
-
-        if not set(analysis_selection).issubset(
-            const.SEGMENTS_AND_ELEMENTS + [const.ALL]
-        ):
-            raise ValueError(
-                f"Unknown analyses in {analysis_selection}. Only elements from {const.SEGMENTS_AND_ELEMENTS} are valid inputs."
-            )
-
-    if analysis_exclusion is not None:
-        if not isinstance(analysis_exclusion, list):
-            raise TypeError("'analysis_exclusion' is not a list.")
-        if not set(analysis_exclusion).issubset(const.SEGMENTS_AND_ELEMENTS):
-            raise ValueError(
-                f"Unknown analyses in {analysis_exclusion}. Only elements from {const.SEGMENTS_AND_ELEMENTS} are valid inputs."
-            )
-
-    if not isinstance(budget_split, dict):
-        raise TypeError("'budget_split' is not a dict.")
-    if not set(budget_split.keys()).issubset(const.ELEMENTS):
-        raise ValueError(
-            f"Unknown analyses in {budget_split}. Only elements from {const.ELEMENTS} are valid inputs as dictionary keys."
-        )
-    if not all(isinstance(x, int) for x in list(budget_split.values())):
-        raise ValueError(
-            f"Not all elements in 'budget_split' are integers: {list(budget_split.values())}."
-        )
-
-    if not isinstance(timewindows, (list, np.ndarray)):
-        raise TypeError("'timewindows' is not a list or a numpy array.")
-
-    timewindows = (
-        np.array(timewindows) if isinstance(timewindows, list) else timewindows
-    )
-    if not all([np.issubdtype(item, int) for item in timewindows]):
-        raise TypeError("not all items of 'timewindows' are integers.")
-
-    if privacy_budget is not None:
-        _validate_numeric_greater_zero(
-            privacy_budget, f"{privacy_budget=}".split("=")[0]
-        )
-    _validate_numeric_greater_zero(max_travel_time, f"{max_travel_time=}".split("=")[0])
-    _validate_numeric_greater_zero(
-        bin_range_travel_time, f"{bin_range_travel_time=}".split("=")[0]
-    )
-    _validate_numeric_greater_zero(max_jump_length, f"{max_jump_length=}".split("=")[0])
-    _validate_numeric_greater_zero(
-        bin_range_jump_length, f"{bin_range_jump_length=}".split("=")[0]
-    )
-    _validate_numeric_greater_zero(
-        max_radius_of_gyration, f"{max_radius_of_gyration=}".split("=")[0]
-    )
-    _validate_numeric_greater_zero(
-        bin_range_radius_of_gyration, f"{bin_range_radius_of_gyration=}".split("=")[0]
-    )
-    _validate_bool(user_privacy, f"{user_privacy=}".split("=")[0])
-    _validate_bool(evalu, f"{user_privacy=}".split("=")[0])
-    _validate_bool(disable_progress_bar, f"{user_privacy=}".split("=")[0])
-
-    if not ((seed_sampling is None) or isinstance(seed_sampling, int)):
-        raise TypeError("'seed_sampling' is not an integer.")
-    if (seed_sampling is not None) and (seed_sampling <= 0):
-        raise ValueError("'seed_sampling' has to be greater 0.")
-
-
-def _validate_numeric_greater_zero(var: Any, name: str) -> None:
-    if not ((var is None) or isinstance(var, (int, float))):
-        raise TypeError(f"{name} is not numeric.")
-    if (var is not None) and (var <= 0):
-        raise ValueError(f"'{name}' has to be greater 0.")
-
-
-def _validate_bool(var: Any, name: str) -> None:
-    if not isinstance(var, bool):
-        raise TypeError(f"'{name}' is not type boolean.")
-
-
-# unify different input options of analyses (segments and elements) to be included / excluded as excluded elements, i.e., 'analysis_exclusion'
-def _clean_analysis_exclusion(
-    analysis_selection: Optional[List[str]],
-    analysis_exclusion: Optional[List[str]],
-    has_tessellation: bool,
-) -> List[str]:
-    # TODO: without timestamp: add w/o timestamp analyses to exclude_analysis
-
-    def _remove_elements(elements: list, remove_list: list) -> list:
-        return [e for e in elements if e not in remove_list]
-
-    if analysis_selection is not None:
-        analysis_exclusion = const.ELEMENTS
-
-        # remove all elements of segments
-        if const.OVERVIEW in analysis_selection:
-            analysis_exclusion = _remove_elements(
-                analysis_exclusion, const.OVERVIEW_ELEMENTS
-            )
-        if const.PLACE_ANALYSIS in analysis_selection:
-            analysis_exclusion = _remove_elements(
-                analysis_exclusion, const.PLACE_ELEMENTS
-            )
-        if const.OD_ANALYSIS in analysis_selection:
-            analysis_exclusion = _remove_elements(analysis_exclusion, const.OD_ELEMENTS)
-        if const.USER_ANALYSIS in analysis_selection:
-            analysis_exclusion = _remove_elements(
-                analysis_exclusion, const.USER_ELEMENTS
-            )
-
-        # remove single elements
-        analysis_exclusion = _remove_elements(analysis_exclusion, analysis_selection)
-
-    elif analysis_exclusion is not None:
-        # deduplicate list in case there are duplicates as input (otherwise `remove` might fail)
-        analysis_exclusion = list(set(analysis_exclusion))
-
-        if const.OVERVIEW in analysis_exclusion:
-            analysis_exclusion += const.OVERVIEW_ELEMENTS
-            analysis_exclusion.remove(const.OVERVIEW)
-
-        if const.PLACE_ANALYSIS in analysis_exclusion:
-            analysis_exclusion += const.PLACE_ELEMENTS
-            analysis_exclusion.remove(const.PLACE_ANALYSIS)
-
-        if const.OD_ANALYSIS in analysis_exclusion:
-            analysis_exclusion += const.OD_ELEMENTS
-            analysis_exclusion.remove(const.OD_ANALYSIS)
-
-        if const.USER_ANALYSIS in analysis_exclusion:
-            analysis_exclusion += const.USER_ELEMENTS
-            analysis_exclusion.remove(const.USER_ANALYSIS)
-
-    else:
-        analysis_exclusion = []
-
-    if not has_tessellation:
-        analysis_exclusion += const.TESSELLATION_ELEMENTS
-
-    # deduplicate in case analyses and segments were included
-    analysis_exclusion = list(set(analysis_exclusion))
-
-    return analysis_exclusion
-
-
-def _clean_budget_split(budget_split: dict, analysis_exclusion: List[str]) -> dict:
-    intersec = set(budget_split.keys()).intersection(analysis_exclusion)
-    if len(intersec) != 0:
-        warnings.warn(
-            f"A `budget_split`is specified for the analyses {intersec} even though they are excluded."
-            "As they will be excluded, the `budget_split` specification will be ignored for these analyses."
-        )
-
-    # remove all analyses that are excluded according to `analysis_exclusion``
-    remaining_analyses = set(budget_split.keys()) - set(analysis_exclusion)
-    budget_split = {analysis: budget_split[analysis] for analysis in remaining_analyses}
-    return budget_split
