@@ -145,6 +145,12 @@ def test_wrong_input_params_DpMobilityReport(
             test_data, test_tessellation, max_trips_per_user=3.1, privacy_budget=None
         )
 
+    # warning if privacy budget but no max trips per user are set
+    with pytest.warns(Warning):
+        DpMobilityReport(
+            test_data, test_tessellation, privacy_budget=1, max_trips_per_user=None
+        )
+
     # wrong analysis_exclusion
     with pytest.raises(TypeError):
         DpMobilityReport(

@@ -110,6 +110,11 @@ def validate_input(
         _validate_numeric_greater_zero(
             privacy_budget, f"{privacy_budget=}".split("=")[0]
         )
+        if max_trips_per_user is None:
+            warnings.warn(
+                "Input parameter `max_trips_per_user` is `None` even though a privacy budget is given. The actual maximum number of trips per user will be used according to the data, though this violates Differential Privacy."
+            )
+
     _validate_numeric_greater_zero(max_travel_time, f"{max_travel_time=}".split("=")[0])
     _validate_numeric_greater_zero(
         bin_range_travel_time, f"{bin_range_travel_time=}".split("=")[0]
