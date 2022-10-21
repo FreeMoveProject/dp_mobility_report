@@ -5,6 +5,7 @@ History
 ------------------
 * make tessellation an Optional parameter
 * allow DataFrames without timestamps but sequence numbering instead (i.e., `integer` for `timestamp` column)
+* allow to set seed for reproducible sampling of the dataset (according to `max_trips_per_user`)
 
 0.0.8 (2022-10-20)
 ------------------
