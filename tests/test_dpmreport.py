@@ -13,12 +13,21 @@ def test_data():
 
 
 @pytest.fixture
+def test_data_sequence():
+    test_data = pd.read_csv("tests/test_files/test_data.csv")
+    test_data["datetime"] = (
+        test_data.groupby("tid").rank(method="first").uid.astype(int)
+    )
+    return test_data
+
+
+@pytest.fixture
 def test_tessellation():
     """Load a test tessellation."""
     return gpd.read_file("tests/test_files/test_tessellation.geojson")
 
 
-def test_DpMobilityReport(test_data, test_tessellation):
+def test_DpMobilityReport(test_data, test_data_sequence, test_tessellation):
     """Test instance of DpMobilityReport is created properly with valid input and default values."""
     mob_report = DpMobilityReport(test_data, test_tessellation, privacy_budget=None)
     assert isinstance(mob_report, DpMobilityReport)
@@ -48,8 +57,16 @@ def test_DpMobilityReport(test_data, test_tessellation):
     )
     assert isinstance(mob_report, DpMobilityReport)
 
-    # TODO: test variations of exclude_analysis
+    # TODO: test variations of analysis_inclusion
+    mob_report = DpMobilityReport(
+        test_data,
+        test_tessellation,
+        privacy_budget=None,
+        analysis_selection=[const.OVERVIEW],
+    )
+    assert isinstance(mob_report, DpMobilityReport)
 
+    # TODO: test variations of exclude_analysis
     # variations of exclude_analysis
     mob_report = DpMobilityReport(
         test_data,
@@ -59,14 +76,47 @@ def test_DpMobilityReport(test_data, test_tessellation):
     )
     assert isinstance(mob_report, DpMobilityReport)
 
-    # TODO: test variations of exclude_analysis
+    # test without datetime
+    mob_report = DpMobilityReport(
+        test_data_sequence,
+        test_tessellation,
+        privacy_budget=None,
+    )
+    assert isinstance(mob_report, DpMobilityReport)
+
+    # test sampling
+    mob_report1 = DpMobilityReport(
+        test_data,
+        test_tessellation,
+        privacy_budget=None,
+        max_trips_per_user=1,
+        seed_sampling=100,
+    )
+
+    mob_report2 = DpMobilityReport(
+        test_data,
+        test_tessellation,
+        privacy_budget=None,
+        max_trips_per_user=1,
+        seed_sampling=100,
+    )
+    assert mob_report1.df.equals(mob_report2.df)
 
 
-def test_wrong_input_params_DpMobilityReport(test_data, test_tessellation):
+def test_wrong_input_params_DpMobilityReport(
+    test_data, test_data_sequence, test_tessellation
+):
     """Test if wrong input parameters are caught correctly."""
-    # wrong input for privacy_butget
+    # wrong input for dataframe
     with pytest.raises(TypeError):
         DpMobilityReport("not a DataFrame", test_tessellation, privacy_budget=None)
+
+    with pytest.warns(Warning):
+        DpMobilityReport(
+            test_data_sequence,
+            test_tessellation,
+            privacy_budget=None,
+        )
 
     # wrong input for tessellation
     with pytest.raises(TypeError):
@@ -93,6 +143,12 @@ def test_wrong_input_params_DpMobilityReport(test_data, test_tessellation):
     with pytest.raises(TypeError):
         DpMobilityReport(
             test_data, test_tessellation, max_trips_per_user=3.1, privacy_budget=None
+        )
+
+    # warning if privacy budget but no max trips per user are set
+    with pytest.warns(Warning):
+        DpMobilityReport(
+            test_data, test_tessellation, privacy_budget=1, max_trips_per_user=None
         )
 
     # wrong analysis_exclusion
@@ -275,8 +331,22 @@ def test_wrong_input_params_DpMobilityReport(test_data, test_tessellation):
             privacy_budget=None,
         )
 
+    # wrong input for seed
+    with pytest.raises(TypeError):
+        DpMobilityReport(
+            test_data,
+            test_tessellation,
+            privacy_budget=None,
+            seed_sampling="not an int",
+        )
 
-def test_report_output(test_data, test_tessellation):
+    with pytest.raises(ValueError):
+        DpMobilityReport(
+            test_data, test_tessellation, privacy_budget=None, seed_sampling=-3
+        )
+
+
+def test_report_output(test_data, test_data_sequence, test_tessellation):
     report = DpMobilityReport(test_data, test_tessellation, privacy_budget=None).report
     assert isinstance(report, dict)
     assert list(report.keys()) == [
@@ -312,6 +382,39 @@ def test_report_output(test_data, test_tessellation):
         const.JUMP_LENGTH,
         const.TRIPS_PER_USER,
         const.USER_TIME_DELTA,
+        const.RADIUS_OF_GYRATION,
+        const.USER_TILE_COUNT,
+        const.MOBILITY_ENTROPY,
+    ]
+
+    # without tessellation
+    report = DpMobilityReport(test_data, privacy_budget=None).report
+    assert isinstance(report, dict)
+    assert list(report.keys()) == [
+        const.DS_STATISTICS,
+        const.MISSING_VALUES,
+        const.TRIPS_OVER_TIME,
+        const.TRIPS_PER_WEEKDAY,
+        const.TRIPS_PER_HOUR,
+        const.TRIPS_PER_USER,
+        const.USER_TIME_DELTA,
+        const.RADIUS_OF_GYRATION,
+    ]
+
+    # without datetime
+    report = DpMobilityReport(
+        test_data_sequence,
+        test_tessellation,
+        privacy_budget=None,
+    ).report
+
+    assert list(report.keys()) == [
+        const.DS_STATISTICS,
+        const.MISSING_VALUES,
+        const.VISITS_PER_TILE,
+        const.OD_FLOWS,
+        const.JUMP_LENGTH,
+        const.TRIPS_PER_USER,
         const.RADIUS_OF_GYRATION,
         const.USER_TILE_COUNT,
         const.MOBILITY_ENTROPY,
@@ -480,10 +583,10 @@ def test_analysis_selection(test_data, test_tessellation):
     ]
 
 
-def test_to_html_file(test_data, test_tessellation, tmp_path):
+def test_to_html_file(test_data, test_data_sequence, test_tessellation, tmp_path):
 
     # DpMobilityReport( # type: ignore
-    #     test_data, test_tessellation, privacy_budget=None  # type: ignore
+    #     test_data, privacy_budget=None  # type: ignore
     # ).to_file("test1.html")  # type: ignore
 
     # DpMobilityReport(  # type: ignore
@@ -518,4 +621,14 @@ def test_to_html_file(test_data, test_tessellation, tmp_path):
         ],
         privacy_budget=None,
     ).to_file(file_name)
+    assert file_name.is_file()
+
+    # without tessellation
+    file_name = tmp_path / "html/test_output4.html"
+    DpMobilityReport(test_data).to_file(file_name)
+    assert file_name.is_file()
+
+    # without timestamps
+    file_name = tmp_path / "html/test_output5.html"
+    DpMobilityReport(test_data_sequence).to_file(file_name)
     assert file_name.is_file()

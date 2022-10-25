@@ -290,7 +290,7 @@ def multi_choropleth_map(
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm._A = []  # add the colorbar to the figure
     # set the range for the choropleth
-    plt.rcParams["axes.grid"] = False   # silence matplotlib warning
+    plt.rcParams["axes.grid"] = False  # silence matplotlib warning
     fig.colorbar(sm, ax=axes)
     plt.rcParams["axes.grid"] = True
 

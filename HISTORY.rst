@@ -1,6 +1,12 @@
 History
 *********
 
+0.1.0 (2022-10-21)
+------------------
+* make tessellation an Optional parameter
+* allow DataFrames without timestamps but sequence numbering instead (i.e., `integer` for `timestamp` column)
+* allow to set seed for reproducible sampling of the dataset (according to `max_trips_per_user`)
+
 0.0.8 (2022-10-20)
 ------------------
 * Fixes addressing deprecation warnings.
@@ -9,7 +15,7 @@ History
 ------------------
 
 * parameter for a custom split of the privacy budget between different analyses
-* extend 'analysis_selction' to include single analyses instead of entire segments
+* extend 'analysis_selection' to include single analyses instead of entire segments
 * parameter for 'analysis_exclusion' instead of selection
 * bug fix: include all possible categories for days and hour of days
 * bug fix: show correct percentage of outliers
