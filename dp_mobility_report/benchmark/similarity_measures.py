@@ -220,202 +220,202 @@ def compute_similarity_measures(report_proposal, report_benchmark, tessellation,
         rel_counts_benchmark, rel_counts_proposal
     )
 
-    # # speed up evaluation: cost_matrix as input so it does not have to be recomputed every time
+    # speed up evaluation: cost_matrix as input so it does not have to be recomputed every time
     
-    # if cost_matrix is None:
-    #     tile_centroids = (
-    #         tessellation.set_index("tile_id").to_crs(3395).centroid.to_crs(4326)
-    #     )
+    if cost_matrix is None:
+        tile_centroids = (
+            tessellation.set_index("tile_id").to_crs(3395).centroid.to_crs(4326)
+        )
 
-    #     sorted_tile_centroids = tile_centroids.loc[counts_per_tile.tile_id]
-    #     tile_coords = list(zip(sorted_tile_centroids.y, sorted_tile_centroids.x))
-    #     # create custom cost matrix with distances between all tiles
-    #     cost_matrix = _get_cost_matrix(tile_coords)
-
-
-    # similarity_measures["counts_per_tile_emd"] = earth_movers_distance(
-    #     counts_per_tile.visits_benchmark.to_numpy(),
-    #     counts_per_tile.visits_proposal.to_numpy(),
-    #     cost_matrix,
-    # )
+        sorted_tile_centroids = tile_centroids.loc[counts_per_tile.tile_id]
+        tile_coords = list(zip(sorted_tile_centroids.y, sorted_tile_centroids.x))
+        # create custom cost matrix with distances between all tiles
+        cost_matrix = _get_cost_matrix(tile_coords)
 
 
-    # similarity_measures["counts_per_tile_outliers"] = rel_error(
-    #     report_benchmark["visits_per_tile"].n_outliers,
-    #     report_proposal["visits_per_tile"].n_outliers,
-    # )
-    # similarity_measures["counts_per_tile_quartiles"] = symmetric_mape(
-    #     report_benchmark["visits_per_tile"].quartiles,
-    #     report_proposal["visits_per_tile"].quartiles,
-    # )
+    similarity_measures["counts_per_tile_emd"] = earth_movers_distance(
+        counts_per_tile.visits_benchmark.to_numpy(),
+        counts_per_tile.visits_proposal.to_numpy(),
+        cost_matrix,
+    )
 
-    # ## tile counts per timewindow
-    # counts_per_tile_timewindow_emd = []
 
-    # for c in report_benchmark["visits_per_tile_timewindow"].data.columns:
-    #     tw_benchmark = report_benchmark["visits_per_tile_timewindow"].data[c].loc[
-    #         report_benchmark["visits_per_tile"].data.tile_id
-    #     ]  # sort accordingly for cost_matrix
-    #     tw_benchmark = tw_benchmark / tw_benchmark.sum()
-    #     if c not in report_proposal["visits_per_tile_timewindow"].data.columns:
-    #         tw_proposal = tw_benchmark.copy()
-    #         tw_proposal[:] = 0
-    #     else:
-    #         tw_proposal = report_proposal["visits_per_tile_timewindow"].data[c].loc[
-    #             report_benchmark["visits_per_tile"].data.tile_id
-    #         ]
-    #         tw_proposal = tw_proposal / tw_proposal.sum()
-    #     tw = pd.merge(
-    #         tw_benchmark,
-    #         tw_proposal,
-    #         how="outer",
-    #         right_index=True,
-    #         left_index=True,
-    #         suffixes=("_benchmark", "_proposal"),
-    #     )
-    #     tw = tw[tw.notna().sum(axis=1) > 0]  # remove instances where both are NaN
-    #     tw.fillna(0, inplace=True)
-    #     counts_per_tile_timewindow_emd.append(
-    #         earth_movers_distance(
-    #             tw.iloc[:, 0].to_numpy(), tw.iloc[:, 1].to_numpy(), cost_matrix
-    #         )
-    #     )
+    similarity_measures["counts_per_tile_outliers"] = rel_error(
+        report_benchmark["visits_per_tile"].n_outliers,
+        report_proposal["visits_per_tile"].n_outliers,
+    )
+    similarity_measures["counts_per_tile_quartiles"] = symmetric_mape(
+        report_benchmark["visits_per_tile"].quartiles,
+        report_proposal["visits_per_tile"].quartiles,
+    )
 
-    # similarity_measures["counts_per_tile_timewindow_emd"] = np.mean(
-    #     counts_per_tile_timewindow_emd
-    # )
+    ## tile counts per timewindow
+    counts_per_tile_timewindow_emd = []
 
-    # counts_timew_benchmark = report_benchmark["visits_per_tile_timewindow"].data[
-    #     report_benchmark["visits_per_tile_timewindow"].data.index != "None"
-    # ].unstack()
-    # counts_timew_proposal = report_proposal["visits_per_tile_timewindow"].data[
-    #     report_proposal["visits_per_tile_timewindow"].data.index != "None"
-    # ].unstack()
+    for c in report_benchmark["visits_per_tile_timewindow"].data.columns:
+        tw_benchmark = report_benchmark["visits_per_tile_timewindow"].data[c].loc[
+            report_benchmark["visits_per_tile"].data.tile_id
+        ]  # sort accordingly for cost_matrix
+        tw_benchmark = tw_benchmark / tw_benchmark.sum()
+        if c not in report_proposal["visits_per_tile_timewindow"].data.columns:
+            tw_proposal = tw_benchmark.copy()
+            tw_proposal[:] = 0
+        else:
+            tw_proposal = report_proposal["visits_per_tile_timewindow"].data[c].loc[
+                report_benchmark["visits_per_tile"].data.tile_id
+            ]
+            tw_proposal = tw_proposal / tw_proposal.sum()
+        tw = pd.merge(
+            tw_benchmark,
+            tw_proposal,
+            how="outer",
+            right_index=True,
+            left_index=True,
+            suffixes=("_benchmark", "_proposal"),
+        )
+        tw = tw[tw.notna().sum(axis=1) > 0]  # remove instances where both are NaN
+        tw.fillna(0, inplace=True)
+        counts_per_tile_timewindow_emd.append(
+            earth_movers_distance(
+                tw.iloc[:, 0].to_numpy(), tw.iloc[:, 1].to_numpy(), cost_matrix
+            )
+        )
 
-    # indices = np.unique(
-    #     np.append(counts_timew_benchmark.index.values, counts_timew_proposal.index.values)
-    # )
+    similarity_measures["counts_per_tile_timewindow_emd"] = np.mean(
+        counts_per_tile_timewindow_emd
+    )
 
-    # counts_timew_benchmark = counts_timew_benchmark.reindex(index=indices)
-    # counts_timew_benchmark.fillna(0, inplace=True)
+    counts_timew_benchmark = report_benchmark["visits_per_tile_timewindow"].data[
+        report_benchmark["visits_per_tile_timewindow"].data.index != "None"
+    ].unstack()
+    counts_timew_proposal = report_proposal["visits_per_tile_timewindow"].data[
+        report_proposal["visits_per_tile_timewindow"].data.index != "None"
+    ].unstack()
 
-    # counts_timew_proposal = counts_timew_proposal.reindex(index=indices)
-    # counts_timew_proposal.fillna(0, inplace=True)
+    indices = np.unique(
+        np.append(counts_timew_benchmark.index.values, counts_timew_proposal.index.values)
+    )
 
-    # rel_counts_timew_benchmark = counts_timew_benchmark / counts_timew_benchmark.sum()
-    # rel_counts_timew_proposal = counts_timew_proposal / counts_timew_proposal.sum()
+    counts_timew_benchmark = counts_timew_benchmark.reindex(index=indices)
+    counts_timew_benchmark.fillna(0, inplace=True)
 
-    # similarity_measures["visits_per_tile_timewindow"] = symmetric_mape(
-    #     counts_timew_benchmark.to_numpy().flatten(),
-    #     counts_timew_proposal.to_numpy().flatten(),
-    # )
+    counts_timew_proposal = counts_timew_proposal.reindex(index=indices)
+    counts_timew_proposal.fillna(0, inplace=True)
 
-    # similarity_measures["rel_counts_per_tile_timewindow"] = symmetric_mape(
-    #     rel_counts_timew_benchmark.to_numpy().flatten(),
-    #     rel_counts_timew_proposal.to_numpy().flatten(),
-    # )
+    rel_counts_timew_benchmark = counts_timew_benchmark / counts_timew_benchmark.sum()
+    rel_counts_timew_proposal = counts_timew_proposal / counts_timew_proposal.sum()
 
-    # ### od
-    # all_od_combinations = pd.concat(
-    #     [
-    #         report_benchmark["od_flows"].data[["origin", "destination"]],
-    #         report_proposal["od_flows"].data[["origin", "destination"]],
-    #     ]
-    # ).drop_duplicates()
-    # all_od_combinations["flow"] = 0
-    # n_benchmark_positive_zeros = len(tessellation) ** 2 - len(all_od_combinations)
+    similarity_measures["visits_per_tile_timewindow"] = symmetric_mape(
+        counts_timew_benchmark.to_numpy().flatten(),
+        counts_timew_proposal.to_numpy().flatten(),
+    )
 
-    # true = (
-    #     pd.concat([report_benchmark["od_flows"].data, all_od_combinations])
-    #     .drop_duplicates(["origin", "destination"], keep="first")
-    #     .sort_values(["origin", "destination"])
-    #     .flow
-    # )
-    # estimate = (
-    #     pd.concat([report_proposal["od_flows"].data, all_od_combinations])
-    #     .drop_duplicates(["origin", "destination"], keep="first")
-    #     .sort_values(["origin", "destination"])
-    #     .flow
-    # )
+    similarity_measures["rel_counts_per_tile_timewindow"] = symmetric_mape(
+        rel_counts_timew_benchmark.to_numpy().flatten(),
+        rel_counts_timew_proposal.to_numpy().flatten(),
+    )
 
-    # rel_benchmark = true / true.sum()
-    # rel_proposal = estimate / (estimate.sum())
+    ### od
+    all_od_combinations = pd.concat(
+        [
+            report_benchmark["od_flows"].data[["origin", "destination"]],
+            report_proposal["od_flows"].data[["origin", "destination"]],
+        ]
+    ).drop_duplicates()
+    all_od_combinations["flow"] = 0
+    n_benchmark_positive_zeros = len(tessellation) ** 2 - len(all_od_combinations)
 
-    # similarity_measures["od_flows"] = symmetric_mape(true.to_numpy(), estimate.to_numpy())
-    # similarity_measures["rel_od_flows"] = symmetric_mape(
-    #     rel_benchmark.to_numpy(), rel_proposal.to_numpy()
-    # )
-    # similarity_measures["od_flows_all_flows"] = symmetric_mape(
-    #     true.to_numpy(), estimate.to_numpy(), n_benchmark_positive_zeros
-    # )
-    # similarity_measures["rel_od_flows_all_flows"] = symmetric_mape(
-    #     rel_benchmark.to_numpy(), rel_proposal.to_numpy(), n_benchmark_positive_zeros
-    # )
-    # similarity_measures["travel_time_emd"] = wasserstein_distance1D(
-    #     report_benchmark["travel_time"].data,
-    #     report_proposal["travel_time"].data,
-    # )
+    true = (
+        pd.concat([report_benchmark["od_flows"].data, all_od_combinations])
+        .drop_duplicates(["origin", "destination"], keep="first")
+        .sort_values(["origin", "destination"])
+        .flow
+    )
+    estimate = (
+        pd.concat([report_proposal["od_flows"].data, all_od_combinations])
+        .drop_duplicates(["origin", "destination"], keep="first")
+        .sort_values(["origin", "destination"])
+        .flow
+    )
+
+    rel_benchmark = true / true.sum()
+    rel_proposal = estimate / (estimate.sum())
+
+    similarity_measures["od_flows"] = symmetric_mape(true.to_numpy(), estimate.to_numpy())
+    similarity_measures["rel_od_flows"] = symmetric_mape(
+        rel_benchmark.to_numpy(), rel_proposal.to_numpy()
+    )
+    similarity_measures["od_flows_all_flows"] = symmetric_mape(
+        true.to_numpy(), estimate.to_numpy(), n_benchmark_positive_zeros
+    )
+    similarity_measures["rel_od_flows_all_flows"] = symmetric_mape(
+        rel_benchmark.to_numpy(), rel_proposal.to_numpy(), n_benchmark_positive_zeros
+    )
+    similarity_measures["travel_time_emd"] = wasserstein_distance1D(
+        report_benchmark["travel_time"].data,
+        report_proposal["travel_time"].data,
+    )
     
-    # similarity_measures["travel_time_quartiles"] = symmetric_mape(
-    #     report_benchmark["travel_time"].quartiles,
-    #     report_proposal["travel_time"].quartiles,
-    # )
-    # similarity_measures["jump_length_emd"] = wasserstein_distance1D(
-    #     report_benchmark["jump_length"].data,
-    #     report_proposal["jump_length"].data,
-    # )
+    similarity_measures["travel_time_quartiles"] = symmetric_mape(
+        report_benchmark["travel_time"].quartiles,
+        report_proposal["travel_time"].quartiles,
+    )
+    similarity_measures["jump_length_emd"] = wasserstein_distance1D(
+        report_benchmark["jump_length"].data,
+        report_proposal["jump_length"].data,
+    )
     
-    # similarity_measures["jump_length_quartiles"] = symmetric_mape(
-    #     report_benchmark["jump_length"].quartiles,
-    #     report_proposal["jump_length"].quartiles,
-    # )
+    similarity_measures["jump_length_quartiles"] = symmetric_mape(
+        report_benchmark["jump_length"].quartiles,
+        report_proposal["jump_length"].quartiles,
+    )
 
-    # ## user
-    # if report_proposal["trips_per_user"] is None:
-    #     similarity_measures["traj_per_user_quartiles"] = None
-    #     similarity_measures["traj_per_user_outliers"] = None
-    # else:
-    #     similarity_measures["traj_per_user_quartiles"] = symmetric_mape(
-    #         report_benchmark["trips_per_user"].quartiles,
-    #         report_proposal["trips_per_user"].quartiles,
-    #     )
-    # if report_proposal["user_time_delta"] is None:
-    #     similarity_measures["user_time_delta_quartiles"] = None
-    #     similarity_measures["user_time_delta_outliers"] = None
-    # else:
-    #     similarity_measures["user_time_delta_quartiles"] = symmetric_mape(
-    #         (
-    #             report_benchmark["user_time_delta"].quartiles.apply(
-    #                 lambda x: x.total_seconds() / 3600
-    #             )
-    #         ),
-    #         report_proposal["user_time_delta"].quartiles.apply(
-    #             lambda x: x.total_seconds() / 3600
-    #         ),
-    #     )
-    # similarity_measures["radius_gyration_emd"] = wasserstein_distance1D(
-    #     report_benchmark["radius_of_gyration"].data,
-    #     report_proposal["radius_of_gyration"].data,
-    # )
-    # similarity_measures["radius_gyration_quartiles"] = symmetric_mape(
-    #     report_benchmark["radius_of_gyration"].quartiles,
-    #     report_proposal["radius_of_gyration"].quartiles,
-    # )
-    # similarity_measures["location_entropy_mre"] = symmetric_mape(
-    #     #loc_entropy_per_tile.location_entropy_benchmark,
-    #     #loc_entropy_per_tile.location_entropy_proposal,
-    #     report_benchmark["mobility_entropy"].data[0],
-    #     report_proposal["mobility_entropy"].data[0],
-    # )
-    # # weight and value array not the same size...?
-    # #similarity_measures["user_tile_count_emd"] = wasserstein_distance1D(
-    # #    report_benchmark["user_tile_count"].data,
-    # #    report_proposal["user_tile_count"].data,
-    # #)
-    # similarity_measures["user_tile_count_quartiles"] = symmetric_mape(
-    #     report_benchmark["user_tile_count"].quartiles,
-    #     report_proposal["user_tile_count"].quartiles,
-    # )
+    ## user
+    if report_proposal["trips_per_user"] is None:
+        similarity_measures["traj_per_user_quartiles"] = None
+        similarity_measures["traj_per_user_outliers"] = None
+    else:
+        similarity_measures["traj_per_user_quartiles"] = symmetric_mape(
+            report_benchmark["trips_per_user"].quartiles,
+            report_proposal["trips_per_user"].quartiles,
+        )
+    if report_proposal["user_time_delta"] is None:
+        similarity_measures["user_time_delta_quartiles"] = None
+        similarity_measures["user_time_delta_outliers"] = None
+    else:
+        similarity_measures["user_time_delta_quartiles"] = symmetric_mape(
+            (
+                report_benchmark["user_time_delta"].quartiles.apply(
+                    lambda x: x.total_seconds() / 3600
+                )
+            ),
+            report_proposal["user_time_delta"].quartiles.apply(
+                lambda x: x.total_seconds() / 3600
+            ),
+        )
+    similarity_measures["radius_gyration_emd"] = wasserstein_distance1D(
+        report_benchmark["radius_of_gyration"].data,
+        report_proposal["radius_of_gyration"].data,
+    )
+    similarity_measures["radius_gyration_quartiles"] = symmetric_mape(
+        report_benchmark["radius_of_gyration"].quartiles,
+        report_proposal["radius_of_gyration"].quartiles,
+    )
+    similarity_measures["location_entropy_mre"] = symmetric_mape(
+        #loc_entropy_per_tile.location_entropy_benchmark,
+        #loc_entropy_per_tile.location_entropy_proposal,
+        report_benchmark["mobility_entropy"].data[0],
+        report_proposal["mobility_entropy"].data[0],
+    )
+    # weight and value array not the same size...?
+    #similarity_measures["user_tile_count_emd"] = wasserstein_distance1D(
+    #    report_benchmark["user_tile_count"].data,
+    #    report_proposal["user_tile_count"].data,
+    #)
+    similarity_measures["user_tile_count_quartiles"] = symmetric_mape(
+        report_benchmark["user_tile_count"].quartiles,
+        report_proposal["user_tile_count"].quartiles,
+    )
 
 
     return similarity_measures
