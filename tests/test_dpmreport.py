@@ -4,6 +4,7 @@ import pytest
 
 from dp_mobility_report import DpMobilityReport
 from dp_mobility_report import constants as const
+from dp_mobility_report.benchmark import similarity_measures
 
 
 @pytest.fixture
@@ -482,9 +483,9 @@ def test_analysis_selection(test_data, test_tessellation):
 
 def test_to_html_file(test_data, test_tessellation, tmp_path):
 
-    # DpMobilityReport( # type: ignore
-    #     test_data, test_tessellation, privacy_budget=None  # type: ignore
-    # ).to_file("test1.html")  # type: ignore
+    r = DpMobilityReport( # type: ignore
+        test_data, test_tessellation, privacy_budget=None  # type: ignore
+    ).report #.to_file("test1.html")  # type: ignore
 
     # DpMobilityReport(  # type: ignore
     #     test_data,   # type: ignore
