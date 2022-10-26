@@ -14,8 +14,6 @@ Differentially Private Mobility Data Report
 
 
 
-! This package is still in alpha-version status !
-
 * Free software: MIT license
 * Documentation: https://dp-mobility-report.readthedocs.io.
 
@@ -40,7 +38,7 @@ or from GitHub:
 Data preparation
 **********************
 
-- **df**: a pandas ``DataFrame``. Expected columns: User ID ``uid``, Trip ID ``tid``, Timestamp ``datetime``, latitude and longitude in CRS EPSG:4326 ``lat`` and ``lng``.
+- **df**: a pandas ``DataFrame``. Expected columns: User ID ``uid``, Trip ID ``tid``, timestamp `datetime` (or `int`to indicate sequence position, if dataset only consists of sequences without timestamps), latitude and longitude in CRS EPSG:4326 ``lat`` and ``lng``.
 - **tessellation**: a geopandas ``GeoDataFrame`` with polygons. Expected columns ``tile_id``. The tessellation is used for spatial aggregations of the data.
 
 Create a mobility report as HTML

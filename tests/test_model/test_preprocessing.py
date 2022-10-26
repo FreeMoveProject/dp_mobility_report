@@ -60,7 +60,7 @@ def test_raised_errors_in_preprocess_tessellation(test_tessellation):
 def test_preprocess_data(test_data, test_tessellation, caplog):
     """Test correct preprocessing of data."""
     processed_data = preprocessing.preprocess_data(
-        test_data, test_tessellation, max_trips_per_user=5, user_privacy=True
+        test_data, test_tessellation, max_trips_per_user=5, user_privacy=True, seed=None
     )
     assert processed_data.columns.tolist() == [
         const.TILE_ID,
@@ -83,7 +83,11 @@ def test_preprocess_data(test_data, test_tessellation, caplog):
     # log output if tile id already present
     with caplog.at_level(logging.INFO):
         processed_data = preprocessing.preprocess_data(
-            processed_data, test_tessellation, max_trips_per_user=5, user_privacy=True
+            processed_data,
+            test_tessellation,
+            max_trips_per_user=5,
+            user_privacy=True,
+            seed=None,
         )
     assert (
         "'tile_id' present in data. No new assignment of points to tessellation."
@@ -144,18 +148,33 @@ def test_assign_points_to_tessellation(test_data, test_tessellation):
 def test_sample_trips(test_data):
     # same length, if max_trips_per_user are max
     sampled_data = preprocessing.sample_trips(
-        test_data, test_data.groupby(const.UID).nunique()[const.TID].max(), True
+        test_data, test_data.groupby(const.UID).nunique()[const.TID].max(), True, None
     )
     assert len(sampled_data) == len(test_data)
 
     # no sampling if user_privacy is false
-    sampled_data = preprocessing.sample_trips(test_data, 1, False)
+    sampled_data = preprocessing.sample_trips(test_data, 1, False, None)
     assert len(sampled_data) == len(test_data)
 
-    sampled_data = preprocessing.sample_trips(test_data, 2, True)
+    sampled_data = preprocessing.sample_trips(test_data, 2, True, None)
     assert sampled_data.groupby(const.UID).nunique()[const.TID].sum() == 39
     assert sampled_data.groupby(const.UID).nunique()[const.TID].max() == 2
 
     # no duplicates drawn from sample
-    sampled_data = preprocessing.sample_trips(test_data, 100, True)
+    sampled_data = preprocessing.sample_trips(test_data, 100, True, None)
     assert len(sampled_data[sampled_data.duplicated()]) == 0
+
+    # test seed
+    sampled_data1 = preprocessing.sample_trips(
+        test_data, max_trips_per_user=1, user_privacy=True, seed=100
+    )
+    sampled_data2 = preprocessing.sample_trips(
+        test_data, max_trips_per_user=1, user_privacy=True, seed=100
+    )
+    assert sampled_data1.equals(sampled_data2)
+
+    # test None as seed
+    sampled_data1 = preprocessing.sample_trips(
+        test_data, max_trips_per_user=1, user_privacy=True, seed=None
+    )
+    assert isinstance(sampled_data1, pd.DataFrame)
