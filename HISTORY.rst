@@ -1,6 +1,10 @@
 History
 *********
 
+0.1.1 (2022-10-27)
+------------------
+* fix bug: prevent error "key `trips`not found" in 'trips_over_time' if sum of 'trip_count' is 0
+
 0.1.0 (2022-10-21)
 ------------------
 * make tessellation an Optional parameter
