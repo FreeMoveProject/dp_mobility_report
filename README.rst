@@ -38,8 +38,9 @@ or from GitHub:
 Data preparation
 **********************
 
-- **df**: a pandas ``DataFrame``. Expected columns: User ID ``uid``, Trip ID ``tid``, timestamp `datetime` (or `int`to indicate sequence position, if dataset only consists of sequences without timestamps), latitude and longitude in CRS EPSG:4326 ``lat`` and ``lng``.
-- **tessellation**: a geopandas ``GeoDataFrame`` with polygons. Expected columns ``tile_id``. The tessellation is used for spatial aggregations of the data.
+- **df**: a pandas ``DataFrame``. Expected columns: User ID ``uid``, Trip ID ``tid``, timestamp ``datetime`` (expected is a datetime-like string, e.g., in the format ``yyyy-mm-dd hh:mm:ss``. If ``datetime`` contains ``int`` values, it is interpreted as sequence positions, i.e., if the dataset only consists of sequences without timestamps), latitude and longitude in CRS EPSG:4326 ``lat`` and ``lng``. You can find an example dataset `here`_.
+
+- **tessellation**: a geopandas ``GeoDataFrame`` with polygons. Expected columns: ``tile_id``. The tessellation is used for spatial aggregations of the data.
 
 Create a mobility report as HTML
 **************************************
@@ -77,6 +78,7 @@ This package was highly inspired by the `pandas-profiling/pandas-profiling`_ and
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
  
+.. _here: https://github.com/FreeMoveProject/dp_mobility_report/blob/main/tests/test_files/test_data.csv
 .. _documentation: https://dp-mobility-report.readthedocs.io/en/latest/modules.html
 .. _examples: https://github.com/FreeMoveProject/dp_mobility_report/tree/main/examples/html
 .. _`pandas-profiling/pandas-profiling`: https://github.com/pandas-profiling/pandas-profiling
