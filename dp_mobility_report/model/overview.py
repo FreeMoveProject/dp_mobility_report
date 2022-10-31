@@ -180,6 +180,8 @@ def get_trips_over_time(
     if trip_sum != 0:
         trips_over_time["trips"] = trips_over_time["trip_count"] / trip_sum * 100
         moe_laplace = moe_laplace / trip_sum * 100
+    else:
+        trips_over_time["trips"] = 0
 
     quartiles = pd.Series({"min": dp_bounds[0], "max": dp_bounds[1]})
 
