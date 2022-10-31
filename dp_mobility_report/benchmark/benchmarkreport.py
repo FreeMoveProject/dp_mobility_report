@@ -15,7 +15,7 @@ class BenchmarkReport:
 
     Args:
         df_proposal: `DataFrame` containing the mobility data. Expected columns: User ID `uid`, trip ID `tid`, timestamp `datetime`, latitude `lat` and longitude `lng` in CRS EPSG:4326.
-        df_benchmark: `DataFrame` containing the mobility data. Expected columns: User ID `uid`, trip ID `tid`, timestamp `datetime`, latitude `lat` and longitude `lng` in CRS EPSG:4326.
+        df_benchmark: `DataFrame` containing the mobility data. Expected columns: User ID `uid`, trip ID `tid`, timestamp `datetime`, latitude `lat` and longitude `lng` in CRS EPSG:4326. Baseline
         privacy_budget_proposal: privacy_budget for the differentially private report
         privacy_budget_benchmark: privacy_budget for the differentially private report
         user_privacy_: Whether item-level or user-level privacy is applied. Defaults to True (user-level privacy).
@@ -63,12 +63,17 @@ class BenchmarkReport:
         max_radius_of_gyration: Union[int, float] = 5,
         bin_range_radius_of_gyration: Union[int, float] = 0.5,
         disable_progress_bar: bool = False,
+        seed_sampling: int = None,
         evalu: bool = False,
     ) -> None:
     
-        self.report_proposal = DpMobilityReport(df_proposal, tessellation, privacy_budget_proposal, user_privacy_proposal, max_trips_per_user_proposal, analysis_selection, analysis_exclusion, budget_split_proposal, timewindows, max_travel_time, bin_range_travel_time, max_jump_length, bin_range_jump_length, max_radius_of_gyration, bin_range_radius_of_gyration, disable_progress_bar, evalu)
-        self.report_benchmark = DpMobilityReport(df_benchmark, tessellation, privacy_budget_benchmark, user_privacy_benchmark, max_trips_per_user_benchmark, analysis_selection, analysis_exclusion, budget_split_benchmark, timewindows, max_travel_time, bin_range_travel_time, max_jump_length, bin_range_jump_length, max_radius_of_gyration, bin_range_radius_of_gyration, disable_progress_bar, evalu)
-
-        self.similarity_measures = compute_similarity_measures(self.report_proposal.report, self.report_benchmark.report)
-
+        self.report_proposal = DpMobilityReport(df_proposal, tessellation, privacy_budget_proposal, user_privacy_proposal, max_trips_per_user_proposal, analysis_selection, analysis_exclusion, budget_split_proposal, timewindows, max_travel_time, bin_range_travel_time, max_jump_length, bin_range_jump_length, max_radius_of_gyration, bin_range_radius_of_gyration, disable_progress_bar, seed_sampling, evalu)
         
+        self.report_benchmark = DpMobilityReport(df_benchmark, tessellation, privacy_budget_benchmark, user_privacy_benchmark, max_trips_per_user_benchmark, analysis_selection, analysis_exclusion, budget_split_benchmark, timewindows, max_travel_time, bin_range_travel_time, max_jump_length, bin_range_jump_length, max_radius_of_gyration, bin_range_radius_of_gyration, disable_progress_bar, seed_sampling, evalu)
+
+        self.similarity_measures = compute_similarity_measures(self.report_proposal.report, self.report_benchmark.report, tessellation)
+
+    def to_file(self):
+        # TODO
+        # Here plot the similarity measures?
+        do_something = None

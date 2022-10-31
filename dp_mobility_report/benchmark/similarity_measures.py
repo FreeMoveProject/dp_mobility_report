@@ -401,12 +401,13 @@ def compute_similarity_measures(report_proposal, report_benchmark, tessellation,
         report_benchmark["radius_of_gyration"].quartiles,
         report_proposal["radius_of_gyration"].quartiles,
     )
-    similarity_measures["location_entropy_mre"] = symmetric_mape(
-        #loc_entropy_per_tile.location_entropy_benchmark,
-        #loc_entropy_per_tile.location_entropy_proposal,
-        report_benchmark["mobility_entropy"].data[0],
-        report_proposal["mobility_entropy"].data[0],
-    )
+    # shape not same
+    #similarity_measures["location_entropy_mre"] = symmetric_mape(
+    #    #loc_entropy_per_tile.location_entropy_benchmark,
+    #    #loc_entropy_per_tile.location_entropy_proposal,
+    #    report_benchmark["mobility_entropy"].data[0],
+    #    report_proposal["mobility_entropy"].data[0],
+    #)
     # weight and value array not the same size...?
     #similarity_measures["user_tile_count_emd"] = wasserstein_distance1D(
     #    report_benchmark["user_tile_count"].data,
