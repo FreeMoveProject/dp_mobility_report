@@ -40,9 +40,9 @@ def test_similarity_measures(
 
     test_tessellation.loc[:, const.TILE_ID] = test_tessellation.tile_id.astype(str)
 
-    sim_dict = compute_similarity_measures(
-        proposal_dpmreport, benchmark_dpmreport, test_tessellation, cost_matrix=None
-    )
+    #analysis_selection =
+
+    relative_error_dict, kld_dict, jsd_dict, emd_dict, smape_dict = compute_similarity_measures(proposal_dpmreport, benchmark_dpmreport, test_tessellation, cost_matrix=None)
 
     pass
 
