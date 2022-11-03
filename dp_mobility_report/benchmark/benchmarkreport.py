@@ -76,7 +76,7 @@ class BenchmarkReport:
     
         self.report_proposal = DpMobilityReport(df_proposal, tessellation, privacy_budget_proposal, user_privacy_proposal, max_trips_per_user_proposal, analysis_selection, analysis_exclusion, budget_split_proposal, timewindows, max_travel_time, bin_range_travel_time, max_jump_length, bin_range_jump_length, max_radius_of_gyration, bin_range_radius_of_gyration, disable_progress_bar, seed_sampling, evalu)
         self.report_benchmark = DpMobilityReport(df_benchmark, tessellation, privacy_budget_benchmark, user_privacy_benchmark, max_trips_per_user_benchmark, analysis_selection, analysis_exclusion, budget_split_benchmark, timewindows, max_travel_time, bin_range_travel_time, max_jump_length, bin_range_jump_length, max_radius_of_gyration, bin_range_radius_of_gyration, disable_progress_bar, seed_sampling, evalu)
-        self.analysis_selection = preprocessing.intersect_analysis_selection(self.report_proposal.analysis_exclusion, self.report_benchmark.analysis_exclusion)
+        self.analysis_exclusion = preprocessing.combine_analysis_exclusion(self.report_proposal.analysis_exclusion, self.report_benchmark.analysis_exclusion)
 
         self.measure_selection = preprocessing.validate_measure_selection(measure_selection)
         self.re, self.kld, self.jsd, self.emd, self.smape = compute_similarity_measures(self.analysis_selection, self.report_proposal.report, self.report_benchmark.report, self.report_proposal.tessellation)

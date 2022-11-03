@@ -21,3 +21,4 @@ scikit-mobility
 Shapely
 tqdm
 typing
+opencv-python

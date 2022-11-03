@@ -4,6 +4,7 @@ import pytest
 
 from dp_mobility_report import DpMobilityReport
 from dp_mobility_report.benchmark.similarity_measures import compute_similarity_measures
+from dp_mobility_report.benchmark.preprocessing import combine_analysis_exclusion
 from dp_mobility_report import constants as const
 
 
@@ -42,3 +43,11 @@ def test_similarity_measures(proposal_dpmreport, benchmark_dpmreport, test_tesse
     relative_error_dict, kld_dict, jsd_dict, emd_dict, smape_dict = compute_similarity_measures(proposal_dpmreport, benchmark_dpmreport, test_tessellation, cost_matrix=None)
 
     pass
+
+
+def test_analysis_intersection():
+    excluded_analyses_proposal = [const.VISITS_PER_TILE, const.RADIUS_OF_GYRATION]
+    excluded_analyses_benchmark = [const.RADIUS_OF_GYRATION]
+    
+    combined_exclusion = combine_analysis_exclusion(excluded_analyses_proposal, excluded_analyses_benchmark)
+    assert combined_exclusion == [const.VISITS_PER_TILE, const.RADIUS_OF_GYRATION]
