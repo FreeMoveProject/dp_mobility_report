@@ -130,14 +130,12 @@ def earth_movers_distance(
     return emd_dist
 
 
-
-
-
-
-def compute_similarity_measures(report_proposal, report_benchmark, tessellation, cost_matrix=None):
+def compute_similarity_measures(analysis_selection, report_proposal, report_benchmark, tessellation, cost_matrix=None):
 
     similarity_measures = dict()
 
+    # TODO: check for each analysis if is in analysis_selection
+    
     ### overview ###
     similarity_measures = dict(
         **similarity_measures,
@@ -401,18 +399,6 @@ def compute_similarity_measures(report_proposal, report_benchmark, tessellation,
         report_benchmark["radius_of_gyration"].quartiles,
         report_proposal["radius_of_gyration"].quartiles,
     )
-    # shape not same
-    #similarity_measures["location_entropy_mre"] = symmetric_mape(
-    #    #loc_entropy_per_tile.location_entropy_benchmark,
-    #    #loc_entropy_per_tile.location_entropy_proposal,
-    #    report_benchmark["mobility_entropy"].data[0],
-    #    report_proposal["mobility_entropy"].data[0],
-    #)
-    # weight and value array not the same size...?
-    #similarity_measures["user_tile_count_emd"] = wasserstein_distance1D(
-    #    report_benchmark["user_tile_count"].data,
-    #    report_proposal["user_tile_count"].data,
-    #)
     similarity_measures["user_tile_count_quartiles"] = symmetric_mape(
         report_benchmark["user_tile_count"].quartiles,
         report_proposal["user_tile_count"].quartiles,
@@ -420,3 +406,7 @@ def compute_similarity_measures(report_proposal, report_benchmark, tessellation,
 
 
     return similarity_measures
+
+
+def get_selected_measures():
+    pass

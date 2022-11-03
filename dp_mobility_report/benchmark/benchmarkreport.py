@@ -5,8 +5,14 @@ import numpy as np
 from geopandas import GeoDataFrame
 from pandas import DataFrame
 from dp_mobility_report import DpMobilityReport
-from dp_mobility_report.benchmark.similarity_measures import compute_similarity_measures
+from dp_mobility_report.benchmark.similarity_measures import compute_similarity_measures, get_selected_measures
+from dp_mobility_report.benchmark import preprocessing
 
+# TODO: naming of "proposal" and "benchmark"; args description
+# TODO: selection
+# TODO: only compute selected analyses (Schnittmenge beider Reports)
+# TODO: replace names of analyses with constants
+# TODO: create names of measures in constants
 
 class BenchmarkReport:
     """Generate two (differentially private) mobility reports from one or two mobility datasets. The report will be generated as an HTML file, using the `.to_file()` method.
@@ -47,6 +53,7 @@ class BenchmarkReport:
         tessellation: GeoDataFrame,
         privacy_budget_proposal: Optional[Union[int, float]],
         privacy_budget_benchmark: Optional[Union[int, float]],
+        measure_selection: Union[dict, str] = const.JSD, # TODO: set default
         user_privacy_proposal: bool = True,
         user_privacy_benchmark: bool = True,
         max_trips_per_user_proposal: Optional[int] = None,
@@ -68,12 +75,15 @@ class BenchmarkReport:
     ) -> None:
     
         self.report_proposal = DpMobilityReport(df_proposal, tessellation, privacy_budget_proposal, user_privacy_proposal, max_trips_per_user_proposal, analysis_selection, analysis_exclusion, budget_split_proposal, timewindows, max_travel_time, bin_range_travel_time, max_jump_length, bin_range_jump_length, max_radius_of_gyration, bin_range_radius_of_gyration, disable_progress_bar, seed_sampling, evalu)
-        
         self.report_benchmark = DpMobilityReport(df_benchmark, tessellation, privacy_budget_benchmark, user_privacy_benchmark, max_trips_per_user_benchmark, analysis_selection, analysis_exclusion, budget_split_benchmark, timewindows, max_travel_time, bin_range_travel_time, max_jump_length, bin_range_jump_length, max_radius_of_gyration, bin_range_radius_of_gyration, disable_progress_bar, seed_sampling, evalu)
+        self.analysis_selection = preprocessing.intersect_analysis_selection(self.report_proposal.analysis_exclusion, self.report_benchmark.analysis_exclusion)
 
-        self.similarity_measures = compute_similarity_measures(self.report_proposal.report, self.report_benchmark.report, tessellation)
+        self.measure_selection = preprocessing.validate_measure_selection(measure_selection)
+        self.re, self.kld, self.jsd, self.emd, self.smape = compute_similarity_measures(self.analysis_selection, self.report_proposal.report, self.report_benchmark.report, self.report_proposal.tessellation)
+        self.similarity_measures = get_selected_measures(self)
 
-    def to_file(self):
-        # TODO
-        # Here plot the similarity measures?
-        do_something = None
+
+    # TODO: html file for comparison
+    def to_file():
+        pass
+
