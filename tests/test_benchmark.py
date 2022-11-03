@@ -3,9 +3,11 @@ import pandas as pd
 import pytest
 
 from dp_mobility_report import DpMobilityReport
-from dp_mobility_report import constants as const
+from dp_mobility_report.benchmark.similarity_measures import (
+    compute_similarity_measures,
+)
 from dp_mobility_report.benchmark.preprocessing import combine_analysis_exclusion
-from dp_mobility_report.benchmark.similarity_measures import compute_similarity_measures
+from dp_mobility_report import constants as const
 
 
 @pytest.fixture
@@ -33,21 +35,37 @@ def test_tessellation():
 # def test_histogram_bin_sizes():
 #    pass
 
-
+    
 def test_similarity_measures(
     proposal_dpmreport, benchmark_dpmreport, test_tessellation
 ):
 
     test_tessellation.loc[:, const.TILE_ID] = test_tessellation.tile_id.astype(str)
 
-    #analysis_selection =
+    analysis_exclusion = []
 
-    relative_error_dict, kld_dict, jsd_dict, emd_dict, smape_dict = compute_similarity_measures(proposal_dpmreport, benchmark_dpmreport, test_tessellation, cost_matrix=None)
+    (
+        relative_error_dict,
+        kld_dict,
+        jsd_dict,
+        emd_dict,
+        smape_dict,
+    ) = compute_similarity_measures(
+        analysis_exclusion,
+        proposal_dpmreport,
+        benchmark_dpmreport,
+        test_tessellation,
+        cost_matrix=None,
+    )
 
-    pass
+    assert isinstance(relative_error_dict, dict)
+    assert isinstance(kld_dict, dict)
+    assert isinstance(jsd_dict, dict)
+    assert isinstance(emd_dict, dict)
+    assert isinstance(smape_dict, dict)
 
 
-def test_analysis_intersection():
+def test_combine_analysis_exclusion():
     excluded_analyses_proposal = [const.VISITS_PER_TILE, const.RADIUS_OF_GYRATION]
     excluded_analyses_benchmark = [const.RADIUS_OF_GYRATION]
 

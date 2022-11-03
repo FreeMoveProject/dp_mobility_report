@@ -121,11 +121,9 @@ class BenchmarkReport:
             self.report_benchmark.analysis_exclusion,
         )
 
-        self.measure_selection = preprocessing.validate_measure_selection(
-            measure_selection
-        )
+        # self.measure_selection = preprocessing.validate_measure_selection(measure_selection)
         self.re, self.kld, self.jsd, self.emd, self.smape = compute_similarity_measures(
-            self.analysis_selection,
+            self.analysis_exclusion,
             self.report_proposal.report,
             self.report_benchmark.report,
             self.report_proposal.tessellation,
