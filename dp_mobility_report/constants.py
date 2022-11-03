@@ -1,12 +1,15 @@
 from pyproj import CRS
 
-ALL = "all"
+# ANALYSIS (SEGMENTS AND ELEMENTS) NAMES
+# segments
+ALL = "all"  # deprecated
 OVERVIEW = "overview"
 PLACE_ANALYSIS = "place_analysis"
 OD_ANALYSIS = "od_analysis"
 USER_ANALYSIS = "user_analysis"
 SEGMENTS = [OVERVIEW, PLACE_ANALYSIS, OD_ANALYSIS, USER_ANALYSIS]
 
+# elements
 DS_STATISTICS = "ds_statistics"
 MISSING_VALUES = "missing_values"
 TRIPS_OVER_TIME = "trips_over_time"
@@ -54,6 +57,7 @@ TIMESTAMP_ANALYSES = [
 
 SEGMENTS_AND_ELEMENTS = SEGMENTS + ELEMENTS
 
+# DATASET COLUMNS
 ID = "id"
 UID = "uid"
 TID = "tid"
@@ -79,9 +83,17 @@ TILE_ID = "tile_id"
 TILE_NAME = "tile_name"
 GEOMETRY = "geometry"
 
+# OTHER
 DEFAULT_CRS = CRS.from_epsg(4326)
 QUARTILES = "quartiles"
 DATETIME_PRECISION = "datetime_precision"
 PREC_DATE = "date"
 PREC_WEEK = "week"
 PREC_MONTH = "month"
+
+# SIMILARITY MEASURES
+RE = "relative_error"
+JSD = "jensen_shannon_divergence"
+KLD = "kullback_leibler_divergence"
+EMD = "earth_movers_distance"
+SMAPE = "symmetric_mean_absolute_percentage_error"

@@ -1,10 +1,9 @@
+import cv2
 import numpy as np
 import pandas as pd
-
+from haversine import Unit, haversine
 from scipy.stats import wasserstein_distance
 
-import cv2
-from haversine import haversine, Unit
 from dp_mobility_report import constants as const
 
 
@@ -57,7 +56,7 @@ def rel_error(true, estimate):
 
 
 def rel_error_dict(true_dict, estimate_dict, round_res=False):
-    re = dict()
+    re = {}
     for key in true_dict.data:
         re[key] = rel_error(true_dict.data[key], estimate_dict.data[key])
         if round_res:
@@ -88,7 +87,7 @@ def compute_JS(p, q):
     return (1.0 / 2.0) * KL(p, m) + (1.0 / 2.0) * KL(q, m)
 
 
-### earth movers distance
+# earth movers distance
 def _get_cost_matrix(tile_coords):
     # get all potential combinations between all points from sig1 and sig2
     grid = np.meshgrid(range(0, len(tile_coords)), range(0, len(tile_coords)))
@@ -130,13 +129,19 @@ def earth_movers_distance(
     return emd_dist
 
 
-def compute_similarity_measures(analysis_selection, report_proposal, report_benchmark, tessellation, cost_matrix=None):
+def compute_similarity_measures(
+    analysis_selection,
+    report_proposal,
+    report_benchmark,
+    tessellation,
+    cost_matrix=None,
+):
 
     similarity_measures = dict()
 
     # TODO: check for each analysis if is in analysis_selection
-    
-    ### overview ###
+
+    # OVERVIEW
     similarity_measures = dict(
         **similarity_measures,
         **rel_error_dict(
@@ -156,26 +161,29 @@ def compute_similarity_measures(analysis_selection, report_proposal, report_benc
     )
 
     trips_over_time = report_benchmark["trips_over_time"].data.merge(
-            report_proposal["trips_over_time"].data,
-            how="outer",
-            on="datetime",
-            suffixes=("_benchmark", "_proposal"),
-        )
+        report_proposal["trips_over_time"].data,
+        how="outer",
+        on="datetime",
+        suffixes=("_benchmark", "_proposal"),
+    )
 
     trips_over_time.fillna(0, inplace=True)
-    similarity_measures["trips_over_time_js"] = compute_JS(trips_over_time.trip_count_benchmark, trips_over_time.trip_count_proposal)
+    similarity_measures["trips_over_time_js"] = compute_JS(
+        trips_over_time.trip_count_benchmark, trips_over_time.trip_count_proposal
+    )
     similarity_measures["trips_over_time_mre"] = symmetric_mape(
         trips_over_time.trip_count_benchmark, trips_over_time.trip_count_proposal
     )
     similarity_measures["trips_over_time_quartiles"] = symmetric_mape(
         report_benchmark["trips_over_time"].quartiles.apply(lambda x: x.toordinal()),
-        report_proposal["trips_over_time"].quartiles.apply(
-            lambda x: x.toordinal()
-        ),
+        report_proposal["trips_over_time"].quartiles.apply(lambda x: x.toordinal()),
     )
 
     trips_per_weekday = pd.concat(
-        [report_benchmark["trips_per_weekday"].data, report_proposal["trips_per_weekday"].data],
+        [
+            report_benchmark["trips_per_weekday"].data,
+            report_proposal["trips_per_weekday"].data,
+        ],
         join="outer",
         axis=1,
     )
@@ -192,10 +200,11 @@ def compute_similarity_measures(analysis_selection, report_proposal, report_benc
     )
     trips_per_hour.fillna(0, inplace=True)
     similarity_measures["trips_per_hour"] = symmetric_mape(
-        trips_per_hour.perc_benchmark, trips_per_hour.perc_proposal #TODO im eval package change to perc
+        trips_per_hour.perc_benchmark,
+        trips_per_hour.perc_proposal,  # TODO im eval package change to perc
     )
 
-    ### place
+    # PLACE
     counts_per_tile = report_benchmark["visits_per_tile"].data.merge(
         report_proposal["visits_per_tile"].data,
         how="outer",
@@ -208,8 +217,7 @@ def compute_similarity_measures(analysis_selection, report_proposal, report_benc
         counts_per_tile.visits_benchmark / counts_per_tile.visits_benchmark.sum()
     )
     rel_counts_proposal = (
-        counts_per_tile.visits_proposal
-        / counts_per_tile.visits_proposal.sum()
+        counts_per_tile.visits_proposal / counts_per_tile.visits_proposal.sum()
     )
     similarity_measures["counts_per_tile_smape"] = symmetric_mape(
         counts_per_tile.visits_benchmark, counts_per_tile.visits_proposal
@@ -219,7 +227,7 @@ def compute_similarity_measures(analysis_selection, report_proposal, report_benc
     )
 
     # speed up evaluation: cost_matrix as input so it does not have to be recomputed every time
-    
+
     if cost_matrix is None:
         tile_centroids = (
             tessellation.set_index("tile_id").to_crs(3395).centroid.to_crs(4326)
@@ -230,13 +238,11 @@ def compute_similarity_measures(analysis_selection, report_proposal, report_benc
         # create custom cost matrix with distances between all tiles
         cost_matrix = _get_cost_matrix(tile_coords)
 
-
     similarity_measures["counts_per_tile_emd"] = earth_movers_distance(
         counts_per_tile.visits_benchmark.to_numpy(),
         counts_per_tile.visits_proposal.to_numpy(),
         cost_matrix,
     )
-
 
     similarity_measures["counts_per_tile_outliers"] = rel_error(
         report_benchmark["visits_per_tile"].n_outliers,
@@ -247,21 +253,25 @@ def compute_similarity_measures(analysis_selection, report_proposal, report_benc
         report_proposal["visits_per_tile"].quartiles,
     )
 
-    ## tile counts per timewindow
+    # tile counts per timewindow
     counts_per_tile_timewindow_emd = []
 
     for c in report_benchmark["visits_per_tile_timewindow"].data.columns:
-        tw_benchmark = report_benchmark["visits_per_tile_timewindow"].data[c].loc[
-            report_benchmark["visits_per_tile"].data.tile_id
-        ]  # sort accordingly for cost_matrix
+        tw_benchmark = (
+            report_benchmark["visits_per_tile_timewindow"]
+            .data[c]
+            .loc[report_benchmark["visits_per_tile"].data.tile_id]
+        )  # sort accordingly for cost_matrix
         tw_benchmark = tw_benchmark / tw_benchmark.sum()
         if c not in report_proposal["visits_per_tile_timewindow"].data.columns:
             tw_proposal = tw_benchmark.copy()
             tw_proposal[:] = 0
         else:
-            tw_proposal = report_proposal["visits_per_tile_timewindow"].data[c].loc[
-                report_benchmark["visits_per_tile"].data.tile_id
-            ]
+            tw_proposal = (
+                report_proposal["visits_per_tile_timewindow"]
+                .data[c]
+                .loc[report_benchmark["visits_per_tile"].data.tile_id]
+            )
             tw_proposal = tw_proposal / tw_proposal.sum()
         tw = pd.merge(
             tw_benchmark,
@@ -283,15 +293,21 @@ def compute_similarity_measures(analysis_selection, report_proposal, report_benc
         counts_per_tile_timewindow_emd
     )
 
-    counts_timew_benchmark = report_benchmark["visits_per_tile_timewindow"].data[
-        report_benchmark["visits_per_tile_timewindow"].data.index != "None"
-    ].unstack()
-    counts_timew_proposal = report_proposal["visits_per_tile_timewindow"].data[
-        report_proposal["visits_per_tile_timewindow"].data.index != "None"
-    ].unstack()
+    counts_timew_benchmark = (
+        report_benchmark["visits_per_tile_timewindow"]
+        .data[report_benchmark["visits_per_tile_timewindow"].data.index != "None"]
+        .unstack()
+    )
+    counts_timew_proposal = (
+        report_proposal["visits_per_tile_timewindow"]
+        .data[report_proposal["visits_per_tile_timewindow"].data.index != "None"]
+        .unstack()
+    )
 
     indices = np.unique(
-        np.append(counts_timew_benchmark.index.values, counts_timew_proposal.index.values)
+        np.append(
+            counts_timew_benchmark.index.values, counts_timew_proposal.index.values
+        )
     )
 
     counts_timew_benchmark = counts_timew_benchmark.reindex(index=indices)
@@ -313,7 +329,7 @@ def compute_similarity_measures(analysis_selection, report_proposal, report_benc
         rel_counts_timew_proposal.to_numpy().flatten(),
     )
 
-    ### od
+    # OD
     all_od_combinations = pd.concat(
         [
             report_benchmark["od_flows"].data[["origin", "destination"]],
@@ -339,7 +355,9 @@ def compute_similarity_measures(analysis_selection, report_proposal, report_benc
     rel_benchmark = true / true.sum()
     rel_proposal = estimate / (estimate.sum())
 
-    similarity_measures["od_flows"] = symmetric_mape(true.to_numpy(), estimate.to_numpy())
+    similarity_measures["od_flows"] = symmetric_mape(
+        true.to_numpy(), estimate.to_numpy()
+    )
     similarity_measures["rel_od_flows"] = symmetric_mape(
         rel_benchmark.to_numpy(), rel_proposal.to_numpy()
     )
@@ -353,7 +371,7 @@ def compute_similarity_measures(analysis_selection, report_proposal, report_benc
         report_benchmark["travel_time"].data,
         report_proposal["travel_time"].data,
     )
-    
+
     similarity_measures["travel_time_quartiles"] = symmetric_mape(
         report_benchmark["travel_time"].quartiles,
         report_proposal["travel_time"].quartiles,
@@ -362,13 +380,13 @@ def compute_similarity_measures(analysis_selection, report_proposal, report_benc
         report_benchmark["jump_length"].data,
         report_proposal["jump_length"].data,
     )
-    
+
     similarity_measures["jump_length_quartiles"] = symmetric_mape(
         report_benchmark["jump_length"].quartiles,
         report_proposal["jump_length"].quartiles,
     )
 
-    ## user
+    # USER
     if report_proposal["trips_per_user"] is None:
         similarity_measures["traj_per_user_quartiles"] = None
         similarity_measures["traj_per_user_outliers"] = None
@@ -404,9 +422,8 @@ def compute_similarity_measures(analysis_selection, report_proposal, report_benc
         report_proposal["user_tile_count"].quartiles,
     )
 
-
     return similarity_measures
 
 
-def get_selected_measures():
+def get_selected_measures(benchmarkreport):
     pass
