@@ -23,6 +23,7 @@ def earth_movers_distance1D(hist1, hist2):
     return wasserstein_distance(u_values, v_values, u_weights, v_weights)
 
 
+# TODO: `n_true_positive_zeros` not needed anymore
 def symmetric_mape(true, estimate, n_true_positive_zeros=None):
     n = (
         len(true)
@@ -238,8 +239,7 @@ def compute_similarity_measures(analysis_exclusion, report_proposal, report_benc
 
         for time_window in report_benchmark[const.VISITS_PER_TILE_TIMEWINDOW].data.columns:
             tw_benchmark = report_benchmark[const.VISITS_PER_TILE_TIMEWINDOW].data[time_window].loc[
-                report_benchmark[const.VISITS_PER_TILE].data.tile_id]  
-            # sort according to cost_matrix TODO is this properly addressed?
+                report_benchmark[const.VISITS_PER_TILE].data.tile_id]  # sort with `report_benchmark[const.VISITS_PER_TILE]` to match order of cost_matrix
             tw_benchmark = tw_benchmark / tw_benchmark.sum()
             # if time window not in proposal report, add time windows with count zero
             if time_window not in report_proposal[const.VISITS_PER_TILE_TIMEWINDOW].data.columns:
@@ -247,7 +247,7 @@ def compute_similarity_measures(analysis_exclusion, report_proposal, report_benc
                 tw_proposal[:] = 0
             else:
                 tw_proposal = report_proposal[const.VISITS_PER_TILE_TIMEWINDOW].data[time_window].loc[
-                    report_benchmark[const.VISITS_PER_TILE].data.tile_id
+                    report_benchmark[const.VISITS_PER_TILE].data.tile_id  # sort with `report_benchmark[const.VISITS_PER_TILE]` to match order of cost_matrix
                 ]
                 tw_proposal = tw_proposal / tw_proposal.sum()
             tw = pd.merge(
@@ -406,9 +406,8 @@ def compute_similarity_measures(analysis_exclusion, report_proposal, report_benc
         )
 
     if not const.USER_TIME_DELTA in analysis_exclusion:
-        if report_proposal[const.USER_TIME_DELTA] is None: #TODO still needed?
+        if report_proposal[const.USER_TIME_DELTA] is None: #if each user only has one trip then `USER_TIME_DELTA` is None
             smape_dict[const.USER_TIME_DELTA_QUARTILES] = None
-            smape_dict[const.USER_TIME_DELTA_OUTLIERS] = None
         else:
             #TODO comparison of histogram buckets of user time delta, currently not possible, missing jsd, kld
             smape_dict[const.USER_TIME_DELTA_QUARTILES] = symmetric_mape(
