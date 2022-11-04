@@ -585,9 +585,9 @@ def test_analysis_selection(test_data, test_tessellation):
 
 def test_to_html_file(test_data, test_data_sequence, test_tessellation, tmp_path):
 
-    r = DpMobilityReport(  # type: ignore
-        test_data, test_tessellation, privacy_budget=None  # type: ignore
-    ).report  # .to_file("test1.html")  # type: ignore
+    # DpMobilityReport(  # type: ignore
+    #     test_data, test_tessellation, privacy_budget=None  # type: ignore
+    # ).report  # .to_file("test1.html")  # type: ignore
 
     # DpMobilityReport(  # type: ignore
     #     test_data,   # type: ignore
