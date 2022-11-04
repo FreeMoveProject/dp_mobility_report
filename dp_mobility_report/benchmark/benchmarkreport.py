@@ -53,8 +53,8 @@ class BenchmarkReport:
         df_proposal: DataFrame,
         df_benchmark: DataFrame,
         tessellation: GeoDataFrame,
-        privacy_budget_proposal: Optional[Union[int, float]],
-        privacy_budget_benchmark: Optional[Union[int, float]],
+        privacy_budget_proposal: Optional[Union[int, float]] = None,
+        privacy_budget_benchmark: Optional[Union[int, float]] = None,
         measure_selection: Union[dict, str] = const.JSD,  # TODO: set default
         user_privacy_proposal: bool = True,
         user_privacy_benchmark: bool = True,

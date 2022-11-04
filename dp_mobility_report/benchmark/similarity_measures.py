@@ -113,7 +113,7 @@ def earth_movers_distance(
     return emd_dist
 
 
-def compute_similarity_measures(analysis_exclusion, report_proposal, report_benchmark, tessellation, cost_matrix=None): 
+def compute_similarity_measures(analysis_exclusion, report_proposal, report_benchmark, tessellation): 
 
     relative_error_dict = {}
     kld_dict = {}
@@ -230,16 +230,14 @@ def compute_similarity_measures(analysis_exclusion, report_proposal, report_benc
             rel_counts_benchmark, rel_counts_proposal
         )
 
-        # speed up evaluation: cost_matrix as input so it does not have to be recomputed every time
-        if cost_matrix is None:
-            tile_centroids = (
-                tessellation.set_index("tile_id").to_crs(3395).centroid.to_crs(4326)
-            )
+        tile_centroids = (
+            tessellation.set_index("tile_id").to_crs(3395).centroid.to_crs(4326)
+        )
 
-            sorted_tile_centroids = tile_centroids.loc[visits_per_tile.tile_id]
-            tile_coords = list(zip(sorted_tile_centroids.y, sorted_tile_centroids.x))
-            # create custom cost matrix with distances between all tiles
-            cost_matrix = _compute_cost_matrix(tile_coords)
+        sorted_tile_centroids = tile_centroids.loc[visits_per_tile.tile_id]
+        tile_coords = list(zip(sorted_tile_centroids.y, sorted_tile_centroids.x))
+        # create custom cost matrix with distances between all tiles
+        cost_matrix = _compute_cost_matrix(tile_coords)
 
         emd_dict[const.VISITS_PER_TILE] = earth_movers_distance(
             visits_per_tile.visits_benchmark.to_numpy(),
@@ -313,7 +311,7 @@ def compute_similarity_measures(analysis_exclusion, report_proposal, report_benc
         
         
         visits_per_tile_timewindow_emd = []
-
+        #TODO visits_per_tile_timewindow should not be based on visits_per_tile and the cost_matrix from above if visits_per_tile is excluded
         for time_window in report_benchmark[const.VISITS_PER_TILE_TIMEWINDOW].data.columns:
             tw_benchmark = report_benchmark[const.VISITS_PER_TILE_TIMEWINDOW].data[time_window].loc[
                 report_benchmark[const.VISITS_PER_TILE].data.tile_id]  # sort with `report_benchmark[const.VISITS_PER_TILE]` to match order of cost_matrix
