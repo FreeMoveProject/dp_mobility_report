@@ -291,7 +291,7 @@ def compute_similarity_measures(analysis_exclusion, report_proposal, report_benc
         rel_counts_timew_benchmark = counts_timew_benchmark / counts_timew_benchmark.sum()
         rel_counts_timew_proposal = counts_timew_proposal / counts_timew_proposal.sum()
 
-        kld_dict[const.VISITS_PER_TILE_TIMEWINDOW] = kld_dict(
+        kld_dict[const.VISITS_PER_TILE_TIMEWINDOW] = entropy(
             rel_counts_timew_benchmark.to_numpy().flatten(),
             rel_counts_timew_proposal.to_numpy().flatten(),
         )
@@ -460,7 +460,7 @@ def compute_similarity_measures(analysis_exclusion, report_proposal, report_benc
         report_benchmark[const.MOBILITY_ENTROPY].data[0],
         report_proposal[const.MOBILITY_ENTROPY].data[0],
     )
-    jsd_dict[const.MOBILITY_ENTROPY] = distance.jensenshannond(
+    jsd_dict[const.MOBILITY_ENTROPY] = distance.jensenshannon(
         report_benchmark[const.MOBILITY_ENTROPY].data[0],
         report_proposal[const.MOBILITY_ENTROPY].data[0],
     )
