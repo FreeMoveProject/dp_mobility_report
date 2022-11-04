@@ -96,6 +96,8 @@ class BenchmarkReport:
             seed_sampling,
             evalu,
         )
+        self.report_proposal.report
+
         self.report_benchmark = DpMobilityReport(
             df_benchmark,
             tessellation,
@@ -116,6 +118,10 @@ class BenchmarkReport:
             seed_sampling,
             evalu,
         )
+        self.report_benchmark.report
+
+        self.report_benchmark._report, self.report_proposal._report = preprocessing.unify_histogram_bins(self.report_benchmark.report, self.report_proposal.report)
+
         self.analysis_exclusion = preprocessing.combine_analysis_exclusion(
             self.report_proposal.analysis_exclusion,
             self.report_benchmark.analysis_exclusion,

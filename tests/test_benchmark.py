@@ -73,3 +73,8 @@ def test_combine_analysis_exclusion():
         excluded_analyses_proposal, excluded_analyses_benchmark
     )
     assert combined_exclusion == [const.VISITS_PER_TILE, const.RADIUS_OF_GYRATION]
+
+
+def test_unify_histogram_bins():
+    # TODO
+    pass
