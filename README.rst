@@ -71,6 +71,100 @@ Please refer to the `documentation`_ for information on further parameters.
 Example HTMLs can be found in the examples_ folder.
 
 
+Benchmark Report 
+***********************
+
+A benchmark report evaluate the similarity of two (differentially private) mobility reports from one or two mobility datasets. This can be based on two datasets (``df_base`` and ``df_alternative``) or one dataset (``df_base``)) with different privacy settings.
+The arguments ``df``, ``privacy_budget``, ``user_privacy``, ``max_trips_per_user`` and ``budget_split`` can differ for the two datasets set with the according ending ``_base`` and ``_alternative``. The other arguments are the same for both reports.
+For the evaluation, similarity measures (namely the relative error (RE), Jensen-Shannon divergence (JSD), Kullback-Leibler divergence (KLD), symmetric mean absolute percentage error (SMAPE) and the earth mover's distance (EMD)) are computed to quantify the statistical similarity for each analysis.
+The evaluation, i.e., benchmark report, will be generated as an HTML file, using the ``.to_file()`` method.
+
+
+Benchmark of two different datasets 
+=============================================
+
+This example creates a benchmark report with similarity measures for two mobility datasets, called *base* and *alternative* in the following. This is intended to compare different datasets with the same or no privacy budget.
+
+.. code-block:: python
+
+        import pandas as pd
+        import geopandas as gpd
+        from dp_mobility_report import BenchmarkReport
+
+        # -- insert paths --
+        df_base = pd.read_csv("mobility_dataset_base.csv")
+        df_alternative = pd.read_csv("mobility_dataset_alternative.csv")
+        tessellation = gpd.read_file("tessellation.gpkg")
+
+        benchmark_report = BenchmarkReport(
+                df_base=df_base, 
+                tesselation=tessellation,
+                df_alternative=df_alternative)
+
+        # Dictionary containing the similarity measures for each analysis
+        similarity_measures = benchmark_report.similarity_measures 
+        # The measure selection indicates which similarity measure
+        # (e.g. KLD, JSD, EMD, RE, SMAPE) has been selected for each analysis
+        measure_selection = benchmark_report.measure_selection
+
+        # If you do not want to access the selection of similarity measures 
+        # but e.g. the Jensen-Shannon divergence for all analyses: 
+        jsd = benchmark_report.jsd
+
+        #benchmark_report.to_file("my_benchmark_mobility_report.html") 
+
+
+The parameter ``measure_selection`` specifies which similarity measures should be chosen for the similarity_measures dictionary that the BenchmarkReport returns. The default is set to a specific set of similarity measures for each analysis which can be accessed by ``dp_mobility_report.default_measure_selection()``. 
+An easy way to overwrite the default measure selection is the following:
+
+.. code-block:: python
+        from dp_mobility_report import BenchmarkReport, default_measure_selection
+        from dp_mobility_report import constants as const
+
+        custom_measure_selection = default_measure_selection()
+        custom_measure_selection[const.VISITS_PER_TILE] = const.JSD
+
+        benchmark_report = BenchmarkReport(
+                df_base=df_base, 
+                tesselation=tessellation,
+                df_alternative=df_alternative, 
+                measure_selection=custom_measure_selection)
+
+
+
+Benchmark of the same dataset with different privacy settings
+===============================================================
+
+This example creates a BenchmarkReport with similarity measures for the same mobility dataset with different privacy settings (``privacy_budget``, ``user_privacy``, ``max_trips_per_user`` and ``budget_split``) to assess the utility loss of the privacy budget for the different analyses. 
+
+.. code-block:: python
+
+        import pandas as pd
+        import geopandas as gpd
+        from dp_mobility_report import BenchmarkReport
+
+        # -- insert paths --
+        df_base = pd.read_csv("mobility_dataset_base.csv")
+        tessellation = gpd.read_file("tessellation.gpkg")
+
+        benchmark_report = BenchmarkReport(
+                df_base=df_base, 
+                tesselation=tessellation, 
+                privacy_budget_base=None, 
+                privacy_budget_alternative=5, 
+                max_trips_per_user_base=None, 
+                max_trips_per_user_alternative=4)
+
+        similarity_measures = benchmark_report.similarity_measures
+
+        #benchmark_report.to_file("my_benchmark_mobility_report.html") 
+
+
+
+Please refer to the `documentation`_ for information on further parameters.
+
+
+
 Credits
 -------
 
