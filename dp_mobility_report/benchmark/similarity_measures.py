@@ -104,8 +104,13 @@ def earth_movers_distance(
     arr_true: np.array, arr_estimate: np.array, cost_matrix: np.array
 ) -> float:  # based on haversine distance
     # normalize input and assign needed type for cv2
+    if all(
+        arr_true == 0
+    ):  # if all values are 0, change all to 1 (otherwise emd cannot be computed)
+        arr_true = np.repeat(1, len(arr_true))
     arr_true = (arr_true / arr_true.sum() * 100).round(2)
     sig_true = arr_true.astype(np.float32)
+
     if all(
         arr_estimate == 0
     ):  # if all values are 0, change all to 1 (otherwise emd cannot be computed)
@@ -121,8 +126,8 @@ def earth_movers_distance(
 
 def compute_similarity_measures(
     analysis_exclusion: list,
-    report_proposal: dict,
-    report_benchmark: dict,
+    report_alternative: dict,
+    report_base: dict,
     tessellation: pd.DataFrame,
 ):
 
@@ -137,8 +142,8 @@ def compute_similarity_measures(
         relative_error_dict = dict(
             **relative_error_dict,
             **all_relative_errors(
-                report_benchmark[const.DS_STATISTICS],
-                report_proposal[const.DS_STATISTICS],
+                report_base[const.DS_STATISTICS],
+                report_alternative[const.DS_STATISTICS],
                 round_res=True,
             )
         )
@@ -147,37 +152,37 @@ def compute_similarity_measures(
         relative_error_dict = dict(
             **relative_error_dict,
             **all_relative_errors(
-                report_benchmark[const.MISSING_VALUES],
-                report_proposal[const.MISSING_VALUES],
+                report_base[const.MISSING_VALUES],
+                report_alternative[const.MISSING_VALUES],
                 round_res=True,
             )
         )
 
     # Temporal distributions
     if const.TRIPS_OVER_TIME not in analysis_exclusion:
-        trips_over_time = report_benchmark[const.TRIPS_OVER_TIME].data.merge(
-            report_proposal[const.TRIPS_OVER_TIME].data,
+        trips_over_time = report_base[const.TRIPS_OVER_TIME].data.merge(
+            report_alternative[const.TRIPS_OVER_TIME].data,
             how="outer",
             on="datetime",
-            suffixes=("_benchmark", "_proposal"),
+            suffixes=("_base", "_alternative"),
         )
 
         trips_over_time.fillna(0, inplace=True)
         kld_dict[const.TRIPS_OVER_TIME] = entropy(
-            trips_over_time.trips_benchmark, trips_over_time.trips_proposal
+            trips_over_time.trips_base, trips_over_time.trips_alternative
         )
         jsd_dict[const.TRIPS_OVER_TIME] = distance.jensenshannon(
-            trips_over_time.trips_benchmark, trips_over_time.trips_proposal
+            trips_over_time.trips_base, trips_over_time.trips_alternative
         )
         smape_dict[const.TRIPS_OVER_TIME] = symmetric_mape(
-            trips_over_time.trip_count_benchmark, trips_over_time.trips_proposal
+            trips_over_time.trip_count_base, trips_over_time.trips_alternative
         )
 
     if const.TRIPS_PER_WEEKDAY not in analysis_exclusion:
         trips_per_weekday = pd.concat(
             [
-                report_benchmark[const.TRIPS_PER_WEEKDAY].data,
-                report_proposal[const.TRIPS_PER_WEEKDAY].data,
+                report_base[const.TRIPS_PER_WEEKDAY].data,
+                report_alternative[const.TRIPS_PER_WEEKDAY].data,
             ],
             join="outer",
             axis=1,
@@ -194,71 +199,48 @@ def compute_similarity_measures(
         )
 
     if const.TRIPS_PER_HOUR not in analysis_exclusion:
-        trips_per_hour = report_benchmark[const.TRIPS_PER_HOUR].data.merge(
-            report_proposal[const.TRIPS_PER_HOUR].data,
+        trips_per_hour = report_base[const.TRIPS_PER_HOUR].data.merge(
+            report_alternative[const.TRIPS_PER_HOUR].data,
             how="outer",
             on=["hour", "time_category"],
-            suffixes=("_benchmark", "_proposal"),
+            suffixes=("_base", "_alternative"),
         )
         trips_per_hour.fillna(0, inplace=True)
         kld_dict[const.TRIPS_PER_HOUR] = entropy(
-            trips_per_hour.perc_benchmark, trips_per_hour.perc_proposal
+            trips_per_hour.perc_base, trips_per_hour.perc_alternative
         )
         jsd_dict[const.TRIPS_PER_HOUR] = distance.jensenshannon(
-            trips_per_hour.perc_benchmark, trips_per_hour.perc_proposal
+            trips_per_hour.perc_base, trips_per_hour.perc_alternative
         )
         smape_dict[const.TRIPS_PER_HOUR] = symmetric_mape(
-            trips_per_hour.perc_benchmark,
-            trips_per_hour.perc_proposal,  # TODO im eval package change to perc
-        )
-
-    if const.TRAVEL_TIME not in analysis_exclusion:
-        kld_dict[const.TRAVEL_TIME] = entropy(
-            report_benchmark[const.TRAVEL_TIME].data[0],
-            report_proposal[const.TRAVEL_TIME].data[0],
-        )
-        jsd_dict[const.TRAVEL_TIME] = distance.jensenshannon(
-            report_benchmark[const.TRAVEL_TIME].data[0],
-            report_proposal[const.TRAVEL_TIME].data[0],
-        )
-        smape_dict[const.TRAVEL_TIME] = symmetric_mape(
-            report_benchmark[const.TRAVEL_TIME].data[0],
-            report_proposal[const.TRAVEL_TIME].data[0],
-        )
-        emd_dict[const.TRAVEL_TIME] = earth_movers_distance1D(
-            report_benchmark[const.TRAVEL_TIME].data,
-            report_proposal[const.TRAVEL_TIME].data,
-        )
-        # Quartiles
-        smape_dict[const.TRAVEL_TIME_QUARTILES] = symmetric_mape(
-            report_benchmark[const.TRAVEL_TIME].quartiles,
-            report_proposal[const.TRAVEL_TIME].quartiles,
+            trips_per_hour.perc_base,
+            trips_per_hour.perc_alternative,  # TODO im eval package change to perc
         )
 
     # Spatial distribution
     if const.VISITS_PER_TILE not in analysis_exclusion:
-        visits_per_tile = report_benchmark[const.VISITS_PER_TILE].data.merge(
-            report_proposal[const.VISITS_PER_TILE].data,
+        visits_per_tile = report_base[const.VISITS_PER_TILE].data.merge(
+            report_alternative[const.VISITS_PER_TILE].data,
             how="outer",
             on="tile_id",
-            suffixes=("_benchmark", "_proposal"),
+            suffixes=("_base", "_alternative"),
         )
         visits_per_tile.fillna(0, inplace=True)
 
-        rel_counts_benchmark = (
-            visits_per_tile.visits_benchmark / visits_per_tile.visits_benchmark.sum()
+        rel_counts_base = (
+            visits_per_tile.visits_base / visits_per_tile.visits_base.sum()
         )
-        rel_counts_proposal = (
-            visits_per_tile.visits_proposal / visits_per_tile.visits_proposal.sum()
+        rel_counts_alternative = (
+            visits_per_tile.visits_alternative / visits_per_tile.visits_alternative.sum()
         )
         kld_dict[const.VISITS_PER_TILE] = entropy(
-            rel_counts_benchmark, rel_counts_proposal
+            rel_counts_base, rel_counts_alternative
         )
         jsd_dict[const.VISITS_PER_TILE] = distance.jensenshannon(
-            rel_counts_benchmark, rel_counts_proposal
+            rel_counts_base, rel_counts_alternative
         )
         smape_dict[const.VISITS_PER_TILE] = symmetric_mape(
-            rel_counts_benchmark, rel_counts_proposal
+            rel_counts_base, rel_counts_alternative
         )
 
         tile_centroids = (
@@ -271,122 +253,100 @@ def compute_similarity_measures(
         cost_matrix = _compute_cost_matrix(tile_coords)
 
         emd_dict[const.VISITS_PER_TILE] = earth_movers_distance(
-            visits_per_tile.visits_benchmark.to_numpy(),
-            visits_per_tile.visits_proposal.to_numpy(),
+            visits_per_tile.visits_base.to_numpy(),
+            visits_per_tile.visits_alternative.to_numpy(),
             cost_matrix,
         )
         # Outliers
         relative_error_dict[const.VISITS_PER_TILE_OUTLIERS] = relative_error(
-            report_benchmark[const.VISITS_PER_TILE].n_outliers,
-            report_proposal[const.VISITS_PER_TILE].n_outliers,
+            report_base[const.VISITS_PER_TILE].n_outliers,
+            report_alternative[const.VISITS_PER_TILE].n_outliers,
         )
 
-    if const.JUMP_LENGTH not in analysis_exclusion:
-        kld_dict[const.JUMP_LENGTH] = entropy(
-            report_benchmark[const.JUMP_LENGTH].data[0],
-            report_proposal[const.JUMP_LENGTH].data[0],
-        )
-        jsd_dict[const.JUMP_LENGTH] = distance.jensenshannon(
-            report_benchmark[const.JUMP_LENGTH].data[0],
-            report_proposal[const.JUMP_LENGTH].data[0],
-        )
-        smape_dict[const.JUMP_LENGTH] = symmetric_mape(
-            report_benchmark[const.JUMP_LENGTH].data[0],
-            report_proposal[const.JUMP_LENGTH].data[0],
-        )
-        emd_dict[const.JUMP_LENGTH] = earth_movers_distance1D(
-            report_benchmark[const.JUMP_LENGTH].data,
-            report_proposal[const.JUMP_LENGTH].data,
-        )
-        # Quartiles
-        smape_dict[const.JUMP_LENGTH_QUARTILES] = symmetric_mape(
-            report_benchmark[const.JUMP_LENGTH].quartiles,
-            report_proposal[const.JUMP_LENGTH].quartiles,
-        )
 
     # Spatio-temporal distributions
     if const.VISITS_PER_TILE_TIMEWINDOW not in analysis_exclusion:
-        counts_timew_benchmark = (
-            report_benchmark[const.VISITS_PER_TILE_TIMEWINDOW]
+        counts_timew_base = (
+            report_base[const.VISITS_PER_TILE_TIMEWINDOW]
             .data[
-                report_benchmark[const.VISITS_PER_TILE_TIMEWINDOW].data.index != "None"
+                report_base[const.VISITS_PER_TILE_TIMEWINDOW].data.index != "None"
             ]
             .unstack()
         )
-        counts_timew_proposal = (
-            report_proposal[const.VISITS_PER_TILE_TIMEWINDOW]
+        counts_timew_alternative = (
+            report_alternative[const.VISITS_PER_TILE_TIMEWINDOW]
             .data[
-                report_proposal[const.VISITS_PER_TILE_TIMEWINDOW].data.index != "None"
+                report_alternative[const.VISITS_PER_TILE_TIMEWINDOW].data.index != "None"
             ]
             .unstack()
         )
 
         indices = np.unique(
             np.append(
-                counts_timew_benchmark.index.values, counts_timew_proposal.index.values
+                counts_timew_base.index.values, counts_timew_alternative.index.values
             )
         )
 
-        counts_timew_benchmark = counts_timew_benchmark.reindex(index=indices)
-        counts_timew_benchmark.fillna(0, inplace=True)
+        counts_timew_base = counts_timew_base.reindex(index=indices)
+        counts_timew_base.fillna(0, inplace=True)
 
-        counts_timew_proposal = counts_timew_proposal.reindex(index=indices)
-        counts_timew_proposal.fillna(0, inplace=True)
+        counts_timew_alternative = counts_timew_alternative.reindex(index=indices)
+        counts_timew_alternative.fillna(0, inplace=True)
 
-        rel_counts_timew_benchmark = (
-            counts_timew_benchmark / counts_timew_benchmark.sum()
+        rel_counts_timew_base = (
+            counts_timew_base / counts_timew_base.sum()
         )
-        rel_counts_timew_proposal = counts_timew_proposal / counts_timew_proposal.sum()
+        rel_counts_timew_alternative = counts_timew_alternative / counts_timew_alternative.sum()
 
         kld_dict[const.VISITS_PER_TILE_TIMEWINDOW] = entropy(
-            rel_counts_timew_benchmark.to_numpy().flatten(),
-            rel_counts_timew_proposal.to_numpy().flatten(),
+            rel_counts_timew_base.to_numpy().flatten(),
+            rel_counts_timew_alternative.to_numpy().flatten(),
         )
         jsd_dict[const.VISITS_PER_TILE_TIMEWINDOW] = distance.jensenshannon(
-            rel_counts_timew_benchmark.to_numpy().flatten(),
-            rel_counts_timew_proposal.to_numpy().flatten(),
+            rel_counts_timew_base.to_numpy().flatten(),
+            rel_counts_timew_alternative.to_numpy().flatten(),
         )
         smape_dict[const.VISITS_PER_TILE_TIMEWINDOW] = symmetric_mape(
-            rel_counts_timew_benchmark.to_numpy().flatten(),
-            rel_counts_timew_proposal.to_numpy().flatten(),
+            rel_counts_timew_base.to_numpy().flatten(),
+            rel_counts_timew_alternative.to_numpy().flatten(),
         )
 
         visits_per_tile_timewindow_emd = []
         # TODO visits_per_tile_timewindow should not be based on visits_per_tile and the cost_matrix from above if visits_per_tile is excluded
-        for time_window in report_benchmark[
+        for time_window in report_base[
             const.VISITS_PER_TILE_TIMEWINDOW
         ].data.columns:
-            tw_benchmark = (
-                report_benchmark[const.VISITS_PER_TILE_TIMEWINDOW]
+            tw_base = (
+                report_base[const.VISITS_PER_TILE_TIMEWINDOW]
                 .data[time_window]
-                .loc[report_benchmark[const.VISITS_PER_TILE].data.tile_id]
-            )  # sort with `report_benchmark[const.VISITS_PER_TILE]` to match order of cost_matrix
-            tw_benchmark = tw_benchmark / tw_benchmark.sum()
+                .loc[report_base[const.VISITS_PER_TILE].data.tile_id]
+            )  # sort with `report_base[const.VISITS_PER_TILE]` to match order of cost_matrix
+            tw_base = tw_base / tw_base.sum()
             # if time window not in proposal report, add time windows with count zero
             if (
                 time_window
-                not in report_proposal[const.VISITS_PER_TILE_TIMEWINDOW].data.columns
+                not in report_alternative[const.VISITS_PER_TILE_TIMEWINDOW].data.columns
             ):
-                tw_proposal = tw_benchmark.copy()
-                tw_proposal[:] = 0
+                tw_alternative = tw_base.copy()
+                tw_alternative[:] = 0
             else:
-                tw_proposal = (
-                    report_proposal[const.VISITS_PER_TILE_TIMEWINDOW]
+                tw_alternative = (
+                    report_alternative[const.VISITS_PER_TILE_TIMEWINDOW]
                     .data[time_window]
                     .loc[
-                        report_benchmark[
+                        report_base[
                             const.VISITS_PER_TILE
-                        ].data.tile_id  # sort with `report_benchmark[const.VISITS_PER_TILE]` to match order of cost_matrix
+                        ].data.tile_id  # sort with `report_base[const.VISITS_PER_TILE]` to match order of cost_matrix
                     ]
                 )
-                tw_proposal = tw_proposal / tw_proposal.sum()
+                tw_alternative = tw_alternative / tw_alternative.sum()
             tw = pd.merge(
-                tw_benchmark,
-                tw_proposal,
+                tw_base,
+                tw_alternative,
                 how="outer",
                 right_index=True,
                 left_index=True,
-                suffixes=("_benchmark", "_proposal"),
+                suffixes=("_base", "_alternative"),
             )
             tw = tw[tw.notna().sum(axis=1) > 0]  # remove instances where both are NaN
             tw.fillna(0, inplace=True)
@@ -395,7 +355,6 @@ def compute_similarity_measures(
                     tw.iloc[:, 0].to_numpy(), tw.iloc[:, 1].to_numpy(), cost_matrix
                 )
             )
-
         emd_dict[const.VISITS_PER_TILE_TIMEWINDOW] = np.mean(
             visits_per_tile_timewindow_emd
         )
@@ -404,76 +363,125 @@ def compute_similarity_measures(
     if const.OD_FLOWS not in analysis_exclusion:
         all_od_combinations = pd.concat(
             [
-                report_benchmark[const.OD_FLOWS].data[["origin", "destination"]],
-                report_proposal[const.OD_FLOWS].data[["origin", "destination"]],
+                report_base[const.OD_FLOWS].data[["origin", "destination"]],
+                report_alternative[const.OD_FLOWS].data[["origin", "destination"]],
             ]
         ).drop_duplicates()
         all_od_combinations["flow"] = 0
 
         true = (
-            pd.concat([report_benchmark[const.OD_FLOWS].data, all_od_combinations])
+            pd.concat([report_base[const.OD_FLOWS].data, all_od_combinations])
             .drop_duplicates(["origin", "destination"], keep="first")
             .sort_values(["origin", "destination"])
             .flow
         )
         estimate = (
-            pd.concat([report_proposal[const.OD_FLOWS].data, all_od_combinations])
+            pd.concat([report_alternative[const.OD_FLOWS].data, all_od_combinations])
             .drop_duplicates(["origin", "destination"], keep="first")
             .sort_values(["origin", "destination"])
             .flow
         )
 
-        rel_benchmark = true / true.sum()
-        rel_proposal = estimate / (estimate.sum())
+        rel_base = true / true.sum()
+        rel_alternative = estimate / (estimate.sum())
 
         kld_dict[const.OD_FLOWS] = entropy(
-            rel_benchmark.to_numpy(), rel_proposal.to_numpy()
+            rel_base.to_numpy(), rel_alternative.to_numpy()
         )
         jsd_dict[const.OD_FLOWS] = distance.jensenshannon(
-            rel_benchmark.to_numpy(), rel_proposal.to_numpy()
+            rel_base.to_numpy(), rel_alternative.to_numpy()
         )
         smape_dict[const.OD_FLOWS] = symmetric_mape(
-            rel_benchmark.to_numpy(), rel_proposal.to_numpy()
+            rel_base.to_numpy(), rel_alternative.to_numpy()
         )
 
-    # User
-    if const.TRIPS_PER_USER not in analysis_exclusion:
-
-        kld_dict[const.TRIPS_PER_USER] = entropy(
-            report_benchmark[const.TRIPS_PER_USER].data[0],
-            report_proposal[const.TRIPS_PER_USER].data[0],
+    if const.TRAVEL_TIME not in analysis_exclusion:
+        kld_dict[const.TRAVEL_TIME] = entropy(
+            report_base[const.TRAVEL_TIME].data[0],
+            report_alternative[const.TRAVEL_TIME].data[0],
         )
-        jsd_dict[const.TRIPS_PER_USER] = distance.jensenshannon(
-            report_benchmark[const.TRIPS_PER_USER].data[0],
-            report_proposal[const.TRIPS_PER_USER].data[0],
+        jsd_dict[const.TRAVEL_TIME] = distance.jensenshannon(
+            report_base[const.TRAVEL_TIME].data[0],
+            report_alternative[const.TRAVEL_TIME].data[0],
         )
-        emd_dict[const.TRIPS_PER_USER] = earth_movers_distance1D(
-            report_benchmark[const.TRIPS_PER_USER].data,
-            report_proposal[const.TRIPS_PER_USER].data,
+        smape_dict[const.TRAVEL_TIME] = symmetric_mape(
+            report_base[const.TRAVEL_TIME].data[0],
+            report_alternative[const.TRAVEL_TIME].data[0],
         )
-        smape_dict[const.TRIPS_PER_USER] = symmetric_mape(
-            report_benchmark[const.TRIPS_PER_USER].data[0],
-            report_proposal[const.TRIPS_PER_USER].data[0],
+        emd_dict[const.TRAVEL_TIME] = earth_movers_distance1D(
+            report_base[const.TRAVEL_TIME].data,
+            report_alternative[const.TRAVEL_TIME].data,
         )
         # Quartiles
+        smape_dict[const.TRAVEL_TIME_QUARTILES] = symmetric_mape(
+            report_base[const.TRAVEL_TIME].quartiles,
+            report_alternative[const.TRAVEL_TIME].quartiles,
+        )
+
+    if const.JUMP_LENGTH not in analysis_exclusion:
+        kld_dict[const.JUMP_LENGTH] = entropy(
+            report_base[const.JUMP_LENGTH].data[0],
+            report_alternative[const.JUMP_LENGTH].data[0],
+        )
+        jsd_dict[const.JUMP_LENGTH] = distance.jensenshannon(
+            report_base[const.JUMP_LENGTH].data[0],
+            report_alternative[const.JUMP_LENGTH].data[0],
+        )
+        smape_dict[const.JUMP_LENGTH] = symmetric_mape(
+            report_base[const.JUMP_LENGTH].data[0],
+            report_alternative[const.JUMP_LENGTH].data[0],
+        )
+        emd_dict[const.JUMP_LENGTH] = earth_movers_distance1D(
+            report_base[const.JUMP_LENGTH].data,
+            report_alternative[const.JUMP_LENGTH].data,
+        )
+        # Quartiles
+        smape_dict[const.JUMP_LENGTH_QUARTILES] = symmetric_mape(
+            report_base[const.JUMP_LENGTH].quartiles,
+            report_alternative[const.JUMP_LENGTH].quartiles,
+        )
+
+
+    # User
+    #TODO bin sizes do not align
+    if const.TRIPS_PER_USER not in analysis_exclusion:
+
+        # kld_dict[const.TRIPS_PER_USER] = entropy(
+        #     report_base[const.TRIPS_PER_USER].data[0],
+        #     report_alternative[const.TRIPS_PER_USER].data[0],
+        # )
+        # jsd_dict[const.TRIPS_PER_USER] = distance.jensenshannon(
+        #     report_base[const.TRIPS_PER_USER].data[0],
+        #     report_alternative[const.TRIPS_PER_USER].data[0],
+        # )
+        #TODO discussion: potentially different results depending on histogram bin sizes
+        emd_dict[const.TRIPS_PER_USER] = earth_movers_distance1D(
+            report_base[const.TRIPS_PER_USER].data,
+            report_alternative[const.TRIPS_PER_USER].data,
+        )
+        # smape_dict[const.TRIPS_PER_USER] = symmetric_mape(
+        #     report_base[const.TRIPS_PER_USER].data[0],
+        #     report_alternative[const.TRIPS_PER_USER].data[0],
+        # )
+        # Quartiles
         smape_dict[const.TRIPS_PER_USER_QUARTILES] = symmetric_mape(
-            report_benchmark[const.TRIPS_PER_USER].quartiles,
-            report_proposal[const.TRIPS_PER_USER].quartiles,
+            report_base[const.TRIPS_PER_USER].quartiles,
+            report_alternative[const.TRIPS_PER_USER].quartiles,
         )
     if const.USER_TIME_DELTA not in analysis_exclusion:
         if (
-            report_proposal[const.USER_TIME_DELTA] is None
+            report_alternative[const.USER_TIME_DELTA] is None
         ):  # if each user only has one trip then `USER_TIME_DELTA` is None
             smape_dict[const.USER_TIME_DELTA_QUARTILES] = None
         else:
             # TODO comparison of histogram buckets of user time delta, currently not possible, missing jsd, kld
             smape_dict[const.USER_TIME_DELTA_QUARTILES] = symmetric_mape(
                 (
-                    report_benchmark[const.USER_TIME_DELTA].quartiles.apply(
+                    report_base[const.USER_TIME_DELTA].quartiles.apply(
                         lambda x: x.total_seconds() / 3600
                     )
                 ),
-                report_proposal[const.USER_TIME_DELTA].quartiles.apply(
+                report_alternative[const.USER_TIME_DELTA].quartiles.apply(
                     lambda x: x.total_seconds() / 3600
                 ),
             )
@@ -481,59 +489,61 @@ def compute_similarity_measures(
     if const.RADIUS_OF_GYRATION not in analysis_exclusion:
 
         kld_dict[const.RADIUS_OF_GYRATION] = entropy(
-            report_benchmark[const.RADIUS_OF_GYRATION].data[0],
-            report_proposal[const.RADIUS_OF_GYRATION].data[0],
+            report_base[const.RADIUS_OF_GYRATION].data[0],
+            report_alternative[const.RADIUS_OF_GYRATION].data[0],
         )
         jsd_dict[const.RADIUS_OF_GYRATION] = distance.jensenshannon(
-            report_benchmark[const.RADIUS_OF_GYRATION].data[0],
-            report_proposal[const.RADIUS_OF_GYRATION].data[0],
+            report_base[const.RADIUS_OF_GYRATION].data[0],
+            report_alternative[const.RADIUS_OF_GYRATION].data[0],
         )
         emd_dict[const.RADIUS_OF_GYRATION] = earth_movers_distance1D(
-            report_benchmark[const.RADIUS_OF_GYRATION].data,
-            report_proposal[const.RADIUS_OF_GYRATION].data,
+            report_base[const.RADIUS_OF_GYRATION].data,
+            report_alternative[const.RADIUS_OF_GYRATION].data,
         )
         smape_dict[const.RADIUS_OF_GYRATION] = symmetric_mape(
-            report_benchmark[const.RADIUS_OF_GYRATION].data[0],
-            report_proposal[const.RADIUS_OF_GYRATION].data[0],
+            report_base[const.RADIUS_OF_GYRATION].data[0],
+            report_alternative[const.RADIUS_OF_GYRATION].data[0],
         )
         # Quartiles
         smape_dict[const.RADIUS_OF_GYRATION_QUARTILES] = symmetric_mape(
-            report_benchmark[const.RADIUS_OF_GYRATION].quartiles,
-            report_proposal[const.RADIUS_OF_GYRATION].quartiles,
+            report_base[const.RADIUS_OF_GYRATION].quartiles,
+            report_alternative[const.RADIUS_OF_GYRATION].quartiles,
         )
 
     if const.USER_TILE_COUNT_QUARTILES not in analysis_exclusion:
         # TODO comparison of histogram buckets of user time delta, currently not possible, missing jsd, kld
         smape_dict[const.USER_TILE_COUNT_QUARTILES] = symmetric_mape(
-            report_benchmark[const.USER_TILE_COUNT].quartiles,
-            report_proposal[const.USER_TILE_COUNT].quartiles,
+            report_base[const.USER_TILE_COUNT].quartiles,
+            report_alternative[const.USER_TILE_COUNT].quartiles,
         )
 
+    #TODO create similar bins in mobility report from 0 to 1 with 0.1 bins
     if const.MOBILITY_ENTROPY not in analysis_exclusion:
         kld_dict[const.MOBILITY_ENTROPY] = entropy(
-            report_benchmark[const.MOBILITY_ENTROPY].data[0],
-            report_proposal[const.MOBILITY_ENTROPY].data[0],
+            report_base[const.MOBILITY_ENTROPY].data[0],
+            report_alternative[const.MOBILITY_ENTROPY].data[0],
         )
         jsd_dict[const.MOBILITY_ENTROPY] = distance.jensenshannon(
-            report_benchmark[const.MOBILITY_ENTROPY].data[0],
-            report_proposal[const.MOBILITY_ENTROPY].data[0],
+            report_base[const.MOBILITY_ENTROPY].data[0],
+            report_alternative[const.MOBILITY_ENTROPY].data[0],
         )
         emd_dict[const.MOBILITY_ENTROPY] = earth_movers_distance1D(
-            report_benchmark[const.MOBILITY_ENTROPY].data,
-            report_proposal[const.MOBILITY_ENTROPY].data,
+            report_base[const.MOBILITY_ENTROPY].data,
+            report_alternative[const.MOBILITY_ENTROPY].data,
         )
         smape_dict[const.MOBILITY_ENTROPY] = symmetric_mape(
-            report_benchmark[const.MOBILITY_ENTROPY].data[0],
-            report_proposal[const.MOBILITY_ENTROPY].data[0],
+            report_base[const.MOBILITY_ENTROPY].data[0],
+            report_alternative[const.MOBILITY_ENTROPY].data[0],
         )
         # Quartiles
         smape_dict["mobility_entropy_quartiles"] = symmetric_mape(
-            report_benchmark[const.MOBILITY_ENTROPY].quartiles,
-            report_proposal[const.MOBILITY_ENTROPY].quartiles,
+            report_base[const.MOBILITY_ENTROPY].quartiles,
+            report_alternative[const.MOBILITY_ENTROPY].quartiles,
         )
 
     return relative_error_dict, kld_dict, jsd_dict, emd_dict, smape_dict
 
 
 def get_selected_measures(benchmarkreport):
+    #TODO check if measure exist, otherwise raise warning
     pass

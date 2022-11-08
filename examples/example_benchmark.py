@@ -17,15 +17,15 @@ tessellation = gpd.read_file(os.path.join(path_data, "geolife_tessellation.gpkg"
 tessellation["tile_name"] = tessellation.tile_id
 
 benchmarkeval = BenchmarkReport(
-    df_proposal=df,
-    df_benchmark=df,
+    df_alternative=df,
+    df_base=df,
     tessellation=tessellation,
-    privacy_budget_proposal=15.0,
-    privacy_budget_benchmark=None,
-    user_privacy_proposal=True,
-    user_privacy_benchmark=True,
-    max_trips_per_user_proposal=10,
-    max_trips_per_user_benchmark=10,
+    privacy_budget_alternative=15.0,
+    privacy_budget_base=None,
+    user_privacy_alternative=True,
+    user_privacy_base=True,
+    max_trips_per_user_alternative=10,
+    max_trips_per_user_base=10,
 )
 
 measures = benchmarkeval.similarity_measures

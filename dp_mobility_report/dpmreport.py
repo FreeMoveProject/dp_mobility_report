@@ -27,9 +27,9 @@ class DpMobilityReport:
     Args:
         df: `DataFrame` containing the mobility data. Expected columns: User ID `uid`, trip ID `tid`, timestamp `datetime` (or `int`to indicate sequence position, if dataset only consists of sequences without timestamps), latitude `lat` and longitude `lng` in CRS EPSG:4326.
         tessellation: Geopandas `GeoDataFrame` containing the tessellation for spatial aggregations. Expected columns: `tile_id`. If tessellation is not provided in the expected default CRS EPSG:4326, it will automatically be transformed. If no tessellation is provided, all analyses based on the tessellation will automatically be removed.
-        privacy_budget: privacy_budget for the differentially private report. Defaults to None, i.e., no privacy guarantee is provided.
+        privacy_budget: privacy_budget for the differentially private report. Defaults to `None`, i.e., no privacy guarantee is provided.
         user_privacy: Whether item-level or user-level privacy is applied. Defaults to True (user-level privacy).
-        max_trips_per_user: maximum number of trips a user shall contribute to the data. Dataset will be sampled accordingly.
+        max_trips_per_user: maximum number of trips a user shall contribute to the data. Dataset will be sampled accordingly. Defaults to `None`, i.e., all trips are used. This implies that the actual maximum number of trips per user will be used according to the data, though this violates Differential Privacy.
         analysis_selection:  Select only needed analyses. A selection reduces computation time and leaves more privacy budget
             for higher accuracy of other analyses. `analysis_selection` takes a list of all analyses to be included. Alternatively, a list of analyses to be excluded can be set with `analysis_exclusion'.
             Either entire segments can be included: `const.OVERVIEW`, `const.PLACE_ANALYSIS`, `const.OD_ANALYSIS`, `const.USER_ANALYSIS`

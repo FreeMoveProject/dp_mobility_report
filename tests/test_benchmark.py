@@ -38,32 +38,32 @@ def test_tessellation():
 @pytest.fixture
 def benchmark_report():
     test_data = pd.read_csv("tests/test_files/test_data.csv")
-    test_data_proposal = pd.read_csv("tests/test_files/test_data.csv", nrows=50)
+    test_data_alternative = pd.read_csv("tests/test_files/test_data.csv", nrows=50)
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
     return benchmarkreport.BenchmarkReport(
-        test_data, test_data_proposal, test_tessellation
+        test_data, test_data_alternative, test_tessellation
     )
 
 
 def test_histogram_bin_sizes(benchmark_report):
 
     assert list(
-        benchmark_report.report_proposal.report[const.TRAVEL_TIME].data[1]
-    ) == list(benchmark_report.report_benchmark.report[const.TRAVEL_TIME].data[1])
+        benchmark_report.report_alternative.report[const.TRAVEL_TIME].data[1]
+    ) == list(benchmark_report.report_base.report[const.TRAVEL_TIME].data[1])
     assert list(
-        benchmark_report.report_proposal.report[const.JUMP_LENGTH].data[1]
-    ) == list(benchmark_report.report_benchmark.report[const.JUMP_LENGTH].data[1])
+        benchmark_report.report_alternative.report[const.JUMP_LENGTH].data[1]
+    ) == list(benchmark_report.report_base.report[const.JUMP_LENGTH].data[1])
+    # assert list(
+    #     benchmark_report.report_alternative.report[const.TRIPS_PER_USER].data[1]
+    # ) == list(benchmark_report.report_base.report[const.TRIPS_PER_USER].data[1])
     assert list(
-        benchmark_report.report_proposal.report[const.TRIPS_PER_USER].data[1]
-    ) == list(benchmark_report.report_benchmark.report[const.TRIPS_PER_USER].data[1])
-    assert list(
-        benchmark_report.report_proposal.report[const.RADIUS_OF_GYRATION].data[1]
+        benchmark_report.report_alternative.report[const.RADIUS_OF_GYRATION].data[1]
     ) == list(
-        benchmark_report.report_benchmark.report[const.RADIUS_OF_GYRATION].data[1]
+        benchmark_report.report_base.report[const.RADIUS_OF_GYRATION].data[1]
     )
-    assert list(
-        benchmark_report.report_proposal.report[const.MOBILITY_ENTROPY].data[1]
-    ) == list(benchmark_report.report_benchmark.report[const.MOBILITY_ENTROPY].data[1])
+    # assert list(
+    #     benchmark_report.report_alternative.report[const.MOBILITY_ENTROPY].data[1]
+    # ) == list(benchmark_report.report_base.report[const.MOBILITY_ENTROPY].data[1])
 
 
 def test_earth_movers_distance1D():
@@ -123,15 +123,19 @@ def test_similarity_measures(
 
 
 def test_combine_analysis_exclusion():
-    excluded_analyses_proposal = [const.VISITS_PER_TILE, const.RADIUS_OF_GYRATION]
-    excluded_analyses_benchmark = [const.RADIUS_OF_GYRATION]
+    excluded_analyses_alternative = [const.VISITS_PER_TILE, const.RADIUS_OF_GYRATION]
+    excluded_analyses_base = [const.RADIUS_OF_GYRATION]
 
     combined_exclusion = combine_analysis_exclusion(
-        excluded_analyses_proposal, excluded_analyses_benchmark
+        excluded_analyses_alternative, excluded_analyses_base
     )
     assert combined_exclusion == [const.VISITS_PER_TILE, const.RADIUS_OF_GYRATION]
 
 
 def test_unify_histogram_bins():
     # TODO
+    pass
+
+def test_base_report():
+    
     pass
