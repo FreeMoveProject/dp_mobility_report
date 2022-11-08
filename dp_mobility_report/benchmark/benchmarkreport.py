@@ -15,9 +15,11 @@ from dp_mobility_report.benchmark.similarity_measures import (
 
 
 class BenchmarkReport:
-    """Generate two (differentially private) mobility reports from one or two mobility datasets. The report will be generated as an HTML file, using the `.to_file()` method.
-        Can be based on two datasets (`df_base` and `df_alternative`) or one dataset (`df_base`)) with different privacy settings.
-        The arguments df, privacy_budget, user_privacy and max_trips_per_user can differ for the two datasets. The other arguments are the same for both reports.
+    """Evaluate the similarity of two (differentially private) mobility reports from one or two mobility datasets. 
+        This can be based on two datasets (`df_base` and `df_alternative`) or one dataset (`df_base`)) with different privacy settings.
+        The arguments `df`, `privacy_budget`, `user_privacy`, `max_trips_per_user` and `budget_split` can differ for the two datasets set with the according ending `_base` and `_alternative`. The other arguments are the same for both reports.
+        For the evaluation, similarity measures (namely the relative error (RE), Jensen-Shannon divergence (JSD), Kullback-Leibler divergence (KLD), symmetric mean absolute percentage error (SMAPE) and the earth mover's distance (EMD)) are computed to quantify the statistical similarity for each analysis.
+        The evaluation, i.e., benchmark report, will be generated as an HTML file, using the `.to_file()` method.
 
     Args:
         df_base: `DataFrame` containing the baseline mobility data, see argument `df` of `DpMobilityReport`.
@@ -44,6 +46,12 @@ class BenchmarkReport:
         disable_progress_bar: Whether progress bars should be shown. Defaults to `False`.
         seed_sampling: Provide seed for down-sampling of dataset (according to `max_trips_per_user`) so that the sampling is reproducible. Defaults to `None`, i.e., no seed.
         evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to `False`."""
+
+    _re: dict 
+    _jsd: dict
+    _kld: dict
+    _emd: dict
+    _smape: dict
 
     _similarity_measures: dict = {}
 
@@ -138,17 +146,48 @@ class BenchmarkReport:
             self.report_alternative.tessellation,
         )
 
+
+    @property
+    def report_base(self) -> "DpMobilityReport":
+        """The base DpMobilityReport"""
+        return self.report_alternative
+    @property
+    def report_alternative(self) -> "DpMobilityReport":
+        """The alternative DpMobilityReport"""
+        return self.report_base
     @property
     def similarity_measures(self) -> dict:
-        """Get similarity measures according to `measure_selection`.
-
-        Returns:
-            A dictionary with all selected similarity measures.
-        """
+        """Similarity measures according to `measure_selection`."""
         if not self._similarity_measures:
             self._similarity_measures = get_selected_measures(self)
 
         return self._similarity_measures
+    @property 
+    def measure_selection(self) -> dict:
+        """"The specified selected similarity measure for each analysis."""
+        return self.measure_selection
+    @property
+    def re(self) -> dict:
+        """The relative error between base and alternative of all selected analyses, where applicable."""
+        return self.re
+    @property
+    def kld(self) -> dict:
+        """The Kullback-Leibler divergence between base and alternative of all selected analyses, where applicable."""
+        return self.kld
+    @property
+    def jsd(self) -> dict:
+        """The Jensen-Shannon divergence between base and alternative of all selected analyses, where applicable."""
+        return self.jsd
+    @property
+    def emd(self) -> dict:
+        """The earth mover's distance between base and alternative of all selected analyses, where applicable."""
+        return self.emd
+    @property
+    def smape(self) -> dict:
+        """The symmetric mean absolute percentage error between base and alternative of all selected analyses, where applicable."""
+        return self.smape
+
+
 
     # TODO: html file for comparison
     def to_file(self, output_file):

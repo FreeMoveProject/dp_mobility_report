@@ -12,3 +12,4 @@ DpMobilityReport
 BenchmarkReport
 ~~~~~~~~~~~~~~~~~~~
 .. autoclass:: dp_mobility_report.benchmark.benchmarkreport.BenchmarkReport
+	:members: re, jsd, kld, smape, emd, similarity_measures, report_base, report_alternative, measure_selection
