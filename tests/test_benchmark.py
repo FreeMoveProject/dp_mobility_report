@@ -5,25 +5,26 @@ import pytest
 
 from dp_mobility_report import DpMobilityReport
 from dp_mobility_report import constants as const
-from dp_mobility_report.benchmark import benchmarkreport
+from dp_mobility_report.benchmark import benchmarkreport, b_utils
 from dp_mobility_report.benchmark.preprocessing import combine_analysis_exclusion
 from dp_mobility_report.benchmark.similarity_measures import (
     compute_similarity_measures,
     earth_movers_distance1D,
+    get_selected_measures,
 )
 
 
 @pytest.fixture
-def proposal_dpmreport():
-    """Create a test report."""
+def alternative_dpmreport():
+    """Create an alternative test report."""
     test_data = pd.read_csv("tests/test_files/test_data.csv")
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
     return DpMobilityReport(test_data, test_tessellation, privacy_budget=1000).report
 
 
 @pytest.fixture
-def benchmark_dpmreport():
-    """Create a test report."""
+def base_dpmreport():
+    """Create a base test report."""
     test_data = pd.read_csv("tests/test_files/test_data.csv")
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
     return DpMobilityReport(test_data, test_tessellation, privacy_budget=None).report
@@ -41,7 +42,7 @@ def benchmark_report():
     test_data_alternative = pd.read_csv("tests/test_files/test_data.csv", nrows=50)
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
     return benchmarkreport.BenchmarkReport(
-        test_data, test_data_alternative, test_tessellation
+        test_data, test_tessellation, test_data_alternative
     )
 
 
@@ -98,7 +99,7 @@ def test_earth_movers_distance1D():
 
 
 def test_similarity_measures(
-    proposal_dpmreport, benchmark_dpmreport, test_tessellation
+    alternative_dpmreport, base_dpmreport, test_tessellation
 ):
 
     test_tessellation.loc[:, const.TILE_ID] = test_tessellation.tile_id.astype(str)
@@ -112,7 +113,7 @@ def test_similarity_measures(
         emd_dict,
         smape_dict,
     ) = compute_similarity_measures(
-        analysis_exclusion, proposal_dpmreport, benchmark_dpmreport, test_tessellation
+        analysis_exclusion, alternative_dpmreport, base_dpmreport, test_tessellation
     )
 
     assert isinstance(relative_error_dict, dict)
@@ -136,6 +137,26 @@ def test_unify_histogram_bins():
     # TODO
     pass
 
+
+def test_get_selected_measures(benchmark_report):
+    similarity_measures = get_selected_measures(benchmark_report)
+    assert isinstance(similarity_measures, dict)
+    assert (not None in similarity_measures.values())
+
+    # check that warning is thrown if wrong measure is set
+    ms = b_utils.default_measure_selection()
+    ms[const.TRAVEL_TIME_QUARTILES] = const.JSD
+
+    test_data = pd.read_csv("tests/test_files/test_data.csv")
+    test_data_alternative = pd.read_csv("tests/test_files/test_data.csv", nrows=50)
+    test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
+    benchmark_report = benchmarkreport.BenchmarkReport(
+        test_data, test_tessellation, test_data_alternative, measure_selection=ms
+    )
+
+    with pytest.warns(Warning):
+        similarity_measures = get_selected_measures(benchmark_report)
+    assert (None in similarity_measures.values())
+
 def test_base_report():
-    
     pass

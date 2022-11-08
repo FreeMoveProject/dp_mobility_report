@@ -7,6 +7,7 @@ from pandas import DataFrame
 from dp_mobility_report import DpMobilityReport
 from dp_mobility_report import constants as const
 from dp_mobility_report.benchmark import preprocessing
+from dp_mobility_report.benchmark import b_utils
 from dp_mobility_report.benchmark.similarity_measures import (
     compute_similarity_measures,
     get_selected_measures,
@@ -46,10 +47,7 @@ class BenchmarkReport:
         seed_sampling: Provide seed for down-sampling of dataset (according to `max_trips_per_user`) so that the sampling is reproducible. Defaults to `None`, i.e., no seed.
         evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to `False`."""
 
-    report_alternative: DpMobilityReport
-    report_base: DpMobilityReport
-
-    similarity_measures: dict
+    _similarity_measures: dict
 
     def __init__(
         self,        
@@ -58,7 +56,7 @@ class BenchmarkReport:
         df_alternative: Optional[DataFrame] = None,
         privacy_budget_base: Optional[Union[int, float]] = None,
         privacy_budget_alternative: Optional[Union[int, float]] = None,
-        measure_selection: Union[dict, str] = const.JSD,  # TODO: set default
+        measure_selection: dict = None,
         user_privacy_base: bool = True,
         user_privacy_alternative: bool = True,
         max_trips_per_user_base: Optional[int] = None,
@@ -130,46 +128,32 @@ class BenchmarkReport:
             self.report_base.analysis_exclusion,
         )
         if measure_selection is None:
-            self.measure_selection = default_measure_selection()
+            self.measure_selection = b_utils.default_measure_selection()
         else:
-            self.measure_selection = preprocessing.validate_measure_selection(measure_selection)
+            #self.measure_selection = preprocessing.validate_measure_selection(measure_selection)
+            self.measure_selection = measure_selection
+            
         self.re, self.kld, self.jsd, self.emd, self.smape = compute_similarity_measures(
             self.analysis_exclusion,
             self.report_alternative.report,
             self.report_base.report,
             self.report_alternative.tessellation,
         )
-        self.similarity_measures = get_selected_measures(self)
+
+    @property
+    def similarity_measures(self) -> dict:
+        """Get similarity measures according to `measure_selection`.
+
+        Returns:
+            A dictionary with all selected similarity measures.
+        """
+        if not self._similarity_measures:
+            self._similarity_measures = self.similarity_measures = get_selected_measures(self)
+
+        return self._similarity_measures
 
     # TODO: html file for comparison
     def to_file(self, output_file):
         pass
-
-
-def default_measure_selection() -> dict: 
-    return {
-        const.DS_STATISTICS: const.RE,
-        const.MISSING_VALUES: const.RE,
-        const.TRIPS_OVER_TIME: const.JSD,
-        const.TRIPS_PER_WEEKDAY: const.JSD,
-        const.TRIPS_PER_HOUR: const.JSD,
-        const.VISITS_PER_TILE: const.EMD,
-        const.VISITS_PER_TILE_OUTLIERS: const.RE,
-        const.VISITS_PER_TILE_TIMEWINDOW: const.EMD,
-        const.OD_FLOWS: const.JSD,
-        const.TRAVEL_TIME: const.JSD,
-        const.TRAVEL_TIME_QUARTILES: const.SMAPE,
-        const.JUMP_LENGTH: const.JSD,
-        const.JUMP_LENGTH_QUARTILES: const.SMAPE,
-        const.TRIPS_PER_USER: const.EMD,
-        const.TRIPS_PER_USER_QUARTILES: const.SMAPE, 
-        const.USER_TIME_DELTA_QUARTILES: const.SMAPE,
-        const.RADIUS_OF_GYRATION: const.JSD,
-        const.RADIUS_OF_GYRATION_QUARTILES: const.SMAPE,
-        #const.USER_TILE_COUNT: const.EMD, 
-        const.USER_TILE_COUNT_QUARTILES: const.SMAPE,
-        const.MOBILITY_ENTROPY: const.JSD,
-        const.MOBILITY_ENTROPY_QUARTILES: const.SMAPE
-    }
 
 

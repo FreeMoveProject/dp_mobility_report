@@ -99,6 +99,18 @@ PREC_DATE = "date"
 PREC_WEEK = "week"
 PREC_MONTH = "month"
 
+# ds_statistics elements
+N_RECORDS = "n_records"
+N_TRIPS = "n_trips"
+N_COMPLETE_TRIPS = "n_complete_trips"
+N_INCOMPLETE_TRIPS = "n_incomplete_trips"
+N_USERS = "n_users"
+N_LOCATIONS = "n_locations"
+DS_STATISTICS_ELEMENTS = [N_RECORDS, N_TRIPS, N_COMPLETE_TRIPS, N_INCOMPLETE_TRIPS, N_USERS, N_LOCATIONS]
+
+# missing_values elements
+MISSING_VALUES_ELEMENTS = [UID, TID, DATETIME, LAT, LNG]
+
 # SIMILARITY MEASURES
 RE = "relative_error"
 JSD = "jensen_shannon_divergence"

@@ -103,33 +103,33 @@ def render_dataset_statistics(dataset_statistics: DictSection) -> str:
     dataset_stats_list = [
         {
             "name": "Number of records",
-            "estimate": fmt(data["n_records"]),
-            "margin_of_error": fmt_moe(moe["records"]),
+            "estimate": fmt(data[const.N_RECORDS]),
+            "margin_of_error": fmt_moe(moe[const.N_RECORDS]),
         },
         {
             "name": "Distinct trips",
-            "estimate": fmt(data["n_trips"]),
-            "margin_of_error": fmt_moe(moe["trips"]),
+            "estimate": fmt(data[const.N_TRIPS]),
+            "margin_of_error": fmt_moe(moe[const.N_TRIPS]),
         },
         {
             "name": "Number of complete trips (start and and point)",
-            "estimate": fmt(data["n_complete_trips"]),
-            "margin_of_error": fmt_moe(moe["complete_trips"]),
+            "estimate": fmt(data[const.N_COMPLETE_TRIPS]),
+            "margin_of_error": fmt_moe(moe[const.N_COMPLETE_TRIPS]),
         },
         {
             "name": "Number of incomplete trips (single point)",
-            "estimate": fmt(data["n_incomplete_trips"]),
-            "margin_of_error": fmt_moe(moe["incomplete_trips"]),
+            "estimate": fmt(data[const.N_INCOMPLETE_TRIPS]),
+            "margin_of_error": fmt_moe(moe[const.N_INCOMPLETE_TRIPS]),
         },
         {
             "name": "Distinct users",
-            "estimate": fmt(data["n_users"]),
-            "margin_of_error": fmt_moe(moe["users"]),
+            "estimate": fmt(data[const.N_USERS]),
+            "margin_of_error": fmt_moe(moe[const.N_USERS]),
         },
         {
             "name": "Distinct locations (lat & lon combination)",
-            "estimate": fmt(data["n_locations"]),
-            "margin_of_error": fmt_moe(moe["locations"]),
+            "estimate": fmt(data[const.N_LOCATIONS]),
+            "margin_of_error": fmt_moe(moe[const.N_LOCATIONS]),
         },
     ]
 

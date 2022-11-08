@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, TYPE_CHECKING
 
 import cv2
 import numpy as np
@@ -7,8 +7,13 @@ from haversine import Unit, haversine
 from scipy.spatial import distance
 from scipy.stats import entropy, wasserstein_distance
 
-from dp_mobility_report import constants as const
+import warnings
 
+from dp_mobility_report import constants as const
+from dp_mobility_report.benchmark import b_utils
+
+if TYPE_CHECKING:
+    from dp_mobility_report import BenchmarkReport
 
 def _moving_average(arr: np.array, size: int) -> np.array:
     return np.convolve(arr, np.ones(size), "valid") / size
@@ -544,6 +549,31 @@ def compute_similarity_measures(
     return relative_error_dict, kld_dict, jsd_dict, emd_dict, smape_dict
 
 
-def get_selected_measures(benchmarkreport):
-    #TODO check if measure exist, otherwise raise warning
-    pass
+def get_selected_measures(benchmarkreport: "BenchmarkReport") -> dict:
+    similarity_measures = {}
+    
+    for analysis in benchmarkreport.measure_selection.keys():
+        selected_measure = benchmarkreport.measure_selection[analysis]
+        try:
+            if selected_measure == const.RE:
+                if (analysis == const.DS_STATISTICS): 
+                    for element in const.DS_STATISTICS_ELEMENTS:
+                        similarity_measures[element] = benchmarkreport.re[element]
+                elif (analysis == const.MISSING_VALUES):
+                    for element in const.MISSING_VALUES_ELEMENTS:
+                        similarity_measures[element] = benchmarkreport.re[element]
+                else:
+                    similarity_measures[analysis] = benchmarkreport.re[analysis]
+            if selected_measure == const.KLD:
+                similarity_measures[analysis] = benchmarkreport.kld[analysis]
+            if selected_measure == const.JSD:
+                similarity_measures[analysis] = benchmarkreport.jsd[analysis]
+            if selected_measure == const.EMD:
+                similarity_measures[analysis] = benchmarkreport.emd[analysis]
+            if selected_measure == const.SMAPE:
+                similarity_measures[analysis] = benchmarkreport.smape[analysis]
+        except:
+            warnings.warn(f"{selected_measure} for {analysis} does not exist. Value for {analysis} in `self.similarity_measures` is set to `None`.")
+            similarity_measures[analysis] = None
+
+    return similarity_measures
