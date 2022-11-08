@@ -97,21 +97,20 @@ This example creates a benchmark report with similarity measures for two mobilit
         tessellation = gpd.read_file("tessellation.gpkg")
 
         benchmark_report = BenchmarkReport(
-                df_base=df_base, 
-                tesselation=tessellation,
-                df_alternative=df_alternative)
+            df_base=df_base, tesselation=tessellation, df_alternative=df_alternative
+        )
 
         # Dictionary containing the similarity measures for each analysis
-        similarity_measures = benchmark_report.similarity_measures 
+        similarity_measures = benchmark_report.similarity_measures
         # The measure selection indicates which similarity measure
         # (e.g. KLD, JSD, EMD, RE, SMAPE) has been selected for each analysis
         measure_selection = benchmark_report.measure_selection
 
-        # If you do not want to access the selection of similarity measures 
-        # but e.g. the Jensen-Shannon divergence for all analyses: 
+        # If you do not want to access the selection of similarity measures
+        # but e.g. the Jensen-Shannon divergence for all analyses:
         jsd = benchmark_report.jsd
 
-        #benchmark_report.to_file("my_benchmark_mobility_report.html") 
+        # benchmark_report.to_file("my_benchmark_mobility_report.html")
 
 
 The parameter ``measure_selection`` specifies which similarity measures should be chosen for the similarity_measures dictionary that the BenchmarkReport returns. The default is set to a specific set of similarity measures for each analysis which can be accessed by ``dp_mobility_report.default_measure_selection()``. 
@@ -125,10 +124,11 @@ An easy way to overwrite the default measure selection is the following:
         custom_measure_selection[const.VISITS_PER_TILE] = const.JSD
 
         benchmark_report = BenchmarkReport(
-                df_base=df_base, 
-                tesselation=tessellation,
-                df_alternative=df_alternative, 
-                measure_selection=custom_measure_selection)
+            df_base=df_base,
+            tesselation=tessellation,
+            df_alternative=df_alternative,
+            measure_selection=custom_measure_selection,
+        )
 
 
 
@@ -148,16 +148,17 @@ This example creates a BenchmarkReport with similarity measures for the same mob
         tessellation = gpd.read_file("tessellation.gpkg")
 
         benchmark_report = BenchmarkReport(
-                df_base=df_base, 
-                tesselation=tessellation, 
-                privacy_budget_base=None, 
-                privacy_budget_alternative=5, 
-                max_trips_per_user_base=None, 
-                max_trips_per_user_alternative=4)
+            df_base=df_base,
+            tesselation=tessellation,
+            privacy_budget_base=None,
+            privacy_budget_alternative=5,
+            max_trips_per_user_base=None,
+            max_trips_per_user_alternative=4,
+        )
 
         similarity_measures = benchmark_report.similarity_measures
 
-        #benchmark_report.to_file("my_benchmark_mobility_report.html") 
+        # benchmark_report.to_file("my_benchmark_mobility_report.html")
 
 
 
