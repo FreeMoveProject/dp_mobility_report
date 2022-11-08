@@ -28,30 +28,30 @@ class DpMobilityReport:
         df: `DataFrame` containing the mobility data. Expected columns: User ID `uid`, trip ID `tid`, timestamp `datetime` (or `int`to indicate sequence position, if dataset only consists of sequences without timestamps), latitude `lat` and longitude `lng` in CRS EPSG:4326.
         tessellation: Geopandas `GeoDataFrame` containing the tessellation for spatial aggregations. Expected columns: `tile_id`. If tessellation is not provided in the expected default CRS EPSG:4326, it will automatically be transformed. If no tessellation is provided, all analyses based on the tessellation will automatically be removed.
         privacy_budget: privacy_budget for the differentially private report. Defaults to `None`, i.e., no privacy guarantee is provided.
-        user_privacy: Whether item-level or user-level privacy is applied. Defaults to True (user-level privacy).
-        max_trips_per_user: maximum number of trips a user shall contribute to the data. Dataset will be sampled accordingly. Defaults to `None`, i.e., all trips are used. This implies that the actual maximum number of trips per user will be used according to the data, though this violates Differential Privacy.
+        user_privacy: Whether item-level or user-level privacy is applied. Defaults to `True` (user-level privacy).
+        max_trips_per_user: Maximum number of trips a user shall contribute to the data. Dataset will be sampled accordingly. Defaults to `None`, i.e., all trips are used. This implies that the actual maximum number of trips per user will be used according to the data, though this violates Differential Privacy.
         analysis_selection:  Select only needed analyses. A selection reduces computation time and leaves more privacy budget
             for higher accuracy of other analyses. `analysis_selection` takes a list of all analyses to be included. Alternatively, a list of analyses to be excluded can be set with `analysis_exclusion'.
             Either entire segments can be included: `const.OVERVIEW`, `const.PLACE_ANALYSIS`, `const.OD_ANALYSIS`, `const.USER_ANALYSIS`
             or any single analysis can be included: `const.DS_STATISTICS`, `const.MISSING_VALUES`, `const.TRIPS_OVER_TIME`, `const.TRIPS_PER_WEEKDAY`, `const.TRIPS_PER_HOUR`, `const.VISITS_PER_TILE`, `const.VISITS_PER_TILE_TIMEWINDOW`, `const.OD_FLOWS`, `const.TRAVEL_TIME`, `const.JUMP_LENGTH`, `const.TRIPS_PER_USER`, `const.USER_TIME_DELTA`, `const.RADIUS_OF_GYRATION`, `const.USER_TILE_COUNT`, `const.MOBILITY_ENTROPY`
-            Default is None, i.e., all analyses are included.
+            Default is None, i.e., all analyses are included. #TODO check for completeness
         analysis_exclusion: Ignored, if `analysis_selection' is set! `analysis_exclusion` takes a list of all analyses to be excluded.
             Either entire segments can be excluded: `const.OVERVIEW`, `const.PLACE_ANALYSIS`, `const.OD_ANALYSIS`, `const.USER_ANALYSIS`
             or any single analysis can be excluded: `const.DS_STATISTICS`, `const.MISSING_VALUES`, `const.TRIPS_OVER_TIME`, `const.TRIPS_PER_WEEKDAY`, `const.TRIPS_PER_HOUR`, `const.VISITS_PER_TILE`, `const.VISITS_PER_TILE_TIMEWINDOW`, `const.OD_FLOWS`, `const.TRAVEL_TIME`, `const.JUMP_LENGTH`, `const.TRIPS_PER_USER`, `const.USER_TIME_DELTA`, `const.RADIUS_OF_GYRATION`, `const.USER_TILE_COUNT`, `const.MOBILITY_ENTROPY`
-        budget_split: `dict`to customize how much privacy budget is assigned to which analysis. Each key needs to be named according to an analysis and the value needs to be an integer indicating the weight for the privacy budget.
+        budget_split: `dict` to customize how much privacy budget is assigned to which analysis. Each key needs to be named according to an analysis and the value needs to be an integer indicating the weight for the privacy budget.
             If no weight is assigned, a default weight of 1 is set.
             For example, if `budget_split = {const.VISITS_PER_TILE: 10}, then the privacy budget for `visits_per_tile` is 10 times higher than for every other analysis, which all get a default weight of 1.
             Possible `dict` keys (all analyses): `const.DS_STATISTICS`, `const.MISSING_VALUES`, `const.TRIPS_OVER_TIME`, `const.TRIPS_PER_WEEKDAY`, `const.TRIPS_PER_HOUR`, `const.VISITS_PER_TILE`, `const.VISITS_PER_TILE_TIMEWINDOW`, `const.OD_FLOWS`, `const.TRAVEL_TIME`, `const.JUMP_LENGTH`, `const.TRIPS_PER_USER`, `const.USER_TIME_DELTA`, `const.RADIUS_OF_GYRATION`, `const.USER_TILE_COUNT`, `const.MOBILITY_ENTROPY`
-        timewindows: List of hours as `int` that define the timewindows for the spatial analysis for single time windows. Defaults to [2, 6, 10, 14, 18, 22].
-        max_travel_time: Upper bound for travel time histogram. If None is given, no upper bound is set. Defaults to None.
-        bin_range_travel_time: The range a single histogram bin spans for travel time (e.g., 5 for 5 min bins). If None is given, the histogram bins will be determined automatically. Defaults to None.
-        max_jump_length: Upper bound for jump length histogram. If None is given, no upper bound is set. Defaults to None.
-        bin_range_jump_length: The range a single histogram bin spans for jump length (e.g., 1 for 1 km bins). If None is given, the histogram bins will be determined automatically. Defaults to None.
-        max_radius_of_gyration: Upper bound for radius of gyration histogram. If None is given, no upper bound is set. Defaults to None.
-        bin_range_radius_of_gyration: The range a single histogram bin spans for the radius of gyration (e.g., 1 for 1 km bins). If None is given, the histogram bins will be determined automatically. Defaults to None.
-        disable_progress_bar: Whether progress bars should be shown. Defaults to False.
-        seed_sampling: Provide seed for down-sampling of dataset (according to 'max_trips_per_user') so that the sampling is reproducible. Defaults to 'None', i.e., no seed.
-        evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to False."""
+        timewindows: List of hours as `int` that define the timewindows for the spatial analysis for single time windows. Defaults to `[2, 6, 10, 14, 18, 22]`.
+        max_travel_time: Upper bound for travel time histogram. If `None` is given, no upper bound is set. Defaults to `None`.
+        bin_range_travel_time: The range a single histogram bin spans for travel time (e.g., 5 for 5 min bins). If `None` is given, the histogram bins will be determined automatically. Defaults to `None`.
+        max_jump_length: Upper bound for jump length histogram. If `None` is given, no upper bound is set. Defaults to `None`.
+        bin_range_jump_length: The range a single histogram bin spans for jump length (e.g., 1 for 1 km bins). If `None` is given, the histogram bins will be determined automatically. Defaults to `None`.
+        max_radius_of_gyration: Upper bound for radius of gyration histogram. If `None` is given, no upper bound is set. Defaults to `None`.
+        bin_range_radius_of_gyration: The range a single histogram bin spans for the radius of gyration (e.g., 1 for 1 km bins). If `None` is given, the histogram bins will be determined automatically. Defaults to `None`.
+        disable_progress_bar: Whether progress bars should be shown. Defaults to `False`.
+        seed_sampling: Provide seed for down-sampling of dataset (according to 'max_trips_per_user') so that the sampling is reproducible. Defaults to `None`, i.e., no seed.
+        evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to `False`."""
 
     _report: dict = {}
     _html: str = ""
