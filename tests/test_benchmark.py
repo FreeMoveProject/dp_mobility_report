@@ -5,7 +5,7 @@ import pytest
 
 from dp_mobility_report import DpMobilityReport
 from dp_mobility_report import constants as const
-from dp_mobility_report.benchmark import benchmarkreport, b_utils
+from dp_mobility_report.benchmark import b_utils, benchmarkreport
 from dp_mobility_report.benchmark.preprocessing import combine_analysis_exclusion
 from dp_mobility_report.benchmark.similarity_measures import (
     compute_similarity_measures,
@@ -42,7 +42,9 @@ def benchmark_report():
     test_data_alternative = pd.read_csv("tests/test_files/test_data.csv", nrows=50)
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
     return benchmarkreport.BenchmarkReport(
-        df_base=test_data, tessellation= test_tessellation, df_alternative= test_data_alternative
+        df_base=test_data,
+        tessellation=test_tessellation,
+        df_alternative=test_data_alternative,
     )
 
 
@@ -59,9 +61,7 @@ def test_histogram_bin_sizes(benchmark_report):
     # ) == list(benchmark_report.report_base.report[const.TRIPS_PER_USER].data[1])
     assert list(
         benchmark_report.report_alternative.report[const.RADIUS_OF_GYRATION].data[1]
-    ) == list(
-        benchmark_report.report_base.report[const.RADIUS_OF_GYRATION].data[1]
-    )
+    ) == list(benchmark_report.report_base.report[const.RADIUS_OF_GYRATION].data[1])
     # assert list(
     #     benchmark_report.report_alternative.report[const.MOBILITY_ENTROPY].data[1]
     # ) == list(benchmark_report.report_base.report[const.MOBILITY_ENTROPY].data[1])
@@ -98,9 +98,7 @@ def test_earth_movers_distance1D():
     )
 
 
-def test_similarity_measures(
-    alternative_dpmreport, base_dpmreport, test_tessellation
-):
+def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessellation):
 
     test_tessellation.loc[:, const.TILE_ID] = test_tessellation.tile_id.astype(str)
 
@@ -141,7 +139,7 @@ def test_unify_histogram_bins():
 def test_get_selected_measures(benchmark_report):
     similarity_measures = get_selected_measures(benchmark_report)
     assert isinstance(similarity_measures, dict)
-    assert (not None in similarity_measures.values())
+    assert None not in similarity_measures.values()
 
     # check that warning is thrown if wrong measure is set
     ms = b_utils.default_measure_selection()
@@ -156,7 +154,8 @@ def test_get_selected_measures(benchmark_report):
 
     with pytest.warns(Warning):
         similarity_measures = get_selected_measures(benchmark_report)
-    assert (None in similarity_measures.values())
+    assert None in similarity_measures.values()
+
 
 def test_benchmark_report(benchmark_report):
 

@@ -1,4 +1,5 @@
-from typing import Union, TYPE_CHECKING
+import warnings
+from typing import TYPE_CHECKING, Union
 
 import cv2
 import numpy as np
@@ -7,13 +8,11 @@ from haversine import Unit, haversine
 from scipy.spatial import distance
 from scipy.stats import entropy, wasserstein_distance
 
-import warnings
-
 from dp_mobility_report import constants as const
-from dp_mobility_report.benchmark import b_utils
 
 if TYPE_CHECKING:
     from dp_mobility_report import BenchmarkReport
+
 
 def _moving_average(arr: np.array, size: int) -> np.array:
     return np.convolve(arr, np.ones(size), "valid") / size
@@ -74,9 +73,9 @@ def relative_error(true: int, estimate: int) -> int:
 def all_relative_errors(
     true_dict: dict, estimate_dict: dict, round_res: bool = False
 ) -> dict:
-    re = dict()
-    for key in true_dict.data:
-        re[key] = relative_error(true_dict.data[key], estimate_dict.data[key])
+    re = {}
+    for key in true_dict:
+        re[key] = relative_error(true_dict[key], estimate_dict[key])
         if round_res:
             re[key] = round(re[key], 2)
     return re
@@ -136,31 +135,31 @@ def compute_similarity_measures(
     tessellation: pd.DataFrame,
 ):
 
-    relative_error_dict = {}
-    kld_dict = {}
-    jsd_dict = {}
-    emd_dict = {}
-    smape_dict = {}
+    relative_error_dict: dict = {}
+    kld_dict: dict = {}
+    jsd_dict: dict = {}
+    emd_dict: dict = {}
+    smape_dict: dict = {}
 
     # Statistics
     if const.DS_STATISTICS not in analysis_exclusion:
         relative_error_dict = dict(
             **relative_error_dict,
             **all_relative_errors(
-                report_base[const.DS_STATISTICS],
-                report_alternative[const.DS_STATISTICS],
+                report_base[const.DS_STATISTICS].data,
+                report_alternative[const.DS_STATISTICS].data,
                 round_res=True,
-            )
+            ),
         )
     # Missing values
     if const.MISSING_VALUES not in analysis_exclusion:
         relative_error_dict = dict(
             **relative_error_dict,
             **all_relative_errors(
-                report_base[const.MISSING_VALUES],
-                report_alternative[const.MISSING_VALUES],
+                report_base[const.MISSING_VALUES].data,
+                report_alternative[const.MISSING_VALUES].data,
                 round_res=True,
-            )
+            ),
         )
 
     # Temporal distributions
@@ -236,7 +235,8 @@ def compute_similarity_measures(
             visits_per_tile.visits_base / visits_per_tile.visits_base.sum()
         )
         rel_counts_alternative = (
-            visits_per_tile.visits_alternative / visits_per_tile.visits_alternative.sum()
+            visits_per_tile.visits_alternative
+            / visits_per_tile.visits_alternative.sum()
         )
         kld_dict[const.VISITS_PER_TILE] = entropy(
             rel_counts_base, rel_counts_alternative
@@ -268,20 +268,18 @@ def compute_similarity_measures(
             report_alternative[const.VISITS_PER_TILE].n_outliers,
         )
 
-
     # Spatio-temporal distributions
     if const.VISITS_PER_TILE_TIMEWINDOW not in analysis_exclusion:
         counts_timew_base = (
             report_base[const.VISITS_PER_TILE_TIMEWINDOW]
-            .data[
-                report_base[const.VISITS_PER_TILE_TIMEWINDOW].data.index != "None"
-            ]
+            .data[report_base[const.VISITS_PER_TILE_TIMEWINDOW].data.index != "None"]
             .unstack()
         )
         counts_timew_alternative = (
             report_alternative[const.VISITS_PER_TILE_TIMEWINDOW]
             .data[
-                report_alternative[const.VISITS_PER_TILE_TIMEWINDOW].data.index != "None"
+                report_alternative[const.VISITS_PER_TILE_TIMEWINDOW].data.index
+                != "None"
             ]
             .unstack()
         )
@@ -298,10 +296,10 @@ def compute_similarity_measures(
         counts_timew_alternative = counts_timew_alternative.reindex(index=indices)
         counts_timew_alternative.fillna(0, inplace=True)
 
-        rel_counts_timew_base = (
-            counts_timew_base / counts_timew_base.sum()
+        rel_counts_timew_base = counts_timew_base / counts_timew_base.sum()
+        rel_counts_timew_alternative = (
+            counts_timew_alternative / counts_timew_alternative.sum()
         )
-        rel_counts_timew_alternative = counts_timew_alternative / counts_timew_alternative.sum()
 
         kld_dict[const.VISITS_PER_TILE_TIMEWINDOW] = entropy(
             rel_counts_timew_base.to_numpy().flatten(),
@@ -318,9 +316,7 @@ def compute_similarity_measures(
 
         visits_per_tile_timewindow_emd = []
         # TODO visits_per_tile_timewindow should not be based on visits_per_tile and the cost_matrix from above if visits_per_tile is excluded
-        for time_window in report_base[
-            const.VISITS_PER_TILE_TIMEWINDOW
-        ].data.columns:
+        for time_window in report_base[const.VISITS_PER_TILE_TIMEWINDOW].data.columns:
             tw_base = (
                 report_base[const.VISITS_PER_TILE_TIMEWINDOW]
                 .data[time_window]
@@ -446,9 +442,8 @@ def compute_similarity_measures(
             report_alternative[const.JUMP_LENGTH].quartiles,
         )
 
-
     # User
-    #TODO bin sizes do not align
+    # TODO bin sizes do not align
     if const.TRIPS_PER_USER not in analysis_exclusion:
 
         # kld_dict[const.TRIPS_PER_USER] = entropy(
@@ -459,7 +454,7 @@ def compute_similarity_measures(
         #     report_base[const.TRIPS_PER_USER].data[0],
         #     report_alternative[const.TRIPS_PER_USER].data[0],
         # )
-        #TODO discussion: potentially different results depending on histogram bin sizes
+        # TODO discussion: potentially different results depending on histogram bin sizes
         emd_dict[const.TRIPS_PER_USER] = earth_movers_distance1D(
             report_base[const.TRIPS_PER_USER].data,
             report_alternative[const.TRIPS_PER_USER].data,
@@ -522,7 +517,7 @@ def compute_similarity_measures(
             report_alternative[const.USER_TILE_COUNT].quartiles,
         )
 
-    #TODO create similar bins in mobility report from 0 to 1 with 0.1 bins
+    # TODO create similar bins in mobility report from 0 to 1 with 0.1 bins
     if const.MOBILITY_ENTROPY not in analysis_exclusion:
         kld_dict[const.MOBILITY_ENTROPY] = entropy(
             report_base[const.MOBILITY_ENTROPY].data[0],
@@ -551,15 +546,15 @@ def compute_similarity_measures(
 
 def get_selected_measures(benchmarkreport: "BenchmarkReport") -> dict:
     similarity_measures = {}
-    
+
     for analysis in benchmarkreport.measure_selection.keys():
         selected_measure = benchmarkreport.measure_selection[analysis]
         try:
             if selected_measure == const.RE:
-                if (analysis == const.DS_STATISTICS): 
+                if analysis == const.DS_STATISTICS:
                     for element in const.DS_STATISTICS_ELEMENTS:
                         similarity_measures[element] = benchmarkreport.re[element]
-                elif (analysis == const.MISSING_VALUES):
+                elif analysis == const.MISSING_VALUES:
                     for element in const.MISSING_VALUES_ELEMENTS:
                         similarity_measures[element] = benchmarkreport.re[element]
                 else:
@@ -572,8 +567,10 @@ def get_selected_measures(benchmarkreport: "BenchmarkReport") -> dict:
                 similarity_measures[analysis] = benchmarkreport.emd[analysis]
             if selected_measure == const.SMAPE:
                 similarity_measures[analysis] = benchmarkreport.smape[analysis]
-        except:
-            warnings.warn(f"{selected_measure} for {analysis} does not exist. Value for {analysis} in `self.similarity_measures` is set to `None`.")
+        except KeyError:
+            warnings.warn(
+                f"{selected_measure} for {analysis} does not exist. Value for {analysis} in `self.similarity_measures` is set to `None`."
+            )
             similarity_measures[analysis] = None
 
     return similarity_measures

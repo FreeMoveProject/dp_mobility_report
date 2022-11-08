@@ -1,21 +1,20 @@
+from pathlib import Path
 from typing import List, Optional, Union
 
 import numpy as np
 from geopandas import GeoDataFrame
 from pandas import DataFrame
 
-from dp_mobility_report import DpMobilityReport
-from dp_mobility_report import constants as const
-from dp_mobility_report.benchmark import preprocessing
-from dp_mobility_report.benchmark import b_utils
+from dp_mobility_report.benchmark import b_utils, preprocessing
 from dp_mobility_report.benchmark.similarity_measures import (
     compute_similarity_measures,
     get_selected_measures,
 )
+from dp_mobility_report.dpmreport import DpMobilityReport
 
 
 class BenchmarkReport:
-    """Evaluate the similarity of two (differentially private) mobility reports from one or two mobility datasets. 
+    """Evaluate the similarity of two (differentially private) mobility reports from one or two mobility datasets.
         This can be based on two datasets (`df_base` and `df_alternative`) or one dataset (`df_base`)) with different privacy settings.
         The arguments `df`, `privacy_budget`, `user_privacy`, `max_trips_per_user` and `budget_split` can differ for the two datasets set with the according ending `_base` and `_alternative`. The other arguments are the same for both reports.
         For the evaluation, similarity measures (namely the relative error (RE), Jensen-Shannon divergence (JSD), Kullback-Leibler divergence (KLD), symmetric mean absolute percentage error (SMAPE) and the earth mover's distance (EMD)) are computed to quantify the statistical similarity for each analysis.
@@ -27,7 +26,7 @@ class BenchmarkReport:
         df_alternative: `DataFrame` containing the alternative mobility data to be compared against the baseline dataset, see argument `df` of `DpMobilityReport`. If `None`, `df_base` is used for both reports.
         privacy_budget_base: privacy_budget for the differentially private base report. Defaults to `None`, i.e., no privacy guarantee is provided.
         privacy_budget_alternative: privacy_budget for the differentially private alternative report. Defaults to `None`, i.e., no privacy guarantee is provided.
-        measure_selection: Select similarity measure for each analysis. If `None`, the default from `default_measure_selection()` will be used. 
+        measure_selection: Select similarity measure for each analysis. If `None`, the default from `default_measure_selection()` will be used.
         user_privacy_base: Whether item-level or user-level privacy is applied for the base report. Defaults to `True` (user-level privacy).
         user_privacy_alternative: Whether item-level or user-level privacy is applied for the alternative report. Defaults to `True` (user-level privacy).
         max_trips_per_user_base: maximum number of trips a user shall contribute to the data. Dataset will be sampled accordingly. Defaults to `None`, i.e., all trips included.
@@ -47,17 +46,19 @@ class BenchmarkReport:
         seed_sampling: Provide seed for down-sampling of dataset (according to `max_trips_per_user`) so that the sampling is reproducible. Defaults to `None`, i.e., no seed.
         evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to `False`."""
 
-    _re: dict 
+    _re: dict
     _jsd: dict
     _kld: dict
     _emd: dict
     _smape: dict
-
     _similarity_measures: dict = {}
+    _measure_selection: dict
+    _report_base: DpMobilityReport
+    _report_alternative: DpMobilityReport
 
     def __init__(
-        self,        
-        df_base: DataFrame,        
+        self,
+        df_base: DataFrame,
         tessellation: Optional[GeoDataFrame] = None,
         df_alternative: Optional[DataFrame] = None,
         privacy_budget_base: Optional[Union[int, float]] = None,
@@ -83,7 +84,7 @@ class BenchmarkReport:
         evalu: bool = False,
     ) -> None:
 
-        self.report_alternative = DpMobilityReport(
+        self._report_alternative = DpMobilityReport(
             df_alternative,
             tessellation,
             privacy_budget_alternative,
@@ -103,9 +104,9 @@ class BenchmarkReport:
             seed_sampling,
             evalu,
         )
-        self.report_alternative.report
+        self._report_alternative.report
 
-        self.report_base = DpMobilityReport(
+        self._report_base = DpMobilityReport(
             df_base,
             tessellation,
             privacy_budget_base,
@@ -127,34 +128,46 @@ class BenchmarkReport:
         )
         self.report_base.report
 
-        self.report_base._report, self.report_alternative._report = preprocessing.unify_histogram_bins(self.report_base.report, self.report_alternative.report)
+        (
+            self.report_base._report,
+            self.report_alternative._report,
+        ) = preprocessing.unify_histogram_bins(
+            self.report_base.report, self.report_alternative.report
+        )
 
         self.analysis_exclusion = preprocessing.combine_analysis_exclusion(
             self.report_alternative.analysis_exclusion,
             self.report_base.analysis_exclusion,
         )
         if measure_selection is None:
-            self.measure_selection = b_utils.default_measure_selection()
+            self._measure_selection = b_utils.default_measure_selection()
         else:
-            #self.measure_selection = preprocessing.validate_measure_selection(measure_selection)
-            self.measure_selection = measure_selection
-            
-        self.re, self.kld, self.jsd, self.emd, self.smape = compute_similarity_measures(
+            # self.measure_selection = preprocessing.validate_measure_selection(measure_selection)
+            self._measure_selection = measure_selection
+
+        (
+            self._re,
+            self._kld,
+            self._jsd,
+            self._emd,
+            self._smape,
+        ) = compute_similarity_measures(
             self.analysis_exclusion,
             self.report_alternative.report,
             self.report_base.report,
             self.report_alternative.tessellation,
         )
 
-
     @property
     def report_base(self) -> "DpMobilityReport":
         """The base DpMobilityReport"""
-        return self.report_alternative
+        return self._report_alternative
+
     @property
     def report_alternative(self) -> "DpMobilityReport":
         """The alternative DpMobilityReport"""
-        return self.report_base
+        return self._report_base
+
     @property
     def similarity_measures(self) -> dict:
         """Similarity measures according to `measure_selection`."""
@@ -162,35 +175,37 @@ class BenchmarkReport:
             self._similarity_measures = get_selected_measures(self)
 
         return self._similarity_measures
-    @property 
+
+    @property
     def measure_selection(self) -> dict:
-        """"The specified selected similarity measure for each analysis."""
-        return self.measure_selection
+        """ "The specified selected similarity measure for each analysis."""
+        return self._measure_selection
+
     @property
     def re(self) -> dict:
         """The relative error between base and alternative of all selected analyses, where applicable."""
-        return self.re
+        return self._re
+
     @property
     def kld(self) -> dict:
         """The Kullback-Leibler divergence between base and alternative of all selected analyses, where applicable."""
-        return self.kld
+        return self._kld
+
     @property
     def jsd(self) -> dict:
         """The Jensen-Shannon divergence between base and alternative of all selected analyses, where applicable."""
-        return self.jsd
+        return self._jsd
+
     @property
     def emd(self) -> dict:
         """The earth mover's distance between base and alternative of all selected analyses, where applicable."""
-        return self.emd
+        return self._emd
+
     @property
     def smape(self) -> dict:
         """The symmetric mean absolute percentage error between base and alternative of all selected analyses, where applicable."""
-        return self.smape
-
-
+        return self._smape
 
     # TODO: html file for comparison
-    def to_file(self, output_file):
+    def to_file(self, output_file: Union[str, Path]) -> None:
         pass
-
-
