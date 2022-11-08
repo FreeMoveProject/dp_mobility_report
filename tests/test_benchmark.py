@@ -42,7 +42,7 @@ def benchmark_report():
     test_data_alternative = pd.read_csv("tests/test_files/test_data.csv", nrows=50)
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
     return benchmarkreport.BenchmarkReport(
-        test_data, test_tessellation, test_data_alternative
+        df_base=test_data, tessellation= test_tessellation, df_alternative= test_data_alternative
     )
 
 
@@ -158,5 +158,12 @@ def test_get_selected_measures(benchmark_report):
         similarity_measures = get_selected_measures(benchmark_report)
     assert (None in similarity_measures.values())
 
-def test_base_report():
-    pass
+def test_benchmark_report(benchmark_report):
+
+    assert isinstance(benchmark_report.emd, dict)
+    assert isinstance(benchmark_report.jsd, dict)
+    assert isinstance(benchmark_report.kld, dict)
+    assert isinstance(benchmark_report.re, dict)
+    assert isinstance(benchmark_report.smape, dict)
+    assert isinstance(benchmark_report.measure_selection, dict)
+    assert isinstance(benchmark_report.similarity_measures, dict)

@@ -13,8 +13,6 @@ from dp_mobility_report.benchmark.similarity_measures import (
     get_selected_measures,
 )
 
-# TODO: measure selection
-
 
 class BenchmarkReport:
     """Generate two (differentially private) mobility reports from one or two mobility datasets. The report will be generated as an HTML file, using the `.to_file()` method.
@@ -27,7 +25,7 @@ class BenchmarkReport:
         df_alternative: `DataFrame` containing the alternative mobility data to be compared against the baseline dataset, see argument `df` of `DpMobilityReport`. If `None`, `df_base` is used for both reports.
         privacy_budget_base: privacy_budget for the differentially private base report. Defaults to `None`, i.e., no privacy guarantee is provided.
         privacy_budget_alternative: privacy_budget for the differentially private alternative report. Defaults to `None`, i.e., no privacy guarantee is provided.
-        measure_selection: TODO
+        measure_selection: Select similarity measure for each analysis. If `None`, the default from `default_measure_selection()` will be used. 
         user_privacy_base: Whether item-level or user-level privacy is applied for the base report. Defaults to `True` (user-level privacy).
         user_privacy_alternative: Whether item-level or user-level privacy is applied for the alternative report. Defaults to `True` (user-level privacy).
         max_trips_per_user_base: maximum number of trips a user shall contribute to the data. Dataset will be sampled accordingly. Defaults to `None`, i.e., all trips included.
@@ -47,7 +45,7 @@ class BenchmarkReport:
         seed_sampling: Provide seed for down-sampling of dataset (according to `max_trips_per_user`) so that the sampling is reproducible. Defaults to `None`, i.e., no seed.
         evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to `False`."""
 
-    _similarity_measures: dict
+    _similarity_measures: dict = {}
 
     def __init__(
         self,        
@@ -148,7 +146,7 @@ class BenchmarkReport:
             A dictionary with all selected similarity measures.
         """
         if not self._similarity_measures:
-            self._similarity_measures = self.similarity_measures = get_selected_measures(self)
+            self._similarity_measures = get_selected_measures(self)
 
         return self._similarity_measures
 

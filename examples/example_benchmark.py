@@ -20,14 +20,15 @@ benchmarkeval = BenchmarkReport(
     df_alternative=df,
     df_base=df,
     tessellation=tessellation,
-    privacy_budget_alternative=15.0,
     privacy_budget_base=None,
-    user_privacy_alternative=True,
+    privacy_budget_alternative=15.0,
     user_privacy_base=True,
-    max_trips_per_user_alternative=10,
+    user_privacy_alternative=True,
     max_trips_per_user_base=10,
+    max_trips_per_user_alternative=10,
 )
 
 measures = benchmarkeval.similarity_measures
 print(measures)
+
 # measures.to_file(os.path.join(path_html_output, "measures.html"))
