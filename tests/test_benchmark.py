@@ -5,7 +5,7 @@ import pytest
 
 from dp_mobility_report import DpMobilityReport
 from dp_mobility_report import constants as const
-from dp_mobility_report.benchmark import b_utils, benchmarkreport
+from dp_mobility_report.benchmark import benchmarkreport, b_utils
 from dp_mobility_report.benchmark.preprocessing import combine_analysis_exclusion
 from dp_mobility_report.benchmark.similarity_measures import (
     compute_similarity_measures,
@@ -139,7 +139,7 @@ def test_unify_histogram_bins():
 def test_get_selected_measures(benchmark_report):
     similarity_measures = get_selected_measures(benchmark_report)
     assert isinstance(similarity_measures, dict)
-    assert None not in similarity_measures.values()
+    assert not None in similarity_measures.values()
 
     # check that warning is thrown if wrong measure is set
     ms = b_utils.default_measure_selection()

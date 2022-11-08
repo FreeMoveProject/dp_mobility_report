@@ -46,15 +46,15 @@ class BenchmarkReport:
         seed_sampling: Provide seed for down-sampling of dataset (according to `max_trips_per_user`) so that the sampling is reproducible. Defaults to `None`, i.e., no seed.
         evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to `False`."""
 
+    _report_base: DpMobilityReport
+    _report_alternative: DpMobilityReport
     _re: dict
     _jsd: dict
     _kld: dict
     _emd: dict
     _smape: dict
-    _similarity_measures: dict = {}
     _measure_selection: dict
-    _report_base: DpMobilityReport
-    _report_alternative: DpMobilityReport
+    _similarity_measures: dict = {}
 
     def __init__(
         self,
@@ -84,28 +84,6 @@ class BenchmarkReport:
         evalu: bool = False,
     ) -> None:
 
-        self._report_alternative = DpMobilityReport(
-            df_alternative,
-            tessellation,
-            privacy_budget_alternative,
-            user_privacy_alternative,
-            max_trips_per_user_alternative,
-            analysis_selection,
-            analysis_exclusion,
-            budget_split_alternative,
-            timewindows,
-            max_travel_time,
-            bin_range_travel_time,
-            max_jump_length,
-            bin_range_jump_length,
-            max_radius_of_gyration,
-            bin_range_radius_of_gyration,
-            disable_progress_bar,
-            seed_sampling,
-            evalu,
-        )
-        self._report_alternative.report
-
         self._report_base = DpMobilityReport(
             df_base,
             tessellation,
@@ -127,6 +105,31 @@ class BenchmarkReport:
             evalu,
         )
         self.report_base.report
+
+        if df_alternative is None:
+            df_alternative = df_base
+
+        self._report_alternative = DpMobilityReport(
+            df_alternative,
+            tessellation,
+            privacy_budget_alternative,
+            user_privacy_alternative,
+            max_trips_per_user_alternative,
+            analysis_selection,
+            analysis_exclusion,
+            budget_split_alternative,
+            timewindows,
+            max_travel_time,
+            bin_range_travel_time,
+            max_jump_length,
+            bin_range_jump_length,
+            max_radius_of_gyration,
+            bin_range_radius_of_gyration,
+            disable_progress_bar,
+            seed_sampling,
+            evalu,
+        )
+        self.report_alternative.report
 
         (
             self.report_base._report,
@@ -155,18 +158,18 @@ class BenchmarkReport:
             self.analysis_exclusion,
             self.report_alternative.report,
             self.report_base.report,
-            self.report_alternative.tessellation,
+            self.report_base.tessellation,
         )
 
     @property
     def report_base(self) -> "DpMobilityReport":
         """The base DpMobilityReport"""
-        return self._report_alternative
+        return self._report_base
 
     @property
     def report_alternative(self) -> "DpMobilityReport":
         """The alternative DpMobilityReport"""
-        return self._report_base
+        return self._report_alternative
 
     @property
     def similarity_measures(self) -> dict:

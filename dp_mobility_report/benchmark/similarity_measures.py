@@ -70,14 +70,10 @@ def relative_error(true: int, estimate: int) -> int:
     return np.abs(true - estimate) / true
 
 
-def all_relative_errors(
-    true_dict: dict, estimate_dict: dict, round_res: bool = False
-) -> dict:
+def all_relative_errors(true_dict: dict, estimate_dict: dict) -> dict:
     re = {}
     for key in true_dict:
         re[key] = relative_error(true_dict[key], estimate_dict[key])
-        if round_res:
-            re[key] = round(re[key], 2)
     return re
 
 
@@ -148,7 +144,6 @@ def compute_similarity_measures(
             **all_relative_errors(
                 report_base[const.DS_STATISTICS].data,
                 report_alternative[const.DS_STATISTICS].data,
-                round_res=True,
             ),
         )
     # Missing values
@@ -158,7 +153,6 @@ def compute_similarity_measures(
             **all_relative_errors(
                 report_base[const.MISSING_VALUES].data,
                 report_alternative[const.MISSING_VALUES].data,
-                round_res=True,
             ),
         )
 
@@ -519,22 +513,22 @@ def compute_similarity_measures(
 
     # TODO create similar bins in mobility report from 0 to 1 with 0.1 bins
     if const.MOBILITY_ENTROPY not in analysis_exclusion:
-        kld_dict[const.MOBILITY_ENTROPY] = entropy(
-            report_base[const.MOBILITY_ENTROPY].data[0],
-            report_alternative[const.MOBILITY_ENTROPY].data[0],
-        )
-        jsd_dict[const.MOBILITY_ENTROPY] = distance.jensenshannon(
-            report_base[const.MOBILITY_ENTROPY].data[0],
-            report_alternative[const.MOBILITY_ENTROPY].data[0],
-        )
+        # kld_dict[const.MOBILITY_ENTROPY] = entropy(
+        #     report_base[const.MOBILITY_ENTROPY].data[0],
+        #     report_alternative[const.MOBILITY_ENTROPY].data[0],
+        # )
+        # jsd_dict[const.MOBILITY_ENTROPY] = distance.jensenshannon(
+        #     report_base[const.MOBILITY_ENTROPY].data[0],
+        #     report_alternative[const.MOBILITY_ENTROPY].data[0],
+        # )
         emd_dict[const.MOBILITY_ENTROPY] = earth_movers_distance1D(
             report_base[const.MOBILITY_ENTROPY].data,
             report_alternative[const.MOBILITY_ENTROPY].data,
         )
-        smape_dict[const.MOBILITY_ENTROPY] = symmetric_mape(
-            report_base[const.MOBILITY_ENTROPY].data[0],
-            report_alternative[const.MOBILITY_ENTROPY].data[0],
-        )
+        # smape_dict[const.MOBILITY_ENTROPY] = symmetric_mape(
+        #     report_base[const.MOBILITY_ENTROPY].data[0],
+        #     report_alternative[const.MOBILITY_ENTROPY].data[0],
+        # )
         # Quartiles
         smape_dict["mobility_entropy_quartiles"] = symmetric_mape(
             report_base[const.MOBILITY_ENTROPY].quartiles,
@@ -559,17 +553,17 @@ def get_selected_measures(benchmarkreport: "BenchmarkReport") -> dict:
                         similarity_measures[element] = benchmarkreport.re[element]
                 else:
                     similarity_measures[analysis] = benchmarkreport.re[analysis]
-            if selected_measure == const.KLD:
+            elif selected_measure == const.KLD:
                 similarity_measures[analysis] = benchmarkreport.kld[analysis]
-            if selected_measure == const.JSD:
+            elif selected_measure == const.JSD:
                 similarity_measures[analysis] = benchmarkreport.jsd[analysis]
-            if selected_measure == const.EMD:
+            elif selected_measure == const.EMD:
                 similarity_measures[analysis] = benchmarkreport.emd[analysis]
-            if selected_measure == const.SMAPE:
+            elif selected_measure == const.SMAPE:
                 similarity_measures[analysis] = benchmarkreport.smape[analysis]
         except KeyError:
             warnings.warn(
-                f"{selected_measure} for {analysis} does not exist. Value for {analysis} in `self.similarity_measures` is set to `None`."
+                f"The selected measure {selected_measure} for {analysis} cannot be computed. Value for {analysis} in `self.similarity_measures` is set to `None`."
             )
             similarity_measures[analysis] = None
 

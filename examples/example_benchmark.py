@@ -3,10 +3,12 @@ import os
 import geopandas as gpd
 import pandas as pd
 
+import config
+
 from dp_mobility_report.benchmark.benchmarkreport import BenchmarkReport
 
-path_data = "examples/"
-path_html_output = "examples/html"
+path_data = config.path_data
+path_html_output = config.path_html_output
 
 if not os.path.exists(path_html_output):
     os.makedirs(path_html_output)
@@ -16,19 +18,18 @@ df = pd.read_csv(os.path.join(path_data, "geolife.csv"))
 tessellation = gpd.read_file(os.path.join(path_data, "geolife_tessellation.gpkg"))
 tessellation["tile_name"] = tessellation.tile_id
 
-benchmarkeval = BenchmarkReport(
-    df_alternative=df,
+benchmarkreport = BenchmarkReport(
     df_base=df,
     tessellation=tessellation,
     privacy_budget_base=None,
     privacy_budget_alternative=15.0,
-    user_privacy_base=True,
-    user_privacy_alternative=True,
     max_trips_per_user_base=10,
     max_trips_per_user_alternative=10,
 )
 
-measures = benchmarkeval.similarity_measures
+measures = benchmarkreport.similarity_measures
 print(measures)
+
+print(benchmarkreport.measure_selection)
 
 # measures.to_file(os.path.join(path_html_output, "measures.html"))
