@@ -113,15 +113,20 @@ This example creates a benchmark report with similarity measures for two mobilit
         # benchmark_report.to_file("my_benchmark_mobility_report.html")
 
 
-The parameter ``measure_selection`` specifies which similarity measures should be chosen for the similarity_measures dictionary that the BenchmarkReport returns. The default is set to a specific set of similarity measures for each analysis which can be accessed by ``dp_mobility_report.default_measure_selection()``. 
-An easy way to overwrite the default measure selection is the following:
+The parameter ``measure_selection`` specifies which similarity measures should be chosen for the ``similarity_measures`` dictionary that is an attribute of the ``BenchmarkReport``. 
+The default is set to a specific set of similarity measures for each analysis which can be accessed by ``dp_mobility_report.default_measure_selection()``. 
+The default of single analyses can be overwritten as shown in the following:
 
 .. code-block:: python
         from dp_mobility_report import BenchmarkReport, default_measure_selection
         from dp_mobility_report import constants as const
 
-        custom_measure_selection = default_measure_selection()
-        custom_measure_selection[const.VISITS_PER_TILE] = const.JSD
+        # print the default measure selection
+        print(default_measure_selection())
+
+        # change default of EMD for visits_per_tile to JSD. 
+        # For the other analyses the default measure is remained
+        custom_measure_selection = {const.VISITS_PER_TILE: const.JSD}
 
         benchmark_report = BenchmarkReport(
             df_base=df_base,
