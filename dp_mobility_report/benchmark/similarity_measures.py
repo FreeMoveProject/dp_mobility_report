@@ -9,6 +9,7 @@ from scipy.spatial import distance
 from scipy.stats import entropy, wasserstein_distance
 
 from dp_mobility_report import constants as const
+from dp_mobility_report.benchmark.b_utils import default_measure_selection
 
 if TYPE_CHECKING:
     from dp_mobility_report import BenchmarkReport
@@ -536,7 +537,6 @@ def compute_similarity_measures(
         )
 
     return relative_error_dict, kld_dict, jsd_dict, emd_dict, smape_dict
-
 
 def get_selected_measures(benchmarkreport: "BenchmarkReport") -> dict:
     similarity_measures = {}

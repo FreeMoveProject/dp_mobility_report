@@ -145,8 +145,7 @@ class BenchmarkReport:
         if measure_selection is None:
             self._measure_selection = b_utils.default_measure_selection()
         else:
-            # self.measure_selection = preprocessing.validate_measure_selection(measure_selection)
-            self._measure_selection = measure_selection
+            self._measure_selection = preprocessing.validate_measure_selection(measure_selection, self.analysis_exclusion)
 
         (
             self._re,
@@ -181,7 +180,7 @@ class BenchmarkReport:
 
     @property
     def measure_selection(self) -> dict:
-        """ "The specified selected similarity measure for each analysis."""
+        """ The specified selected similarity measure for each analysis."""
         return self._measure_selection
 
     @property

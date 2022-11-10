@@ -3,7 +3,9 @@ from typing import List, Tuple
 import numpy as np
 
 from dp_mobility_report import constants as const
+from dp_mobility_report.benchmark.b_utils import default_measure_selection
 
+import warnings
 
 # only select analyses that are present in both reports
 def combine_analysis_exclusion(
@@ -49,6 +51,34 @@ def unify_histogram_bins(
     return report_base, report_alternative
 
 
-# make sure there is a valid measure selected for each analysis
-def validate_measure_selection(measure_selection: dict) -> dict:
-    pass
+def validate_measure_selection(measure_selection: dict, analysis_exclusion: list) -> dict:
+    
+    default_selection = default_measure_selection()
+
+    if not isinstance(measure_selection, dict):
+         raise TypeError("'measure selection' is not a dictionary")
+
+    for key in list(measure_selection.keys()):
+        if key not in default_selection.keys():
+            warnings.warn(
+            f"{key} is not a valid key (analysis) and will be removed from the measure selection."
+        )
+            del measure_selection[key]
+    
+    for key, value in list(measure_selection.items()):
+        
+        if value not in [const.KLD, const.JSD, const.EMD, const.RE, const.SMAPE]:
+            warnings.warn(
+            f"{value} is not a valid value (similarity measure) and will be removed from the measure selection."
+        )
+            del measure_selection[key]
+
+    measure_selection = {**default_selection, **measure_selection}
+
+    for analysis in analysis_exclusion:
+        all_analysis = [item for item in measure_selection.keys() if item.startswith(analysis)]
+        for item in all_analysis:
+            del measure_selection[item]
+        
+    return measure_selection
+

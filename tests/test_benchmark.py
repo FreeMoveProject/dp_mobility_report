@@ -5,8 +5,8 @@ import pytest
 
 from dp_mobility_report import DpMobilityReport
 from dp_mobility_report import constants as const
-from dp_mobility_report.benchmark import benchmarkreport, b_utils
-from dp_mobility_report.benchmark.preprocessing import combine_analysis_exclusion
+from dp_mobility_report.benchmark import b_utils, benchmarkreport
+from dp_mobility_report.benchmark.preprocessing import combine_analysis_exclusion, validate_measure_selection
 from dp_mobility_report.benchmark.similarity_measures import (
     compute_similarity_measures,
     earth_movers_distance1D,
@@ -137,24 +137,22 @@ def test_unify_histogram_bins():
 
 
 def test_get_selected_measures(benchmark_report):
+
     similarity_measures = get_selected_measures(benchmark_report)
     assert isinstance(similarity_measures, dict)
     assert not None in similarity_measures.values()
-
-    # check that warning is thrown if wrong measure is set
-    ms = b_utils.default_measure_selection()
-    ms[const.TRAVEL_TIME_QUARTILES] = const.JSD
 
     test_data = pd.read_csv("tests/test_files/test_data.csv")
     test_data_alternative = pd.read_csv("tests/test_files/test_data.csv", nrows=50)
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
     benchmark_report = benchmarkreport.BenchmarkReport(
-        test_data, test_tessellation, test_data_alternative, measure_selection=ms
+        test_data, test_tessellation, test_data_alternative, measure_selection={const.TRAVEL_TIME_QUARTILES: const.JSD}
     )
 
+    assert const.JSD == benchmark_report.measure_selection[const.TRAVEL_TIME_QUARTILES]
     with pytest.warns(Warning):
         similarity_measures = get_selected_measures(benchmark_report)
-    assert None in similarity_measures.values()
+    assert similarity_measures[const.TRAVEL_TIME_QUARTILES] == None
 
 
 def test_benchmark_report(benchmark_report):
@@ -166,3 +164,13 @@ def test_benchmark_report(benchmark_report):
     assert isinstance(benchmark_report.smape, dict)
     assert isinstance(benchmark_report.measure_selection, dict)
     assert isinstance(benchmark_report.similarity_measures, dict)
+
+
+def test_measure_selection():
+
+    with pytest.warns(Warning):
+        validate_measure_selection(measure_selection={const.JUMP_LENGTH: 'klld'}, analysis_exclusion=[const.VISITS_PER_TILE])
+    with pytest.warns(Warning):
+        validate_measure_selection(measure_selection={'jump_lengthh': const.KLD}, analysis_exclusion=[const.VISITS_PER_TILE])
+
+    assert validate_measure_selection(measure_selection={const.OD_FLOWS: const.SMAPE}, analysis_exclusion=[const.VISITS_PER_TILE, const.DS_STATISTICS, const.MISSING_VALUES, const.TRIPS_OVER_TIME, const.TRIPS_PER_WEEKDAY, const.TRIPS_PER_HOUR, const.TRAVEL_TIME, const.JUMP_LENGTH, const.TRIPS_PER_USER, const.USER_TIME_DELTA, const.RADIUS_OF_GYRATION, const.USER_TILE_COUNT, const.MOBILITY_ENTROPY, const.VISITS_PER_TILE_TIMEWINDOW]) == {const.OD_FLOWS: const.SMAPE} 
