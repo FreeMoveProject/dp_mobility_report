@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Union
 import cv2
 import numpy as np
 import pandas as pd
+from geopandas import GeoDataFrame
 from haversine import Unit, haversine
 from scipy.spatial import distance
 from scipy.stats import entropy, wasserstein_distance
@@ -79,7 +80,12 @@ def all_relative_errors(true_dict: dict, estimate_dict: dict) -> dict:
 
 
 # earth movers distance
-def _compute_cost_matrix(tile_coords: list) -> np.array:
+def _compute_cost_matrix(tessellation: GeoDataFrame) -> np.array:
+    tile_centroids = (
+        tessellation.set_index(const.TILE_ID).to_crs(3395).centroid.to_crs(4326)
+    )
+    tile_coords = list(zip(tile_centroids.y, tile_centroids.x))
+
     # get all potential combinations between all points from sig1 and sig2
     grid = np.meshgrid(range(0, len(tile_coords)), range(0, len(tile_coords)))
     tile_combinations = np.array([grid[0].flatten(), grid[1].flatten()])
@@ -137,6 +143,7 @@ def compute_similarity_measures(
     jsd_dict: dict = {}
     emd_dict: dict = {}
     smape_dict: dict = {}
+    cost_matrix = None
 
     # Statistics
     if const.DS_STATISTICS not in analysis_exclusion:
@@ -218,11 +225,13 @@ def compute_similarity_measures(
 
     # Spatial distribution
     if const.VISITS_PER_TILE not in analysis_exclusion:
+        tessellation = tessellation.sort_values(by=const.TILE_ID)
         visits_per_tile = report_base[const.VISITS_PER_TILE].data.merge(
             report_alternative[const.VISITS_PER_TILE].data,
             how="outer",
             on="tile_id",
             suffixes=("_base", "_alternative"),
+            sort=True,  # sort according to tessellation for cost_matrix
         )
         visits_per_tile.fillna(0, inplace=True)
 
@@ -243,14 +252,15 @@ def compute_similarity_measures(
             rel_counts_base, rel_counts_alternative
         )
 
-        tile_centroids = (
-            tessellation.set_index("tile_id").to_crs(3395).centroid.to_crs(4326)
-        )
+        # tile_centroids = (
+        #     tessellation.set_index(const.TILE_ID).to_crs(3395).centroid.to_crs(4326)
+        # )
 
-        sorted_tile_centroids = tile_centroids.loc[visits_per_tile.tile_id]
-        tile_coords = list(zip(sorted_tile_centroids.y, sorted_tile_centroids.x))
+        # sorted_tile_centroids = tile_centroids.loc[visits_per_tile.tile_id]
+        # tile_coords = list(zip(sorted_tile_centroids.y, sorted_tile_centroids.x))
+
         # create custom cost matrix with distances between all tiles
-        cost_matrix = _compute_cost_matrix(tile_coords)
+        cost_matrix = _compute_cost_matrix(tessellation)
 
         emd_dict[const.VISITS_PER_TILE] = earth_movers_distance(
             visits_per_tile.visits_base.to_numpy(),
@@ -265,6 +275,10 @@ def compute_similarity_measures(
 
     # Spatio-temporal distributions
     if const.VISITS_PER_TILE_TIMEWINDOW not in analysis_exclusion:
+        if cost_matrix is None:
+            tessellation = tessellation.sort_values(by=const.TILE_ID)
+            cost_matrix = _compute_cost_matrix(tessellation)
+
         counts_timew_base = (
             report_base[const.VISITS_PER_TILE_TIMEWINDOW]
             .data[report_base[const.VISITS_PER_TILE_TIMEWINDOW].data.index != "None"]
@@ -310,13 +324,8 @@ def compute_similarity_measures(
         )
 
         visits_per_tile_timewindow_emd = []
-        # TODO visits_per_tile_timewindow should not be based on visits_per_tile and the cost_matrix from above if visits_per_tile is excluded
         for time_window in report_base[const.VISITS_PER_TILE_TIMEWINDOW].data.columns:
-            tw_base = (
-                report_base[const.VISITS_PER_TILE_TIMEWINDOW]
-                .data[time_window]
-                .loc[report_base[const.VISITS_PER_TILE].data.tile_id]
-            )  # sort with `report_base[const.VISITS_PER_TILE]` to match order of cost_matrix
+            tw_base = report_base[const.VISITS_PER_TILE_TIMEWINDOW].data[time_window]
             tw_base = tw_base / tw_base.sum()
             # if time window not in proposal report, add time windows with count zero
             if (
@@ -326,15 +335,9 @@ def compute_similarity_measures(
                 tw_alternative = tw_base.copy()
                 tw_alternative[:] = 0
             else:
-                tw_alternative = (
-                    report_alternative[const.VISITS_PER_TILE_TIMEWINDOW]
-                    .data[time_window]
-                    .loc[
-                        report_base[
-                            const.VISITS_PER_TILE
-                        ].data.tile_id  # sort with `report_base[const.VISITS_PER_TILE]` to match order of cost_matrix
-                    ]
-                )
+                tw_alternative = report_alternative[
+                    const.VISITS_PER_TILE_TIMEWINDOW
+                ].data[time_window]
                 tw_alternative = tw_alternative / tw_alternative.sum()
             tw = pd.merge(
                 tw_base,
@@ -343,7 +346,9 @@ def compute_similarity_measures(
                 right_index=True,
                 left_index=True,
                 suffixes=("_base", "_alternative"),
+                sort=True,  # sort according to tile_id for cost_matrix
             )
+
             tw = tw[tw.notna().sum(axis=1) > 0]  # remove instances where both are NaN
             tw.fillna(0, inplace=True)
             visits_per_tile_timewindow_emd.append(
@@ -537,6 +542,7 @@ def compute_similarity_measures(
         )
 
     return relative_error_dict, kld_dict, jsd_dict, emd_dict, smape_dict
+
 
 def get_selected_measures(benchmarkreport: "BenchmarkReport") -> dict:
     similarity_measures = {}

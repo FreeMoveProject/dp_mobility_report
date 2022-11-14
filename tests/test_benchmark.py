@@ -6,7 +6,10 @@ import pytest
 from dp_mobility_report import DpMobilityReport
 from dp_mobility_report import constants as const
 from dp_mobility_report.benchmark import b_utils, benchmarkreport
-from dp_mobility_report.benchmark.preprocessing import combine_analysis_exclusion, validate_measure_selection
+from dp_mobility_report.benchmark.preprocessing import (
+    combine_analysis_exclusion,
+    validate_measure_selection,
+)
 from dp_mobility_report.benchmark.similarity_measures import (
     compute_similarity_measures,
     earth_movers_distance1D,
@@ -17,9 +20,9 @@ from dp_mobility_report.benchmark.similarity_measures import (
 @pytest.fixture
 def alternative_dpmreport():
     """Create an alternative test report."""
-    test_data = pd.read_csv("tests/test_files/test_data.csv")
+    test_data = pd.read_csv("tests/test_files/test_data.csv", nrows=50)
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
-    return DpMobilityReport(test_data, test_tessellation, privacy_budget=1000).report
+    return DpMobilityReport(test_data, test_tessellation, privacy_budget=None).report
 
 
 @pytest.fixture
@@ -103,7 +106,27 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
     test_tessellation.loc[:, const.TILE_ID] = test_tessellation.tile_id.astype(str)
 
     analysis_exclusion = [const.MOBILITY_ENTROPY]
-    # TODO analysis_exclusion = [const.VISITS_PER_TILE]
+    (
+        relative_error_dict,
+        kld_dict,
+        jsd_dict,
+        emd_dict,
+        smape_dict,
+    ) = compute_similarity_measures(
+        analysis_exclusion, alternative_dpmreport, base_dpmreport, test_tessellation
+    )
+
+    assert isinstance(relative_error_dict, dict)
+    assert isinstance(kld_dict, dict)
+    assert isinstance(jsd_dict, dict)
+    assert isinstance(emd_dict, dict)
+    assert isinstance(smape_dict, dict)
+    assert round(jsd_dict[const.VISITS_PER_TILE], 3) == 0.041
+    assert round(emd_dict[const.VISITS_PER_TILE], 2) == 315.75
+    assert round(jsd_dict[const.VISITS_PER_TILE_TIMEWINDOW], 3) == 0.268
+    assert round(emd_dict[const.VISITS_PER_TILE_TIMEWINDOW], 2) == 1326.41
+
+    analysis_exclusion = [const.VISITS_PER_TILE]
     (
         relative_error_dict,
         kld_dict,
@@ -146,7 +169,10 @@ def test_get_selected_measures(benchmark_report):
     test_data_alternative = pd.read_csv("tests/test_files/test_data.csv", nrows=50)
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
     benchmark_report = benchmarkreport.BenchmarkReport(
-        test_data, test_tessellation, test_data_alternative, measure_selection={const.TRAVEL_TIME_QUARTILES: const.JSD}
+        test_data,
+        test_tessellation,
+        test_data_alternative,
+        measure_selection={const.TRAVEL_TIME_QUARTILES: const.JSD},
     )
 
     assert const.JSD == benchmark_report.measure_selection[const.TRAVEL_TIME_QUARTILES]
@@ -169,8 +195,32 @@ def test_benchmark_report(benchmark_report):
 def test_measure_selection():
 
     with pytest.warns(Warning):
-        validate_measure_selection(measure_selection={const.JUMP_LENGTH: 'klld'}, analysis_exclusion=[const.VISITS_PER_TILE])
+        validate_measure_selection(
+            measure_selection={const.JUMP_LENGTH: "klld"},
+            analysis_exclusion=[const.VISITS_PER_TILE],
+        )
     with pytest.warns(Warning):
-        validate_measure_selection(measure_selection={'jump_lengthh': const.KLD}, analysis_exclusion=[const.VISITS_PER_TILE])
+        validate_measure_selection(
+            measure_selection={"jump_lengthh": const.KLD},
+            analysis_exclusion=[const.VISITS_PER_TILE],
+        )
 
-    assert validate_measure_selection(measure_selection={const.OD_FLOWS: const.SMAPE}, analysis_exclusion=[const.VISITS_PER_TILE, const.DS_STATISTICS, const.MISSING_VALUES, const.TRIPS_OVER_TIME, const.TRIPS_PER_WEEKDAY, const.TRIPS_PER_HOUR, const.TRAVEL_TIME, const.JUMP_LENGTH, const.TRIPS_PER_USER, const.USER_TIME_DELTA, const.RADIUS_OF_GYRATION, const.USER_TILE_COUNT, const.MOBILITY_ENTROPY, const.VISITS_PER_TILE_TIMEWINDOW]) == {const.OD_FLOWS: const.SMAPE} 
+    assert validate_measure_selection(
+        measure_selection={const.OD_FLOWS: const.SMAPE},
+        analysis_exclusion=[
+            const.VISITS_PER_TILE,
+            const.DS_STATISTICS,
+            const.MISSING_VALUES,
+            const.TRIPS_OVER_TIME,
+            const.TRIPS_PER_WEEKDAY,
+            const.TRIPS_PER_HOUR,
+            const.TRAVEL_TIME,
+            const.JUMP_LENGTH,
+            const.TRIPS_PER_USER,
+            const.USER_TIME_DELTA,
+            const.RADIUS_OF_GYRATION,
+            const.USER_TILE_COUNT,
+            const.MOBILITY_ENTROPY,
+            const.VISITS_PER_TILE_TIMEWINDOW,
+        ],
+    ) == {const.OD_FLOWS: const.SMAPE}
