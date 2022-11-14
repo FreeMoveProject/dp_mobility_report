@@ -131,21 +131,26 @@ class BenchmarkReport:
         )
         self.report_alternative.report
 
-        (
-            self.report_base._report,
-            self.report_alternative._report,
-        ) = preprocessing.unify_histogram_bins(
-            self.report_base.report, self.report_alternative.report
-        )
-
         self.analysis_exclusion = preprocessing.combine_analysis_exclusion(
             self.report_alternative.analysis_exclusion,
             self.report_base.analysis_exclusion,
         )
+
+        (
+            self.report_base._report,
+            self.report_alternative._report,
+        ) = preprocessing.unify_histogram_bins(
+            self.report_base.report,
+            self.report_alternative.report,
+            self.analysis_exclusion,
+        )
+
         if measure_selection is None:
             self._measure_selection = b_utils.default_measure_selection()
         else:
-            self._measure_selection = preprocessing.validate_measure_selection(measure_selection, self.analysis_exclusion)
+            self._measure_selection = preprocessing.validate_measure_selection(
+                measure_selection, self.analysis_exclusion
+            )
 
         (
             self._re,
@@ -180,7 +185,7 @@ class BenchmarkReport:
 
     @property
     def measure_selection(self) -> dict:
-        """ The specified selected similarity measure for each analysis."""
+        """The specified selected similarity measure for each analysis."""
         return self._measure_selection
 
     @property
