@@ -35,7 +35,7 @@ class DpMobilityReport:
             or any single analysis can be included: ``const.DS_STATISTICS``, ``const.MISSING_VALUES``, ``const.TRIPS_OVER_TIME``, ``const.TRIPS_PER_WEEKDAY``, ``const.TRIPS_PER_HOUR``, ``const.VISITS_PER_TILE``, ``const.VISITS_PER_TILE_TIMEWINDOW``, ``const.OD_FLOWS``, ``const.TRAVEL_TIME``, ``const.JUMP_LENGTH``, ``const.TRIPS_PER_USER``, ``const.USER_TIME_DELTA``, ``const.RADIUS_OF_GYRATION``, ``const.USER_TILE_COUNT``, ``const.MOBILITY_ENTROPY``
             Default is None, i.e., all analyses are included.
         analysis_exclusion: Ignored, if ``analysis_selection`` is set! ``analysis_exclusion`` takes a list of all analyses to be excluded.
-            Either entire segments can be excluded: ````const.OVERVIEW````, ``const.PLACE_ANALYSIS``, ``const.OD_ANALYSIS``, ``const.USER_ANALYSIS``
+            Either entire segments can be excluded: ``const.OVERVIEW``, ``const.PLACE_ANALYSIS``, ``const.OD_ANALYSIS``, ``const.USER_ANALYSIS``
             or any single analysis can be excluded: ``const.DS_STATISTICS``, ``const.MISSING_VALUES``, ``const.TRIPS_OVER_TIME``, ``const.TRIPS_PER_WEEKDAY``, ``const.TRIPS_PER_HOUR``, ``const.VISITS_PER_TILE``, ``const.VISITS_PER_TILE_TIMEWINDOW``, ``const.OD_FLOWS``, ``const.TRAVEL_TIME``, ``const.JUMP_LENGTH``, ``const.TRIPS_PER_USER``, ``const.USER_TIME_DELTA``, ``const.RADIUS_OF_GYRATION``, ``const.USER_TILE_COUNT``, ``const.MOBILITY_ENTROPY``
         budget_split: ``dict`` to customize how much privacy budget is assigned to which analysis. Each key needs to be named according to an analysis and the value needs to be an integer indicating the weight for the privacy budget.
             If no weight is assigned, a default weight of 1 is set.
