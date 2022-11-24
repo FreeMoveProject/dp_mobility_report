@@ -35,7 +35,7 @@ def get_user_time_delta(
 ) -> Optional[TupleSection]:
     epsi = m_utils.get_epsi(dpmreport.evalu, eps, 6)
 
-    dpmreport.df = dpmreport.df.sort_values(
+    dpmreport._df = dpmreport.df.sort_values(
         [const.UID, const.TID, const.DATETIME]
     )  # assuming tid numbers are integers and given in a chronological order, as arranged in "preprocessing"
     same_user = dpmreport.df[const.UID] == dpmreport.df[const.UID].shift()

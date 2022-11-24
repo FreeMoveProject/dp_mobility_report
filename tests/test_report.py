@@ -26,35 +26,35 @@ def test_report_elements(test_dpmreport):
         + const.USER_ELEMENTS
     )
 
-    test_dpmreport.analysis_exclusion = (
+    test_dpmreport._analysis_exclusion = (
         const.PLACE_ELEMENTS + const.OD_ELEMENTS + const.USER_ELEMENTS
     )
     elements = report.report_elements(test_dpmreport)
     assert list(elements.keys()) == const.OVERVIEW_ELEMENTS
 
-    test_dpmreport.analysis_exclusion = (
+    test_dpmreport._analysis_exclusion = (
         const.OVERVIEW_ELEMENTS + const.OD_ELEMENTS + const.USER_ELEMENTS
     )
     elements = report.report_elements(test_dpmreport)
     assert list(elements.keys()) == const.PLACE_ELEMENTS
 
-    test_dpmreport.analysis_exclusion = (
+    test_dpmreport._analysis_exclusion = (
         const.OVERVIEW_ELEMENTS + const.PLACE_ELEMENTS + const.USER_ELEMENTS
     )
     elements = report.report_elements(test_dpmreport)
     assert list(elements.keys()) == const.OD_ELEMENTS
 
-    test_dpmreport.analysis_exclusion = (
+    test_dpmreport._analysis_exclusion = (
         const.OVERVIEW_ELEMENTS + const.PLACE_ELEMENTS + const.OD_ELEMENTS
     )
     elements = report.report_elements(test_dpmreport)
     assert list(elements.keys()) == const.USER_ELEMENTS
 
-    test_dpmreport.analysis_exclusion = const.PLACE_ELEMENTS + const.OD_ELEMENTS
+    test_dpmreport._analysis_exclusion = const.PLACE_ELEMENTS + const.OD_ELEMENTS
     elements = report.report_elements(test_dpmreport)
     assert list(elements.keys()) == const.OVERVIEW_ELEMENTS + const.USER_ELEMENTS
 
-    test_dpmreport.analysis_exclusion = [
+    test_dpmreport._analysis_exclusion = [
         const.VISITS_PER_TILE_TIMEWINDOW
     ] + const.OD_ELEMENTS
     elements = report.report_elements(test_dpmreport)
