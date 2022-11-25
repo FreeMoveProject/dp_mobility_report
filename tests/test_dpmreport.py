@@ -1,6 +1,9 @@
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import pytest
+from geopandas import GeoDataFrame
+from pandas import DataFrame
 
 from dp_mobility_report import DpMobilityReport
 from dp_mobility_report import constants as const
@@ -29,8 +32,20 @@ def test_tessellation():
 
 def test_DpMobilityReport(test_data, test_data_sequence, test_tessellation):
     """Test instance of DpMobilityReport is created properly with valid input and default values."""
-    mob_report = DpMobilityReport(test_data, test_tessellation, privacy_budget=None)
+    mob_report = DpMobilityReport(
+        test_data,
+        test_tessellation,
+        privacy_budget=None,
+        analysis_exclusion=[const.JUMP_LENGTH],
+    )
     assert isinstance(mob_report, DpMobilityReport)
+    assert isinstance(mob_report.max_trips_per_user, np.integer)
+    assert isinstance(mob_report._budget_split, dict)
+    assert isinstance(mob_report.analysis_exclusion, list)
+    assert mob_report.analysis_exclusion == [const.JUMP_LENGTH]
+    assert mob_report.privacy_budget is None
+    assert isinstance(mob_report.tessellation, GeoDataFrame)
+    assert isinstance(mob_report.df, DataFrame)
 
     mob_report = DpMobilityReport(test_data, test_tessellation, privacy_budget=0.1)
     assert isinstance(mob_report, DpMobilityReport)
