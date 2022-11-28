@@ -8,7 +8,9 @@ DpMobilityReport
 ~~~~~~~~~~~~~~~~~~~
 .. autoclass:: dp_mobility_report.dpmreport.DpMobilityReport
 	:members: report, to_file, tessellation, df, privacy_budget, max_trips_per_user, analysis_exclusion, budget_split
+
 BenchmarkReport
 ~~~~~~~~~~~~~~~~~~~
 .. autoclass:: dp_mobility_report.benchmark.benchmarkreport.BenchmarkReport
 	:members: re, jsd, kld, smape, emd, similarity_measures, report_base, report_alternative, measure_selection
+	

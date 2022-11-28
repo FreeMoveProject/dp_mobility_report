@@ -1,5 +1,5 @@
 ============================================================
-Differentially Private Mobility Data Report
+Differentially Private Mobility Report (DpMobilityReport)
 ============================================================
 
 
@@ -21,8 +21,11 @@ Differentially Private Mobility Data Report
 ``dp_mobility_report``: A python package to create a mobility report with differential privacy guarentees, especially for urban human mobility data. 
 
 
+Quickstart 
+**************
+
 Install
-**********************
+==========
 
 .. code-block:: bash
 
@@ -36,14 +39,15 @@ or from GitHub:
 
 
 Data preparation
-**********************
+====================
 
 - **df**: a pandas ``DataFrame``. Expected columns: User ID ``uid``, Trip ID ``tid``, timestamp ``datetime`` (expected is a datetime-like string, e.g., in the format ``yyyy-mm-dd hh:mm:ss``. If ``datetime`` contains ``int`` values, it is interpreted as sequence positions, i.e., if the dataset only consists of sequences without timestamps), latitude and longitude in CRS EPSG:4326 ``lat`` and ``lng``. You can find an example dataset `here`_.
 
 - **tessellation**: a geopandas ``GeoDataFrame`` with polygons. Expected columns: ``tile_id``. The tessellation is used for spatial aggregations of the data.
 
-Create a mobility report as HTML
-**************************************
+
+Create a DpMobilityReport
+===================================
 
 .. code-block:: python
 
@@ -66,22 +70,22 @@ If the value is set to ``None`` no noise (i.e., no privacy guarantee) is applied
 The parameter ``max_trips_per_user`` specifies how many trips a user can contribute to the dataset at most. If a user is represented with more trips, a random sample is drawn according to ``max_trips_per_user``.
 If the value is set to ``None`` the full dataset is used. Note, that deriving the maximum trips per user from the data violates the differential privacy guarantee. Thus, ``None`` should only be used in combination with ``privacy_budget=None``.
 
-Please refer to the `documentation`_ for information on further parameters.
+Please refer to the `documentation`_ for information on further parameters. Here you can find information on the `analyses`_ of the report.
 
 Example HTMLs can be found in the examples_ folder.
 
 
-Benchmark Report 
-***********************
+Create a BenchmarkReport 
+================================
 
 A benchmark report evaluate the similarity of two (differentially private) mobility reports from one or two mobility datasets. This can be based on two datasets (``df_base`` and ``df_alternative``) or one dataset (``df_base``)) with different privacy settings.
 The arguments ``df``, ``privacy_budget``, ``user_privacy``, ``max_trips_per_user`` and ``budget_split`` can differ for the two datasets set with the according ending ``_base`` and ``_alternative``. The other arguments are the same for both reports.
-For the evaluation, similarity measures (namely the relative error (RE), Jensen-Shannon divergence (JSD), Kullback-Leibler divergence (KLD), symmetric mean absolute percentage error (SMAPE) and the earth mover's distance (EMD)) are computed to quantify the statistical similarity for each analysis.
+For the evaluation, `similarity measures`_ (namely the relative error (RE), Jensen-Shannon divergence (JSD), Kullback-Leibler divergence (KLD), symmetric mean absolute percentage error (SMAPE) and the earth mover's distance (EMD)) are computed to quantify the statistical similarity for each analysis.
 The evaluation, i.e., benchmark report, will be generated as an HTML file, using the ``.to_file()`` method.
 
 
 Benchmark of two different datasets 
-=============================================
+---------------------------------------
 
 This example creates a benchmark report with similarity measures for two mobility datasets, called *base* and *alternative* in the following. This is intended to compare different datasets with the same or no privacy budget.
 
@@ -118,6 +122,7 @@ The default is set to a specific set of similarity measures for each analysis wh
 The default of single analyses can be overwritten as shown in the following:
 
 .. code-block:: python
+
         from dp_mobility_report import BenchmarkReport, default_measure_selection
         from dp_mobility_report import constants as const
 
@@ -138,7 +143,7 @@ The default of single analyses can be overwritten as shown in the following:
 
 
 Benchmark of the same dataset with different privacy settings
-===============================================================
+-------------------------------------------------------------------
 
 This example creates a BenchmarkReport with similarity measures for the same mobility dataset with different privacy settings (``privacy_budget``, ``user_privacy``, ``max_trips_per_user`` and ``budget_split``) to assess the utility loss of the privacy budget for the different analyses. 
 
@@ -172,7 +177,7 @@ Please refer to the `documentation`_ for information on further parameters.
 
 
 Credits
--------
+========
 
 This package was highly inspired by the `pandas-profiling/pandas-profiling`_ and `scikit-mobility`_ packages.
 
@@ -180,6 +185,8 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
  
 .. _here: https://github.com/FreeMoveProject/dp_mobility_report/blob/main/tests/test_files/test_data.csv
 .. _documentation: https://dp-mobility-report.readthedocs.io/en/latest/modules.html
+.. _analyses: https://dp-mobility-report.readthedocs.io/en/latest/analyses.html
+.. _`similarity measures`: https://dp-mobility-report.readthedocs.io/en/latest/similarity_measures.html
 .. _examples: https://github.com/FreeMoveProject/dp_mobility_report/tree/main/examples/html
 .. _`pandas-profiling/pandas-profiling`: https://github.com/pandas-profiling/pandas-profiling
 .. _`scikit-mobility`: https://github.com/scikit-mobility

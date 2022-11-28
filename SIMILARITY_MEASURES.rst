@@ -1,0 +1,176 @@
+============================================================
+Similarity Measures
+============================================================
+
+The similarity of two mobility reports is evaluated with a set of similarity measures. Specifically, a measure is computed for each analysis of the report.
+The following table shows the analysis segments 
+that can be included/exluded in the benchmark report and their corresponding analyses and similarity measures. The default measures are in bold. 
+In the following the similarity measures relative error (RE), Kullback-Leibler divergence (KLD), Jensen-Shannon divergence (JSD), earth mover's distance (EMD) and
+symmetric mean average percentage error (SMAPE) will be explained, as well as the reasoning why the specific measures are available for each analyses and why the default measure was chosen. 
+
+Overview and default measures
+********************************
+
+
+.. list-table:: Analyses and their similarity measures
+   :widths: 20 35 35
+   :header-rows: 1
+
+   * - Segment
+     - Analysis
+     - Similarity measures (Default bold)
+   * - Overview
+     - Dataset Statistics
+     - **RE**
+   * - 
+     - Missing values
+     - **RE**
+   * - 
+     - Trips over time
+     - KLD, **JSD**, SMAPE
+   * - 
+     - Trips per weekday
+     - KLD, **JSD**, SMAPE
+   * - 
+     - Trips per hour
+     - KLD, **JSD**, SMAPE
+   * - Place
+     - Visits per tile
+     - KLD, JSD, SMAPE, **EMD**
+   * - 
+     - Visits per tile outliers
+     - **RE**
+   * - 
+     - Visits per tile timewindow
+     - KLD, JSD, SMAPE, **EMD**
+   * - OD
+     - OD flows
+     - KLD, **JSD**, SMAPE
+   * - 
+     - Travel time
+     - KLD, **JSD**, SMAPE, EMD
+   * - 
+     - Travel time quartiles
+     - **SMAPE**
+   * - 
+     - Jump length
+     - KLD, **JSD**, SMAPE, EMD
+   * - 
+     - Jump length quartiles
+     - **SMAPE**
+   * - User 
+     - Trips per user
+     - **EMD**, Todo: JSD, KLD, SMAPE
+   * -  
+     - Trips per user quartiles
+     - **SMAPE**
+   * -  
+     - User time delta
+     - Todo
+   * -  
+     - User time delta quartiles
+     - **SMAPE**
+   * - 
+     - Radius of gyration
+     - KLD, **JSD**, EMD, SMAPE
+   * - 
+     - Radius of gyration quartiles
+     - **SMAPE**
+   * - 
+     - User tile count quartiles
+     - **SMAPE**
+   * -  
+     - Mobility entropy
+     - **SMAPE**, Todo: KLD, JSD, EMD
+   
+   
+
+
+Relative Error (RE)
+********************
+Relative error is the absolute error divided by the magnitude of the exact value and is computed as :math:`\frac{ \bar{y} - y }{y}`, with :math:`\bar{y}` equals the estimated value and :math:`y` the true value.
+The relative error is used for the analyses of the dataset statistics (e.g.,record count, trip count, user count), missing values and outliers. The relative error can only be computed for single values (e.g., not for histograms) and thus is not computed for other analyses.
+
+
+Symmetric mean absolute percentage error (SMAPE)
+***************************************************
+
+The symmetric mean absolute percentage error (SMAPE) is an accuracy measure based on percentage (or relative) errors. 
+In contrast to the mean absolute percentage error, SMAPE has both a lower bound (0, meaning entirely different) and an upper bound (2, meaning identical). 
+SMAPE is computed for all analyses, that entail more than a single value, in contrast to analyses the relativ error is used for. 
+SMAPE is employed as the default measure for the evaluation of quartiles, as KLD, JSD and EMD are not suitable.
+
+
+Kullback Leibler Divergence (KLD)
+**********************************
+The Kullback-Leibler divergence (KLD), also called relative entropy, is a widely used statistic to measure how far a probability distribution :math:`P` deviates from a reference probability distribution :math:`Q` on the same probability space :math:`\mathcal{X}`.
+For discrete distributions :math:`P` and :math:`Q`, it is formally defined as 
+:math:`D_{KL}(P||Q):= \sum\limits_{x \in \mathcal{X}: P(x)>0} P(x)\cdot \log \frac{P(x)}{Q(x)}`.
+
+For example, considering a tessellation (:math:`\mathcal{X}`) the spatial distribution can be evaluated by comparing the relative counts in the synthetic data (P) per tile (:math:`x`) to the relative counts per tile in the reference dataset (Q). 
+The larger the deviation of P from Q, the larger the value of the resulting KLD, with a minimum value of 0 for identical distributions.
+
+Note that KLD is not symmetric, i.e., :math:`D_{KL}(P||Q)~\neq~D_{KL}(Q||P)`, which is why KLD is best applicable in settings with a reference model Q and a fitted model P. 
+However, the lack of symmetry implies that it is not a distance metric in the  mathematical sense. 
+
+It is worth noting that KLD is only defined if :math:`Q(x)\neq 0` for all x in the support of P, while this constraint is not required for JSD.
+In practice, both KLD and JSD are computed for discrete approximations of continuous distributions, e.g., histograms approximating the relative number of trips over time based on daily or hourly counts. However, the choice of histogram bins has an impact in two respects:
+Say we want to compare the number of visits per tile. Depending on the granularity of the chosen tessellation, there might be tiles with :math:`0` visits in the real dataset but :math:`>0` visits in the synthetic dataset, thus KLD would not be defined for such cases.
+Additionally, the resulting values for both KLD and JSD vary according to the choice of bins, e.g., by reducing the granularity of the tessellation, the values of KLD and JSD will tend to be smaller. 
+
+The KLD is computed for the following analyses: trips over time, trips per weekday, trips per hour, visits per tile, visits per tile timewindow, OD flows, travel time, jump length and radius of gyration.
+The KLD might be ``None`` due to the fact, that it is not defined for :math:`Q(x)\neq 0` for all x in the support of P and therefore the JSD is set as a default measure.
+
+
+
+Jensen-Shannon Divergence (JSD)
+**********************************
+
+The Jensen-Shannon divergence (JSD) solves this asymmetry by building on the KLD to calculate a symmetrical score in the sense that the divergence of P from Q is the same as Q from P: :math:`D_{JS}(P||Q) = D_{JS}(Q||P)`.
+Additionally, JSD provides a smoothed and normalized version of KLD, with scores between :math:`0` (identical) and :math:`1` (maximally different) when using the base-2 logarithm, thus making it easier to relate the resulting score within a fixed finite range. 
+Formally, the JSD is defined for two probability distributions :math:`P` and :math:`Q` as: :math:`D_{JS}(P||Q) := \frac{1}{2} D_{KL}(P\left\Vert\frac{P+Q}{2}\right) + \frac{1}{2} D_{KL}(Q\left\Vert\frac{P+Q}{2}\right)`.
+
+Following this advantage of the JSD compared to the KLD, the JSD is chosen as a default measure over the KLD. 
+
+Earth mover's distance (EMD)
+********************************
+Both KLD and JSD do not account for a distance of instances in the probability 
+space :math:`\mathcal{X}`. However, the earth mover's distance (EMD) between two empirical distributions allows to take a notion of distance, like the underlying geometry of the space into account. 
+Informally, the EMD is proportional to the minimum amount of work required to convert one distribution into the other. 
+
+Suppose we have a tessellation, each tile denoted by :math:`\{x_1, \ldots , x_n\}` with a corresponding notion of distance :math:`dis(x_i, x_j)` 
+being the Haversine distance between the centroids of tiles :math:`x_i` and :math:`x_j`. 
+For two empirical distributions :math:`P` and :math:`Q` represented by the visits in the given tiles :math:`\{p_1, \ldots , p_n\}` and :math:`\{q_1, \ldots , q_n\}`, respectively, 
+the EMD can be defined as where :math:`f_{ij}` is the optimal flow that minimizes the work to transform P into Q. 
+
+The amount of work is determined by the defined distance between instances (i.e., tiles), thus, it allows for an intuitive interpretation.
+In the given example, an EMD of 100 signifies 
+that on average each record of the first distribution needs to be moved 100 meters to reproduce the second distribution. On the downside, there is no fixed range as for the
+JSD which provides values between 0 and 1. Thus the EMD always needs to be interpreted in the context of the dataset and the EMD of different datasets cannot be compared directly.
+
+ 
+In the same manner, the EMD can be computed for histograms, by defining a distance between histogram bins. 
+To measure the distance between histogram bins, the difference between the midrange values of each bin pair is computed. 
+For tiles, the centroid of each tile is used to compute the haversine distance.
+
+Thus the EMD is available for the following analyses provided in the following units: 
+
+* visits per tile: distance in meters
+
+* visits per tile timewindow: average distance in meters for each timewindow
+
+* travel time: distance in minutes
+
+* jump length: distance in meters TODO: km or m?
+
+* trips per user: distance in counts of trips
+
+* radius of gyration: distance in kilometers
+
+
+The EDM can only be computed, if a notion of distance between histogram bins or tiles can be computed. 
+For example, there is no trivial distance between weekdays (you could argue that the categorization of weekdays and weekend is more important than the number of days lying inbetween). Thus, we decided to omit the EMD if there is no intuitive distance measure. 
+The EMD is the default measure for visits per tile and visits per tile timewindow, as the underlying geometry is especially important to account for here.
+
+
+

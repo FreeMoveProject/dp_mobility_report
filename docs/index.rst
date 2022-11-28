@@ -1,4 +1,4 @@
-Welcome to Mobility Data Report's documentation!
+Welcome to the DpMobilityReport's documentation!
 ================================================
 
 .. toctree::
@@ -8,6 +8,8 @@ Welcome to Mobility Data Report's documentation!
    readme
    installation
    modules
+   analyses
+   similarity_measures
    contributing
    authors
    history

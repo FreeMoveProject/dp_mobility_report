@@ -14,7 +14,7 @@ To install DP Mobility Report, run this command in your terminal:
 
     $ pip install dp_mobility_report
 
-This is the preferred method to install Mobility Data Report, as it will always install the most recent stable release.
+This is the preferred method to install dp_mobility_report, as it will always install the most recent stable release.
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
@@ -26,7 +26,7 @@ you through the process.
 From sources
 ------------
 
-The sources for Mobility Data Report can be downloaded from the `Github repo`_.
+The sources for dp_mobility_report can be downloaded from the `Github repo`_.
 
 You can either clone the public repository:
 
