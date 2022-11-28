@@ -55,7 +55,7 @@ def test_report_elements(test_dpmreport):
     assert list(elements.keys()) == const.OVERVIEW_ELEMENTS + const.USER_ELEMENTS
 
     test_dpmreport._analysis_exclusion = [
-        const.VISITS_PER_TILE_TIMEWINDOW
+        const.VISITS_PER_TIME_TILE
     ] + const.OD_ELEMENTS
     elements = report.report_elements(test_dpmreport)
     assert (

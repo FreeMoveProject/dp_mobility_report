@@ -393,7 +393,7 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
         const.TRIPS_PER_WEEKDAY,
         const.TRIPS_PER_HOUR,
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.OD_FLOWS,
         const.TRAVEL_TIME,
         const.JUMP_LENGTH,
@@ -413,7 +413,7 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
         const.TRIPS_PER_WEEKDAY,
         const.TRIPS_PER_HOUR,
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.OD_FLOWS,
         const.TRAVEL_TIME,
         const.JUMP_LENGTH,
@@ -474,7 +474,7 @@ def test_analysis_exclusion(test_data, test_tessellation):
     }
     assert list(dpmr.report.keys()) == [
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.OD_FLOWS,
         const.TRAVEL_TIME,
         const.JUMP_LENGTH,
@@ -500,7 +500,7 @@ def test_analysis_exclusion(test_data, test_tessellation):
     }
     assert list(dpmr.report.keys()) == [
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.OD_FLOWS,
         const.TRAVEL_TIME,
         const.JUMP_LENGTH,
@@ -529,7 +529,7 @@ def test_analysis_exclusion(test_data, test_tessellation):
         const.TRIPS_PER_WEEKDAY,
         const.TRIPS_PER_HOUR,
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.OD_FLOWS,
         const.TRAVEL_TIME,
         const.TRIPS_PER_USER,
@@ -548,7 +548,7 @@ def test_analysis_selection(test_data, test_tessellation):
     )
     assert set(dpmr.analysis_exclusion) == {
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.OD_FLOWS,
         const.TRAVEL_TIME,
         const.JUMP_LENGTH,
@@ -574,7 +574,7 @@ def test_analysis_selection(test_data, test_tessellation):
     )
     assert set(dpmr.analysis_exclusion) == {
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.OD_FLOWS,
         const.TRAVEL_TIME,
         const.JUMP_LENGTH,
@@ -605,7 +605,7 @@ def test_analysis_selection(test_data, test_tessellation):
         const.TRIPS_PER_WEEKDAY,
         const.TRIPS_PER_HOUR,
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.OD_FLOWS,
         const.TRAVEL_TIME,
         const.TRIPS_PER_USER,

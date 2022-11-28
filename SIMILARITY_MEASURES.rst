@@ -41,7 +41,7 @@ Overview and default measures
      - Visits per tile outliers
      - **RE**
    * - 
-     - Visits per tile timewindow
+     - Visits per time tile
      - KLD, JSD, SMAPE, **EMD**
    * - OD
      - OD flows
@@ -157,7 +157,7 @@ Thus the EMD is available for the following analyses provided in the following u
 
 * visits per tile: distance in meters
 
-* visits per tile timewindow: average distance in meters for each timewindow
+* visits per time tile: average distance in meters for each timewindow
 
 * travel time: distance in minutes
 

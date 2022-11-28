@@ -10,7 +10,7 @@ def default_measure_selection() -> dict:
         const.TRIPS_PER_HOUR: const.JSD,
         const.VISITS_PER_TILE: const.EMD,
         const.VISITS_PER_TILE_OUTLIERS: const.RE,
-        const.VISITS_PER_TILE_TIMEWINDOW: const.EMD,
+        const.VISITS_PER_TIME_TILE: const.EMD,
         const.OD_FLOWS: const.JSD,
         const.TRAVEL_TIME: const.JSD,
         const.TRAVEL_TIME_QUARTILES: const.SMAPE,

@@ -274,20 +274,20 @@ def compute_similarity_measures(
         )
 
     # Spatio-temporal distributions
-    if const.VISITS_PER_TILE_TIMEWINDOW not in analysis_exclusion:
+    if const.VISITS_PER_TIME_TILE not in analysis_exclusion:
         if cost_matrix is None:
             tessellation = tessellation.sort_values(by=const.TILE_ID)
             cost_matrix = _compute_cost_matrix(tessellation)
 
         counts_timew_base = (
-            report_base[const.VISITS_PER_TILE_TIMEWINDOW]
-            .data[report_base[const.VISITS_PER_TILE_TIMEWINDOW].data.index != "None"]
+            report_base[const.VISITS_PER_TIME_TILE]
+            .data[report_base[const.VISITS_PER_TIME_TILE].data.index != "None"]
             .unstack()
         )
         counts_timew_alternative = (
-            report_alternative[const.VISITS_PER_TILE_TIMEWINDOW]
+            report_alternative[const.VISITS_PER_TIME_TILE]
             .data[
-                report_alternative[const.VISITS_PER_TILE_TIMEWINDOW].data.index
+                report_alternative[const.VISITS_PER_TIME_TILE].data.index
                 != "None"
             ]
             .unstack()
@@ -310,33 +310,33 @@ def compute_similarity_measures(
             counts_timew_alternative / counts_timew_alternative.sum()
         )
 
-        kld_dict[const.VISITS_PER_TILE_TIMEWINDOW] = entropy(
+        kld_dict[const.VISITS_PER_TIME_TILE] = entropy(
             rel_counts_timew_base.to_numpy().flatten(),
             rel_counts_timew_alternative.to_numpy().flatten(),
         )
-        jsd_dict[const.VISITS_PER_TILE_TIMEWINDOW] = distance.jensenshannon(
+        jsd_dict[const.VISITS_PER_TIME_TILE] = distance.jensenshannon(
             rel_counts_timew_base.to_numpy().flatten(),
             rel_counts_timew_alternative.to_numpy().flatten(),
         )
-        smape_dict[const.VISITS_PER_TILE_TIMEWINDOW] = symmetric_mape(
+        smape_dict[const.VISITS_PER_TIME_TILE] = symmetric_mape(
             rel_counts_timew_base.to_numpy().flatten(),
             rel_counts_timew_alternative.to_numpy().flatten(),
         )
 
-        visits_per_tile_timewindow_emd = []
-        for time_window in report_base[const.VISITS_PER_TILE_TIMEWINDOW].data.columns:
-            tw_base = report_base[const.VISITS_PER_TILE_TIMEWINDOW].data[time_window]
+        visits_per_time_tile_emd = []
+        for time_window in report_base[const.VISITS_PER_TIME_TILE].data.columns:
+            tw_base = report_base[const.VISITS_PER_TIME_TILE].data[time_window]
             tw_base = tw_base / tw_base.sum()
             # if time window not in proposal report, add time windows with count zero
             if (
                 time_window
-                not in report_alternative[const.VISITS_PER_TILE_TIMEWINDOW].data.columns
+                not in report_alternative[const.VISITS_PER_TIME_TILE].data.columns
             ):
                 tw_alternative = tw_base.copy()
                 tw_alternative[:] = 0
             else:
                 tw_alternative = report_alternative[
-                    const.VISITS_PER_TILE_TIMEWINDOW
+                    const.VISITS_PER_TIME_TILE
                 ].data[time_window]
                 tw_alternative = tw_alternative / tw_alternative.sum()
             tw = pd.merge(
@@ -351,13 +351,13 @@ def compute_similarity_measures(
 
             tw = tw[tw.notna().sum(axis=1) > 0]  # remove instances where both are NaN
             tw.fillna(0, inplace=True)
-            visits_per_tile_timewindow_emd.append(
+            visits_per_time_tile_emd.append(
                 earth_movers_distance(
                     tw.iloc[:, 0].to_numpy(), tw.iloc[:, 1].to_numpy(), cost_matrix
                 )
             )
-        emd_dict[const.VISITS_PER_TILE_TIMEWINDOW] = np.mean(
-            visits_per_tile_timewindow_emd
+        emd_dict[const.VISITS_PER_TIME_TILE] = np.mean(
+            visits_per_time_tile_emd
         )
 
     # Origin-Destination

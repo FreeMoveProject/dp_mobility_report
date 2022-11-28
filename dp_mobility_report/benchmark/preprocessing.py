@@ -28,7 +28,7 @@ def unify_histogram_bins(
         const.TRAVEL_TIME,
         const.JUMP_LENGTH,
         const.RADIUS_OF_GYRATION,
-        const.USER_TIME_DELTA,
+        #const.USER_TIME_DELTA, # TODO: fix
         const.TRIPS_PER_USER,
     ]  # TODO: how to handle const.USER_TILE_COUNT?
     # const.MOBILITY_ENTROPY should already be similar: 0-1 with 0.1 bin range

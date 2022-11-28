@@ -123,8 +123,8 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
     assert isinstance(smape_dict, dict)
     assert round(jsd_dict[const.VISITS_PER_TILE], 3) == 0.041
     assert round(emd_dict[const.VISITS_PER_TILE], 2) == 315.75
-    assert round(jsd_dict[const.VISITS_PER_TILE_TIMEWINDOW], 3) == 0.268
-    assert round(emd_dict[const.VISITS_PER_TILE_TIMEWINDOW], 2) == 1326.41
+    assert round(jsd_dict[const.VISITS_PER_TIME_TILE], 3) == 0.268
+    assert round(emd_dict[const.VISITS_PER_TIME_TILE], 2) == 1326.41
 
     analysis_exclusion = [const.VISITS_PER_TILE]
     (
@@ -221,6 +221,6 @@ def test_measure_selection():
             const.RADIUS_OF_GYRATION,
             const.USER_TILE_COUNT,
             const.MOBILITY_ENTROPY,
-            const.VISITS_PER_TILE_TIMEWINDOW,
+            const.VISITS_PER_TIME_TILE,
         ],
     ) == {const.OD_FLOWS: const.SMAPE}

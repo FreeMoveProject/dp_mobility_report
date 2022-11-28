@@ -136,15 +136,15 @@ def add_place_analysis_elements(
             _get_eps(eps_factor, const.VISITS_PER_TILE, dpmreport.budget_split),
         )
 
-    if (const.VISITS_PER_TILE_TIMEWINDOW in const.PLACE_ELEMENTS) and (
-        const.VISITS_PER_TILE_TIMEWINDOW not in dpmreport.analysis_exclusion
+    if (const.VISITS_PER_TIME_TILE in const.PLACE_ELEMENTS) and (
+        const.VISITS_PER_TIME_TILE not in dpmreport.analysis_exclusion
     ):
         place_analysis_elements[
-            const.VISITS_PER_TILE_TIMEWINDOW
-        ] = place_analysis.get_visits_per_tile_timewindow(
+            const.VISITS_PER_TIME_TILE
+        ] = place_analysis.get_visits_per_time_tile(
             dpmreport,
             _get_eps(
-                eps_factor, const.VISITS_PER_TILE_TIMEWINDOW, dpmreport.budget_split
+                eps_factor, const.VISITS_PER_TIME_TILE, dpmreport.budget_split
             ),
         )
     return place_analysis_elements

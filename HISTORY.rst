@@ -33,7 +33,7 @@ History
 0.0.6 (2022-09-30)
 ------------------
 
-* Remove scaling of counts to match a consistent trip_count / record_count (from ds_statistics) in visits_per_tile, visits_per_tile_timewindow and od_flows. Scaling was implemented to keep the report consistent, though it is removed for now as it introduces new issues.
+* Remove scaling of counts to match a consistent trip_count / record_count (from ds_statistics) in visits_per_tile, visits_per_time_tile and od_flows. Scaling was implemented to keep the report consistent, though it is removed for now as it introduces new issues.
 * Minor bug fixes in the visualization: outliers were not correctly converted into percentage. 
 
 0.0.5 (2022-08-26)

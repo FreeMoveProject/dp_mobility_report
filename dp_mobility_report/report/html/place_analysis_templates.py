@@ -34,8 +34,8 @@ def render_place_analysis(
     visits_per_tile_summary_table = ""
     visits_per_tile_cumsum_linechart = ""
     most_freq_tiles_ranking = ""
-    visits_per_tile_timewindow_eps = None
-    visits_per_tile_timewindow_moe = None
+    visits_per_time_tile_eps = None
+    visits_per_time_tile_moe = None
     visits_per_tile_time_map = ""
 
     if (const.VISITS_PER_TILE in report) and (
@@ -65,18 +65,18 @@ def render_place_analysis(
             report[const.VISITS_PER_TILE],
         )
 
-    if (const.VISITS_PER_TILE_TIMEWINDOW in report) and (
-        report[const.VISITS_PER_TILE_TIMEWINDOW] is not None
+    if (const.VISITS_PER_TIME_TILE in report) and (
+        report[const.VISITS_PER_TIME_TILE] is not None
     ):
-        visits_per_tile_timewindow_eps = render_eps(
-            report[const.VISITS_PER_TILE_TIMEWINDOW].privacy_budget
+        visits_per_time_tile_eps = render_eps(
+            report[const.VISITS_PER_TIME_TILE].privacy_budget
         )
-        visits_per_tile_timewindow_moe = fmt_moe(
-            report[const.VISITS_PER_TILE_TIMEWINDOW].margin_of_error_laplace
+        visits_per_time_tile_moe = fmt_moe(
+            report[const.VISITS_PER_TIME_TILE].margin_of_error_laplace
         )
 
-        visits_per_tile_time_map = render_visits_per_tile_timewindow(
-            report[const.VISITS_PER_TILE_TIMEWINDOW], tessellation, THRESHOLD
+        visits_per_tile_time_map = render_visits_per_time_tile(
+            report[const.VISITS_PER_TIME_TILE], tessellation, THRESHOLD
         )
 
     template_structure = get_template("place_analysis_segment.html")
@@ -91,8 +91,8 @@ def render_place_analysis(
         visits_per_tile_summary_table=visits_per_tile_summary_table,
         visits_per_tile_cumsum_linechart=visits_per_tile_cumsum_linechart,
         most_freq_tiles_ranking=most_freq_tiles_ranking,
-        visits_per_tile_timewindow_eps=visits_per_tile_timewindow_eps,
-        visits_per_tile_timewindow_moe=visits_per_tile_timewindow_moe,
+        visits_per_time_tile_eps=visits_per_time_tile_eps,
+        visits_per_time_tile_moe=visits_per_time_tile_moe,
         visits_per_tile_time_map=visits_per_tile_time_map,
     )
 
@@ -178,7 +178,7 @@ def render_most_freq_tiles_ranking(visits_per_tile: DfSection, top_x: int = 10) 
     return html_ranking
 
 
-def render_visits_per_tile_timewindow(
+def render_visits_per_time_tile(
     counts_per_tile_timewindow: DfSection, tessellation: GeoDataFrame, threshold: float
 ) -> str:
     data = counts_per_tile_timewindow.data
