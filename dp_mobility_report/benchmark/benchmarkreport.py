@@ -36,12 +36,14 @@ class BenchmarkReport:
         budget_split_base: `dict`to customize how much privacy budget is assigned to which analysis. See argument `budget_split` of `DpMobilityReport`.
         budget_split_alternative: `dict`to customize how much privacy budget is assigned to which analysis. See argument `budget_split` of `DpMobilityReport`.
         timewindows: List of hours as `int` that define the timewindows for the spatial analysis for single time windows. Defaults to [2, 6, 10, 14, 18, 22].
-        max_travel_time: Upper bound for travel time histogram. If `None` is given, no upper bound is set. Defaults to `None`.
-        bin_range_travel_time: The range a single histogram bin spans for travel time (e.g., 5 for 5 min bins). If `None` is given, the histogram bins will be determined automatically. Defaults to `None`.
-        max_jump_length: Upper bound for jump length histogram. If `None` is given, no upper bound is set. Defaults to `None`.
-        bin_range_jump_length: The range a single histogram bin spans for jump length (e.g., 1 for 1 km bins). If `None` is given, the histogram bins will be determined automatically. Defaults to `None`.
-        max_radius_of_gyration: Upper bound for radius of gyration histogram. If `None` is given, no upper bound is set. Defaults to `None`.
-        bin_range_radius_of_gyration: The range a single histogram bin spans for the radius of gyration (e.g., 1 for 1 km bins). If `None` is given, the histogram bins will be determined automatically. Defaults to `None`.
+        max_travel_time: Upper bound for travel time histogram. Defaults to 120 (mins).
+        bin_range_travel_time: The range a single histogram bin spans for travel time (e.g., 5 for 5 min bins). Defaults to 5 (min).
+        max_jump_length: Upper bound for jump length histogram. Defaults to 10 (km).
+        bin_range_jump_length: The range a single histogram bin spans for jump length (e.g., 1 for 1 km bins). Defaults to 1 (km).
+        max_radius_of_gyration: Upper bound for radius of gyration histogram. Defaults to 5 (km).
+        bin_range_radius_of_gyration: The range a single histogram bin spans for the radius of gyration (e.g., 1 for 1 km bins). Defaults to 0.5 (km).
+        max_user_time_delta:  Upper bound for user time delta histogram. Defaults to 48 (hours).
+        bin_range_user_time_delta: The range a single histogram bin spans for user time delta (e.g., 1 for 1 hour bins). Defaults to 4 (hours).
         disable_progress_bar: Whether progress bars should be shown. Defaults to `False`.
         seed_sampling: Provide seed for down-sampling of dataset (according to `max_trips_per_user`) so that the sampling is reproducible. Defaults to `None`, i.e., no seed.
         evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to `False`."""
@@ -73,12 +75,14 @@ class BenchmarkReport:
         budget_split_base: dict = {},
         budget_split_alternative: dict = {},
         timewindows: Union[List[int], np.ndarray] = [2, 6, 10, 14, 18, 22],
-        max_travel_time: int = 90,
+        max_travel_time: int = 120,
         bin_range_travel_time: int = 5,
         max_jump_length: Union[int, float] = 10,
         bin_range_jump_length: Union[int, float] = 1,
         max_radius_of_gyration: Union[int, float] = 5,
         bin_range_radius_of_gyration: Union[int, float] = 0.5,
+        max_user_time_delta: Optional[Union[int, float]] = 48,
+        bin_range_user_time_delta: Optional[Union[int, float]] = 4,
         disable_progress_bar: bool = False,
         seed_sampling: int = None,
         evalu: bool = False,
@@ -100,6 +104,8 @@ class BenchmarkReport:
             bin_range_jump_length,
             max_radius_of_gyration,
             bin_range_radius_of_gyration,
+            max_user_time_delta,
+            bin_range_user_time_delta,
             disable_progress_bar,
             seed_sampling,
             evalu,
@@ -125,6 +131,8 @@ class BenchmarkReport:
             bin_range_jump_length,
             max_radius_of_gyration,
             bin_range_radius_of_gyration,
+            max_user_time_delta,
+            bin_range_user_time_delta,
             disable_progress_bar,
             seed_sampling,
             evalu,

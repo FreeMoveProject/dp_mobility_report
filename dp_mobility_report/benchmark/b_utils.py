@@ -23,6 +23,6 @@ def default_measure_selection() -> dict:
         const.RADIUS_OF_GYRATION_QUARTILES: const.SMAPE,
         # const.USER_TILE_COUNT: const.EMD,
         const.USER_TILE_COUNT_QUARTILES: const.SMAPE,
-        # const.MOBILITY_ENTROPY: const.JSD,
+        const.MOBILITY_ENTROPY: const.JSD,
         const.MOBILITY_ENTROPY_QUARTILES: const.SMAPE,
     }

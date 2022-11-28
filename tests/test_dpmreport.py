@@ -39,7 +39,7 @@ def test_DpMobilityReport(test_data, test_data_sequence, test_tessellation):
         analysis_exclusion=[const.JUMP_LENGTH],
     )
     assert isinstance(mob_report, DpMobilityReport)
-    assert isinstance(mob_report.max_trips_per_user, np.integer)
+    assert isinstance(mob_report.max_trips_per_user, int)
     assert isinstance(mob_report._budget_split, dict)
     assert isinstance(mob_report.analysis_exclusion, list)
     assert mob_report.analysis_exclusion == [const.JUMP_LENGTH]
@@ -298,6 +298,28 @@ def test_wrong_input_params_DpMobilityReport(
             test_data,
             test_tessellation,
             bin_range_radius_of_gyration=-1,
+            privacy_budget=None,
+        )
+
+    # wrong input for max_user_time_delta
+    with pytest.raises(ValueError):
+        DpMobilityReport(
+            test_data, test_tessellation, max_user_time_delta=-1, privacy_budget=None
+        )
+    with pytest.raises(TypeError):
+        DpMobilityReport(
+            test_data,
+            test_tessellation,
+            max_user_time_delta="not a number",
+            privacy_budget=None,
+        )
+
+    # wrong input for bin_range_radius_of_gyration
+    with pytest.raises(ValueError):
+        DpMobilityReport(
+            test_data,
+            test_tessellation,
+            bin_range_user_time_delta=-1,
             privacy_budget=None,
         )
     with pytest.raises(TypeError):

@@ -33,6 +33,7 @@ def hist_section(
     eps: Optional[float],
     sensitivity: int,
     hist_max: Optional[Union[float, int]] = None,
+    hist_min: Optional[Union[float, int]] = None,
     bin_range: Optional[Union[float, int]] = None,
     bin_type: Type = float,
     evalu: bool = False,
@@ -55,11 +56,18 @@ def hist_section(
         else quartiles["max"]
     )
 
+    hist_min = (
+        hist_min
+        if (hist_min is not None)
+        else quartiles["min"]
+    )
+
+
     # if there are less than 10 integers, use value counts of single integers instead of bin ranges for histogram
     if (
         (bin_range is None or bin_range == 1)
         and (bin_type is int)
-        and (hist_max - quartiles["min"] < 10)
+        and (hist_max - hist_min < 10)
     ):
         min_value = int(quartiles["min"])
         max_value = int(quartiles["max"])
@@ -76,20 +84,20 @@ def hist_section(
     # else use ranges for bins to create histogram
     else:
         # if hist range is small (<1), set bin_range to 0.1 to prevent too fine-granular bins
-        if bin_range is None and (hist_max - quartiles["min"]) < 1:
-            bin_range = 0.1
+        if bin_range is None and (hist_max - hist_min) < 1:
+            bin_range = 0.1 
 
         # if bin_range is provided, snap min and max value accordingly(to create "clean" bins).
         if bin_range is not None:
             # "snap" min_value: e.g., if bin range is 5 and dp min value is 12, min_value snaps to 10
-            min_value = quartiles["min"] - (quartiles["min"] % bin_range)
+            min_value = hist_min - (hist_min % bin_range)
 
         # set default of 10 bins if no bin_range is given.
         # compute bin_range from hist_max and snap max_value accordingly. This is necessary, bc hist_max and dp max might differ:
         # to create 10 bins up to hist_max but maintain bins up to dp max (to aggregate them in the following step)
         else:
-            bin_range = (hist_max - quartiles["min"]) / 10
-            min_value = quartiles["min"]
+            bin_range = (hist_max - hist_min) / 10
+            min_value = hist_min
 
         # "snap" max_value to bin_range: E.g., if bin range is 5, and the dp max value is 23, max_value snaps to 25
         max_value = (
@@ -113,7 +121,7 @@ def hist_section(
             bins = bins[bins <= hist_max]
             counts[len(bins) - 1] = counts[
                 len(bins) - 1 :
-            ].sum()  # sum up to single >max count
+            ].sum()  # sum up to single > max count
             counts = counts[: len(bins)]  # remove long tail
             bins = np.append(bins, np.Inf)
 

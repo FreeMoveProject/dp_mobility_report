@@ -81,7 +81,7 @@ Overview and default measures
      - **SMAPE**
    * -  
      - Mobility entropy
-     - **SMAPE**, Todo: KLD, JSD, EMD
+     - KLD, **JSD**, EMD, SMAPE
    
    
 

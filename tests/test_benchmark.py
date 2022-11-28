@@ -65,9 +65,9 @@ def test_histogram_bin_sizes(benchmark_report):
     assert list(
         benchmark_report.report_alternative.report[const.RADIUS_OF_GYRATION].data[1]
     ) == list(benchmark_report.report_base.report[const.RADIUS_OF_GYRATION].data[1])
-    # assert list(
-    #     benchmark_report.report_alternative.report[const.MOBILITY_ENTROPY].data[1]
-    # ) == list(benchmark_report.report_base.report[const.MOBILITY_ENTROPY].data[1])
+    assert list(
+         benchmark_report.report_alternative.report[const.MOBILITY_ENTROPY].data[1]
+    ) == list(benchmark_report.report_base.report[const.MOBILITY_ENTROPY].data[1])
 
 
 def test_earth_movers_distance1D():

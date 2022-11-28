@@ -53,6 +53,8 @@ def get_user_time_delta(
     sec = m_utils.hist_section(
         (user_time_delta.dt.total_seconds() / 3600),  # convert to hours
         eps,
+        hist_max=dpmreport.max_user_time_delta,
+        bin_range=dpmreport.bin_range_user_time_delta,
         sensitivity=dpmreport.max_trips_per_user,
         evalu=dpmreport.evalu,
     )
@@ -172,5 +174,6 @@ def get_mobility_entropy(
         sensitivity=1,
         bin_range=0.1,
         hist_max=1,
+        hist_min=0,
         evalu=dpmreport.evalu,
     )

@@ -49,6 +49,8 @@ def validate_input(
     bin_range_jump_length: Optional[Union[int, float]],
     max_radius_of_gyration: Optional[Union[int, float]],
     bin_range_radius_of_gyration: Optional[Union[int, float]],
+    max_user_time_delta: Optional[Union[int, float]],
+    bin_range_user_time_delta: Optional[Union[int, float]],
     seed_sampling: Optional[int],
 ) -> None:
     if not isinstance(df, DataFrame):
@@ -129,6 +131,12 @@ def validate_input(
     _validate_numeric_greater_zero(
         bin_range_radius_of_gyration, f"{bin_range_radius_of_gyration=}".split("=")[0]
     )
+    _validate_numeric_greater_zero(
+        max_user_time_delta, f"{max_user_time_delta=}".split("=")[0]
+    )
+    _validate_numeric_greater_zero(
+        bin_range_user_time_delta, f"{bin_range_user_time_delta=}".split("=")[0]
+    )
     _validate_bool(user_privacy, f"{user_privacy=}".split("=")[0])
     _validate_bool(evalu, f"{user_privacy=}".split("=")[0])
     _validate_bool(disable_progress_bar, f"{user_privacy=}".split("=")[0])
@@ -158,7 +166,6 @@ def clean_analysis_exclusion(
     has_tessellation: bool,
     has_timestamps: bool,
 ) -> List[str]:
-    # TODO: without timestamp: add w/o timestamp analyses to exclude_analysis
 
     def _remove_elements(elements: list, remove_list: list) -> list:
         return [e for e in elements if e not in remove_list]

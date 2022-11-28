@@ -517,24 +517,23 @@ def compute_similarity_measures(
             report_alternative[const.USER_TILE_COUNT].quartiles,
         )
 
-    # TODO create similar bins in mobility report from 0 to 1 with 0.1 bins
     if const.MOBILITY_ENTROPY not in analysis_exclusion:
-        # kld_dict[const.MOBILITY_ENTROPY] = entropy(
-        #     report_base[const.MOBILITY_ENTROPY].data[0],
-        #     report_alternative[const.MOBILITY_ENTROPY].data[0],
-        # )
-        # jsd_dict[const.MOBILITY_ENTROPY] = distance.jensenshannon(
-        #     report_base[const.MOBILITY_ENTROPY].data[0],
-        #     report_alternative[const.MOBILITY_ENTROPY].data[0],
-        # )
+        kld_dict[const.MOBILITY_ENTROPY] = entropy(
+            report_base[const.MOBILITY_ENTROPY].data[0],
+            report_alternative[const.MOBILITY_ENTROPY].data[0],
+        )
+        jsd_dict[const.MOBILITY_ENTROPY] = distance.jensenshannon(
+            report_base[const.MOBILITY_ENTROPY].data[0],
+            report_alternative[const.MOBILITY_ENTROPY].data[0],
+        )
         emd_dict[const.MOBILITY_ENTROPY] = earth_movers_distance1D(
             report_base[const.MOBILITY_ENTROPY].data,
             report_alternative[const.MOBILITY_ENTROPY].data,
         )
-        # smape_dict[const.MOBILITY_ENTROPY] = symmetric_mape(
-        #     report_base[const.MOBILITY_ENTROPY].data[0],
-        #     report_alternative[const.MOBILITY_ENTROPY].data[0],
-        # )
+        smape_dict[const.MOBILITY_ENTROPY] = symmetric_mape(
+            report_base[const.MOBILITY_ENTROPY].data[0],
+            report_alternative[const.MOBILITY_ENTROPY].data[0],
+        )
         # Quartiles
         smape_dict["mobility_entropy_quartiles"] = symmetric_mape(
             report_base[const.MOBILITY_ENTROPY].quartiles,
