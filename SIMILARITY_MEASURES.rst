@@ -161,7 +161,7 @@ Thus the EMD is available for the following analyses provided in the following u
 
 * travel time: distance in minutes
 
-* jump length: distance in meters TODO: km or m?
+* jump length: distance in kilometers
 
 * trips per user: distance in counts of trips
 

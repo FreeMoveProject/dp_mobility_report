@@ -16,8 +16,9 @@ def default_measure_selection() -> dict:
         const.TRAVEL_TIME_QUARTILES: const.SMAPE,
         const.JUMP_LENGTH: const.JSD,
         const.JUMP_LENGTH_QUARTILES: const.SMAPE,
-        const.TRIPS_PER_USER: const.EMD,
+        const.TRIPS_PER_USER: const.EMD, # TODO: implement JSD
         const.TRIPS_PER_USER_QUARTILES: const.SMAPE,
+        const.USER_TIME_DELTA: const.JSD,
         const.USER_TIME_DELTA_QUARTILES: const.SMAPE,
         const.RADIUS_OF_GYRATION: const.JSD,
         const.RADIUS_OF_GYRATION_QUARTILES: const.SMAPE,

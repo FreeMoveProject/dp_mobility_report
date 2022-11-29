@@ -7,6 +7,7 @@ from dp_mobility_report import constants as const
 from dp_mobility_report.benchmark.b_utils import default_measure_selection
 
 import warnings
+from datetime import timedelta
 
 # only select analyses that are present in both reports
 def combine_analysis_exclusion(
@@ -28,9 +29,10 @@ def unify_histogram_bins(
         const.TRAVEL_TIME,
         const.JUMP_LENGTH,
         const.RADIUS_OF_GYRATION,
-        #const.USER_TIME_DELTA, # TODO: fix
-        const.TRIPS_PER_USER,
-    ]  # TODO: how to handle const.USER_TILE_COUNT?
+        const.USER_TIME_DELTA,
+        # const.TRIPS_PER_USER, TODO: how to handle?
+        # const.USER_TILE_COUNT TODO: how to handle?
+    ]  
     # const.MOBILITY_ENTROPY should already be similar: 0-1 with 0.1 bin range
     
     for hist in histograms:
@@ -42,6 +44,11 @@ def unify_histogram_bins(
  
             max_base = report_base[hist].quartiles["max"]
             max_alternative = report_alternative[hist].quartiles["max"]
+            
+            if isinstance(max_base, timedelta): # needed for user_time_delta
+                max_base = max_base.total_seconds() / 3600
+                max_alternative = max_alternative.total_seconds() / 3600
+
             combined_max = max([max_base, max_alternative])
             if (math.isinf(hist_base_bins[-1]) | math.isinf(hist_alternative_bins[-1])):
                 hist_base_bins[-1] = combined_max
