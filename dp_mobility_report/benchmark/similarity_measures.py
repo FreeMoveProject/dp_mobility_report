@@ -10,7 +10,6 @@ from scipy.spatial import distance
 from scipy.stats import entropy, wasserstein_distance
 
 from dp_mobility_report import constants as const
-from dp_mobility_report.benchmark.b_utils import default_measure_selection
 
 if TYPE_CHECKING:
     from dp_mobility_report import BenchmarkReport

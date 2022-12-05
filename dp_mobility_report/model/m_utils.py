@@ -65,10 +65,12 @@ def hist_section(
         and (bin_type is int)
         and (hist_max - hist_min < 10)
     ):
-        min_value = int(quartiles["min"])
-        max_value = int(quartiles["max"])
-        bins = np.array(range(min_value, max_value + 1))
-        counts = np.bincount(series, minlength=len(bins))[min_value : max_value + 1]
+        min_value = quartiles["min"]
+        max_value = quartiles["max"]
+        bins = np.array(range(int(min_value), int(max_value) + 1))
+        counts = np.bincount(series, minlength=len(bins))[
+            int(min_value) : int(max_value) + 1
+        ]
 
         # sum all counts above hist max to single bin >max
         if bins[-1] > hist_max:

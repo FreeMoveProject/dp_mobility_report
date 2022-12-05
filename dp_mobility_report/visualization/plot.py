@@ -31,7 +31,7 @@ def histogram(
     x_axis_label: str,
     min_value: Union[int, float] = None,
     y_axis_label: str = "Frequency",
-    margin_of_error: float = None,
+    margin_of_error: Union[float, list] = None,
     rotate_label: bool = False,
     x_axis_type: Type = float,
     ndigits_x_label: int = 2,
@@ -68,10 +68,12 @@ def histogram(
                 labels[-1][:-1] + "]"
             )  # fix label string of last bin to include last value
 
-    margin_of_error = np.repeat(margin_of_error, len(upper_limits))
     # margin of error only for bins above min value
     if min_value:
-        margin_of_error[min_value > upper_limits] = 0
+        margin_of_error = [
+            0 if (min_value > upper_limits[i]) else margin_of_error
+            for i in range(0, len(upper_limits))
+        ]
 
     return barchart(
         labels,

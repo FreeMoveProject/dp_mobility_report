@@ -3,9 +3,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from dp_mobility_report import DpMobilityReport
+from dp_mobility_report import BenchmarkReport, DpMobilityReport
 from dp_mobility_report import constants as const
-from dp_mobility_report.benchmark import b_utils, benchmarkreport
 from dp_mobility_report.benchmark.preprocessing import (
     combine_analysis_exclusion,
     validate_measure_selection,
@@ -44,7 +43,7 @@ def benchmark_report():
     test_data = pd.read_csv("tests/test_files/test_data.csv")
     test_data_alternative = pd.read_csv("tests/test_files/test_data.csv", nrows=50)
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
-    return benchmarkreport.BenchmarkReport(
+    return BenchmarkReport(
         df_base=test_data,
         tessellation=test_tessellation,
         df_alternative=test_data_alternative,
@@ -163,12 +162,12 @@ def test_get_selected_measures(benchmark_report):
 
     similarity_measures = get_selected_measures(benchmark_report)
     assert isinstance(similarity_measures, dict)
-    assert not None in similarity_measures.values()
+    assert None not in similarity_measures.values()
 
     test_data = pd.read_csv("tests/test_files/test_data.csv")
     test_data_alternative = pd.read_csv("tests/test_files/test_data.csv", nrows=50)
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
-    benchmark_report = benchmarkreport.BenchmarkReport(
+    benchmark_report = BenchmarkReport(
         test_data,
         test_tessellation,
         test_data_alternative,
@@ -178,7 +177,7 @@ def test_get_selected_measures(benchmark_report):
     assert const.JSD == benchmark_report.measure_selection[const.TRAVEL_TIME_QUARTILES]
     with pytest.warns(Warning):
         similarity_measures = get_selected_measures(benchmark_report)
-    assert similarity_measures[const.TRAVEL_TIME_QUARTILES] == None
+    assert similarity_measures[const.TRAVEL_TIME_QUARTILES] is None
 
 
 def test_benchmark_report(benchmark_report):
