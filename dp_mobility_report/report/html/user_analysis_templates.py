@@ -221,6 +221,7 @@ def render_distinct_tiles_user(user_tile_count_hist: TupleSection) -> str:
 def render_mobility_entropy(mobility_entropy: TupleSection) -> str:
     hist = plot.histogram(
         (mobility_entropy.data[0], mobility_entropy.data[1].round(2)),
+        min_value = mobility_entropy.quartiles["min"],
         x_axis_label="mobility entropy",
         y_axis_label="% of users",
         margin_of_error=mobility_entropy.margin_of_error_laplace,

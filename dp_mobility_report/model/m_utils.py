@@ -56,6 +56,7 @@ def hist_section(
         else quartiles["max"]
     )
 
+    # min value of histogram: either given as input or determined by dp min
     hist_min = (
         hist_min
         if (hist_min is not None)
@@ -126,6 +127,11 @@ def hist_section(
             bins = np.append(bins, np.Inf)
 
     dp_counts = diff_privacy.counts_dp(counts, epsi, sensitivity)
+
+    # set counts below dp_min to 0, as there cannot be counts below the min (empty bins are only needed for mobility entropy to show all possible bins)
+    temp_bins = bins if len(bins) == len(dp_counts) else bins[1:]
+    dp_counts[temp_bins < min_value] = 0 
+
     moe_laplace = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
 
     # as percent instead of counts

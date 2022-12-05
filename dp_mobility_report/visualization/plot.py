@@ -29,6 +29,7 @@ def format(value: Union[float, int], type: Type, ndigits: int = 2) -> Union[floa
 def histogram(
     hist: Tuple,
     x_axis_label: str,
+    min_value: Union[int, float] = None,
     y_axis_label: str = "Frequency",
     margin_of_error: float = None,
     rotate_label: bool = False,
@@ -45,6 +46,8 @@ def histogram(
             labels = np.append(labels, f"> {labels[-1]}")
         else:
             labels = np.append(labels, format(bins[-1], x_axis_type))
+        # needed for margin of error (see below)
+        upper_limits = bins
 
     # bin ranges as labels
     else:
@@ -65,6 +68,11 @@ def histogram(
                 labels[-1][:-1] + "]"
             )  # fix label string of last bin to include last value
 
+    margin_of_error = np.repeat(margin_of_error, len(upper_limits))
+    # margin of error only for bins above min value
+    if min_value:
+        margin_of_error[min_value > upper_limits] = 0
+
     return barchart(
         labels,
         counts,
@@ -80,7 +88,7 @@ def barchart(
     y: np.ndarray,
     x_axis_label: str,
     y_axis_label: str,
-    margin_of_error: Optional[float] = None,
+    margin_of_error: Optional[Union[float, list]] = None,
     rotate_label: bool = False,
 ) -> mpl.figure.Figure:
     fig, ax = plt.subplots()
