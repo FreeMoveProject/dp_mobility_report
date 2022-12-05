@@ -39,7 +39,7 @@ def test_DpMobilityReport(test_data, test_data_sequence, test_tessellation):
         analysis_exclusion=[const.JUMP_LENGTH],
     )
     assert isinstance(mob_report, DpMobilityReport)
-    assert isinstance(mob_report.max_trips_per_user, int)
+    assert isinstance(mob_report.max_trips_per_user, (int, np.integer))
     assert isinstance(mob_report._budget_split, dict)
     assert isinstance(mob_report.analysis_exclusion, list)
     assert mob_report.analysis_exclusion == [const.JUMP_LENGTH]
