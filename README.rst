@@ -129,7 +129,7 @@ The default of single analyses can be overwritten as shown in the following:
         # print the default measure selection
         print(default_measure_selection())
 
-        # change default of EMD for visits_per_tile to JSD. 
+        # change default of EMD for visits_per_tile to JSD.
         # For the other analyses the default measure is remained
         custom_measure_selection = {const.VISITS_PER_TILE: const.JSD}
 

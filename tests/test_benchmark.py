@@ -66,7 +66,7 @@ def test_histogram_bin_sizes(benchmark_report):
         benchmark_report.report_alternative.report[const.RADIUS_OF_GYRATION].data[1]
     ) == list(benchmark_report.report_base.report[const.RADIUS_OF_GYRATION].data[1])
     assert list(
-         benchmark_report.report_alternative.report[const.MOBILITY_ENTROPY].data[1]
+        benchmark_report.report_alternative.report[const.MOBILITY_ENTROPY].data[1]
     ) == list(benchmark_report.report_base.report[const.MOBILITY_ENTROPY].data[1])
 
 

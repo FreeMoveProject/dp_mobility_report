@@ -1,9 +1,8 @@
 import os
 
+import config
 import geopandas as gpd
 import pandas as pd
-
-import config
 
 from dp_mobility_report.benchmark.benchmarkreport import BenchmarkReport
 
