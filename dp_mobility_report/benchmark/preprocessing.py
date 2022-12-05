@@ -1,13 +1,13 @@
+import math
+import warnings
+from datetime import timedelta
 from typing import List, Tuple
 
-import math
 import numpy as np
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.benchmark.b_utils import default_measure_selection
 
-import warnings
-from datetime import timedelta
 
 # only select analyses that are present in both reports
 def combine_analysis_exclusion(
@@ -30,30 +30,30 @@ def unify_histogram_bins(
         const.JUMP_LENGTH,
         const.RADIUS_OF_GYRATION,
         const.USER_TIME_DELTA,
+        const.USER_TILE_COUNT,
         # const.TRIPS_PER_USER, TODO: how to handle?
-        # const.USER_TILE_COUNT TODO: how to handle?
-    ]  
+    ]
     # const.MOBILITY_ENTROPY should already be similar: 0-1 with 0.1 bin range
-    
+
     for hist in histograms:
         if hist not in analysis_exclusion:
             hist_base_values, hist_base_bins = report_base[hist].data
             hist_alternative_values, hist_alternative_bins = report_alternative[
                 hist
             ].data
- 
+
             max_base = report_base[hist].quartiles["max"]
             max_alternative = report_alternative[hist].quartiles["max"]
-            
-            if isinstance(max_base, timedelta): # needed for user_time_delta
+
+            if isinstance(max_base, timedelta):  # needed for user_time_delta
                 max_base = max_base.total_seconds() / 3600
                 max_alternative = max_alternative.total_seconds() / 3600
 
             combined_max = max([max_base, max_alternative])
-            if (math.isinf(hist_base_bins[-1]) | math.isinf(hist_alternative_bins[-1])):
+            if math.isinf(hist_base_bins[-1]) | math.isinf(hist_alternative_bins[-1]):
                 hist_base_bins[-1] = combined_max
                 hist_alternative_bins[-1] = combined_max
-                
+
             bins_union = np.union1d(hist_alternative_bins, hist_base_bins)
 
             missing_in_base = [i for i in bins_union if i not in hist_base_bins]

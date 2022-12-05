@@ -135,6 +135,8 @@ def get_user_tile_count(
         eps,
         sensitivity=1,
         bin_type=int,
+        hist_max=dpmreport.max_user_tile_count,
+        bin_range=dpmreport.bin_range_user_tile_count,
         evalu=dpmreport.evalu,
     )
 

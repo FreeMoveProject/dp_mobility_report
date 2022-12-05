@@ -143,9 +143,7 @@ def add_place_analysis_elements(
             const.VISITS_PER_TIME_TILE
         ] = place_analysis.get_visits_per_time_tile(
             dpmreport,
-            _get_eps(
-                eps_factor, const.VISITS_PER_TIME_TILE, dpmreport.budget_split
-            ),
+            _get_eps(eps_factor, const.VISITS_PER_TIME_TILE, dpmreport.budget_split),
         )
     return place_analysis_elements
 

@@ -42,6 +42,8 @@ class BenchmarkReport:
         bin_range_jump_length: The range a single histogram bin spans for jump length (e.g., 1 for 1 km bins). Defaults to 1 (km).
         max_radius_of_gyration: Upper bound for radius of gyration histogram. Defaults to 5 (km).
         bin_range_radius_of_gyration: The range a single histogram bin spans for the radius of gyration (e.g., 1 for 1 km bins). Defaults to 0.5 (km).
+        max_user_tile_count: Upper bound for distinct tiles per user histogram. If ``None`` is given, no upper bound is set. Defaults to ``None``.
+        bin_range_user_tile_count: The range a single histogram bin spans for the distinct tiles per user histogram. If ``None`` is given, the histogram bins will be determined automatically. Defaults to ``None``.
         max_user_time_delta:  Upper bound for user time delta histogram. Defaults to 48 (hours).
         bin_range_user_time_delta: The range a single histogram bin spans for user time delta (e.g., 1 for 1 hour bins). Defaults to 4 (hours).
         disable_progress_bar: Whether progress bars should be shown. Defaults to `False`.
@@ -81,6 +83,8 @@ class BenchmarkReport:
         bin_range_jump_length: Union[int, float] = 1,
         max_radius_of_gyration: Union[int, float] = 5,
         bin_range_radius_of_gyration: Union[int, float] = 0.5,
+        max_user_tile_count: Optional[int] = 10,
+        bin_range_user_tile_count: Optional[int] = 1,
         max_user_time_delta: Optional[Union[int, float]] = 48,
         bin_range_user_time_delta: Optional[Union[int, float]] = 4,
         disable_progress_bar: bool = False,
@@ -104,6 +108,8 @@ class BenchmarkReport:
             bin_range_jump_length,
             max_radius_of_gyration,
             bin_range_radius_of_gyration,
+            max_user_tile_count,
+            bin_range_user_tile_count,
             max_user_time_delta,
             bin_range_user_time_delta,
             disable_progress_bar,
@@ -131,6 +137,8 @@ class BenchmarkReport:
             bin_range_jump_length,
             max_radius_of_gyration,
             bin_range_radius_of_gyration,
+            max_user_tile_count,
+            bin_range_user_tile_count,
             max_user_time_delta,
             bin_range_user_time_delta,
             disable_progress_bar,

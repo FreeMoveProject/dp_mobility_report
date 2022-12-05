@@ -520,7 +520,23 @@ def compute_similarity_measures(
         )
 
     if const.USER_TILE_COUNT_QUARTILES not in analysis_exclusion:
-        # TODO comparison of histogram buckets of user time delta, currently not possible, missing jsd, kld
+        kld_dict[const.USER_TILE_COUNT] = entropy(
+            pk=report_alternative[const.USER_TILE_COUNT].data[0],
+            qk=report_base[const.USER_TILE_COUNT].data[0],
+        )
+        jsd_dict[const.USER_TILE_COUNT] = distance.jensenshannon(
+            p=report_alternative[const.USER_TILE_COUNT].data[0],
+            q=report_base[const.USER_TILE_COUNT].data[0],
+        )
+        emd_dict[const.USER_TILE_COUNT] = earth_movers_distance1D(
+            report_alternative[const.USER_TILE_COUNT].data,
+            report_base[const.USER_TILE_COUNT].data,
+        )
+        smape_dict[const.USER_TILE_COUNT] = symmetric_mape(
+            estimate=report_alternative[const.USER_TILE_COUNT].data[0],
+            true=report_base[const.USER_TILE_COUNT].data[0],
+        )
+
         smape_dict[const.USER_TILE_COUNT_QUARTILES] = symmetric_mape(
             estimate=report_alternative[const.USER_TILE_COUNT].quartiles,
             true=report_base[const.USER_TILE_COUNT].quartiles,

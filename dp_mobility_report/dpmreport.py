@@ -48,6 +48,8 @@ class DpMobilityReport:
         bin_range_jump_length: The range a single histogram bin spans for jump length (e.g., 1 for 1 km bins). If ``None`` is given, the histogram bins will be determined automatically. Defaults to ``None``.
         max_radius_of_gyration: Upper bound for radius of gyration histogram. If ``None`` is given, no upper bound is set. Defaults to ``None``.
         bin_range_radius_of_gyration: The range a single histogram bin spans for the radius of gyration (e.g., 1 for 1 km bins). If ``None`` is given, the histogram bins will be determined automatically. Defaults to ``None``.
+        max_user_tile_count: Upper bound for distinct tiles per user histogram. If ``None`` is given, no upper bound is set. Defaults to ``None``.
+        bin_range_user_tile_count: The range a single histogram bin spans for the distinct tiles per user histogram. If ``None`` is given, the histogram bins will be determined automatically. Defaults to ``None``.
         max_user_time_delta:  Upper bound for user time delta histogram. If ``None`` is given, no upper bound is set. Defaults to ``None``.
         bin_range_user_time_delta: The range a single histogram bin spans for user time delta (e.g., 1 for 1 hour bins). If ``None`` is given, the histogram bins will be determined automatically. Defaults to ``None``.
         disable_progress_bar: Whether progress bars should be shown. Defaults to ``False``.
@@ -80,6 +82,8 @@ class DpMobilityReport:
         bin_range_jump_length: Optional[Union[int, float]] = None,
         max_radius_of_gyration: Optional[Union[int, float]] = None,
         bin_range_radius_of_gyration: Optional[Union[int, float]] = None,
+        max_user_tile_count: Optional[int] = None,
+        bin_range_user_tile_count: Optional[int] = None,
         max_user_time_delta: Optional[Union[int, float]] = None,
         bin_range_user_time_delta: Optional[Union[int, float]] = None,
         disable_progress_bar: bool = False,
@@ -104,6 +108,8 @@ class DpMobilityReport:
             bin_range_jump_length,
             max_radius_of_gyration,
             bin_range_radius_of_gyration,
+            max_user_tile_count,
+            bin_range_user_tile_count,
             max_user_time_delta,
             bin_range_user_time_delta,
             seed_sampling,
@@ -156,6 +162,8 @@ class DpMobilityReport:
         self.bin_range_travel_time = bin_range_travel_time
         self.max_radius_of_gyration = max_radius_of_gyration
         self.bin_range_radius_of_gyration = bin_range_radius_of_gyration
+        self.max_user_tile_count = max_user_tile_count
+        self.bin_range_user_tile_count = bin_range_user_tile_count
         self.max_user_time_delta = max_user_time_delta
         self.bin_range_user_time_delta = bin_range_user_time_delta
         self._analysis_exclusion = preprocessing.clean_analysis_exclusion(
@@ -251,7 +259,9 @@ class DpMobilityReport:
         self.report
 
         # render html
-        data, temp_map_folder = render_html(self, filename, top_n_flows, disable_progress_bar)
+        data, temp_map_folder = render_html(
+            self, filename, top_n_flows, disable_progress_bar
+        )
 
         create_maps_folder(temp_map_folder, output_dir)
 

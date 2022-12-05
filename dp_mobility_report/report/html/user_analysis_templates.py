@@ -24,6 +24,7 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
     trips_per_user_summary_table = ""
     trips_per_user_moe_info = ""
     time_between_traj_eps = None
+    time_between_traj_hist_info = ""
     overlapping_trips_info = ""
     time_between_traj_hist = ""
     time_between_traj_summary_table = ""
@@ -34,6 +35,7 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
     radius_of_gyration_summary_table = ""
     radius_of_gyration_moe_info = ""
     distinct_tiles_user_eps = None
+    distinct_tiles_hist_info = ""
     distinct_tiles_user_hist = ""
     distinct_tiles_user_summary_table = ""
     distinct_tiles_moe_info = ""
@@ -62,6 +64,9 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
         and (report[const.USER_TIME_DELTA].quartiles is not None)
     ):
         time_between_traj_eps = render_eps(report[const.USER_TIME_DELTA].privacy_budget)
+        time_between_traj_hist_info = render_user_input_info(
+            dpmreport.max_user_time_delta, dpmreport.bin_range_user_time_delta
+        )
         overlapping_trips_info = render_overlapping_trips(report[const.USER_TIME_DELTA])
         time_between_traj_hist = render_time_between_traj(report[const.USER_TIME_DELTA])
         time_between_traj_summary_table = render_summary(
@@ -96,6 +101,9 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
         distinct_tiles_user_eps = render_eps(
             report[const.USER_TILE_COUNT].privacy_budget
         )
+        distinct_tiles_hist_info = render_user_input_info(
+            dpmreport.max_user_tile_count, dpmreport.bin_range_user_tile_count
+        )
         distinct_tiles_user_hist = render_distinct_tiles_user(
             report[const.USER_TILE_COUNT]
         )
@@ -127,6 +135,7 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
         trips_per_user_summary_table=trips_per_user_summary_table,
         trips_per_user_moe_info=trips_per_user_moe_info,
         time_between_traj_eps=time_between_traj_eps,
+        time_between_traj_hist_info=time_between_traj_hist_info,
         overlapping_trips_info=overlapping_trips_info,
         time_between_traj_hist=time_between_traj_hist,
         time_between_traj_summary_table=time_between_traj_summary_table,
@@ -137,6 +146,7 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
         radius_of_gyration_summary_table=radius_of_gyration_summary_table,
         radius_of_gyration_moe_info=radius_of_gyration_moe_info,
         distinct_tiles_user_eps=distinct_tiles_user_eps,
+        distinct_tiles_hist_info=distinct_tiles_hist_info,
         distinct_tiles_user_hist=distinct_tiles_user_hist,
         distinct_tiles_user_summary_table=distinct_tiles_user_summary_table,
         distinct_tiles_moe_info=distinct_tiles_moe_info,

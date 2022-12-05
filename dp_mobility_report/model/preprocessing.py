@@ -49,6 +49,8 @@ def validate_input(
     bin_range_jump_length: Optional[Union[int, float]],
     max_radius_of_gyration: Optional[Union[int, float]],
     bin_range_radius_of_gyration: Optional[Union[int, float]],
+    max_user_tile_count: Optional[int],
+    bin_range_user_tile_count: Optional[int],
     max_user_time_delta: Optional[Union[int, float]],
     bin_range_user_time_delta: Optional[Union[int, float]],
     seed_sampling: Optional[int],
@@ -132,6 +134,12 @@ def validate_input(
         bin_range_radius_of_gyration, f"{bin_range_radius_of_gyration=}".split("=")[0]
     )
     _validate_numeric_greater_zero(
+        max_user_tile_count, f"{max_user_tile_count=}".split("=")[0]
+    )
+    _validate_numeric_greater_zero(
+        bin_range_user_tile_count, f"{bin_range_user_tile_count=}".split("=")[0]
+    )
+    _validate_numeric_greater_zero(
         max_user_time_delta, f"{max_user_time_delta=}".split("=")[0]
     )
     _validate_numeric_greater_zero(
@@ -166,7 +174,6 @@ def clean_analysis_exclusion(
     has_tessellation: bool,
     has_timestamps: bool,
 ) -> List[str]:
-
     def _remove_elements(elements: list, remove_list: list) -> list:
         return [e for e in elements if e not in remove_list]
 

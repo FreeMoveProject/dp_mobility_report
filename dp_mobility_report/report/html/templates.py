@@ -4,12 +4,11 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Tuple
 
+import pkg_resources  # type: ignore
 from tqdm.auto import tqdm
 
-import pkg_resources  # type: ignore
-
 if TYPE_CHECKING:
-    from dp_mobility_report import DpMobilityReport, BenchmarkReport
+    from dp_mobility_report import DpMobilityReport
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.report.html import (
@@ -23,7 +22,10 @@ from dp_mobility_report.report.html import (
 
 
 def render_html(
-    dpmreport: "DpMobilityReport", output_filename: str, top_n_flows: int = 100, disable_progress_bar = False
+    dpmreport: "DpMobilityReport",
+    output_filename: str,
+    top_n_flows: int = 100,
+    disable_progress_bar: bool = False,
 ) -> Tuple[str, Path]:
     template_structure = html_utils.get_template("structure.html")
     temp_map_folder = Path(os.path.join(tempfile.gettempdir(), "maps"))
@@ -46,13 +48,16 @@ def render_html(
         if not set(const.OVERVIEW_ELEMENTS).issubset(dpmreport.analysis_exclusion):
             overview_segment = overview_templates.render_overview(dpmreport.report)
         pbar.update()
-        
+
         if not set(const.PLACE_ELEMENTS).issubset(dpmreport.analysis_exclusion):
             place_analysis_segment = place_analysis_templates.render_place_analysis(
-                dpmreport.report, dpmreport.tessellation, temp_map_folder, output_filename
+                dpmreport.report,
+                dpmreport.tessellation,
+                temp_map_folder,
+                output_filename,
             )
         pbar.update()
-        
+
         if not set(const.OD_ELEMENTS).issubset(dpmreport.analysis_exclusion):
             od_analysis_segment = od_analysis_templates.render_od_analysis(
                 dpmreport, top_n_flows, temp_map_folder, output_filename
@@ -60,7 +65,9 @@ def render_html(
         pbar.update()
 
         if not set(const.USER_ELEMENTS).issubset(dpmreport.analysis_exclusion):
-            user_analysis_segment = user_analysis_templates.render_user_analysis(dpmreport)
+            user_analysis_segment = user_analysis_templates.render_user_analysis(
+                dpmreport
+            )
         pbar.update()
     return (
         template_structure.render(
@@ -73,6 +80,7 @@ def render_html(
         ),
         temp_map_folder,
     )
+
 
 # def render_benchmark_html(
 #     benchmarkreport: "BenchmarkReport", output_filename: str, top_n_flows: int = 100
