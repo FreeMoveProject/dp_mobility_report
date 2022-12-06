@@ -281,7 +281,7 @@ def _validate_columns(df: pd.DataFrame) -> pd.DataFrame:
         )
     else:
         try:
-            df.loc[:, const.DATETIME] = pd.to_datetime(df[const.DATETIME])
+            df[const.DATETIME] =  pd.to_datetime(df[const.DATETIME])
         except Exception as ex:
             raise TypeError("Column 'datetime' cannot be cast to datetime.") from ex
     return df
