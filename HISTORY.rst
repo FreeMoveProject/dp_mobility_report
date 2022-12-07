@@ -1,6 +1,10 @@
 History
 *********
 
+0.1.4 (2022-12-07)
+------------------
+* Remove Google Fonts from HTML.
+
 0.1.3 (2022-12-05)
 ------------------
 * Handle FutureWarning of pandas.
