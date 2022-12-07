@@ -96,6 +96,8 @@ Beijing `Geolife`_ dataset: [`Code used for Beijing`_]
 * `Report of Beijing without DP`_
 * `Report of Beijing with DP epsilon=50`_
 
+(Here you find the `code of the data preprocessing`_ to obtain the needed format)
+
 Credits
 -------
 
@@ -122,5 +124,6 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 .. _`Report of Beijing without DP`: https://freemoveproject.github.io/dp_mobility_report/examples/html/geolife_noPrivacy.html
 .. _`Report of Beijing with DP epsilon=50`: https://freemoveproject.github.io/dp_mobility_report/examples/html/geolife.html
 .. _`Code used for Beijing`: https://github.com/FreeMoveProject/dp_mobility_report/blob/main/examples/example_geolife.py
+.. _`code of the data preprocessing`: https://github.com/FreeMoveProject/evaluation_dp_mobility_report/blob/main/01_preprocess_evaluation_data.py
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
