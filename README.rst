@@ -81,9 +81,20 @@ Please refer to the `documentation`_ for information on further parameters.
 Examples
 *********
 
-* Berlin mobility data simulated using the `DLR TAPAS`_ Model: `Berlin without DP`_,  `with DP epsilon=1`_. [`Code used for Berlin`_]
-* Madrid `CRTM survey`_ data: `Madrid without DP`_, `with DP epsilon=10`_. [`Code used for Madrid`_]
-* Beijing `Geolife`_ dataset: `Beijing without DP`_, `with DP epsilon=50`_. [`Code used for Beijing`_]
+Berlin mobility data simulated using the `DLR TAPAS`_ Model: [`Code used for Berlin`_]
+
+* `Report of Berlin without DP`_
+* `Report of Berlin with DP epsilon=1`_
+
+Madrid `CRTM survey`_ data: [`Code used for Madrid`_]
+
+* `Report of Madrid without DP`_
+* `Report of Madrid with DP epsilon=10`_
+
+Beijing `Geolife`_ dataset: [`Code used for Beijing`_]
+
+* `Report of Beijing without DP`_
+* `Report of Beijing with DP epsilon=50`_
 
 Credits
 -------
@@ -100,16 +111,16 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 .. _`pandas-profiling/pandas-profiling`: https://github.com/pandas-profiling/pandas-profiling
 .. _`scikit-mobility`: https://github.com/scikit-mobility
 .. _`DLR TAPAS`: https://github.com/DLR-VF/TAPAS
-.. _`Berlin without DP`: https://freemoveproject.github.io/dp_mobility_report/examples/html/berlin_noPrivacy.html
-.. _`with DP epsilon=1`: https://freemoveproject.github.io/dp_mobility_report/examples/html/berlin.html
+.. _`Report of Berlin without DP`: https://freemoveproject.github.io/dp_mobility_report/examples/html/berlin_noPrivacy.html
+.. _`Report of Berlin with DP epsilon=1`: https://freemoveproject.github.io/dp_mobility_report/examples/html/berlin.html
 .. _`Code used for Berlin`: https://github.com/FreeMoveProject/dp_mobility_report/blob/main/examples/example_berlin.py
 .. _`CRTM survey`: https://crtm.maps.arcgis.com/apps/MinimalGallery/index.html?appid=a60bb2f0142b440eadee1a69a11693fc
-.. _`Madrid without DP`: https://freemoveproject.github.io/dp_mobility_report/examples/html/madrid_noPrivacy.html
-.. _`with DP epsilon=10`: https://freemoveproject.github.io/dp_mobility_report/examples/html/madrid.html
+.. _`Report of Madrid without DP`: https://freemoveproject.github.io/dp_mobility_report/examples/html/madrid_noPrivacy.html
+.. _`Report of Madrid with DP epsilon=10`: https://freemoveproject.github.io/dp_mobility_report/examples/html/madrid.html
 .. _`Code used for Madrid`: https://github.com/FreeMoveProject/dp_mobility_report/blob/main/examples/example_madrid.py
 .. _`Geolife`: https://www.microsoft.com/en-us/download/details.aspx?id=52367
-.. _`Beijing without DP`: https://freemoveproject.github.io/dp_mobility_report/examples/html/geolife_noPrivacy.html
-.. _`with DP epsilon=50`: https://freemoveproject.github.io/dp_mobility_report/examples/html/geolife.html
+.. _`Report of Beijing without DP`: https://freemoveproject.github.io/dp_mobility_report/examples/html/geolife_noPrivacy.html
+.. _`Report of Beijing with DP epsilon=50`: https://freemoveproject.github.io/dp_mobility_report/examples/html/geolife.html
 .. _`Code used for Beijing`: https://github.com/FreeMoveProject/dp_mobility_report/blob/main/examples/example_geolife.py
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
