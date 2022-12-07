@@ -75,12 +75,14 @@ def create_html_assets(output_file: Path) -> None:
     )
 
     for file_name in os.listdir(asset_folder):
-        # construct full file path
-        source = os.path.join(asset_folder, file_name)
-        destination = os.path.join(path, file_name)
-        # copy only files
-        if os.path.isfile(source):
-            shutil.copy(source, destination)
+        # only copy .css files (e.g., not __init__.py)
+        if str.endswith(file_name, ".css"):
+            # construct full file path
+            source = os.path.join(asset_folder, file_name)
+            destination = os.path.join(path, file_name)
+            # copy only files
+            if os.path.isfile(source):
+                shutil.copy(source, destination)
 
 
 def create_maps_folder(temp_map_folder: Path, output_dir: Path) -> None:
