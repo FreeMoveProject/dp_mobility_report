@@ -18,7 +18,7 @@ Differentially Private Mobility Data Report
 * Documentation: https://dp-mobility-report.readthedocs.io.
 
 
-``dp_mobility_report``: A python package to create a mobility report with differential privacy (DP) guarentees, especially for urban human mobility data. 
+``dp_mobility_report``: A python package to create a mobility report with differential privacy (DP) guarantees, especially for urban human mobility data. 
 
 
 Install
@@ -41,7 +41,7 @@ Data preparation
 **df**: 
 
 * A pandas ``DataFrame``. 
-* Expected columns: User ID ``uid``, Trip ID ``tid``, timestamp ``datetime`` (expected is a datetime-like string, e.g., in the format ``yyyy-mm-dd hh:mm:ss``. If ``datetime`` contains ``int`` values, it is interpreted as sequence positions, i.e., if the dataset only consists of sequences without timestamps), latitude and longitude in CRS EPSG:4326 ``lat`` and ``lng``. 
+* Expected columns: User ID ``uid``, Trip ID ``tid``, timestamp ``datetime`` (expected is a datetime-like string, e.g., in the format ``yyyy-mm-dd hh:mm:ss``. If ``datetime`` contains ``int`` values, it is interpreted as sequence positions, i.e., if the dataset only consists of sequences without timestamps), latitude and longitude in CRS EPSG:4326 ``lat`` and ``lng``. (We thereby closely followed the format of the `scikit-mobility`_ ``TrajDataFrame``.)
 * Here you can find an `example dataset`_.
 
 **tessellation**: 
@@ -98,6 +98,24 @@ Beijing `Geolife`_ dataset: [`Code used for Beijing`_]
 
 (Here you find the `code of the data preprocessing`_ to obtain the needed format)
 
+Citing
+******
+if you use dp-mobility-report please cite the `following paper`_:
+
+.. code-block::
+
+        @article{
+                doi:10.1080/17489725.2022.2148008,
+                title = {Towards Mobility Reports with User-Level Privacy},
+                author = {Kapp, Alexandra and {von Voigt}, Saskia Nu{\~n}ez and Mihaljevi{\'c}, Helena and Tschorsch, Florian},
+                year = {2022},
+                journal = {Journal of Location Based Services},
+                eprint = {https://www.tandfonline.com/doi/pdf/10.1080/17489725.2022.2148008},
+                publisher = {{Taylor \& Francis}},
+                doi = {10.1080/17489725.2022.2148008}
+        }
+
+
 Credits
 -------
 
@@ -109,9 +127,6 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 .. _`example tessellation`: https://github.com/FreeMoveProject/dp_mobility_report/blob/main/tests/test_files/test_tessellation.geojson
 .. _`create a tessellation`:  https://github.com/FreeMoveProject/dp_mobility_report/blob/main/examples/create_tessellation.py
 .. _documentation: https://dp-mobility-report.readthedocs.io/en/latest/modules.html
-.. _examples: https://github.com/FreeMoveProject/dp_mobility_report/tree/main/examples/html
-.. _`pandas-profiling/pandas-profiling`: https://github.com/pandas-profiling/pandas-profiling
-.. _`scikit-mobility`: https://github.com/scikit-mobility
 .. _`DLR TAPAS`: https://github.com/DLR-VF/TAPAS
 .. _`Report of Berlin without DP`: https://freemoveproject.github.io/dp_mobility_report/examples/html/berlin_noPrivacy.html
 .. _`Report of Berlin with DP epsilon=1`: https://freemoveproject.github.io/dp_mobility_report/examples/html/berlin.html
@@ -125,5 +140,8 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 .. _`Report of Beijing with DP epsilon=50`: https://freemoveproject.github.io/dp_mobility_report/examples/html/geolife.html
 .. _`Code used for Beijing`: https://github.com/FreeMoveProject/dp_mobility_report/blob/main/examples/example_geolife.py
 .. _`code of the data preprocessing`: https://github.com/FreeMoveProject/evaluation_dp_mobility_report/blob/main/01_preprocess_evaluation_data.py
+.. _`following paper`: https://www.tandfonline.com/doi/full/10.1080/17489725.2022.2148008
+.. _`pandas-profiling/pandas-profiling`: https://github.com/pandas-profiling/pandas-profiling
+.. _`scikit-mobility`: https://github.com/scikit-mobility
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
