@@ -389,7 +389,7 @@ def flows(
             fill_color=light_blue,
         )
         T_D = [
-            [destination, flow]
+            [destination, int(flow)]
             for destination, flow in OD[[const.DESTINATION, const.FLOW]].values
         ]
         trips_info = "<br/>".join(
