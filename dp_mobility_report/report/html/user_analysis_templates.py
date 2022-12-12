@@ -297,6 +297,10 @@ def render_benchmark_user_analysis(
 
 
 def render_trips_per_user(trips_per_user_hist: TupleSection, trips_per_user_hist_alternative: Optional[TupleSection]=None) -> str:
+    if trips_per_user_hist_alternative:
+        alternative_data = trips_per_user_hist_alternative.data
+    else:
+        alternative_data = None
     hist = plot.histogram(
         hist=trips_per_user_hist.data,
         hist_alternative=trips_per_user_hist_alternative.data,

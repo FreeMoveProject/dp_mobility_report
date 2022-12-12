@@ -391,7 +391,7 @@ def render_trips_over_time_info(datetime_precision: str) -> str:
     return f"Timestamps have been aggregated by {datetime_precision}."
 
 
-def render_trips_over_time(trips_over_time: DfSection, trips_over_time_alternative: Optional[DfSection]) -> str:
+def render_trips_over_time(trips_over_time: DfSection) -> str:
     if len(trips_over_time.data) <= 14:
         chart = plot.barchart(
             x=trips_over_time.data[const.DATETIME].to_numpy(),

@@ -279,7 +279,10 @@ def render_benchmark_visits_per_tile(
 
 def render_visits_per_tile_cumsum(counts_per_tile: DfSection, counts_per_tile_alternative: Optional[DfSection]=None) -> str:
     df_cumsum = counts_per_tile.cumsum
-    df_cumsum_alternative = counts_per_tile_alternative.cumsum
+    if counts_per_tile_alternative:
+        df_cumsum_alternative = counts_per_tile_alternative.cumsum 
+    else: 
+        df_cumsum_alternative = None
 
     chart = plot.linechart_new(
         data=df_cumsum,

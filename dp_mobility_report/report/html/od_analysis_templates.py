@@ -413,7 +413,10 @@ def render_intra_tile_flows(od_flows: DfSection, n_tiles: int) -> str:
 
 def render_flows_cumsum(od_flows: DfSection,  od_flows_alternative: Optional[DfSection]=None) -> str: 
     df_cumsum = od_flows.cumsum
-    df_cumsum_alternative = od_flows_alternative.cumsum
+    if  od_flows_alternative:
+        df_cumsum_alternative = od_flows_alternative.cumsum
+    else:
+        df_cumsum_alternative = None
 
     chart = plot.linechart_new(
         data=df_cumsum,
@@ -519,9 +522,13 @@ def render_most_freq_flows_ranking_benchmark(
     return html_ranking
 
 def render_travel_time_hist(travel_time_hist: TupleSection, travel_time_hist_alternative: Optional[TupleSection]=None) -> str:
+    if travel_time_hist_alternative:
+        alternative_data = travel_time_hist_alternative.data
+    else:
+        alternative_data = None
     hist = plot.histogram(
         hist=travel_time_hist.data,
-        hist_alternative=travel_time_hist_alternative.data,
+        hist_alternative=alternative_data,
         x_axis_label="travel time (min.)",
         y_axis_label="% of trips",
         x_axis_type=int,
@@ -534,9 +541,14 @@ def render_travel_time_hist(travel_time_hist: TupleSection, travel_time_hist_alt
 
 
 def render_jump_length_hist(jump_length_hist: TupleSection, jump_length_hist_alternative: Optional[TupleSection]) -> str:
+    if jump_length_hist_alternative:
+        alternative_data = jump_length_hist_alternative.data
+    else:
+        alternative_data = None
+        
     hist = plot.histogram(
         hist=jump_length_hist.data,
-        hist_alternative=jump_length_hist_alternative.data,
+        hist_alternative=alternative_data,
         x_axis_label="jump length (kilometers)",
         y_axis_label="% of trips",
         x_axis_type=float,

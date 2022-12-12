@@ -6,7 +6,7 @@ from pandas import DataFrame
 
 from dp_mobility_report import DpMobilityReport
 from dp_mobility_report import constants as const
-
+import numpy as np
 
 @pytest.fixture
 def test_data():
