@@ -78,7 +78,7 @@ def render_eps(value: Optional[float]) -> Optional[float]:
 
 
 def get_centroids(tessellation: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    centroids = tessellation.geometry.centroid.apply(lambda x: x.xy)
+    centroids = tessellation.geometry.to_crs(3857).centroid.to_crs(4326).apply(lambda x: x.xy)
     lngs = [c[0].pop() for c in centroids]
     lats = [c[1].pop() for c in centroids]
     return dict(zip(tessellation[const.TILE_ID], zip(lngs, lats)))
