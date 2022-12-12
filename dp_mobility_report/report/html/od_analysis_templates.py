@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import pandas as pd
-import skmob
 from geopandas.geodataframe import GeoDataFrame
 
 if TYPE_CHECKING:
@@ -143,42 +142,37 @@ def render_origin_destination_flows(
     threshold: float,
     temp_map_folder: Path,
 ) -> str:
+
     data = od_flows.data.copy()
-    moe_deviation = od_flows.margin_of_error_laplace / data["flow"]
+    moe_deviation = od_flows.margin_of_error_laplace / data[const.FLOW]
+    data.loc[moe_deviation > threshold, const.FLOW] = None
 
-    data.loc[moe_deviation > threshold, "flow"] = None
-    top_n_flows = top_n_flows if top_n_flows <= len(data) else len(data)
-    innerflow = data[data.origin == data.destination]
-
+    # create intra_tile basemap
+    intra_tile_flows = data[data[const.ORIGIN] == data[const.DESTINATION]]
     tessellation_innerflow = pd.merge(
         tessellation,
-        innerflow,
+        intra_tile_flows,
         how="left",
         left_on=const.TILE_ID,
-        right_on="origin",
+        right_on=const.ORIGIN,
     )
 
-    fdf = skmob.FlowDataFrame(
-        data, tessellation=tessellation_innerflow, tile_id=const.TILE_ID
-    )
-
-    innerflow_choropleth, innerflow_legend = plot.choropleth_map(
-        tessellation_innerflow, "flow", "intra-tile flows"
+    intra_tile_basemap, intra_tile_legend = plot.choropleth_map(
+        tessellation_innerflow, const.FLOW, "intra-tile flows"
     )  # get innerflows as color for choropleth
 
-    inter_flows = fdf[fdf.origin != fdf.destination]
-    if not inter_flows.flow.isnull().all():
-        od_map = (
-            fdf[fdf.origin != fdf.destination]
-            .nlargest(top_n_flows, "flow")
-            .plot_flows(flow_color="red", map_f=innerflow_choropleth)
-        )
-    else:  # if there are no inter flows only plot innerflow choropleth
-        od_map = innerflow_choropleth
+    # create od flows map
+    top_n_flows = top_n_flows if top_n_flows <= len(data) else len(data)
+    flows = data[
+        (data[const.ORIGIN] != data[const.DESTINATION]) & data[const.FLOW].notna()
+    ].nlargest(top_n_flows, const.FLOW)
+    # only plot lines if there are any flows between tiles
+    if not flows[const.FLOW].isnull().all():
+        intra_tile_basemap = plot.flows(intra_tile_basemap, flows, tessellation)
 
-    od_map.save(os.path.join(temp_map_folder, "od_map.html"))
+    intra_tile_basemap.save(os.path.join(temp_map_folder, "od_map.html"))
 
-    html_legend = v_utils.fig_to_html(innerflow_legend)
+    html_legend = v_utils.fig_to_html(intra_tile_legend)
     plt.close()
     return html_legend
 
@@ -231,13 +225,13 @@ def render_most_freq_flows_ranking(
     topx_flows = topx_flows.merge(
         tessellation[[const.TILE_ID, const.TILE_NAME]],
         how="left",
-        left_on="origin",
+        left_on=const.ORIGIN,
         right_on=const.TILE_ID,
     )
     topx_flows = topx_flows.merge(
         tessellation[[const.TILE_ID, const.TILE_NAME]],
         how="left",
-        left_on="destination",
+        left_on=const.DESTINATION,
         right_on=const.TILE_ID,
         suffixes=("_origin", "_destination"),
     )

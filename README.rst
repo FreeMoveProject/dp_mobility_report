@@ -61,8 +61,12 @@ Create a mobility report as HTML
         import geopandas as gpd
         from dp_mobility_report import DpMobilityReport
 
-        df = pd.read_csv("https://raw.githubusercontent.com/FreeMoveProject/dp_mobility_report/main/tests/test_files/test_data.csv")
-        tessellation = gpd.read_file("https://raw.githubusercontent.com/FreeMoveProject/dp_mobility_report/main/tests/test_files/test_tessellation.geojson")
+        df = pd.read_csv(
+            "https://raw.githubusercontent.com/FreeMoveProject/dp_mobility_report/main/tests/test_files/test_data.csv"
+        )
+        tessellation = gpd.read_file(
+            "https://raw.githubusercontent.com/FreeMoveProject/dp_mobility_report/main/tests/test_files/test_tessellation.geojson"
+        )
 
         report = DpMobilityReport(df, tessellation, privacy_budget=10, max_trips_per_user=5)
 
