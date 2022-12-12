@@ -5,7 +5,7 @@ folium==0.12.1.post1
 haversine
 Jinja2
 matplotlib==3.5.3
-numpy
+numpy<=1.23.4
 pandarallel
 pandas
 pyproj
