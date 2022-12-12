@@ -1,7 +1,9 @@
 
 {{config_table}}
+{% if privacy_info %}
 <p class="warning">
-    {{privacy_info}}
+    {{privacy_info}} <!--TODO or tessellation or timestamp-->
     {{tessellation_info}}
     {{timestamp_info}}
 </p>
+{% endif %}

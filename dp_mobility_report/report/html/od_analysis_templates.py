@@ -1,24 +1,29 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import skmob
 from geopandas.geodataframe import GeoDataFrame
+import numpy as np
 
 if TYPE_CHECKING:
-    from dp_mobility_report import DpMobilityReport
+    from dp_mobility_report import DpMobilityReport, BenchmarkReport
+
+import folium
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import od_analysis
 from dp_mobility_report.model.section import DfSection, TupleSection
 from dp_mobility_report.report.html.html_utils import (
     fmt_moe,
+    fmt,
     get_template,
     render_eps,
     render_moe_info,
     render_summary,
+    render_benchmark_summary,
     render_user_input_info,
 )
 from dp_mobility_report.visualization import plot, v_utils
@@ -135,6 +140,135 @@ def render_od_analysis(
         jump_length_summary_table=jump_length_summary_table,
     )
 
+def render_benchmark_od_analysis(
+    report_base: "DpMobilityReport",
+    report_alternative: "DpMobilityReport",
+    tessellation: GeoDataFrame,
+    top_n_flows: int,
+    temp_map_folder: Path,
+    output_filename: str,
+    analysis_exclusion: list,
+    benchmark:"BenchmarkReport",
+) -> str:
+    THRESHOLD = 0.2  # 20 %
+    # privacy_info = f"""Intra-tile flows below a certain threshold are grayed out: 
+    #     Due to the applied noise, tiles with a low intra-tile flow count are likely to contain a high percentage of noise. 
+    #     For usability reasons, such unrealistic values are grayed out. 
+    #     More specifically: The threshold is set so that values for tiles with a 5% chance (or higher) of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are not shown."""
+    user_config_info = (
+        f"User configuration: display max. top {top_n_flows} OD connections on map"
+    )
+    od_eps = None
+    od_moe = None
+    od_legend = ""
+    intra_tile_flows_info = ""
+    flows_summary_table = ""
+    flows_cumsum_linechart = ""
+    flows_measure = ""
+    most_freq_flows_ranking = ""
+    travel_time_eps = None
+    travel_time_moe = None
+    travel_time_hist_info = ""
+    travel_time_hist = ""
+    travel_time_summary_table = ""
+    travel_time_moe_info = ""
+    travel_time_measure = ""
+    jump_length_eps = None
+    jump_length_moe = None
+    jump_length_hist = ""
+    jump_length_hist_info = ""
+    jump_length_moe_info = ""
+    jump_length_summary_table = ""
+    jump_length_measure = ""
+
+    report_base = report_base.report
+    report_alternative = report_alternative.report 
+
+    if const.OD_FLOWS not in analysis_exclusion:
+        od_eps = (render_eps(report_base[const.OD_FLOWS].privacy_budget), render_eps(report_alternative[const.OD_FLOWS].privacy_budget))
+        od_moe = (fmt_moe(report_base[const.OD_FLOWS].margin_of_error_laplace), fmt_moe(report_base[const.OD_FLOWS].margin_of_error_laplace)) 
+
+    #     od_legend = render_benchmark_origin_destination_flows(
+    #         report_base[const.OD_FLOWS],
+    #         report_alternative[const.OD_FLOWS],
+    #         tessellation,
+    #         top_n_flows,
+    #         temp_map_folder,
+    #    )
+        # intra_tile_flows_info = render_intra_tile_flows(
+        #     report[const.OD_FLOWS], len(dpmreport.tessellation)
+        # )
+
+        quartiles_base = report_base[const.OD_FLOWS].quartiles.round()
+        quartiles_alternative = report_alternative[const.OD_FLOWS].quartiles.round()
+        flows_summary_table = render_benchmark_summary(
+            quartiles_base.astype(int), quartiles_alternative.astype(int),
+            "Distribution of flows per OD pair",
+        )
+        flows_cumsum_linechart = render_flows_cumsum(report_base[const.OD_FLOWS], report_alternative[const.OD_FLOWS]) 
+        most_freq_flows_ranking = render_most_freq_flows_ranking_benchmark(
+            report_base[const.OD_FLOWS], report_alternative[const.OD_FLOWS], tessellation
+        )
+        flows_measure=(const.format[benchmark.measure_selection[const.OD_FLOWS]], fmt(benchmark.similarity_measures[const.OD_FLOWS]))
+
+
+    if const.TRAVEL_TIME not in analysis_exclusion:
+        travel_time_eps = (render_eps(report_base[const.TRAVEL_TIME].privacy_budget), render_eps(report_alternative[const.TRAVEL_TIME].privacy_budget))
+        travel_time_moe = (fmt_moe(report_base[const.TRAVEL_TIME].margin_of_error_laplace), fmt_moe(report_alternative[const.TRAVEL_TIME].margin_of_error_laplace))
+
+        travel_time_hist_info = render_user_input_info(
+            benchmark.report_base.max_travel_time, benchmark.report_base.bin_range_travel_time
+        )
+        travel_time_hist = render_travel_time_hist(report_base[const.TRAVEL_TIME], report_alternative[const.TRAVEL_TIME])
+        travel_time_moe_info = render_moe_info(
+            report_base[const.TRAVEL_TIME].margin_of_error_expmech
+        )
+        travel_time_summary_table = render_benchmark_summary(report_base[const.TRAVEL_TIME].quartiles, report_alternative[const.TRAVEL_TIME].quartiles)
+
+        travel_time_measure=(const.format[benchmark.measure_selection[const.TRAVEL_TIME]], fmt(benchmark.similarity_measures[const.TRAVEL_TIME]))
+    
+    if const.JUMP_LENGTH not in analysis_exclusion:
+        jump_length_eps = (render_eps(report_base[const.JUMP_LENGTH].privacy_budget), render_eps(report_alternative[const.JUMP_LENGTH].privacy_budget))
+        jump_length_moe = (fmt_moe(report_base[const.JUMP_LENGTH].margin_of_error_laplace), fmt_moe(report_alternative[const.JUMP_LENGTH].margin_of_error_laplace))
+
+        jump_length_hist_info = render_user_input_info(
+            benchmark.report_base.max_jump_length, benchmark.report_base.bin_range_jump_length
+        )
+        jump_length_hist = render_jump_length_hist(report_base[const.JUMP_LENGTH], report_alternative[const.JUMP_LENGTH])
+        jump_length_moe_info = render_moe_info(
+            report_base[const.JUMP_LENGTH].margin_of_error_expmech
+        )
+        jump_length_summary_table = render_benchmark_summary(report_base[const.JUMP_LENGTH].quartiles, report_alternative[const.JUMP_LENGTH].quartiles)
+        jump_length_measure=(const.format[benchmark.measure_selection[const.JUMP_LENGTH]], fmt(benchmark.similarity_measures[const.JUMP_LENGTH]))
+
+    template_structure = get_template("od_analysis_segment_benchmark.html")
+    return template_structure.render(
+        #privacy_info=privacy_info,
+        output_filename=output_filename,
+        user_config_info=user_config_info,
+        od_eps=od_eps,
+        od_moe=od_moe,
+        od_legend=od_legend,
+        intra_tile_flows_info=intra_tile_flows_info,
+        flows_summary_table=flows_summary_table,
+        flows_cumsum_linechart=flows_cumsum_linechart,
+        flows_measure=flows_measure,
+        most_freq_flows_ranking=most_freq_flows_ranking,
+        travel_time_eps=travel_time_eps,
+        travel_time_moe=travel_time_moe,
+        travel_time_hist_info=travel_time_hist_info,
+        travel_time_hist=travel_time_hist,
+        travel_time_summary_table=travel_time_summary_table,
+        travel_time_moe_info=travel_time_moe_info,
+        travel_time_measure=travel_time_measure,
+        jump_length_eps=jump_length_eps,
+        jump_length_moe=jump_length_moe,
+        jump_length_hist_info=jump_length_hist_info,
+        jump_length_hist=jump_length_hist,
+        jump_length_moe_info=jump_length_moe_info,
+        jump_length_summary_table=jump_length_summary_table,
+        jump_length_measure=jump_length_measure,
+    )
 
 def render_origin_destination_flows(
     od_flows: DfSection,
@@ -182,6 +316,86 @@ def render_origin_destination_flows(
     plt.close()
     return html_legend
 
+def merge_innerflows(base_flows, alternative_flows):
+    flows = base_flows.merge(alternative_flows, how='outer', on=['origin', 'destination'], suffixes=['_alt', '_base'])
+    flows['flow_base'] = flows['flow_base']/np.sum(flows['flow_base'])
+    flows['flow_alt'] = flows['flow_alt']/np.sum(flows['flow_alt'])
+    flows['flow_base'] = flows['flow_base'].fillna(0)
+    flows['flow_alt'] = flows['flow_alt'].fillna(0)
+    flows['flow'] = flows['flow_alt']-flows['flow_base']
+    flows.drop(['flow_alt','flow_base'], axis=1, inplace=True)
+    return flows
+
+def render_benchmark_origin_destination_flows(
+    od_flows_base: DfSection,
+    od_flows_alternative: DfSection,
+    tessellation: GeoDataFrame,
+    top_n_flows: int,
+    temp_map_folder: Path,
+) -> str:
+    data_base = od_flows_base.data.copy()
+    data_alternative = od_flows_alternative.data.copy()
+    #moe_deviation = od_flows.margin_of_error_laplace / data["flow"]
+    #data.loc[moe_deviation > threshold, "flow"] = None
+
+    top_n_flows_base = top_n_flows if top_n_flows <= len(data_base) else len(data_base)
+    top_n_flows_alternative = top_n_flows if top_n_flows <= len(data_alternative) else len(data_alternative)
+
+    innerflows = merge_innerflows(data_alternative[data_alternative.origin == data_alternative.destination], data_base[data_base.origin == data_base.destination])
+
+    tessellation_innerflow = pd.merge(
+        tessellation,
+        innerflows,
+        how="left",
+        left_on=const.TILE_ID,
+        right_on="origin",
+    )
+
+    fdf_base = skmob.FlowDataFrame(
+        data_base, tessellation=tessellation_innerflow, tile_id=const.TILE_ID
+    )
+    fdf_alternative = skmob.FlowDataFrame(
+        data_alternative, tessellation=tessellation_innerflow, tile_id=const.TILE_ID
+    )
+
+    innerflow_choropleth, innerflow_legend = plot.choropleth_map(
+        tessellation_innerflow, "flow", "deviation from base intra-tile flows"
+    )  # get innerflows as color for choropleth
+
+    inter_flows_base = fdf_base[fdf_base.origin != fdf_base.destination]
+    inter_flows_alternative = fdf_alternative[fdf_alternative.origin != fdf_alternative.destination]
+    
+    #feature_group = folium.FeatureGroup()
+    #feature_group.add_child(innerflow_choropleth, name='innerflow')
+
+    if not inter_flows_base.flow.isnull().all():
+        base_flows = (fdf_base[fdf_base.origin != fdf_base.destination]
+            .nlargest(top_n_flows_base, "flow")
+            .plot_flows(flow_color="red")) #, map_f=innerflow_choropleth
+        base_flows.add_to(innerflow_choropleth)
+        #feature_group.add_child(base_flows)
+        #innerflow_choropleth.add_child(od_map)
+
+    if not inter_flows_alternative.flow.isnull().all():
+        alternative_flows = (fdf_alternative[fdf_alternative.origin != fdf_alternative.destination]
+            .nlargest(top_n_flows_alternative, "flow")
+            .plot_flows(flow_color="blue"))
+        alternative_flows.add_to(innerflow_choropleth)
+        #feature_group.add_child(alternative_flows)
+        #innerflow_choropleth.add_child(od_map_alternative)
+    #else:  # if there are no inter flows only plot innerflow choropleth
+    #   od_map = innerflow_choropleth
+    
+    #innerflow_choropleth.add_child(feature_group)
+    #innerflow_choropleth.add_child(folium.LayerControl())
+
+    folium.LayerControl(collapsed=False).add_to(innerflow_choropleth)
+
+    innerflow_choropleth.save(os.path.join(temp_map_folder, "od_map.html"))
+
+    html_legend = v_utils.fig_to_html(innerflow_legend)
+    plt.close()
+    return html_legend
 
 def render_intra_tile_flows(od_flows: DfSection, n_tiles: int) -> str:
     od_sum = od_flows.data["flow"].sum()
@@ -203,20 +417,23 @@ def render_intra_tile_flows(od_flows: DfSection, n_tiles: int) -> str:
     return f"{intra_tile_flows_perc}% of flows start and end within the same cell {ci_interval_info}."
 
 
-def render_flows_cumsum(od_flows: DfSection) -> str:
+def render_flows_cumsum(od_flows: DfSection,  od_flows_alternative: Optional[DfSection]=None) -> str: 
     df_cumsum = od_flows.cumsum
+    df_cumsum_alternative = od_flows_alternative.cumsum
 
-    chart = plot.linechart(
-        df_cumsum,
-        "n",
-        "cum_perc",
-        "Number of OD tile pairs",
-        "Cumulated sum of flows between OD pairs",
-        add_diagonal=True,
+    chart = plot.linechart_new(
+        data=df_cumsum,
+        x="n",
+        y="cum_perc",
+        data_alternative=df_cumsum_alternative,
+        x_axis_label="Number of OD tile pairs",
+        y_axis_label="Cumulated sum of flows between OD pairs",
+        add_diagonal=False,
     )
     html = v_utils.fig_to_html(chart)
     plt.close()
     return html
+
 
 
 def render_most_freq_flows_ranking(
@@ -259,27 +476,78 @@ def render_most_freq_flows_ranking(
     plt.close()
     return html_ranking
 
+def render_most_freq_flows_ranking_benchmark(
+    od_flows_base: DfSection, od_flows_alternative: DfSection, tessellation: GeoDataFrame, top_x: int = 10
+) -> str:
 
-def render_travel_time_hist(travel_time_hist: TupleSection) -> str:
+    topx_flows_base = od_flows_base.data.nlargest(top_x, "flow")
+    topx_flows_base['flow']=topx_flows_base['flow']/topx_flows_base['flow'].sum()*100
+    topx_flows_alternative = od_flows_alternative.data.nlargest(top_x, "flow")
+    topx_flows_alternative['flow']=topx_flows_alternative['flow']/topx_flows_alternative['flow'].sum()*100
+
+    topx_flows_merged = topx_flows_base.merge(topx_flows_alternative, on=['origin', 'destination'], suffixes=('_base', '_alternative'), how='outer')
+    topx_flows_merged.sort_values(by=['flow_base','flow_alternative'])
+    # if no intra-cell flows should be shown
+    # topx_flows = od_flows.data[(od_flows.data.origin != od_flows.data.destination)].nlargest(top_x, "flow") # type: ignore
+
+    topx_flows_merged["rank"] = list(range(1, len(topx_flows_merged) + 1))
+    topx_flows_merged = topx_flows_merged.merge(
+        tessellation[[const.TILE_ID, const.TILE_NAME]],
+        how="left",
+        left_on="origin",
+        right_on=const.TILE_ID,
+    )
+    topx_flows_merged = topx_flows_merged.merge(
+        tessellation[[const.TILE_ID, const.TILE_NAME]],
+        how="left",
+        left_on="destination",
+        right_on=const.TILE_ID,
+        suffixes=("_origin", "_destination"),
+    )
+    labels = (
+        topx_flows_merged["rank"].astype(str)
+        + ": "
+        + topx_flows_merged[f"{const.TILE_NAME}_origin"]
+        + " - \n"
+        + topx_flows_merged[f"{const.TILE_NAME}_destination"]
+    )
+
+    ranking = plot.ranking(
+        x=topx_flows_merged.flow_base,
+        x_alternative=topx_flows_merged.flow_alternative,
+        x_axis_label="percentage of flows per OD pair",
+        y_labels=labels,
+        margin_of_error=od_flows_base.margin_of_error_laplace,
+        #margin_of_error_alternative=od_flows_alternative.margin_of_error_laplace #TODO only works with better example?
+    )
+    html_ranking = v_utils.fig_to_html(ranking)
+    plt.close()
+    return html_ranking
+
+def render_travel_time_hist(travel_time_hist: TupleSection, travel_time_hist_alternative: Optional[TupleSection]=None) -> str:
     hist = plot.histogram(
-        travel_time_hist.data,
+        hist=travel_time_hist.data,
+        hist_alternative=travel_time_hist_alternative.data,
         x_axis_label="travel time (min.)",
         y_axis_label="% of trips",
         x_axis_type=int,
         margin_of_error=travel_time_hist.margin_of_error_laplace,
+        margin_of_error_alternative=travel_time_hist_alternative.margin_of_error_laplace,
     )
     html_hist = v_utils.fig_to_html(hist)
     plt.close()
     return html_hist
 
 
-def render_jump_length_hist(jump_length_hist: TupleSection) -> str:
+def render_jump_length_hist(jump_length_hist: TupleSection, jump_length_hist_alternative: Optional[TupleSection]) -> str:
     hist = plot.histogram(
-        jump_length_hist.data,
+        hist=jump_length_hist.data,
+        hist_alternative=jump_length_hist_alternative.data,
         x_axis_label="jump length (kilometers)",
         y_axis_label="% of trips",
         x_axis_type=float,
         margin_of_error=jump_length_hist.margin_of_error_laplace,
+        margin_of_error_alternative=jump_length_hist_alternative.margin_of_error_laplace
     )
     html_hist = v_utils.fig_to_html(hist)
     plt.close()

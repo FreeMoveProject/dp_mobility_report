@@ -41,12 +41,13 @@ def test_tessellation():
 @pytest.fixture
 def benchmark_report():
     test_data = pd.read_csv("tests/test_files/test_data.csv")
-    test_data_alternative = pd.read_csv("tests/test_files/test_data.csv", nrows=50)
+    test_data_alternative = pd.read_csv("tests/test_files/test_data_new_dates.csv", nrows=50)
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
     return BenchmarkReport(
         df_base=test_data,
         tessellation=test_tessellation,
         df_alternative=test_data_alternative,
+        privacy_budget_alternative=10
     )
 
 
@@ -156,10 +157,6 @@ def test_combine_analysis_exclusion():
     assert combined_exclusion == [const.VISITS_PER_TILE, const.RADIUS_OF_GYRATION]
 
 
-def test_unify_histogram_bins():
-    # TODO
-    pass
-
 
 def test_get_selected_measures(benchmark_report):
 
@@ -226,3 +223,9 @@ def test_measure_selection():
             const.VISITS_PER_TIME_TILE,
         ],
     ) == {const.OD_FLOWS: const.SMAPE}
+
+
+def test_benchmark_to_file(benchmark_report):
+    
+    benchmark_report.to_file('test_benchmark.html')
+    #test linechart

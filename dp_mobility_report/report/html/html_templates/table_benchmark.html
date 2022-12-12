@@ -1,0 +1,24 @@
+{% if name %}
+    <h4>{{ name }}</h3>
+{% endif %}
+<table class="table medium-size-table">
+    <tbody>
+        <tr>
+            <th></th>
+            <th>Base</th>
+            <th>Alternative</th>
+        </tr>
+        {% for row in rows %}
+        <tr>
+            <th class="table-rowheader">{{ row['name'] }}</th>
+            <td>{{ row['value'][0] }}</td>
+            <td>{{ row['value'][1] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% if caption %}
+    <div class="caption text-center">
+        {{ caption }}
+    </div> 
+{% endif %}

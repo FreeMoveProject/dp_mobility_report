@@ -34,6 +34,22 @@ def render_summary(summary: Series, title: str = "") -> str:
     summary_html = template_table.render(name=title, rows=summary_list)
     return summary_html
 
+def render_benchmark_summary(summary_base: Series, summary_alternative:Series, title: str = "") -> str:
+    summary_list = [
+        {"name": "Min.", "value": (fmt(summary_base["min"]),fmt(summary_alternative["min"]))},
+        {"name": "Max.", "value": (fmt(summary_base["max"]),fmt(summary_alternative["max"]))},
+    ]
+    if "25%" in summary_base:
+        summary_list.insert(1, {"name": "75%", "value": (fmt(summary_base["75%"]),fmt(summary_alternative["75%"]))})
+        summary_list.insert(1, {"name": "Median", "value": (fmt(summary_base["50%"]), fmt(summary_alternative["50%"]))})
+        summary_list.insert(1, {"name": "25%", "value": (fmt(summary_base["25%"]),fmt(summary_alternative["25%"]))})
+
+    if "mean" in summary_base:
+        summary_list.insert(0, {"name": "Mean", "value": (fmt(summary_base["mean"]), fmt(summary_alternative["mean"]))})
+
+    template_table = jinja2_env.get_template("table_benchmark.html")
+    summary_html = template_table.render(name=title, rows=summary_list)
+    return summary_html
 
 def render_user_input_info(
     max_value: Optional[Union[int, float]], bin_size: Optional[Union[int, float]]

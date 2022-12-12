@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import List, Optional, Union
 
+import warnings
+import os
 import numpy as np
 from geopandas import GeoDataFrame
 from pandas import DataFrame
@@ -11,6 +13,9 @@ from dp_mobility_report.benchmark.similarity_measures import (
     get_selected_measures,
 )
 from dp_mobility_report.dpmreport import DpMobilityReport
+
+from dp_mobility_report.report.html.templates import render_benchmark_html, create_html_assets, create_maps_folder
+from shutil import rmtree
 
 
 class BenchmarkReport:
@@ -91,6 +96,8 @@ class BenchmarkReport:
         seed_sampling: int = None,
         evalu: bool = False,
     ) -> None:
+
+        self.disable_progress_bar = disable_progress_bar
 
         self._report_base = DpMobilityReport(
             df_base,
@@ -229,6 +236,50 @@ class BenchmarkReport:
         """The symmetric mean absolute percentage error between base and alternative of all selected analyses, where applicable."""
         return self._smape
 
-    # TODO: html file for comparison
-    def to_file(self, output_file: Union[str, Path]) -> None:
-        pass
+
+    def to_file(
+        self,
+        output_file: Union[str, Path],
+        disable_progress_bar: Optional[bool] = None,
+        top_n_flows: int = 100,
+    ) -> None:
+        """Write the report to a file.
+        By default a name is generated.
+
+        Args:
+            output_file: The name or the path of the file to store the ``html`` output.
+            disable_progress_bar: if ``False``, no progress bar is shown.
+            top_n_flows: Determines how many of the top ``n`` origin-destination flows are displayed. Defaults to 100.
+        """
+        if disable_progress_bar is None:
+            disable_progress_bar = self.disable_progress_bar
+
+        if not isinstance(output_file, Path):
+            output_file = Path(str(output_file))
+
+        else:
+            if output_file.suffix != ".html":
+                suffix = output_file.suffix
+                output_file = output_file.with_suffix(".html")
+                warnings.warn(
+                    f"Extension {suffix} not supported. For now we assume .html was intended. "
+                    f"To remove this warning, please use .html or .json."
+                )
+
+        output_dir = Path(os.path.splitext(output_file)[0])
+        filename = Path(os.path.basename(output_file)).stem
+
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        create_html_assets(output_dir)
+
+
+        data, temp_map_folder = render_benchmark_html(self, filename, top_n_flows)
+
+        create_maps_folder(temp_map_folder, output_dir)
+
+        # clean up temp folder
+        rmtree(temp_map_folder, ignore_errors=True)
+
+        output_file.write_text(data, encoding="utf-8")

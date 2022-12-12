@@ -1,0 +1,104 @@
+<h2>Origin-destination (OD) analysis</h2>
+
+
+<div>
+    <h3>OD flows between tiles</h3>
+    <p>privacy budget base: {{od_eps[0]}}</p>
+    <p>95%-confidence interval: +/-{{od_moe[0]}}</p>
+    <p>privacy budget alternative: {{od_eps[1]}}</p>
+    <p>95%-confidence interval: +/-{{od_moe[1]}}</p>
+    <div>
+        <p class = "info">
+          {{privacy_info}}
+        </p>
+        <iframe src="{{output_filename}}/maps/od_map.html" width="80%" height="600" style="border:1px solid black;">
+        </iframe>
+        <!-- <div style="width: 800px; height: 600px;">
+            {{od_map}}
+        </div> -->
+
+        <p class="grey info">
+            {{user_config_info}}
+        </p>
+        
+        <div>
+            {{od_legend}}
+        </div>
+        <p class="measure info">
+            {{flows_measure[0]}}: {{flows_measure[1]}}</p>
+
+<!--        <p>    
+            {{intra_tile_flows_info}}
+        </p>
+        
+        <p class = "info">
+            A large number of intra-cell flows either indicate many round-trips 
+            (i.e., start and end location are the same) 
+            or the start and end location lie within the same tile due to a coarse tessellation.
+        </p>
+    -->
+    </div>
+
+    <div>
+        {{flows_summary_table}}
+
+        {{flows_cumsum_linechart}}
+
+        <p class="info">
+            The cumuluated sum of flows visualizes the distribution of flows over OD pairs:
+            If all OD connections are traveled equally, the cumulated sum follows a straight diagonal line (gray line). 
+            The larger the share of single OD connections in the total number of flows, the steeper the curve.
+        </p>
+    </div>  
+    
+    <div>
+        <h4>Ranking of most frequent OD connections</h4>
+        {{most_freq_flows_ranking}}
+    </div>
+</div>
+
+<div>
+    <h3>Trip statistics</h3>
+    
+    <div>
+        <h4>Travel time of trips (in minutes)</h4>
+        <p>privacy budget base: {{travel_time_eps[0]}}</p>
+        <p>95%-confidence interval: +/-: {{travel_time_moe[0]}}</p>
+        <p>privacy budget alternative: {{travel_time_eps[1]}}</p>
+        <p>95%-confidence interval: +/-: {{travel_time_moe[1]}}</p>
+
+        {{travel_time_hist}}
+        <p class="grey info">
+            {{travel_time_hist_info}}
+        </p>
+        <p class="measure info">
+            {{travel_time_measure[0]}}: {{travel_time_measure[1]}}</p>
+
+            {{travel_time_summary_table}}
+            <p class="info">
+                {{travel_time_moe_info}}
+            </p>
+
+    </div>
+    <div>
+        <h4>Jump length (in kilometers)</h4>
+        <p>privacy budget base: {{travel_time_eps[0]}}</p>
+        <p>95%-confidence interval: +/- {{travel_time_moe[0]}}</p>
+        <p>privacy budget alternative: {{travel_time_eps[1]}}</p>
+        <p>95%-confidence interval: +/- {{travel_time_moe[1]}}</p>
+
+        <p>The jump length is the straight-line distance between the origin and destination.</p>
+        {{jump_length_hist}}
+        <p class="grey info">
+            {{jump_length_hist_info}}
+        </p>
+        <p class="measure info">
+            {{jump_length_measure[0]}}: {{jump_length_measure[1]}}</p>
+            
+            {{jump_length_summary_table}}
+            <p class="info">
+                {{jump_length_moe_info}}
+            </p>
+
+    </div>
+</div>

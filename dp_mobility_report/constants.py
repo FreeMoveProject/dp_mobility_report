@@ -124,3 +124,5 @@ JSD = "jensen_shannon_divergence"
 KLD = "kullback_leibler_divergence"
 EMD = "earth_movers_distance"
 SMAPE = "symmetric_mean_absolute_percentage_error"
+
+format = {"jensen_shannon_divergence": "Jensen-Shannon divergence", "relative_error": "Relative error", "kullback_leibler_divergence": "Kullback-Leibler divergence", "earth_movers_distance": "Earth mover's distance","symmetric_mean_absolute_percentage_error": "Symmetric mean absolute percentage error"}

@@ -29,16 +29,19 @@ def format(value: Union[float, int], type: Type, ndigits: int = 2) -> Union[floa
 def histogram(
     hist: Tuple,
     x_axis_label: str,
+    hist_alternative: Optional[Tuple] = None,
     min_value: Union[int, float] = None,
     y_axis_label: str = "Frequency",
     margin_of_error: Union[float, list] = None,
+    margin_of_error_alternative: Union[float, list] = None,
     rotate_label: bool = False,
     x_axis_type: Type = float,
     ndigits_x_label: int = 2,
 ) -> mpl.figure.Figure:
     bins = hist[1]
     counts = hist[0]
-
+    counts_alternative = hist_alternative[0] if hist_alternative else None
+    
     # single integers (instead of bin ranges) as x axis labels
     if len(bins) == len(counts):
         labels = np.array([format(bin, x_axis_type) for bin in bins[:-1]])
@@ -76,11 +79,13 @@ def histogram(
         ]
 
     return barchart(
-        labels,
-        counts,
-        x_axis_label,
-        y_axis_label,
+        x=labels,
+        y=counts,
+        x_axis_label=x_axis_label,
+        y_axis_label=y_axis_label,
+        y_alternative=counts_alternative,
         margin_of_error=margin_of_error,
+        margin_of_error_alternative=margin_of_error_alternative,
         rotate_label=rotate_label,
     )
 
@@ -90,11 +95,16 @@ def barchart(
     y: np.ndarray,
     x_axis_label: str,
     y_axis_label: str,
+    y_alternative: Optional[np.ndarray] = None,
     margin_of_error: Optional[Union[float, list]] = None,
+    margin_of_error_alternative: Optional[Union[float, list]] = None,
     rotate_label: bool = False,
 ) -> mpl.figure.Figure:
     fig, ax = plt.subplots()
-    ax.bar(x, y, yerr=margin_of_error, align="center", alpha=0.5, capsize=10)
+    bar_base = ax.bar(x, y, yerr=margin_of_error, align="center", alpha=0.5, capsize=10, label='base')
+    if y_alternative is not None:
+            bar_alt = ax.bar(x, y_alternative, yerr=margin_of_error_alternative, width=0.3, align="center", alpha=0.5, capsize=10, color=light_orange, ecolor=light_orange, label='alternative')
+            ax.legend(handles=[bar_base, bar_alt])
     ax.set_ylabel(y_axis_label)
     ax.set_xlabel(x_axis_label)
     plt.xticks(x)
@@ -111,6 +121,7 @@ def linechart(
     y: str,
     x_axis_label: str,
     y_axis_label: str,
+    x_alternative: Optional[str] = None,
     margin_of_error: float = None,
     add_diagonal: bool = False,
     rotate_label: bool = False,
@@ -125,6 +136,9 @@ def linechart(
             alpha=0.1,
         )
     ax.plot(data[x], data[y])
+    if x_alternative is not None:
+        ax.plot(data[x_alternative], data[y], color=light_orange)
+        ax.legend({'base','alt'})
     ax.set_ylabel(y_axis_label)
     ax.set_xlabel(x_axis_label)
     ax.set_ylim(bottom=0)
@@ -136,6 +150,49 @@ def linechart(
 
     return fig
 
+def linechart_new(
+    data: DataFrame,
+    x: str,
+    y: str,
+    x_axis_label: str,
+    y_axis_label: str,
+    data_alternative: Optional[DataFrame] = None,
+    margin_of_error: float = None,
+    margin_of_error_alternative: float = None,
+    add_diagonal: bool = False,
+    rotate_label: bool = False,
+) -> mpl.figure.Figure:
+    fig, ax = plt.subplots()
+    if margin_of_error is not None:
+        ax.fill_between(
+            data[x],
+            (data[y] - margin_of_error),
+            (data[y] + margin_of_error),
+            color=light_blue,
+            alpha=0.1,
+        )
+    line_base, = ax.plot(data[x], data[y], color=light_blue, label='base')
+    if data_alternative is not None:
+        line_alt, = ax.plot(data_alternative[x], data_alternative[y], color=light_orange, label='alternative')
+        ax.legend(handles=[line_base, line_alt])
+        if margin_of_error_alternative is not None:
+            ax.fill_between(
+                data_alternative[x],
+                (data_alternative[y] - margin_of_error_alternative),
+                (data_alternative[y] + margin_of_error_alternative),
+                color=light_orange,
+                alpha=0.1,
+            )
+    ax.set_ylabel(y_axis_label)
+    ax.set_xlabel(x_axis_label)
+    ax.set_ylim(bottom=0)
+    if add_diagonal:
+        ax.plot([0, data[x].max()], [0, data[y].max()], grey)
+
+    if rotate_label:
+        plt.xticks(rotation=90)
+
+    return fig
 
 def multi_linechart(
     data: DataFrame,
@@ -144,6 +201,7 @@ def multi_linechart(
     color: str,
     x_axis_label: str,
     y_axis_label: str,
+    style: Optional[str] = None,
     hue_order: Optional[list] = None,
     margin_of_error: Optional[float] = None,
 ) -> mpl.figure.Figure:
@@ -157,6 +215,7 @@ def multi_linechart(
         y=y,
         hue=color,
         ax=plot,
+        style=style,
         hue_order=hue_order,
         palette=palette,
     )
@@ -183,6 +242,7 @@ def choropleth_map(
     scale_title: str = "Visit count",
     min_scale: Optional[Union[int, float]] = None,
     aliases: list = None,
+    diverging_cmap: bool = False,
 ) -> folium.Map:
     poly_json = counts_per_tile_gdf.to_json()
 
@@ -193,10 +253,16 @@ def choropleth_map(
     )
 
     # color
-    cmap = mpl.cm.viridis_r
-    norm = mpl.colors.Normalize(
-        vmin=min_scale, vmax=counts_per_tile_gdf[fill_color_name].max()
-    )
+    if diverging_cmap: #TODO können wir das hier einfach ändern??
+        vmin = -1
+        vmax = 1
+        cmap = mpl.cm.RdBu_r
+        norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
+    else:
+        cmap = mpl.cm.viridis_r
+        norm = mpl.colors.Normalize(
+            vmin=min_scale, vmax=counts_per_tile_gdf[fill_color_name].max()
+        )
 
     def _hex_color(x: Union[float, int]) -> str:
         rgb = norm(x)
@@ -262,11 +328,11 @@ def multi_choropleth_map(
     vmax = vmax if not math.isnan(vmax) else 2
 
     # color
-    if diverging_cmap:
-        vmin = 0
-        vmax = 2 if vmax <= 1 else vmax
+    if diverging_cmap: #TODO können wir das hier einfach ändern?
+        vmin = -1
+        vmax = 1 #if vmax <= 1 else vmax
         cmap = "RdBu_r"
-        norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=1, vmax=vmax)
+        norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
     else:
         cmap = "viridis_r"
         norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
@@ -326,13 +392,15 @@ def _basemap(center_x: float, center_y: float, zoom_start: int = 10) -> folium.M
 def ranking(
     x: np.ndarray,
     x_axis_label: str,
+    x_alternative: Optional[np.ndarray]=None,
     y_labels: list = None,
     margin_of_error: Optional[float] = None,
+    margin_of_error_alternative: Optional[float] = None,
 ) -> mpl.figure.Figure:
     y = list(range(1, len(x) + 1))[::-1]
     y_labels = y if y_labels is None else y_labels
     fig, ax = plt.subplots()
-    ax.errorbar(
+    bar_base=ax.errorbar(
         x,
         y,
         xerr=margin_of_error,
@@ -340,7 +408,20 @@ def ranking(
         ecolor="lightblue",
         elinewidth=5,
         capsize=10,
+        label='base',
     )
+    if x_alternative is not None:
+        bar_alt = ax.errorbar(
+        x_alternative,
+        y,
+        xerr=margin_of_error_alternative,
+        fmt="o",
+        ecolor=light_orange,
+        elinewidth=5,
+        capsize=10,
+        label='alternative',
+    )
+        ax.legend(handles=[bar_base, bar_alt])
     ax.set_yticks(y)
     ax.set_yticklabels(y_labels)
     ax.set_ylabel("Rank")
