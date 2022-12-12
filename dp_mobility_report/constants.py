@@ -99,6 +99,10 @@ PREC_DATE = "date"
 PREC_WEEK = "week"
 PREC_MONTH = "month"
 
+ORIGIN = "origin"
+DESTINATION = "destination"
+FLOW = "flow"
+
 # ds_statistics elements
 N_RECORDS = "n_records"
 N_TRIPS = "n_trips"

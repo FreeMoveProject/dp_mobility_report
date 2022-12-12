@@ -1,8 +1,11 @@
 from typing import Any, Optional, Union
 
+import geopandas as gpd
 import jinja2
 import numpy as np
 from pandas import Series
+
+from dp_mobility_report import constants as const
 
 # Initializing Jinja
 package_loader = jinja2.PackageLoader(
@@ -88,3 +91,10 @@ def render_eps(value: Optional[float]) -> Optional[float]:
         return None
     else:
         return round(value, 4)
+
+
+def get_centroids(tessellation: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    centroids = tessellation.geometry.to_crs(3857).centroid.to_crs(4326).apply(lambda x: x.xy)
+    lngs = [c[0].pop() for c in centroids]
+    lats = [c[1].pop() for c in centroids]
+    return dict(zip(tessellation[const.TILE_ID], zip(lngs, lats)))
