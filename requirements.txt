@@ -13,6 +13,7 @@ pytest
 geopandas==0.10.2
 rtree
 scipy
+geojson
 shapely
 seaborn
 setuptools
