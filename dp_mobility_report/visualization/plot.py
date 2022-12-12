@@ -1,18 +1,20 @@
 import math
-from typing import Optional, Tuple, Type, Union
+from typing import Callable, Optional, Tuple, Type, Union
 
 import folium
+import geopandas as gpd
 import matplotlib
 import matplotlib as mpl
 import numpy as np
+import pandas as pd
 import seaborn as sns
+from geojson import LineString
 from geopandas import GeoDataFrame
 from matplotlib import pyplot as plt
 from pandas import DataFrame
-from geojson import LineString
 
-from dp_mobility_report.report.html.html_utils import get_centroids
 import dp_mobility_report.constants as const
+from dp_mobility_report.report.html.html_utils import get_centroids
 
 sns.set_theme()
 dark_blue = "#283377"
@@ -341,45 +343,63 @@ def ranking(
     ax.set_xlabel(x_axis_label)
     return fig
 
-def flows(basemap, data, tessellation):
+
+def flows(
+    basemap: folium.Map, data: pd.DataFrame, tessellation: gpd.GeoDataFrame
+) -> folium.Map:
     centroids = get_centroids(tessellation)
     mean_flows = data["flow"].mean()
-    
-    flow_style_function = lambda weight, color: \
-        (lambda feature: dict(color=color, weight= 5 * weight ** 0.5, opacity=0.8))
+
+    def _flow_style_function(weight: float, color: str) -> Callable:
+        return lambda feature: {
+            "color": color,
+            "weight": 5 * weight**0.5,
+            "opacity": 0.8,
+        }
 
     origin_groups = data.groupby(by=const.ORIGIN)
-    for O, OD in origin_groups:
-        lonO, latO = centroids[O]
-        for D, T in OD[[const.DESTINATION, const.FLOW]].values:
-            lonD, latD = centroids[D]
-            gjc = LineString([(lonO,latO), (lonD,latD)])
+    for origin, OD in origin_groups:
+        lonO, latO = centroids[origin]
+        for destination, flow in OD[[const.DESTINATION, const.FLOW]].values:
+            lonD, latD = centroids[destination]
+            gjc = LineString([(lonO, latO), (lonD, latD)])
 
+            fgeojson = folium.GeoJson(
+                gjc,
+                name="flows",
+                style_function=_flow_style_function(
+                    weight=flow / mean_flows, color=dark_blue
+                ),
+            )
 
-            fgeojson = folium.GeoJson(gjc,
-                                      name='flows',
-                                      style_function = flow_style_function(weight = T / mean_flows, color = dark_blue)
-                                      )
-
-            popup = folium.Popup('flow from %s to %s: %s'%(O, D, int(T)), max_width=300)
+            popup = folium.Popup(
+                f"flow from {origin} to {destination}: {int(flow)}", max_width=300
+            )
             fgeojson = fgeojson.add_child(popup)
 
             fgeojson.add_to(basemap)
 
         # Plot marker
-        name = 'origin: %s' % O.replace('\'', '_')
-        T_D = [[T, D] for D, T in OD[[const.DESTINATION, const.FLOW]].values]
-
-        fmarker = folium.CircleMarker([latO, lonO],
-                                    radius=5,
-                                    weight=2,
-                                    color=dark_blue,
-                                    fill=True, fill_color=dark_blue
-                                    )
-        trips_info = '<br/>'.join(["flow to %s: %s" %
-                                (dd.replace('\'', '_'), int(tt)) \
-                                for tt, dd in sorted(T_D, reverse=True)[:5]])
-        popup = folium.Popup(name+'<br/>'+trips_info, max_width=300)
+        fmarker = folium.CircleMarker(
+            [latO, lonO],
+            radius=5,
+            weight=2,
+            color=dark_blue,
+            fill=True,
+            fill_color=dark_blue,
+        )
+        T_D = [
+            [destination, flow]
+            for destination, flow in OD[[const.DESTINATION, const.FLOW]].values
+        ]
+        trips_info = "<br/>".join(
+            [
+                f"flow to {destination}: {flow}"
+                for destination, flow in sorted(T_D, reverse=True)[:5]
+            ]
+        )
+        name = f"origin: {origin}"
+        popup = folium.Popup(name + "<br/>" + trips_info, max_width=300)
         fmarker = fmarker.add_child(popup)
         fmarker.add_to(basemap)
     return basemap

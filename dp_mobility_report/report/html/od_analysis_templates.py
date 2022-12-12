@@ -19,7 +19,6 @@ from dp_mobility_report.report.html.html_utils import (
     render_moe_info,
     render_summary,
     render_user_input_info,
-    get_centroids
 )
 from dp_mobility_report.visualization import plot, v_utils
 
@@ -164,8 +163,12 @@ def render_origin_destination_flows(
 
     # create od flows map
     top_n_flows = top_n_flows if top_n_flows <= len(data) else len(data)
-    flows = data[data[const.ORIGIN] != data[const.DESTINATION]].nlargest(top_n_flows, const.FLOW)
-    intra_tile_basemap = plot.flows(intra_tile_basemap, flows, tessellation)
+    flows = data[
+        (data[const.ORIGIN] != data[const.DESTINATION]) & data[const.FLOW].notna()
+    ].nlargest(top_n_flows, const.FLOW)
+    # only plot lines if there are any flows between tiles
+    if not flows[const.FLOW].isnull().all():
+        intra_tile_basemap = plot.flows(intra_tile_basemap, flows, tessellation)
 
     intra_tile_basemap.save(os.path.join(temp_map_folder, "od_map.html"))
 
