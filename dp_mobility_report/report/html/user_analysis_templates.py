@@ -1,7 +1,7 @@
+from datetime import timedelta
 from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
-from datetime import timedelta
 
 if TYPE_CHECKING:
     from dp_mobility_report import DpMobilityReport
@@ -17,14 +17,21 @@ from dp_mobility_report.report.html.html_utils import (
 )
 from dp_mobility_report.visualization import plot, v_utils
 
+
 def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
-    args = {}
-    args["trips_per_user_info"] = f"Trips per user are limited according to the configured maximum of trips per user: {dpmreport.max_trips_per_user}"
+    args: dict = {}
+    args[
+        "trips_per_user_info"
+    ] = f"Trips per user are limited according to the configured maximum of trips per user: {dpmreport.max_trips_per_user}"
     report = dpmreport.report
 
-    if (const.TRIPS_PER_USER not in dpmreport.analysis_exclusion):
-        args["trips_per_user_eps"] = render_eps(report[const.TRIPS_PER_USER].privacy_budget)
-        args["trips_per_user_hist"] = render_trips_per_user(report[const.TRIPS_PER_USER])
+    if const.TRIPS_PER_USER not in dpmreport.analysis_exclusion:
+        args["trips_per_user_eps"] = render_eps(
+            report[const.TRIPS_PER_USER].privacy_budget
+        )
+        args["trips_per_user_hist"] = render_trips_per_user(
+            report[const.TRIPS_PER_USER]
+        )
         args["trips_per_user_summary_table"] = render_summary(
             report[const.TRIPS_PER_USER].quartiles
         )
@@ -32,14 +39,20 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
             report[const.TRIPS_PER_USER].margin_of_error_expmech
         )
 
-    if (const.USER_TIME_DELTA not in dpmreport.analysis_exclusion):
-        args["time_between_traj_eps"] = render_eps(report[const.USER_TIME_DELTA].privacy_budget)
+    if const.USER_TIME_DELTA not in dpmreport.analysis_exclusion:
+        args["time_between_traj_eps"] = render_eps(
+            report[const.USER_TIME_DELTA].privacy_budget
+        )
         if report[const.USER_TIME_DELTA].quartiles["min"] < timedelta(seconds=0):
-            args["plausi_check_info"] = """<strong>Plausibility check</strong>: 
+            args[
+                "plausi_check_info"
+            ] = """<strong>Plausibility check</strong>: 
             There are overlapping trips in the dataset.
             The negative minimum time delta implies that there is a trip of a user that starts before the previous one has ended. 
             This might be an indication of an error in the dataset."""
-        args["time_between_traj_hist"] = render_time_between_traj(report[const.USER_TIME_DELTA])
+        args["time_between_traj_hist"] = render_time_between_traj(
+            report[const.USER_TIME_DELTA]
+        )
         args["time_between_traj_summary_table"] = render_summary(
             report[const.USER_TIME_DELTA].quartiles
         )
@@ -47,7 +60,7 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
             report[const.USER_TIME_DELTA].margin_of_error_expmech
         )
 
-    if (const.RADIUS_OF_GYRATION not in dpmreport.analysis_exclusion):
+    if const.RADIUS_OF_GYRATION not in dpmreport.analysis_exclusion:
         args["radius_of_gyration_eps"] = render_eps(
             report[const.RADIUS_OF_GYRATION].privacy_budget
         )
@@ -64,7 +77,7 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
             report[const.RADIUS_OF_GYRATION].margin_of_error_expmech
         )
 
-    if (const.USER_TILE_COUNT not in dpmreport.analysis_exclusion):
+    if const.USER_TILE_COUNT not in dpmreport.analysis_exclusion:
         args["distinct_tiles_user_eps"] = render_eps(
             report[const.USER_TILE_COUNT].privacy_budget
         )
@@ -78,9 +91,13 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
             report[const.USER_TILE_COUNT].margin_of_error_expmech
         )
 
-    if (const.MOBILITY_ENTROPY not in dpmreport.analysis_exclusion):
-        args["mobility_entropy_eps"] = render_eps(report[const.MOBILITY_ENTROPY].privacy_budget)
-        args["mobility_entropy_hist"] = render_mobility_entropy(report[const.MOBILITY_ENTROPY])
+    if const.MOBILITY_ENTROPY not in dpmreport.analysis_exclusion:
+        args["mobility_entropy_eps"] = render_eps(
+            report[const.MOBILITY_ENTROPY].privacy_budget
+        )
+        args["mobility_entropy_hist"] = render_mobility_entropy(
+            report[const.MOBILITY_ENTROPY]
+        )
         args["mobility_entropy_summary_table"] = render_summary(
             report[const.MOBILITY_ENTROPY].quartiles
         )

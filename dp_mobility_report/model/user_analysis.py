@@ -1,4 +1,3 @@
-from datetime import timedelta
 from typing import TYPE_CHECKING, List, Optional
 
 if TYPE_CHECKING:
@@ -32,7 +31,6 @@ def get_trips_per_user(
 def get_user_time_delta(
     dpmreport: "DpMobilityReport", eps: Optional[float]
 ) -> Optional[TupleSection]:
-    epsi = m_utils.get_epsi(dpmreport.evalu, eps, 6)
 
     dpmreport._df = dpmreport.df.sort_values(
         [const.UID, const.TID, const.DATETIME]
