@@ -85,3 +85,7 @@ DATETIME_PRECISION = "datetime_precision"
 PREC_DATE = "date"
 PREC_WEEK = "week"
 PREC_MONTH = "month"
+
+ORIGIN = "origin"
+DESTINATION = "destination"
+FLOW = "flow"

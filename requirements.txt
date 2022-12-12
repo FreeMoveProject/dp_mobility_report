@@ -17,7 +17,6 @@ shapely
 seaborn
 setuptools
 scikit-learn
-scikit-mobility
 Shapely
 tqdm
 typing
