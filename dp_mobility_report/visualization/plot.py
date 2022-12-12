@@ -264,7 +264,7 @@ def multi_choropleth_map(
         cmap = "RdBu_r"
         norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=1, vmax=vmax)
     else:
-        cmap = "viridis_r"
+        cmap = "YlOrRd"
         norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
 
     for i in range(0, plots_per_row * row_count):
@@ -354,7 +354,7 @@ def flows(
         return lambda feature: {
             "color": color,
             "weight": 5 * weight**0.5,
-            "opacity": 0.8,
+            "opacity": 0.65,
         }
 
     origin_groups = data.groupby(by=const.ORIGIN)
@@ -384,9 +384,9 @@ def flows(
             [latO, lonO],
             radius=5,
             weight=2,
-            color=dark_blue,
+            color=light_blue,
             fill=True,
-            fill_color=dark_blue,
+            fill_color=light_blue,
         )
         T_D = [
             [destination, flow]
