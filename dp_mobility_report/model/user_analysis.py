@@ -45,7 +45,6 @@ def get_user_time_delta(
     )
     user_time_delta[(same_tid) | (~same_user)] = None
     user_time_delta = user_time_delta[user_time_delta.notnull()]
-    overlaps = len(user_time_delta[user_time_delta < timedelta(seconds=0)])
 
     if len(user_time_delta) < 1:
         return None
@@ -56,18 +55,9 @@ def get_user_time_delta(
         sensitivity=dpmreport.max_trips_per_user,
         evalu=dpmreport.evalu,
     )
-    if sec.quartiles["min"] < 0:  # are there overlaps according to dp minimum?
-        sec.n_outliers = diff_privacy.count_dp(
-            overlaps,
-            epsi,
-            dpmreport.max_trips_per_user,
-        )
-    else:
-        sec.n_outliers = None
     sec.quartiles = pd.to_timedelta(sec.quartiles, unit="h").apply(
         lambda x: x.round(freq="s")
     )
-
     return sec
 
 
