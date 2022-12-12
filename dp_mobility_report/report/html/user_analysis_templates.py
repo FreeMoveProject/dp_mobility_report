@@ -34,11 +34,11 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
 
     if (const.USER_TIME_DELTA not in dpmreport.analysis_exclusion):
         args["time_between_traj_eps"] = render_eps(report[const.USER_TIME_DELTA].privacy_budget)
-        if report[const.USER_TIME_DELTA].quartiles["min"] >= timedelta(seconds=0):
+        if report[const.USER_TIME_DELTA].quartiles["min"] < timedelta(seconds=0):
             args["plausi_check_info"] = """<strong>Plausibility check</strong>: 
-            There are overlapping trips in the dataset: 
+            There are overlapping trips in the dataset.
             The negative minimum time delta implies that there is a trip of a user that starts before the previous one has ended. 
-            This might be an indication of a faulty dataset."""
+            This might be an indication of an error in the dataset."""
         args["time_between_traj_hist"] = render_time_between_traj(report[const.USER_TIME_DELTA])
         args["time_between_traj_summary_table"] = render_summary(
             report[const.USER_TIME_DELTA].quartiles

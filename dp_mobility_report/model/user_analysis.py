@@ -11,7 +11,6 @@ from scipy import stats
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import m_utils
 from dp_mobility_report.model.section import TupleSection
-from dp_mobility_report.privacy import diff_privacy
 
 
 def get_trips_per_user(
