@@ -119,8 +119,8 @@ def validate_input(
                 "Input parameter `max_trips_per_user` is `None` even though a privacy budget is given. The actual maximum number of trips per user will be used according to the data, though this violates Differential Privacy."
             )
 
-    _validate_numeric_greater_zero(max_travel_time, f"{max_travel_time=}".split("=")[0])
-    _validate_numeric_greater_zero(
+    _validate_int_greater_zero(max_travel_time, f"{max_travel_time=}".split("=")[0])
+    _validate_int_greater_zero(
         bin_range_travel_time, f"{bin_range_travel_time=}".split("=")[0]
     )
     _validate_numeric_greater_zero(max_jump_length, f"{max_jump_length=}".split("=")[0])
@@ -133,10 +133,10 @@ def validate_input(
     _validate_numeric_greater_zero(
         bin_range_radius_of_gyration, f"{bin_range_radius_of_gyration=}".split("=")[0]
     )
-    _validate_numeric_greater_zero(
+    _validate_int_greater_zero(
         max_user_tile_count, f"{max_user_tile_count=}".split("=")[0]
     )
-    _validate_numeric_greater_zero(
+    _validate_int_greater_zero(
         bin_range_user_tile_count, f"{bin_range_user_tile_count=}".split("=")[0]
     )
     _validate_numeric_greater_zero(
@@ -154,6 +154,12 @@ def validate_input(
     if (seed_sampling is not None) and (seed_sampling <= 0):
         raise ValueError("'seed_sampling' has to be greater 0.")
 
+
+def _validate_int_greater_zero(var: Any, name: str) -> None:
+    if not ((var is None) or isinstance(var, int)):
+        raise TypeError(f"{name} is not an int.")
+    if (var is not None) and (var <= 0):
+        raise ValueError(f"'{name}' has to be greater 0.")
 
 def _validate_numeric_greater_zero(var: Any, name: str) -> None:
     if not ((var is None) or isinstance(var, (int, float))):
