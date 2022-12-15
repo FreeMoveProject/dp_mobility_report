@@ -54,8 +54,8 @@ def get_od_flows(
         .reset_index()
         .rename(
             columns={
-                const.TILE_ID: "origin",
-                const.TILE_ID_END: "destination",
+                const.TILE_ID: const.ORIGIN,
+                const.TILE_ID_END: const.DESTINATION,
             }
         )
         .sort_values("flow", ascending=False)
@@ -68,12 +68,12 @@ def get_od_flows(
     full_tile_ids = np.unique(dpmreport.tessellation[const.TILE_ID])
     full_combinations = list(map(np.ravel, np.meshgrid(full_tile_ids, full_tile_ids)))
     od_flows = pd.DataFrame(
-        {"origin": full_combinations[0], "destination": full_combinations[1]}
-    ).merge(od_flows, on=["origin", "destination"], how="left")
+        {const.ORIGIN: full_combinations[0], const.DESTINATION: full_combinations[1]}
+    ).merge(od_flows, on=[const.ORIGIN, const.DESTINATION], how="left")
     od_flows.fillna(0, inplace=True)
 
-    od_flows["flow"] = diff_privacy.counts_dp(
-        od_flows["flow"].to_numpy(), eps, sensitivity, allow_negative=True
+    od_flows[const.FLOW] = diff_privacy.counts_dp(
+        od_flows[const.FLOW].to_numpy(), eps, sensitivity, allow_negative=True
     )
 
     # remove all instances of 0 (and smaller) to reduce storage
@@ -96,7 +96,7 @@ def get_od_flows(
 
 
 def get_intra_tile_flows(od_flows: pd.DataFrame) -> int:
-    return od_flows[(od_flows.origin == od_flows.destination)].flow.sum()
+    return od_flows[(od_flows[const.ORIGIN] == od_flows[const.DESTINATION])].flow.sum()
 
 
 def get_travel_time(
