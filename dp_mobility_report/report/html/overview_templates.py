@@ -14,45 +14,32 @@ from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_overview(report: dict) -> str:
-    dataset_stats_table = ""
-    missing_values_table = ""
-    trips_over_time_eps = None
-    trips_over_time_moe = None
-    trips_over_time_info = ""
-    trips_over_time_linechart = ""
-    trips_over_time_moe_info = ""
-    trips_over_time_summary_table = ""
-    trips_per_weekday_eps = None
-    trips_per_weekday_moe = None
-    trips_per_weekday_barchart = ""
-    trips_per_hour_eps = None
-    trips_per_hour_moe = None
-    trips_per_hour_linechart = ""
+    args : dict = {}
 
     if const.DS_STATISTICS in report and report[const.DS_STATISTICS].data is not None:
-        dataset_stats_table = render_dataset_statistics(report[const.DS_STATISTICS])
+        args["dataset_stats_table"] = render_dataset_statistics(report[const.DS_STATISTICS])
 
     if const.MISSING_VALUES in report and report[const.MISSING_VALUES].data is not None:
-        missing_values_table = render_missing_values(report[const.MISSING_VALUES])
+        args["missing_values_table"] = render_missing_values(report[const.MISSING_VALUES])
 
     if (
         const.TRIPS_OVER_TIME in report
         and report[const.TRIPS_OVER_TIME].data is not None
     ):
-        trips_over_time_eps = render_eps(report[const.TRIPS_OVER_TIME].privacy_budget)
-        trips_over_time_moe = fmt_moe(
+        args["trips_over_time_eps"] = render_eps(report[const.TRIPS_OVER_TIME].privacy_budget)
+        args["trips_over_time_moe"] = fmt_moe(
             report[const.TRIPS_OVER_TIME].margin_of_error_laplace
         )
-        trips_over_time_info = render_trips_over_time_info(
+        args["trips_over_time_info"] = render_trips_over_time_info(
             report[const.TRIPS_OVER_TIME].datetime_precision
         )
-        trips_over_time_linechart = render_trips_over_time(
+        args["trips_over_time_linechart"] = render_trips_over_time(
             report[const.TRIPS_OVER_TIME]
         )
-        trips_over_time_moe_info = render_moe_info(
+        args["trips_over_time_moe_info"] = render_moe_info(
             report[const.TRIPS_OVER_TIME].margin_of_error_expmech
         )
-        trips_over_time_summary_table = render_summary(
+        args["trips_over_time_summary_table"] = render_summary(
             report[const.TRIPS_OVER_TIME].quartiles
         )
 
@@ -60,41 +47,26 @@ def render_overview(report: dict) -> str:
         const.TRIPS_PER_WEEKDAY in report
         and report[const.TRIPS_PER_WEEKDAY].data is not None
     ):
-        trips_per_weekday_eps = render_eps(
+        args["trips_per_weekday_eps"] = render_eps(
             report[const.TRIPS_PER_WEEKDAY].privacy_budget
         )
-        trips_per_weekday_moe = fmt_moe(
+        args["trips_per_weekday_moe"] = fmt_moe(
             report[const.TRIPS_PER_HOUR].margin_of_error_laplace
         )
 
-        trips_per_weekday_barchart = render_trips_per_weekday(
+        args["trips_per_weekday_barchart"] = render_trips_per_weekday(
             report[const.TRIPS_PER_WEEKDAY]
         )
 
     if const.TRIPS_PER_HOUR in report and report[const.TRIPS_PER_HOUR].data is not None:
-        trips_per_hour_eps = render_eps(report[const.TRIPS_PER_HOUR].privacy_budget)
-        trips_per_hour_moe = fmt_moe(
+        args["trips_per_hour_eps"] = render_eps(report[const.TRIPS_PER_HOUR].privacy_budget)
+        args["trips_per_hour_moe"] = fmt_moe(
             report[const.TRIPS_PER_HOUR].margin_of_error_laplace
         )
-        trips_per_hour_linechart = render_trips_per_hour(report[const.TRIPS_PER_HOUR])
+        args["trips_per_hour_linechart"] = render_trips_per_hour(report[const.TRIPS_PER_HOUR])
 
     template_structure = get_template("overview_segment.html")
-    return template_structure.render(
-        dataset_stats_table=dataset_stats_table,
-        missing_values_table=missing_values_table,
-        trips_over_time_eps=trips_over_time_eps,
-        trips_over_time_moe=trips_over_time_moe,
-        trips_over_time_info=trips_over_time_info,
-        trips_over_time_linechart=trips_over_time_linechart,
-        trips_over_time_moe_info=trips_over_time_moe_info,
-        trips_over_time_summary_table=trips_over_time_summary_table,
-        trips_per_weekday_eps=trips_per_weekday_eps,
-        trips_per_weekday_moe=trips_per_weekday_moe,
-        trips_per_weekday_barchart=trips_per_weekday_barchart,
-        trips_per_hour_eps=trips_per_hour_eps,
-        trips_per_hour_moe=trips_per_hour_moe,
-        trips_per_hour_linechart=trips_per_hour_linechart,
-    )
+    return template_structure.render(args)
 
 
 def render_dataset_statistics(dataset_statistics: DictSection) -> str:

@@ -30,36 +30,27 @@ def render_html(
     shutil.rmtree(temp_map_folder, ignore_errors=True)
     os.mkdir(temp_map_folder)
 
-    overview_segment = ""
-    place_analysis_segment = ""
-    od_analysis_segment = ""
-    user_analysis_segment = ""
+    args : dict = {}
 
-    config_segment = config_templates.render_config(dpmreport)
+    args["output_filename"] = output_filename
+    args["config_segment"] = config_templates.render_config(dpmreport)
 
     if not set(const.OVERVIEW_ELEMENTS).issubset(dpmreport.analysis_exclusion):
-        overview_segment = overview_templates.render_overview(dpmreport.report)
+        args["overview_segment"] = overview_templates.render_overview(dpmreport.report)
 
     if not set(const.PLACE_ELEMENTS).issubset(dpmreport.analysis_exclusion):
-        place_analysis_segment = place_analysis_templates.render_place_analysis(
+        args["place_analysis_segment"] = place_analysis_templates.render_place_analysis(
             dpmreport.report, dpmreport.tessellation, temp_map_folder, output_filename
         )
     if not set(const.OD_ELEMENTS).issubset(dpmreport.analysis_exclusion):
-        od_analysis_segment = od_analysis_templates.render_od_analysis(
+        args["od_analysis_segment"] = od_analysis_templates.render_od_analysis(
             dpmreport, top_n_flows, temp_map_folder, output_filename
         )
     if not set(const.USER_ELEMENTS).issubset(dpmreport.analysis_exclusion):
-        user_analysis_segment = user_analysis_templates.render_user_analysis(dpmreport)
+        args["user_analysis_segment"] = user_analysis_templates.render_user_analysis(dpmreport)
 
     return (
-        template_structure.render(
-            output_filename=output_filename,
-            config_segment=config_segment,
-            overview_segment=overview_segment,
-            place_analysis_segment=place_analysis_segment,
-            od_analysis_segment=od_analysis_segment,
-            user_analysis_segment=user_analysis_segment,
-        ),
+        template_structure.render(args),
         temp_map_folder,
     )
 

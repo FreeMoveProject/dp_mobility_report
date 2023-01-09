@@ -1,7 +1,17 @@
 
+{% if config_table %}
 {{config_table}}
+{% endif %}
 <p class="warning">
+    {% if privacy_info %}
     {{privacy_info}}
+    {% endif %}
+
+    {% if tessellation_info %}
     {{tessellation_info}}
+    {% endif %}
+
+    {% if timestamp_info %}
     {{timestamp_info}}
+    {% endif %}
 </p>

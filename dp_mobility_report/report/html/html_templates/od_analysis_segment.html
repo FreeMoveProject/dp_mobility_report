@@ -1,6 +1,6 @@
 <h2>Origin-destination (OD) analysis</h2>
 
-
+{% if flows_cumsum_linechart %}
 <div>
     <h3>OD flows between tiles</h3>
     <p>privacy budget: {{od_eps}}</p>
@@ -53,10 +53,13 @@
         {{most_freq_flows_ranking}}
     </div>
 </div>
+{% endif %}
+
 
 <div>
     <h3>Trip statistics</h3>
     
+    {% if travel_time_hist %}
     <div>
         <h4>Travel time of trips (in minutes)</h4>
         <p>privacy budget: {{travel_time_eps}}</p>
@@ -71,6 +74,10 @@
                 {{travel_time_moe_info}}
             </p>
     </div>
+    {% endif %} 
+
+
+    {% if jump_length_hist %}
     <div>
         <h4>Jump length (in kilometers)</h4>
         <p>privacy budget: {{travel_time_eps}}</p>
@@ -86,4 +93,5 @@
                 {{jump_length_moe_info}}
             </p>
     </div>
+    {% endif %}
 </div>

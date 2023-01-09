@@ -23,78 +23,58 @@ def render_place_analysis(
     output_filename: str,
 ) -> str:
     THRESHOLD = 0.2  # 20%
-    points_outside_tessellation_info = ""
-    privacy_info = f"""Tiles below a certain threshold are grayed out: 
+    args: dict = {}
+
+    args["privacy_info"] = f"""Tiles below a certain threshold are grayed out: 
         Due to the applied noise, tiles with a low visit count are likely to contain a high percentage of noise. 
         For usability reasons, such unrealistic values are grayed out. 
         More specifically: The threshold is set so that values for tiles with a 5% chance (or higher) of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are not shown."""
-    visits_per_tile_eps = None
-    visits_per_tile_moe = None
-    visits_per_tile_legend = ""
-    visits_per_tile_summary_table = ""
-    visits_per_tile_cumsum_linechart = ""
-    most_freq_tiles_ranking = ""
-    visits_per_tile_timewindow_eps = None
-    visits_per_tile_timewindow_moe = None
-    visits_per_tile_time_map = ""
+    args["output_filename"] = output_filename
 
     if (const.VISITS_PER_TILE in report) and (
         report[const.VISITS_PER_TILE].data is not None
     ):
-        visits_per_tile_eps = render_eps(report[const.VISITS_PER_TILE].privacy_budget)
-        visits_per_tile_moe = fmt_moe(
+        args["visits_per_tile_eps"] = render_eps(report[const.VISITS_PER_TILE].privacy_budget)
+        args["visits_per_tile_moe"] = fmt_moe(
             report[const.VISITS_PER_TILE].margin_of_error_laplace
         )
 
-        points_outside_tessellation_info = render_points_outside_tess(
+        args["points_outside_tessellation_info"] = render_points_outside_tess(
             report[const.VISITS_PER_TILE]
         )
-        visits_per_tile_legend = render_visits_per_tile(
+        args["visits_per_tile_legend"] = render_visits_per_tile(
             report[const.VISITS_PER_TILE], tessellation, THRESHOLD, temp_map_folder
         )
         quartiles = report[const.VISITS_PER_TILE].quartiles.round()
 
-        visits_per_tile_summary_table = render_summary(
+        args["visits_per_tile_summary_table"] = render_summary(
             quartiles.astype(int),
             "Distribution of visits per tile",  # extrapolate visits from dp record count
         )
-        visits_per_tile_cumsum_linechart = render_visits_per_tile_cumsum(
+        args["visits_per_tile_cumsum_linechart"] = render_visits_per_tile_cumsum(
             report[const.VISITS_PER_TILE]
         )
-        most_freq_tiles_ranking = render_most_freq_tiles_ranking(
+        args["most_freq_tiles_ranking"] = render_most_freq_tiles_ranking(
             report[const.VISITS_PER_TILE],
         )
 
     if (const.VISITS_PER_TILE_TIMEWINDOW in report) and (
         report[const.VISITS_PER_TILE_TIMEWINDOW] is not None
     ):
-        visits_per_tile_timewindow_eps = render_eps(
+        args["visits_per_tile_timewindow_eps"] = render_eps(
             report[const.VISITS_PER_TILE_TIMEWINDOW].privacy_budget
         )
-        visits_per_tile_timewindow_moe = fmt_moe(
+        args["visits_per_tile_timewindow_moe"] = fmt_moe(
             report[const.VISITS_PER_TILE_TIMEWINDOW].margin_of_error_laplace
         )
 
-        visits_per_tile_time_map = render_visits_per_tile_timewindow(
+        args["visits_per_tile_time_map"] = render_visits_per_tile_timewindow(
             report[const.VISITS_PER_TILE_TIMEWINDOW], tessellation, THRESHOLD
         )
 
     template_structure = get_template("place_analysis_segment.html")
 
-    return template_structure.render(
-        output_filename=output_filename,
-        points_outside_tessellation_info=points_outside_tessellation_info,
-        privacy_info=privacy_info,
-        visits_per_tile_eps=visits_per_tile_eps,
-        visits_per_tile_moe=visits_per_tile_moe,
-        visits_per_tile_legend=visits_per_tile_legend,
-        visits_per_tile_summary_table=visits_per_tile_summary_table,
-        visits_per_tile_cumsum_linechart=visits_per_tile_cumsum_linechart,
-        most_freq_tiles_ranking=most_freq_tiles_ranking,
-        visits_per_tile_timewindow_eps=visits_per_tile_timewindow_eps,
-        visits_per_tile_timewindow_moe=visits_per_tile_timewindow_moe,
-        visits_per_tile_time_map=visits_per_tile_time_map,
-    )
+    return template_structure.render(args)
 
 
 def render_points_outside_tess(visits_per_tile: DfSection) -> str:
