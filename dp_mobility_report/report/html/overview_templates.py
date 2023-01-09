@@ -1,5 +1,6 @@
-import matplotlib.pyplot as plt
 from typing import TYPE_CHECKING
+
+import matplotlib.pyplot as plt
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model.section import DfSection, DictSection, SeriesSection

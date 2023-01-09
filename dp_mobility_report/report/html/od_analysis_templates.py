@@ -44,7 +44,6 @@ def render_od_analysis(
     ] = f"User configuration: display max. top {top_n_flows} OD connections on map"
     args["output_filename"] = output_filename
 
-
     if const.OD_FLOWS not in dpmreport.analysis_exclusion:
         args["od_eps"] = render_eps(report[const.OD_FLOWS].privacy_budget)
         args["od_moe"] = fmt_moe(report[const.OD_FLOWS].margin_of_error_laplace)

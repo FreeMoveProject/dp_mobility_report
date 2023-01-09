@@ -36,11 +36,11 @@ def render_html(
     args["config_segment"] = config_templates.render_config(dpmreport)
 
     if not set(const.OVERVIEW_ELEMENTS).issubset(dpmreport.analysis_exclusion):
-        args["overview_segment"] = overview_templates.render_overview(dpmreport.report)
+        args["overview_segment"] = overview_templates.render_overview(dpmreport)
 
     if not set(const.PLACE_ELEMENTS).issubset(dpmreport.analysis_exclusion):
         args["place_analysis_segment"] = place_analysis_templates.render_place_analysis(
-            dpmreport.report, dpmreport.tessellation, temp_map_folder, output_filename
+            dpmreport, dpmreport.tessellation, temp_map_folder, output_filename
         )
     if not set(const.OD_ELEMENTS).issubset(dpmreport.analysis_exclusion):
         args["od_analysis_segment"] = od_analysis_templates.render_od_analysis(
