@@ -1,6 +1,10 @@
 History
 *********
 
+0.1.6 (2023-01-09)
+------------------
+* Refactoring of template files.
+
 0.1.5 (2022-12-12)
 ------------------
 * Remove scikit-mobility dependency and refactor od flow visualization.

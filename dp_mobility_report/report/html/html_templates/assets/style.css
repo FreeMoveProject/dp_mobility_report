@@ -27,6 +27,10 @@ p{
     border-width: 3px;
 }
 
+.warning-text {
+    color: #a94442;
+}
+
 .estimate{
     font-weight: bold
 }

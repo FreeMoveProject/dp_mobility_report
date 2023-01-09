@@ -1,5 +1,6 @@
 <h2>Place analysis</h2>
 
+{% if visits_per_tile_cumsum_linechart %}
 <div>
 
     <h3>Visits per tile</h3>
@@ -38,7 +39,10 @@
     <h4>Ranking of most frequently visited tiles</h4>
     {{most_freq_tiles_ranking}}
 </div>
-    
+{% endif %} 
+
+
+{% if visits_per_tile_time_map %}
 <div>
     <h3>Visits per tile and time window</h3>
     <p>privacy budget: {{ visits_per_tile_timewindow_eps }}</p>
@@ -52,3 +56,4 @@
         {{visits_per_tile_time_map}}
     </div>
 </div>
+{% endif %}
