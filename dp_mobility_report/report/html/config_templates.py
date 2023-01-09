@@ -11,8 +11,8 @@ if TYPE_CHECKING:
 
 def render_config(dpmreport: "DpMobilityReport") -> str:
 
-    args : dict = {}
-    
+    args: dict = {}
+
     args["config_table"] = render_config_table(dpmreport)
     args["privacy_info"] = render_privacy_info(dpmreport.privacy_budget is not None)
     args["tessellation_info"] = (

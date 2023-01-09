@@ -30,7 +30,7 @@ def render_html(
     shutil.rmtree(temp_map_folder, ignore_errors=True)
     os.mkdir(temp_map_folder)
 
-    args : dict = {}
+    args: dict = {}
 
     args["output_filename"] = output_filename
     args["config_segment"] = config_templates.render_config(dpmreport)
@@ -47,7 +47,9 @@ def render_html(
             dpmreport, top_n_flows, temp_map_folder, output_filename
         )
     if not set(const.USER_ELEMENTS).issubset(dpmreport.analysis_exclusion):
-        args["user_analysis_segment"] = user_analysis_templates.render_user_analysis(dpmreport)
+        args["user_analysis_segment"] = user_analysis_templates.render_user_analysis(
+            dpmreport
+        )
 
     return (
         template_structure.render(args),

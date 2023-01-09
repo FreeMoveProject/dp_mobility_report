@@ -14,19 +14,25 @@ from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_overview(report: dict) -> str:
-    args : dict = {}
+    args: dict = {}
 
     if const.DS_STATISTICS in report and report[const.DS_STATISTICS].data is not None:
-        args["dataset_stats_table"] = render_dataset_statistics(report[const.DS_STATISTICS])
+        args["dataset_stats_table"] = render_dataset_statistics(
+            report[const.DS_STATISTICS]
+        )
 
     if const.MISSING_VALUES in report and report[const.MISSING_VALUES].data is not None:
-        args["missing_values_table"] = render_missing_values(report[const.MISSING_VALUES])
+        args["missing_values_table"] = render_missing_values(
+            report[const.MISSING_VALUES]
+        )
 
     if (
         const.TRIPS_OVER_TIME in report
         and report[const.TRIPS_OVER_TIME].data is not None
     ):
-        args["trips_over_time_eps"] = render_eps(report[const.TRIPS_OVER_TIME].privacy_budget)
+        args["trips_over_time_eps"] = render_eps(
+            report[const.TRIPS_OVER_TIME].privacy_budget
+        )
         args["trips_over_time_moe"] = fmt_moe(
             report[const.TRIPS_OVER_TIME].margin_of_error_laplace
         )
@@ -59,11 +65,15 @@ def render_overview(report: dict) -> str:
         )
 
     if const.TRIPS_PER_HOUR in report and report[const.TRIPS_PER_HOUR].data is not None:
-        args["trips_per_hour_eps"] = render_eps(report[const.TRIPS_PER_HOUR].privacy_budget)
+        args["trips_per_hour_eps"] = render_eps(
+            report[const.TRIPS_PER_HOUR].privacy_budget
+        )
         args["trips_per_hour_moe"] = fmt_moe(
             report[const.TRIPS_PER_HOUR].margin_of_error_laplace
         )
-        args["trips_per_hour_linechart"] = render_trips_per_hour(report[const.TRIPS_PER_HOUR])
+        args["trips_per_hour_linechart"] = render_trips_per_hour(
+            report[const.TRIPS_PER_HOUR]
+        )
 
     template_structure = get_template("overview_segment.html")
     return template_structure.render(args)

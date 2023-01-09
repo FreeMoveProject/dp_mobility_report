@@ -32,15 +32,16 @@ def render_od_analysis(
     THRESHOLD = 0.2  # 20 %
     args: dict = {}
 
-    args["privacy_info"] = f"""Intra-tile flows below a certain threshold are grayed out: 
+    args[
+        "privacy_info"
+    ] = f"""Intra-tile flows below a certain threshold are grayed out: 
         Due to the applied noise, tiles with a low intra-tile flow count are likely to contain a high percentage of noise. 
         For usability reasons, such unrealistic values are grayed out. 
         More specifically: The threshold is set so that values for tiles with a 5% chance (or higher) of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are not shown."""
-    args["user_config_info"] = (
-        f"User configuration: display max. top {top_n_flows} OD connections on map"
-    )
+    args[
+        "user_config_info"
+    ] = f"User configuration: display max. top {top_n_flows} OD connections on map"
     args["output_filename"] = output_filename
-
 
     report = dpmreport.report
 
@@ -70,7 +71,9 @@ def render_od_analysis(
 
     if const.TRAVEL_TIME in report and report[const.TRAVEL_TIME].data is not None:
         args["travel_time_eps"] = render_eps(report[const.TRAVEL_TIME].privacy_budget)
-        args["travel_time_moe"] = fmt_moe(report[const.TRAVEL_TIME].margin_of_error_laplace)
+        args["travel_time_moe"] = fmt_moe(
+            report[const.TRAVEL_TIME].margin_of_error_laplace
+        )
 
         args["travel_time_hist_info"] = render_user_input_info(
             dpmreport.max_travel_time, dpmreport.bin_range_travel_time
@@ -79,11 +82,15 @@ def render_od_analysis(
         args["travel_time_moe_info"] = render_moe_info(
             report[const.TRAVEL_TIME].margin_of_error_expmech
         )
-        args["travel_time_summary_table"] = render_summary(report[const.TRAVEL_TIME].quartiles)
+        args["travel_time_summary_table"] = render_summary(
+            report[const.TRAVEL_TIME].quartiles
+        )
 
     if const.JUMP_LENGTH in report and report[const.JUMP_LENGTH].data is not None:
         args["jump_length_eps"] = render_eps(report[const.JUMP_LENGTH].privacy_budget)
-        args["jump_length_moe"] = fmt_moe(report[const.JUMP_LENGTH].margin_of_error_laplace)
+        args["jump_length_moe"] = fmt_moe(
+            report[const.JUMP_LENGTH].margin_of_error_laplace
+        )
 
         args["jump_length_hist_info"] = render_user_input_info(
             dpmreport.max_jump_length, dpmreport.bin_range_jump_length
@@ -92,7 +99,9 @@ def render_od_analysis(
         args["jump_length_moe_info"] = render_moe_info(
             report[const.JUMP_LENGTH].margin_of_error_expmech
         )
-        args["jump_length_summary_table"] = render_summary(report[const.JUMP_LENGTH].quartiles)
+        args["jump_length_summary_table"] = render_summary(
+            report[const.JUMP_LENGTH].quartiles
+        )
 
     template_structure = get_template("od_analysis_segment.html")
     return template_structure.render(args)

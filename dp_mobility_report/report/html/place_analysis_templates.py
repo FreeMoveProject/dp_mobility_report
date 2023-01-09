@@ -25,7 +25,9 @@ def render_place_analysis(
     THRESHOLD = 0.2  # 20%
     args: dict = {}
 
-    args["privacy_info"] = f"""Tiles below a certain threshold are grayed out: 
+    args[
+        "privacy_info"
+    ] = f"""Tiles below a certain threshold are grayed out: 
         Due to the applied noise, tiles with a low visit count are likely to contain a high percentage of noise. 
         For usability reasons, such unrealistic values are grayed out. 
         More specifically: The threshold is set so that values for tiles with a 5% chance (or higher) of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are not shown."""
@@ -34,7 +36,9 @@ def render_place_analysis(
     if (const.VISITS_PER_TILE in report) and (
         report[const.VISITS_PER_TILE].data is not None
     ):
-        args["visits_per_tile_eps"] = render_eps(report[const.VISITS_PER_TILE].privacy_budget)
+        args["visits_per_tile_eps"] = render_eps(
+            report[const.VISITS_PER_TILE].privacy_budget
+        )
         args["visits_per_tile_moe"] = fmt_moe(
             report[const.VISITS_PER_TILE].margin_of_error_laplace
         )
