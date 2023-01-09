@@ -4,7 +4,7 @@ import geopandas as gpd
 from shapely.geometry import Polygon
 from skmob.tessellation import tilers
 
-# INPUT PARAMETERS #################################################
+# INPUT PARAMETERS ################################################
 # set boundaries of tessellation in latitude and longitude
 # (this example is Beijing center)
 MIN_LNG = 116.08
