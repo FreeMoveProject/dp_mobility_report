@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from typing import TYPE_CHECKING
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model.section import DfSection, DictSection, SeriesSection
@@ -10,26 +11,28 @@ from dp_mobility_report.report.html.html_utils import (
     render_moe_info,
     render_summary,
 )
+
+if TYPE_CHECKING:
+    from dp_mobility_report import DpMobilityReport
+
 from dp_mobility_report.visualization import plot, v_utils
 
 
-def render_overview(report: dict) -> str:
+def render_overview(dpmreport: "DpMobilityReport") -> str:
     args: dict = {}
+    report = dpmreport.report
 
-    if const.DS_STATISTICS in report and report[const.DS_STATISTICS].data is not None:
+    if const.DS_STATISTICS not in dpmreport.analysis_exclusion:
         args["dataset_stats_table"] = render_dataset_statistics(
             report[const.DS_STATISTICS]
         )
 
-    if const.MISSING_VALUES in report and report[const.MISSING_VALUES].data is not None:
+    if const.MISSING_VALUES not in dpmreport.analysis_exclusion:
         args["missing_values_table"] = render_missing_values(
             report[const.MISSING_VALUES]
         )
 
-    if (
-        const.TRIPS_OVER_TIME in report
-        and report[const.TRIPS_OVER_TIME].data is not None
-    ):
+    if const.TRIPS_OVER_TIME not in dpmreport.analysis_exclusion:
         args["trips_over_time_eps"] = render_eps(
             report[const.TRIPS_OVER_TIME].privacy_budget
         )
@@ -49,10 +52,7 @@ def render_overview(report: dict) -> str:
             report[const.TRIPS_OVER_TIME].quartiles
         )
 
-    if (
-        const.TRIPS_PER_WEEKDAY in report
-        and report[const.TRIPS_PER_WEEKDAY].data is not None
-    ):
+    if const.TRIPS_PER_WEEKDAY not in dpmreport.analysis_exclusion:
         args["trips_per_weekday_eps"] = render_eps(
             report[const.TRIPS_PER_WEEKDAY].privacy_budget
         )
@@ -64,7 +64,7 @@ def render_overview(report: dict) -> str:
             report[const.TRIPS_PER_WEEKDAY]
         )
 
-    if const.TRIPS_PER_HOUR in report and report[const.TRIPS_PER_HOUR].data is not None:
+    if const.TRIPS_PER_HOUR not in dpmreport.analysis_exclusion:
         args["trips_per_hour_eps"] = render_eps(
             report[const.TRIPS_PER_HOUR].privacy_budget
         )

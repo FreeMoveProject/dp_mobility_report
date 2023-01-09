@@ -20,10 +20,11 @@ from dp_mobility_report.visualization import plot, v_utils
 
 def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
     args: dict = {}
+    report = dpmreport.report
+
     args[
         "trips_per_user_info"
     ] = f"Trips per user are limited according to the configured maximum of trips per user: {dpmreport.max_trips_per_user}"
-    report = dpmreport.report
 
     if const.TRIPS_PER_USER not in dpmreport.analysis_exclusion:
         args["trips_per_user_eps"] = render_eps(

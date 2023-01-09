@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -13,17 +14,22 @@ from dp_mobility_report.report.html.html_utils import (
     render_eps,
     render_summary,
 )
+
+if TYPE_CHECKING:
+    from dp_mobility_report import DpMobilityReport
+
 from dp_mobility_report.visualization import plot, v_utils
 
 
 def render_place_analysis(
-    report: dict,
+    dpmreport: "DpMobilityReport",
     tessellation: GeoDataFrame,
     temp_map_folder: Path,
     output_filename: str,
 ) -> str:
     THRESHOLD = 0.2  # 20%
     args: dict = {}
+    report = dpmreport.report
 
     args[
         "privacy_info"
@@ -33,9 +39,7 @@ def render_place_analysis(
         More specifically: The threshold is set so that values for tiles with a 5% chance (or higher) of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are not shown."""
     args["output_filename"] = output_filename
 
-    if (const.VISITS_PER_TILE in report) and (
-        report[const.VISITS_PER_TILE].data is not None
-    ):
+    if const.VISITS_PER_TILE not in dpmreport.analysis_exclusion:
         args["visits_per_tile_eps"] = render_eps(
             report[const.VISITS_PER_TILE].privacy_budget
         )
@@ -62,9 +66,7 @@ def render_place_analysis(
             report[const.VISITS_PER_TILE],
         )
 
-    if (const.VISITS_PER_TILE_TIMEWINDOW in report) and (
-        report[const.VISITS_PER_TILE_TIMEWINDOW] is not None
-    ):
+    if const.VISITS_PER_TILE_TIMEWINDOW not in dpmreport.analysis_exclusion:
         args["visits_per_tile_timewindow_eps"] = render_eps(
             report[const.VISITS_PER_TILE_TIMEWINDOW].privacy_budget
         )

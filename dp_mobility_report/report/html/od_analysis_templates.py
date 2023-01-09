@@ -31,6 +31,7 @@ def render_od_analysis(
 ) -> str:
     THRESHOLD = 0.2  # 20 %
     args: dict = {}
+    report = dpmreport.report
 
     args[
         "privacy_info"
@@ -43,9 +44,8 @@ def render_od_analysis(
     ] = f"User configuration: display max. top {top_n_flows} OD connections on map"
     args["output_filename"] = output_filename
 
-    report = dpmreport.report
 
-    if const.OD_FLOWS in report and report[const.OD_FLOWS].data is not None:
+    if const.OD_FLOWS not in dpmreport.analysis_exclusion:
         args["od_eps"] = render_eps(report[const.OD_FLOWS].privacy_budget)
         args["od_moe"] = fmt_moe(report[const.OD_FLOWS].margin_of_error_laplace)
 
@@ -69,7 +69,7 @@ def render_od_analysis(
             report[const.OD_FLOWS], dpmreport.tessellation
         )
 
-    if const.TRAVEL_TIME in report and report[const.TRAVEL_TIME].data is not None:
+    if const.TRAVEL_TIME not in dpmreport.analysis_exclusion:
         args["travel_time_eps"] = render_eps(report[const.TRAVEL_TIME].privacy_budget)
         args["travel_time_moe"] = fmt_moe(
             report[const.TRAVEL_TIME].margin_of_error_laplace
@@ -86,7 +86,7 @@ def render_od_analysis(
             report[const.TRAVEL_TIME].quartiles
         )
 
-    if const.JUMP_LENGTH in report and report[const.JUMP_LENGTH].data is not None:
+    if const.JUMP_LENGTH not in dpmreport.analysis_exclusion:
         args["jump_length_eps"] = render_eps(report[const.JUMP_LENGTH].privacy_budget)
         args["jump_length_moe"] = fmt_moe(
             report[const.JUMP_LENGTH].margin_of_error_laplace
