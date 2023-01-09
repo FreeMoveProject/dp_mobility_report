@@ -1,5 +1,6 @@
 <h2>User analysis</h2>
 
+{%if trips_per_user_hist %}
 <div>
     <h3>Number of trips per user</h3>
     <p>privacy budget: {{trips_per_user_eps}}</p>
@@ -13,7 +14,9 @@
         {{trips_per_user_moe_info}}
     </p>
 </div>
+{% endif %}
 
+{%if time_between_traj_hist %}
 <div>
     <h3>Time between consecutive trips of a user</h3>
     <p>privacy budget: {{time_between_traj_eps}}</p>
@@ -25,10 +28,19 @@
     <p class="info">
         {{time_between_traj_moe_info}}
     </p>
-    {{plausi_check_info}}
+
+    {%if plausi_check_info %}
+    <p class="warning-text">
+        {{plausi_check_info}}
+    </p>
+    {% endif %}
 
 </div>
-    
+{% endif %}
+
+
+{%if radius_of_gyration_hist %}
+
 <div>
     <h3>Radius of gyration (in kilometers)</h3>
     <p>privacy budget: {{radius_of_gyration_eps}}</p>
@@ -46,7 +58,10 @@
         {{radius_of_gyration_moe_info}}
     </p>
 </div>
+{% endif %}
+
     
+{%if distinct_tiles_user_hist %}
 <div>
     <h3>Number of distinct tiles per user</h3>
     <p>privacy budget: {{distinct_tiles_user_eps}}</p>
@@ -59,7 +74,10 @@
         {{distinct_tiles_moe_info}}
     </p>
 </div>
+{% endif %}
 
+
+{%if mobility_entropy_hist %}
 <div>
     <h3>Mobility entropy</h3>
     <p>privacy budget: {{mobility_entropy_eps}}</p>
@@ -79,3 +97,4 @@
         {{mobility_entropy_moe_info}}
     </p>
 </div>
+{% endif %}
