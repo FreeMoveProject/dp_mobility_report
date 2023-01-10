@@ -161,6 +161,7 @@ def _validate_int_greater_zero(var: Any, name: str) -> None:
     if (var is not None) and (var <= 0):
         raise ValueError(f"'{name}' has to be greater 0.")
 
+
 def _validate_numeric_greater_zero(var: Any, name: str) -> None:
     if not ((var is None) or isinstance(var, (int, float))):
         raise TypeError(f"{name} is not numeric.")

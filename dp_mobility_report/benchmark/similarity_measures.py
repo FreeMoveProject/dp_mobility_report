@@ -7,7 +7,7 @@ import pandas as pd
 from geopandas import GeoDataFrame
 from haversine import Unit, haversine
 from scipy.spatial import distance
-from scipy.stats import entropy, wasserstein_distance
+from scipy.stats import entropy, stats, wasserstein_distance
 
 from dp_mobility_report import constants as const
 
@@ -142,6 +142,7 @@ def compute_similarity_measures(
     jsd_dict: dict = {}
     emd_dict: dict = {}
     smape_dict: dict = {}
+    kendall_dict: dict = {}
     cost_matrix = None
 
     # Statistics
@@ -250,6 +251,19 @@ def compute_similarity_measures(
         )
         smape_dict[const.VISITS_PER_TILE] = symmetric_mape(
             estimate=rel_counts_alternative, true=rel_counts_base
+        )
+        most_freq_base = (
+            report_base[const.VISITS_PER_TILE]
+            .data.sort_values(by=["visits"], ascending=False, ignore_index=True)
+            .truncate(after=9)
+        )
+        most_freq_alternative = (
+            report_alternative[const.VISITS_PER_TILE]
+            .data.sort_values(by=["visits"], ascending=False, ignore_index=True)
+            .truncate(after=9)
+        )
+        kendall_dict[const.VISITS_PER_TILE_RANKING], _ = stats.kendalltau(
+            most_freq_base["tile_name"], most_freq_alternative["tile_name"]
         )
 
         # tile_centroids = (
@@ -390,6 +404,10 @@ def compute_similarity_measures(
         )
         smape_dict[const.OD_FLOWS] = symmetric_mape(
             estimate=rel_alternative.to_numpy(), true=rel_base.to_numpy()
+        )
+        kendall_dict[const.OD_FLOWS_RANKING], _ = stats.kendalltau(
+            list(rel_alternative.sort_values(ascending=False).index.values)[:10],
+            list(rel_base.sort_values(ascending=False).index.values)[:10],
         )
 
     if const.TRAVEL_TIME not in analysis_exclusion:
@@ -565,7 +583,7 @@ def compute_similarity_measures(
             true=report_base[const.MOBILITY_ENTROPY].quartiles,
         )
 
-    return relative_error_dict, kld_dict, jsd_dict, emd_dict, smape_dict
+    return relative_error_dict, kld_dict, jsd_dict, emd_dict, smape_dict, kendall_dict
 
 
 def get_selected_measures(benchmarkreport: "BenchmarkReport") -> dict:
@@ -591,6 +609,8 @@ def get_selected_measures(benchmarkreport: "BenchmarkReport") -> dict:
                 similarity_measures[analysis] = benchmarkreport.emd[analysis]
             elif selected_measure == const.SMAPE:
                 similarity_measures[analysis] = benchmarkreport.smape[analysis]
+            elif selected_measure == const.KT:
+                similarity_measures[analysis] = benchmarkreport.kt[analysis]
         except KeyError:
             warnings.warn(
                 f"The selected measure {selected_measure} for {analysis} cannot be computed. Value for {analysis} in `self.similarity_measures` is set to `None`."

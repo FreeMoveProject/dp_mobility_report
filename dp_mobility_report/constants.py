@@ -18,7 +18,9 @@ TRIPS_PER_HOUR = "trips_per_hour"
 VISITS_PER_TILE = "visits_per_tile"
 VISITS_PER_TIME_TILE = "visits_per_time_tile"
 VISITS_PER_TILE_OUTLIERS = "visits_per_tile_outliers"
+VISITS_PER_TILE_RANKING = "visits_per_tile_ranking"
 OD_FLOWS = "od_flows"
+OD_FLOWS_RANKING = "od_flows_ranking"
 TRAVEL_TIME = "travel_time"
 TRAVEL_TIME_QUARTILES = "travel_time_quartiles"
 JUMP_LENGTH = "jump_length"
@@ -128,5 +130,22 @@ JSD = "jensen_shannon_divergence"
 KLD = "kullback_leibler_divergence"
 EMD = "earth_movers_distance"
 SMAPE = "symmetric_mean_absolute_percentage_error"
+KT = "kendalls_tau"
 
-format = {"jensen_shannon_divergence": "Jensen-Shannon divergence", "relative_error": "Relative error", "kullback_leibler_divergence": "Kullback-Leibler divergence", "earth_movers_distance": "Earth mover's distance","symmetric_mean_absolute_percentage_error": "Symmetric mean absolute percentage error"}
+format = {
+    "jensen_shannon_divergence": "Jensen-Shannon divergence",
+    "relative_error": "Relative error",
+    "kullback_leibler_divergence": "Kullback-Leibler divergence",
+    "earth_movers_distance": "Earth mover's distance",
+    "symmetric_mean_absolute_percentage_error": "Symmetric mean absolute percentage error",
+    "kendalls_tau": "Kendall's tau coefficient",
+}
+
+DARK_BLUE = "#283377"
+LIGHT_BLUE = "#5D6FFF"
+ORANGE = "#D9642C"
+LIGHT_ORANGE = "#FFAD6F"
+GREY = "#8A8A8A"
+LIGHT_GREY = "#f2f2f2"
+DARK_RED = "#8B0000"
+LIGHT_RED = "#FFCCCB"

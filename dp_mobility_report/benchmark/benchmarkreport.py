@@ -1,8 +1,9 @@
+import os
+import warnings
 from pathlib import Path
+from shutil import rmtree
 from typing import List, Optional, Union
 
-import warnings
-import os
 import numpy as np
 from geopandas import GeoDataFrame
 from pandas import DataFrame
@@ -13,9 +14,11 @@ from dp_mobility_report.benchmark.similarity_measures import (
     get_selected_measures,
 )
 from dp_mobility_report.dpmreport import DpMobilityReport
-
-from dp_mobility_report.report.html.templates import render_benchmark_html, create_html_assets, create_maps_folder
-from shutil import rmtree
+from dp_mobility_report.report.html.templates import (
+    create_html_assets,
+    create_maps_folder,
+    render_benchmark_html,
+)
 
 
 class BenchmarkReport:
@@ -62,6 +65,7 @@ class BenchmarkReport:
     _kld: dict
     _emd: dict
     _smape: dict
+    _kt: dict
     _measure_selection: dict
     _similarity_measures: dict = {}
 
@@ -181,6 +185,7 @@ class BenchmarkReport:
             self._jsd,
             self._emd,
             self._smape,
+            self._kt,
         ) = compute_similarity_measures(
             self.analysis_exclusion,
             self.report_alternative.report,
@@ -236,6 +241,10 @@ class BenchmarkReport:
         """The symmetric mean absolute percentage error between base and alternative of all selected analyses, where applicable."""
         return self._smape
 
+    @property
+    def kt(self) -> dict:
+        """The Kendall's tau coefficient of base and alternative of all selected analyses, where applicable."""
+        return self._kt
 
     def to_file(
         self,
@@ -274,8 +283,9 @@ class BenchmarkReport:
 
         create_html_assets(output_dir)
 
-
-        data, temp_map_folder = render_benchmark_html(self, filename, top_n_flows)
+        data, temp_map_folder = render_benchmark_html(
+            self, filename, top_n_flows, disable_progress_bar
+        )
 
         create_maps_folder(temp_map_folder, output_dir)
 

@@ -51,11 +51,7 @@ def hist_section(
     # hist_min and hist_max determine how the output histogram looks like
 
     # max value of histogram: either given as input or determined by dp max
-    hist_max = (
-        hist_max
-        if ((hist_max is not None))
-        else quartiles["max"]
-    )
+    hist_max = hist_max if (hist_max is not None) else quartiles["max"]
 
     # min value of histogram: either given as input or determined by dp min
     hist_min = hist_min if (hist_min is not None) else quartiles["min"]
@@ -66,8 +62,10 @@ def hist_section(
         and (bin_type is int)
         and (hist_max - hist_min < 10)
     ):
-        bins = np.array(range(int(quartiles["min"]), int(quartiles["max"])+1))
-        counts = np.bincount(series, minlength=int(quartiles["max"])+1)[int(quartiles["min"]) : ]
+        bins = np.array(range(int(quartiles["min"]), int(quartiles["max"]) + 1))
+        counts = np.bincount(series, minlength=int(quartiles["max"]) + 1)[
+            int(quartiles["min"]) :
+        ]
 
     # else use ranges for bins to create histogram
     else:
@@ -76,7 +74,7 @@ def hist_section(
             bin_range = 0.1
 
         # if bin_range is provided, snap min and max value accordingly(to create "clean" bins).
-        if (bin_range is not None):
+        if bin_range is not None:
             # "snap" min_value: e.g., if bin range is 5 and dp min value is 12, min_value snaps to 10
             hist_min = hist_min - (hist_min % bin_range)
 

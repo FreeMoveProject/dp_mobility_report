@@ -17,12 +17,6 @@ import dp_mobility_report.constants as const
 from dp_mobility_report.report.html.html_utils import get_centroids
 
 sns.set_theme()
-dark_blue = "#283377"
-light_blue = "#5D6FFF"
-orange = "#D9642C"
-light_orange = "#FFAD6F"
-grey = "#8A8A8A"
-light_grey = "##f2f2f2"
 
 
 def format(value: Union[float, int], type: Type, ndigits: int = 2) -> Union[float, int]:
@@ -47,7 +41,7 @@ def histogram(
     bins = hist[1]
     counts = hist[0]
     counts_alternative = hist_alternative[0] if hist_alternative else None
-    
+
     # single integers (instead of bin ranges) as x axis labels
     if len(bins) == len(counts):
         labels = np.array([format(bin, x_axis_type) for bin in bins[:-1]])
@@ -107,10 +101,23 @@ def barchart(
     rotate_label: bool = False,
 ) -> mpl.figure.Figure:
     fig, ax = plt.subplots()
-    bar_base = ax.bar(x, y, yerr=margin_of_error, align="center", alpha=0.5, capsize=10, label='base')
+    bar_base = ax.bar(
+        x, y, yerr=margin_of_error, align="center", alpha=0.5, capsize=10, label="base"
+    )
     if y_alternative is not None:
-            bar_alt = ax.bar(x, y_alternative, yerr=margin_of_error_alternative, width=0.3, align="center", alpha=0.5, capsize=10, color=light_orange, ecolor=light_orange, label='alternative')
-            ax.legend(handles=[bar_base, bar_alt])
+        bar_alt = ax.bar(
+            x,
+            y_alternative,
+            yerr=margin_of_error_alternative,
+            width=0.3,
+            align="center",
+            alpha=0.5,
+            capsize=10,
+            color=const.LIGHT_ORANGE,
+            ecolor=const.LIGHT_ORANGE,
+            label="alternative",
+        )
+        ax.legend(handles=[bar_base, bar_alt])
     ax.set_ylabel(y_axis_label)
     ax.set_xlabel(x_axis_label)
     plt.xticks(x)
@@ -143,18 +150,19 @@ def linechart(
         )
     ax.plot(data[x], data[y])
     if x_alternative is not None:
-        ax.plot(data[x_alternative], data[y], color=light_orange)
-        ax.legend({'base','alt'})
+        ax.plot(data[x_alternative], data[y], color=const.LIGHT_ORANGE)
+        ax.legend({"base", "alt"})
     ax.set_ylabel(y_axis_label)
     ax.set_xlabel(x_axis_label)
     ax.set_ylim(bottom=0)
     if add_diagonal:
-        ax.plot([0, data[x].max()], [0, data[y].max()], grey)
+        ax.plot([0, data[x].max()], [0, data[y].max()], const.GREY)
 
     if rotate_label:
         plt.xticks(rotation=90)
 
     return fig
+
 
 def linechart_new(
     data: DataFrame,
@@ -174,31 +182,37 @@ def linechart_new(
             data[x],
             (data[y] - margin_of_error),
             (data[y] + margin_of_error),
-            color=light_blue,
+            color=const.LIGHT_BLUE,
             alpha=0.1,
         )
-    line_base, = ax.plot(data[x], data[y], color=light_blue, label='base')
+    (line_base,) = ax.plot(data[x], data[y], color=const.LIGHT_BLUE, label="base")
     if data_alternative is not None:
-        line_alt, = ax.plot(data_alternative[x], data_alternative[y], color=light_orange, label='alternative')
+        (line_alt,) = ax.plot(
+            data_alternative[x],
+            data_alternative[y],
+            color=const.LIGHT_ORANGE,
+            label="alternative",
+        )
         ax.legend(handles=[line_base, line_alt])
         if margin_of_error_alternative is not None:
             ax.fill_between(
                 data_alternative[x],
                 (data_alternative[y] - margin_of_error_alternative),
                 (data_alternative[y] + margin_of_error_alternative),
-                color=light_orange,
+                color=const.LIGHT_ORANGE,
                 alpha=0.1,
             )
     ax.set_ylabel(y_axis_label)
     ax.set_xlabel(x_axis_label)
     ax.set_ylim(bottom=0)
     if add_diagonal:
-        ax.plot([0, data[x].max()], [0, data[y].max()], grey)
+        ax.plot([0, data[x].max()], [0, data[y].max()], const.GREY)
 
     if rotate_label:
         plt.xticks(rotation=90)
 
     return fig
+
 
 def multi_linechart(
     data: DataFrame,
@@ -213,7 +227,7 @@ def multi_linechart(
 ) -> mpl.figure.Figure:
     fig = plt.figure()
     plot = fig.add_subplot(111)
-    palette = [dark_blue, light_blue, orange, light_orange]
+    palette = [const.DARK_BLUE, const.LIGHT_BLUE, const.ORANGE, const.LIGHT_ORANGE]
 
     sns.lineplot(
         data=data,
@@ -249,6 +263,7 @@ def choropleth_map(
     min_scale: Optional[Union[int, float]] = None,
     aliases: list = None,
     diverging_cmap: bool = False,
+    layer_name: str = "Visits",
 ) -> folium.Map:
     poly_json = counts_per_tile_gdf.to_json()
 
@@ -259,7 +274,7 @@ def choropleth_map(
     )
 
     # color
-    if diverging_cmap: #TODO können wir das hier einfach ändern??
+    if diverging_cmap:  # TODO können wir das hier einfach ändern??
         vmin = -1
         vmax = 1
         cmap = mpl.cm.RdBu_r
@@ -282,7 +297,7 @@ def choropleth_map(
     def _style_function(x: dict) -> dict:
         return {
             "fillColor": _get_color(x, fill_color_name),
-            "color": grey,
+            "color": const.GREY,
             "weight": 1.5,
             "fillOpacity": 0.6,
         }
@@ -293,6 +308,7 @@ def choropleth_map(
         fields = ["tile_id", fill_color_name]
     folium.GeoJson(
         poly_json,
+        name=layer_name,
         style_function=_style_function,
         popup=folium.GeoJsonPopup(fields=fields, aliases=aliases),
     ).add_to(m)
@@ -334,9 +350,9 @@ def multi_choropleth_map(
     vmax = vmax if not math.isnan(vmax) else 2
 
     # color
-    if diverging_cmap: #TODO können wir das hier einfach ändern?
+    if diverging_cmap:  # TODO können wir das hier einfach ändern?
         vmin = -1
-        vmax = 1 #if vmax <= 1 else vmax
+        vmax = 1  # if vmax <= 1 else vmax
         cmap = "RdBu_r"
         norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
     else:
@@ -363,7 +379,7 @@ def multi_choropleth_map(
                 ax=ax,
                 edgecolor="#FFFFFF",
                 missing_kwds={
-                    "color": "lightgrey",
+                    "color": const.LIGHT_GREY,
                 },
             )
             ax.set_title(column_name)
@@ -398,7 +414,7 @@ def _basemap(center_x: float, center_y: float, zoom_start: int = 10) -> folium.M
 def ranking(
     x: np.ndarray,
     x_axis_label: str,
-    x_alternative: Optional[np.ndarray]=None,
+    x_alternative: Optional[np.ndarray] = None,
     y_labels: list = None,
     margin_of_error: Optional[float] = None,
     margin_of_error_alternative: Optional[float] = None,
@@ -406,7 +422,7 @@ def ranking(
     y = list(range(1, len(x) + 1))[::-1]
     y_labels = y if y_labels is None else y_labels
     fig, ax = plt.subplots()
-    bar_base=ax.errorbar(
+    bar_base = ax.errorbar(
         x,
         y,
         xerr=margin_of_error,
@@ -414,19 +430,19 @@ def ranking(
         ecolor="lightblue",
         elinewidth=5,
         capsize=10,
-        label='base',
+        label="base",
     )
     if x_alternative is not None:
         bar_alt = ax.errorbar(
-        x_alternative,
-        y,
-        xerr=margin_of_error_alternative,
-        fmt="o",
-        ecolor=light_orange,
-        elinewidth=5,
-        capsize=10,
-        label='alternative',
-    )
+            x_alternative,
+            y,
+            xerr=margin_of_error_alternative,
+            fmt="o",
+            ecolor=const.LIGHT_ORANGE,
+            elinewidth=5,
+            capsize=10,
+            label="alternative",
+        )
         ax.legend(handles=[bar_base, bar_alt])
     ax.set_yticks(y)
     ax.set_yticklabels(y_labels)
@@ -436,7 +452,12 @@ def ranking(
 
 
 def flows(
-    basemap: folium.Map, data: pd.DataFrame, tessellation: gpd.GeoDataFrame
+    basemap: folium.Map,
+    data: pd.DataFrame,
+    tessellation: gpd.GeoDataFrame,
+    flow_color: str = const.DARK_BLUE,
+    marker_color: str = const.LIGHT_BLUE,
+    layer_name: str = "flows",
 ) -> folium.Map:
     centroids = get_centroids(tessellation)
     mean_flows = data["flow"].mean()
@@ -448,18 +469,20 @@ def flows(
             "opacity": 0.65,
         }
 
+    feature_group = folium.FeatureGroup(name=layer_name)
+
     origin_groups = data.groupby(by=const.ORIGIN)
     for origin, OD in origin_groups:
         lonO, latO = centroids[origin]
+
         for destination, flow in OD[[const.DESTINATION, const.FLOW]].values:
             lonD, latD = centroids[destination]
             gjc = LineString([(lonO, latO), (lonD, latD)])
 
             fgeojson = folium.GeoJson(
                 gjc,
-                name="flows",
                 style_function=_flow_style_function(
-                    weight=flow / mean_flows, color=dark_blue
+                    weight=flow / mean_flows, color=flow_color
                 ),
             )
 
@@ -467,17 +490,16 @@ def flows(
                 f"flow from {origin} to {destination}: {int(flow)}", max_width=300
             )
             fgeojson = fgeojson.add_child(popup)
-
-            fgeojson.add_to(basemap)
+            feature_group.add_child(fgeojson)
 
         # Plot marker
         fmarker = folium.CircleMarker(
             [latO, lonO],
             radius=5,
             weight=2,
-            color=light_blue,
+            color=marker_color,
             fill=True,
-            fill_color=light_blue,
+            fill_color=marker_color,
         )
         T_D = [
             [destination, int(flow)]
@@ -492,5 +514,9 @@ def flows(
         name = f"origin: {origin}"
         popup = folium.Popup(name + "<br/>" + trips_info, max_width=300)
         fmarker = fmarker.add_child(popup)
-        fmarker.add_to(basemap)
+        # fmarker.add_to(basemap)
+        feature_group.add_child(fmarker)
+
+    feature_group.add_to(basemap)
+
     return basemap

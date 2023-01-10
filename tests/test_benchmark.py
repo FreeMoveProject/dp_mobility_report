@@ -41,13 +41,15 @@ def test_tessellation():
 @pytest.fixture
 def benchmark_report():
     test_data = pd.read_csv("tests/test_files/test_data.csv")
-    test_data_alternative = pd.read_csv("tests/test_files/test_data_new_dates.csv", nrows=50)
+    test_data_alternative = pd.read_csv(
+        "tests/test_files/test_data_new_dates.csv", nrows=50
+    )
     test_tessellation = gpd.read_file("tests/test_files/test_tessellation.geojson")
     return BenchmarkReport(
         df_base=test_data,
         tessellation=test_tessellation,
         df_alternative=test_data_alternative,
-        privacy_budget_alternative=10
+        privacy_budget_alternative=10,
     )
 
 
@@ -115,6 +117,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
         jsd_dict,
         emd_dict,
         smape_dict,
+        kendall_dict,
     ) = compute_similarity_measures(
         analysis_exclusion, alternative_dpmreport, base_dpmreport, test_tessellation
     )
@@ -136,6 +139,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
         jsd_dict,
         emd_dict,
         smape_dict,
+        kendall_dict,
     ) = compute_similarity_measures(
         analysis_exclusion, alternative_dpmreport, base_dpmreport, test_tessellation
     )
@@ -145,6 +149,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
     assert isinstance(jsd_dict, dict)
     assert isinstance(emd_dict, dict)
     assert isinstance(smape_dict, dict)
+    assert isinstance(kendall_dict, dict)
 
 
 def test_combine_analysis_exclusion():
@@ -155,7 +160,6 @@ def test_combine_analysis_exclusion():
         excluded_analyses_alternative, excluded_analyses_base
     )
     assert combined_exclusion == [const.VISITS_PER_TILE, const.RADIUS_OF_GYRATION]
-
 
 
 def test_get_selected_measures(benchmark_report):
@@ -221,11 +225,13 @@ def test_measure_selection():
             const.USER_TILE_COUNT,
             const.MOBILITY_ENTROPY,
             const.VISITS_PER_TIME_TILE,
+            const.VISITS_PER_TILE_RANKING,
+            const.OD_FLOWS_RANKING,
         ],
     ) == {const.OD_FLOWS: const.SMAPE}
 
 
 def test_benchmark_to_file(benchmark_report):
-    
-    benchmark_report.to_file('test_benchmark.html')
-    #test linechart
+
+    benchmark_report.to_file("test_benchmark.html")
+    # test linechart

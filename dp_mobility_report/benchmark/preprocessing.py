@@ -4,11 +4,12 @@ from datetime import timedelta
 from typing import List, Tuple
 
 import numpy as np
+import pandas as pd
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.benchmark.b_utils import default_measure_selection
 from dp_mobility_report.model.section import DfSection
-import pandas as pd
+
 
 # only select analyses that are present in both reports
 def combine_analysis_exclusion(
@@ -20,13 +21,19 @@ def combine_analysis_exclusion(
     analysis_exclusion.sort(key=lambda i: const.ELEMENTS.index(i))
     return analysis_exclusion
 
+
 def _resample_to_prec(df, current_precision, target_precision):
     if current_precision == target_precision:
         return df
-    precision_names = {const.PREC_MONTH: "M", const.PREC_WEEK: "W-MON", const.PREC_DATE: "1D"}
-    df[const.DATETIME] = pd.to_datetime(df[const.DATETIME] )
+    precision_names = {
+        const.PREC_MONTH: "M",
+        const.PREC_WEEK: "W-MON",
+        const.PREC_DATE: "1D",
+    }
+    df[const.DATETIME] = pd.to_datetime(df[const.DATETIME])
     return (
-        df.set_index(const.DATETIME).resample(precision_names[target_precision], label="left")
+        df.set_index(const.DATETIME)
+        .resample(precision_names[target_precision], label="left")
         .sum()
         .reset_index()
     )
@@ -34,22 +41,59 @@ def _resample_to_prec(df, current_precision, target_precision):
 
 def unify_trips_over_time(base: DfSection, alternative: DfSection):
     if base.datetime_precision != alternative.datetime_precision:
-        if const.PREC_MONTH in [base.datetime_precision, alternative.datetime_precision]:
-            base.data = _resample_to_prec(base.data, base.datetime_precision, const.PREC_MONTH)
+        if const.PREC_MONTH in [
+            base.datetime_precision,
+            alternative.datetime_precision,
+        ]:
+            base.data = _resample_to_prec(
+                base.data, base.datetime_precision, const.PREC_MONTH
+            )
             base.datetime_precision = const.PREC_MONTH
-            alternative.data = _resample_to_prec(alternative.data, alternative.datetime_precision, const.PREC_MONTH)
+            alternative.data = _resample_to_prec(
+                alternative.data, alternative.datetime_precision, const.PREC_MONTH
+            )
             alternative.datetime_precision = const.PREC_MONTH
-        elif const.PREC_WEEK in [base.datetime_precision, alternative.datetime_precision]:
-            base.data = _resample_to_prec(base.data, base.datetime_precision, const.PREC_WEEK)
+        elif const.PREC_WEEK in [
+            base.datetime_precision,
+            alternative.datetime_precision,
+        ]:
+            base.data = _resample_to_prec(
+                base.data, base.datetime_precision, const.PREC_WEEK
+            )
             base.datetime_precision = const.PREC_WEEK
-            alternative.data = _resample_to_prec(alternative.data, alternative.datetime_precision, const.PREC_WEEK)
+            alternative.data = _resample_to_prec(
+                alternative.data, alternative.datetime_precision, const.PREC_WEEK
+            )
             alternative.datetime_precision = const.PREC_WEEK
 
-    missing_dates_base =  list(set(alternative.data[const.DATETIME]) - set(base.data[const.DATETIME]))
-    missing_dates_alternative = list(set(base.data[const.DATETIME]) - set(alternative.data[const.DATETIME]))
-    base.data = pd.concat([base.data, pd.DataFrame(data={const.DATETIME:missing_dates_base, 'trip_count': 0, 'trips': 0})]).sort_values(const.DATETIME)
-    alternative.data = pd.concat([ alternative.data, pd.DataFrame(data={const.DATETIME:missing_dates_alternative, 'trip_count': 0, 'trips': 0})]).sort_values(const.DATETIME)
-    
+    missing_dates_base = list(
+        set(alternative.data[const.DATETIME]) - set(base.data[const.DATETIME])
+    )
+    missing_dates_alternative = list(
+        set(base.data[const.DATETIME]) - set(alternative.data[const.DATETIME])
+    )
+    base.data = pd.concat(
+        [
+            base.data,
+            pd.DataFrame(
+                data={const.DATETIME: missing_dates_base, "trip_count": 0, "trips": 0}
+            ),
+        ]
+    ).sort_values(const.DATETIME)
+    alternative.data = pd.concat(
+        [
+            alternative.data,
+            pd.DataFrame(
+                data={
+                    const.DATETIME: missing_dates_alternative,
+                    "trip_count": 0,
+                    "trips": 0,
+                }
+            ),
+        ]
+    ).sort_values(const.DATETIME)
+
+
 # check if histograms of both reports have similar bins
 # if bins are missing they can only be at the lower end of the bins as bin_range and max_bins are similar
 def unify_histogram_bins(
@@ -62,7 +106,7 @@ def unify_histogram_bins(
         const.USER_TIME_DELTA,
         const.USER_TILE_COUNT,
         const.TRIPS_OVER_TIME,
-        #const.TRIPS_PER_USER, TODO: how to handle?
+        # const.TRIPS_PER_USER, TODO: how to handle?
     ]
     # const.MOBILITY_ENTROPY should already be similar: 0-1 with 0.1 bin range
 
@@ -70,7 +114,7 @@ def unify_histogram_bins(
         if hist not in analysis_exclusion:
             if hist == const.TRIPS_OVER_TIME:
                 unify_trips_over_time(report_base[hist], report_alternative[hist])
-                #pass
+                # pass
             else:
                 hist_base_values, hist_base_bins = report_base[hist].data
                 hist_alternative_values, hist_alternative_bins = report_alternative[
@@ -85,7 +129,9 @@ def unify_histogram_bins(
                     max_alternative = max_alternative.total_seconds() / 3600
 
                 combined_max = max([max_base, max_alternative])
-                if math.isinf(hist_base_bins[-1]) | math.isinf(hist_alternative_bins[-1]):
+                if math.isinf(hist_base_bins[-1]) | math.isinf(
+                    hist_alternative_bins[-1]
+                ):
                     hist_base_bins[-1] = combined_max
                     hist_alternative_bins[-1] = combined_max
 
@@ -99,7 +145,9 @@ def unify_histogram_bins(
                 missing_in_alternative = [
                     i for i in bins_union if i not in hist_alternative_bins
                 ]
-                added_value_indizes = np.searchsorted(bins_union, missing_in_alternative)
+                added_value_indizes = np.searchsorted(
+                    bins_union, missing_in_alternative
+                )
                 for i in added_value_indizes:
                     hist_alternative_values = np.insert(hist_alternative_values, i, 0)
 

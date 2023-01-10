@@ -37,23 +37,97 @@ def render_html(
     args: dict = {}
 
     args["output_filename"] = output_filename
-    args["config_segment"] = config_templates.render_config(dpmreport)
 
-    if not set(const.OVERVIEW_ELEMENTS).issubset(dpmreport.analysis_exclusion):
-        args["overview_segment"] = overview_templates.render_overview(dpmreport)
+    with tqdm(  # progress bar
+        total=4, desc="Create HTML Output", disable=disable_progress_bar
+    ) as pbar:
 
-    if not set(const.PLACE_ELEMENTS).issubset(dpmreport.analysis_exclusion):
-        args["place_analysis_segment"] = place_analysis_templates.render_place_analysis(
-            dpmreport, dpmreport.tessellation, temp_map_folder, output_filename
+        args["config_segment"] = config_templates.render_config(dpmreport)
+
+        if not set(const.OVERVIEW_ELEMENTS).issubset(dpmreport.analysis_exclusion):
+            args["overview_segment"] = overview_templates.render_overview(dpmreport)
+        pbar.update()
+
+        if not set(const.PLACE_ELEMENTS).issubset(dpmreport.analysis_exclusion):
+            args[
+                "place_analysis_segment"
+            ] = place_analysis_templates.render_place_analysis(
+                dpmreport, temp_map_folder, output_filename
+            )
+        pbar.update()
+
+        if not set(const.OD_ELEMENTS).issubset(dpmreport.analysis_exclusion):
+            args["od_analysis_segment"] = od_analysis_templates.render_od_analysis(
+                dpmreport, top_n_flows, temp_map_folder, output_filename
+            )
+        pbar.update()
+
+        if not set(const.USER_ELEMENTS).issubset(dpmreport.analysis_exclusion):
+            args[
+                "user_analysis_segment"
+            ] = user_analysis_templates.render_user_analysis(dpmreport)
+        pbar.update()
+
+    return (
+        template_structure.render(args),
+        temp_map_folder,
+    )
+
+
+def render_benchmark_html(
+    benchmarkreport: "BenchmarkReport",
+    output_filename: str,
+    top_n_flows: int = 100,
+    disable_progress_bar: bool = False,
+) -> Tuple[str, Path]:
+    template_structure = html_utils.get_template("structure.html")
+    temp_map_folder = Path(os.path.join(tempfile.gettempdir(), "maps"))
+
+    # remove any old temp files in case there exist any
+    shutil.rmtree(temp_map_folder, ignore_errors=True)
+    os.mkdir(temp_map_folder)
+
+    args: dict = {}
+
+    args["output_filename"] = output_filename
+
+    with tqdm(  # progress bar
+        total=4, desc="Create HTML Output", disable=disable_progress_bar
+    ) as pbar:
+
+        args["config_segment"] = config_templates.render_benchmark_config(
+            benchmarkreport
         )
-    if not set(const.OD_ELEMENTS).issubset(dpmreport.analysis_exclusion):
-        args["od_analysis_segment"] = od_analysis_templates.render_od_analysis(
-            dpmreport, top_n_flows, temp_map_folder, output_filename
-        )
-    if not set(const.USER_ELEMENTS).issubset(dpmreport.analysis_exclusion):
-        args["user_analysis_segment"] = user_analysis_templates.render_user_analysis(
-            dpmreport
-        )
+
+        if not set(const.OVERVIEW_ELEMENTS).issubset(
+            benchmarkreport.analysis_exclusion
+        ):
+            args["overview_segment"] = overview_templates.render_benchmark_overview(
+                benchmarkreport
+            )
+        pbar.update()
+
+        if not set(const.PLACE_ELEMENTS).issubset(benchmarkreport.analysis_exclusion):
+            args[
+                "place_analysis_segment"
+            ] = place_analysis_templates.render_benchmark_place_analysis(
+                benchmarkreport, temp_map_folder, output_filename
+            )
+        pbar.update()
+
+        if not set(const.OD_ELEMENTS).issubset(benchmarkreport.analysis_exclusion):
+            args[
+                "od_analysis_segment"
+            ] = od_analysis_templates.render_benchmark_od_analysis(
+                benchmarkreport, top_n_flows, temp_map_folder, output_filename
+            )
+        pbar.update()
+
+        if not set(const.USER_ELEMENTS).issubset(benchmarkreport.analysis_exclusion):
+            args[
+                "user_analysis_segment"
+            ] = user_analysis_templates.render_benchmark_user_analysis(benchmarkreport)
+        pbar.update()
 
     return (
         template_structure.render(args),

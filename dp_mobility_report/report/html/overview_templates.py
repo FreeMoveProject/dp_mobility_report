@@ -8,19 +8,21 @@ from dp_mobility_report.report.html.html_utils import (
     fmt,
     fmt_moe,
     get_template,
+    render_benchmark_summary,
     render_eps,
     render_moe_info,
     render_summary,
-    render_benchmark_summary
 )
 
 if TYPE_CHECKING:
     from dp_mobility_report import DpMobilityReport
 
-from dp_mobility_report.visualization import plot, v_utils
 from typing import TYPE_CHECKING, Optional
-import pandas as pd
+
 import numpy as np
+import pandas as pd
+
+from dp_mobility_report.visualization import plot, v_utils
 
 if TYPE_CHECKING:
     from dp_mobility_report import BenchmarkReport
@@ -50,7 +52,7 @@ def render_overview(dpmreport: "DpMobilityReport") -> str:
         args["trips_over_time_info"] = render_trips_over_time_info(
             report[const.TRIPS_OVER_TIME].datetime_precision
         )
-        trips_over_time_linechart = render_trips_over_time(
+        args["trips_over_time_linechart"] = render_trips_over_time(
             report[const.TRIPS_OVER_TIME]
         )
         args["trips_over_time_moe_info"] = render_moe_info(
@@ -79,98 +81,116 @@ def render_overview(dpmreport: "DpMobilityReport") -> str:
         args["trips_per_hour_moe"] = fmt_moe(
             report[const.TRIPS_PER_HOUR].margin_of_error_laplace
         )
-        trips_per_hour_linechart = render_trips_per_hour(report[const.TRIPS_PER_HOUR])
+        args["trips_per_hour_linechart"] = render_trips_per_hour(
+            report[const.TRIPS_PER_HOUR].data, margin_of_error=None
+        )
 
     template_structure = get_template("overview_segment.html")
     return template_structure.render(args)
 
 
-def render_benchmark_overview(report_base: dict, report_alternative:dict, analysis_exclusion, benchmark: "BenchmarkReport") -> str:
-    #agrs={}
-    dataset_stats_table = ""
-    missing_values_table = ""
-    trips_over_time_eps = None
-    trips_over_time_moe = None
-    trips_over_time_info = ""
-    trips_over_time_linechart = ""
-    trips_over_time_moe_info = ""
-    trips_over_time_summary_table = ""
-    trips_over_time_measure = ""
-    trips_per_weekday_eps = None
-    trips_per_weekday_moe = None
-    trips_per_weekday_barchart = ""
-    trips_per_weekday_measure = ""
-    trips_per_hour_eps = None
-    trips_per_hour_moe = None
-    trips_per_hour_linechart = ""
-    trips_per_hour_measure = ""
+def render_benchmark_overview(benchmark: "BenchmarkReport") -> str:
 
-    if const.DS_STATISTICS not in analysis_exclusion:
-        dataset_stats_table = render_benchmark_dataset_statistics(report_base.report[const.DS_STATISTICS], report_alternative.report[const.DS_STATISTICS], benchmark.re)
+    args: dict = {}
+    report_base = benchmark.report_base.report
+    report_alternative = benchmark.report_alternative.report
 
-    if const.MISSING_VALUES not in analysis_exclusion:
-        missing_values_table = render_benchmark_missing_values(report_base.report[const.MISSING_VALUES], report_alternative.report[const.MISSING_VALUES], benchmark.re)
-
-    if const.TRIPS_OVER_TIME not in analysis_exclusion:
-        trips_over_time_eps = (render_eps(report_base.report[const.TRIPS_OVER_TIME].privacy_budget),render_eps(report_alternative.report[const.TRIPS_OVER_TIME].privacy_budget))
-        trips_over_time_moe = (fmt_moe(report_base.report[const.TRIPS_OVER_TIME].margin_of_error_laplace),
-                                fmt_moe(report_alternative.report[const.TRIPS_OVER_TIME].margin_of_error_laplace))
-        trips_over_time_info = render_trips_over_time_info(report_base.report[const.TRIPS_OVER_TIME].datetime_precision)
-        trips_over_time_linechart = render_benchmark_trips_over_time(
-            report_base.report[const.TRIPS_OVER_TIME], report_alternative.report[const.TRIPS_OVER_TIME]
+    if const.DS_STATISTICS not in benchmark.analysis_exclusion:
+        args["dataset_stats_table"] = render_benchmark_dataset_statistics(
+            report_base[const.DS_STATISTICS],
+            report_alternative[const.DS_STATISTICS],
+            benchmark.re,
         )
-        trips_over_time_moe_info = render_moe_info(
-            report_base.report[const.TRIPS_OVER_TIME].margin_of_error_expmech
+
+    if const.MISSING_VALUES not in benchmark.analysis_exclusion:
+        args["missing_values_table"] = render_benchmark_missing_values(
+            report_base[const.MISSING_VALUES],
+            report_alternative[const.MISSING_VALUES],
+            benchmark.re,
         )
-        trips_over_time_summary_table = render_benchmark_summary(
-            report_base.report[const.TRIPS_OVER_TIME].quartiles, report_alternative.report[const.TRIPS_OVER_TIME].quartiles
+
+    if const.TRIPS_OVER_TIME not in benchmark.analysis_exclusion:
+        args["trips_over_time_eps"] = (
+            render_eps(report_base[const.TRIPS_OVER_TIME].privacy_budget),
+            render_eps(report_alternative[const.TRIPS_OVER_TIME].privacy_budget),
         )
-        trips_over_time_measure = (const.format[benchmark.measure_selection[const.TRIPS_OVER_TIME]], fmt(benchmark.similarity_measures[const.TRIPS_OVER_TIME]))
+        args["trips_over_time_moe"] = (
+            fmt_moe(report_base[const.TRIPS_OVER_TIME].margin_of_error_laplace),
+            fmt_moe(report_alternative[const.TRIPS_OVER_TIME].margin_of_error_laplace),
+        )
+        args["trips_over_time_info"] = render_trips_over_time_info(
+            report_base[const.TRIPS_OVER_TIME].datetime_precision
+        )
+        args["trips_over_time_linechart"] = render_benchmark_trips_over_time(
+            report_base[const.TRIPS_OVER_TIME],
+            report_alternative[const.TRIPS_OVER_TIME],
+        )
+        args["trips_over_time_moe_info"] = render_moe_info(
+            report_base[const.TRIPS_OVER_TIME].margin_of_error_expmech
+        )
+        args["trips_over_time_summary_table"] = render_benchmark_summary(
+            report_base[const.TRIPS_OVER_TIME].quartiles,
+            report_alternative[const.TRIPS_OVER_TIME].quartiles,
+        )
+        args["trips_over_time_measure"] = (
+            const.format[benchmark.measure_selection[const.TRIPS_OVER_TIME]],
+            fmt(benchmark.similarity_measures[const.TRIPS_OVER_TIME]),
+        )
 
-    if const.TRIPS_PER_WEEKDAY not in analysis_exclusion:
-        trips_per_weekday_eps = (render_eps(report_base.report[const.TRIPS_PER_WEEKDAY].privacy_budget), 
-                                    render_eps(report_alternative.report[const.TRIPS_PER_WEEKDAY].privacy_budget))
-        trips_per_weekday_moe = (fmt_moe(report_base.report[const.TRIPS_PER_WEEKDAY].margin_of_error_laplace), 
-                                    fmt_moe(report_alternative.report[const.TRIPS_PER_WEEKDAY].margin_of_error_laplace))
+    if const.TRIPS_PER_WEEKDAY not in benchmark.analysis_exclusion:
+        args["trips_per_weekday_eps"] = (
+            render_eps(report_base[const.TRIPS_PER_WEEKDAY].privacy_budget),
+            render_eps(report_alternative[const.TRIPS_PER_WEEKDAY].privacy_budget),
+        )
+        args["trips_per_weekday_moe"] = (
+            fmt_moe(report_base[const.TRIPS_PER_WEEKDAY].margin_of_error_laplace),
+            fmt_moe(
+                report_alternative[const.TRIPS_PER_WEEKDAY].margin_of_error_laplace
+            ),
+        )
 
-        trips_per_weekday_barchart = render_benchmark_trips_per_weekday(
-            report_base.report[const.TRIPS_PER_WEEKDAY], report_alternative.report[const.TRIPS_PER_WEEKDAY]
-            )
-        trips_per_weekday_measure = (const.format[benchmark.measure_selection[const.TRIPS_PER_WEEKDAY]], fmt(benchmark.similarity_measures[const.TRIPS_PER_WEEKDAY]))
+        args["trips_per_weekday_barchart"] = render_benchmark_trips_per_weekday(
+            report_base[const.TRIPS_PER_WEEKDAY],
+            report_alternative[const.TRIPS_PER_WEEKDAY],
+        )
+        args["trips_per_weekday_measure"] = (
+            const.format[benchmark.measure_selection[const.TRIPS_PER_WEEKDAY]],
+            fmt(benchmark.similarity_measures[const.TRIPS_PER_WEEKDAY]),
+        )
 
-    if const.TRIPS_PER_HOUR not in analysis_exclusion:
-        trips_per_hour_eps = (render_eps(report_base.report[const.TRIPS_PER_HOUR].privacy_budget), 
-                                render_eps(report_alternative.report[const.TRIPS_PER_HOUR].privacy_budget))
-        trips_per_hour_moe = (fmt_moe(report_base.report[const.TRIPS_PER_HOUR].margin_of_error_laplace), 
-                                fmt_moe(report_alternative.report[const.TRIPS_PER_HOUR].margin_of_error_laplace))
-        
-        dataset = np.append(np.repeat("base", len(report_base.report[const.TRIPS_PER_HOUR].data)),
-                            np.repeat("alternative", len(report_alternative.report[const.TRIPS_PER_HOUR].data)))
-        combined_trips_per_hour = pd.concat([report_base.report[const.TRIPS_PER_HOUR].data, report_alternative.report[const.TRIPS_PER_HOUR].data])
-        combined_trips_per_hour['dataset'] = dataset
-        trips_per_hour_linechart = render_trips_per_hour(combined_trips_per_hour, margin_of_error=None, style="dataset")
-        trips_per_hour_measure = (const.format[benchmark.measure_selection[const.TRIPS_PER_HOUR]], fmt(benchmark.similarity_measures[const.TRIPS_PER_HOUR]))
+    if const.TRIPS_PER_HOUR not in benchmark.analysis_exclusion:
+        args["trips_per_hour_eps"] = (
+            render_eps(report_base[const.TRIPS_PER_HOUR].privacy_budget),
+            render_eps(report_alternative[const.TRIPS_PER_HOUR].privacy_budget),
+        )
+        args["trips_per_hour_moe"] = (
+            fmt_moe(report_base[const.TRIPS_PER_HOUR].margin_of_error_laplace),
+            fmt_moe(report_alternative[const.TRIPS_PER_HOUR].margin_of_error_laplace),
+        )
+
+        dataset = np.append(
+            np.repeat("base", len(report_base[const.TRIPS_PER_HOUR].data)),
+            np.repeat(
+                "alternative", len(report_alternative[const.TRIPS_PER_HOUR].data)
+            ),
+        )
+        combined_trips_per_hour = pd.concat(
+            [
+                report_base[const.TRIPS_PER_HOUR].data,
+                report_alternative[const.TRIPS_PER_HOUR].data,
+            ]
+        )
+        combined_trips_per_hour["dataset"] = dataset
+        args["trips_per_hour_linechart"] = render_trips_per_hour(
+            combined_trips_per_hour, margin_of_error=None, style="dataset"
+        )
+        args["trips_per_hour_measure"] = (
+            const.format[benchmark.measure_selection[const.TRIPS_PER_HOUR]],
+            fmt(benchmark.similarity_measures[const.TRIPS_PER_HOUR]),
+        )
 
     template_structure = get_template("overview_segment_benchmark.html")
-    return template_structure.render(
-        dataset_stats_table=dataset_stats_table,
-        missing_values_table=missing_values_table,
-        trips_over_time_eps=trips_over_time_eps,
-        trips_over_time_moe=trips_over_time_moe,
-        trips_over_time_info=trips_over_time_info,
-        trips_over_time_linechart=trips_over_time_linechart,
-        trips_over_time_measure=trips_over_time_measure,
-        trips_over_time_moe_info=trips_over_time_moe_info,
-        trips_over_time_summary_table=trips_over_time_summary_table,
-        trips_per_weekday_eps=trips_per_weekday_eps,
-        trips_per_weekday_moe=trips_per_weekday_moe,
-        trips_per_weekday_barchart=trips_per_weekday_barchart,
-        trips_per_weekday_measure=trips_per_weekday_measure,
-        trips_per_hour_eps=trips_per_hour_eps,
-        trips_per_hour_moe=trips_per_hour_moe,
-        trips_per_hour_linechart=trips_per_hour_linechart,
-        trips_per_hour_measure=trips_per_hour_measure
-    )
+    return template_structure.render(args)
 
 
 def render_dataset_statistics(dataset_statistics: DictSection) -> str:
@@ -219,7 +239,11 @@ def render_dataset_statistics(dataset_statistics: DictSection) -> str:
     return dataset_stats_html
 
 
-def render_benchmark_dataset_statistics(dataset_statistics_base: DictSection, dataset_statistics_alternative: DictSection, re:dict) -> str:
+def render_benchmark_dataset_statistics(
+    dataset_statistics_base: DictSection,
+    dataset_statistics_alternative: DictSection,
+    re: dict,
+) -> str:
     moe_base = dataset_statistics_base.margin_of_errors_laplace
     moe_alternative = dataset_statistics_alternative.margin_of_errors_laplace
     data_base = dataset_statistics_base.data
@@ -228,40 +252,75 @@ def render_benchmark_dataset_statistics(dataset_statistics_base: DictSection, da
     dataset_stats_list = [
         {
             "name": "Number of records",
-            "estimate": (fmt(data_base[const.N_RECORDS]), fmt(data_alternative[const.N_RECORDS])),
-            "margin_of_error": (fmt_moe(moe_base[const.N_RECORDS]), fmt_moe(moe_alternative[const.N_RECORDS])),
-            "relative_error": re['n_records']
+            "estimate": (
+                fmt(data_base[const.N_RECORDS]),
+                fmt(data_alternative[const.N_RECORDS]),
+            ),
+            "margin_of_error": (
+                fmt_moe(moe_base[const.N_RECORDS]),
+                fmt_moe(moe_alternative[const.N_RECORDS]),
+            ),
+            "relative_error": re["n_records"],
         },
         {
             "name": "Distinct trips",
-            "estimate": (fmt(data_base[const.N_TRIPS]), fmt(data_alternative[const.N_TRIPS])),
-            "margin_of_error": (fmt_moe(moe_base[const.N_TRIPS]), fmt_moe(moe_alternative[const.N_TRIPS])),
-            "relative_error": re['n_trips']
-
+            "estimate": (
+                fmt(data_base[const.N_TRIPS]),
+                fmt(data_alternative[const.N_TRIPS]),
+            ),
+            "margin_of_error": (
+                fmt_moe(moe_base[const.N_TRIPS]),
+                fmt_moe(moe_alternative[const.N_TRIPS]),
+            ),
+            "relative_error": re["n_trips"],
         },
         {
             "name": "Number of complete trips (start and and point)",
-            "estimate": (fmt(data_base[const.N_COMPLETE_TRIPS]), fmt(data_alternative[const.N_COMPLETE_TRIPS])),
-            "margin_of_error": (fmt_moe(moe_base[const.N_COMPLETE_TRIPS]), fmt_moe(moe_alternative[const.N_COMPLETE_TRIPS])),
-            "relative_error": re['n_complete_trips']
+            "estimate": (
+                fmt(data_base[const.N_COMPLETE_TRIPS]),
+                fmt(data_alternative[const.N_COMPLETE_TRIPS]),
+            ),
+            "margin_of_error": (
+                fmt_moe(moe_base[const.N_COMPLETE_TRIPS]),
+                fmt_moe(moe_alternative[const.N_COMPLETE_TRIPS]),
+            ),
+            "relative_error": re["n_complete_trips"],
         },
         {
             "name": "Number of incomplete trips (single point)",
-            "estimate": (fmt(data_base[const.N_INCOMPLETE_TRIPS]), fmt(data_alternative[const.N_INCOMPLETE_TRIPS])),
-            "margin_of_error": (fmt_moe(moe_base[const.N_INCOMPLETE_TRIPS]), fmt_moe(data_alternative[const.N_INCOMPLETE_TRIPS])),
-            "relative_error": re['n_incomplete_trips']
+            "estimate": (
+                fmt(data_base[const.N_INCOMPLETE_TRIPS]),
+                fmt(data_alternative[const.N_INCOMPLETE_TRIPS]),
+            ),
+            "margin_of_error": (
+                fmt_moe(moe_base[const.N_INCOMPLETE_TRIPS]),
+                fmt_moe(data_alternative[const.N_INCOMPLETE_TRIPS]),
+            ),
+            "relative_error": re["n_incomplete_trips"],
         },
         {
             "name": "Distinct users",
-            "estimate": (fmt(data_base[const.N_USERS]), fmt(data_alternative[const.N_USERS])),
-            "margin_of_error": (fmt_moe(moe_base[const.N_USERS]),fmt_moe(moe_alternative[const.N_USERS])),
-            "relative_error": re['n_users']
+            "estimate": (
+                fmt(data_base[const.N_USERS]),
+                fmt(data_alternative[const.N_USERS]),
+            ),
+            "margin_of_error": (
+                fmt_moe(moe_base[const.N_USERS]),
+                fmt_moe(moe_alternative[const.N_USERS]),
+            ),
+            "relative_error": re["n_users"],
         },
         {
             "name": "Distinct locations (lat & lon combination)",
-            "estimate": (fmt(data_base[const.N_LOCATIONS]), fmt(data_alternative[const.N_LOCATIONS])),
-            "margin_of_error": (fmt_moe(moe_base[const.N_LOCATIONS]),fmt_moe(moe_alternative[const.N_LOCATIONS])),
-            "relative_error": re['n_locations']
+            "estimate": (
+                fmt(data_base[const.N_LOCATIONS]),
+                fmt(data_alternative[const.N_LOCATIONS]),
+            ),
+            "margin_of_error": (
+                fmt_moe(moe_base[const.N_LOCATIONS]),
+                fmt_moe(moe_alternative[const.N_LOCATIONS]),
+            ),
+            "relative_error": re["n_locations"],
         },
     ]
 
@@ -270,7 +329,9 @@ def render_benchmark_dataset_statistics(dataset_statistics_base: DictSection, da
     dataset_stats_html = template_table.render(
         name="Dataset statistics",
         privacy_budget_base=render_eps(dataset_statistics_base.privacy_budget),
-        privacy_budget_alternative=render_eps(dataset_statistics_alternative.privacy_budget),
+        privacy_budget_alternative=render_eps(
+            dataset_statistics_alternative.privacy_budget
+        ),
         rows=dataset_stats_list,
     )
     return dataset_stats_html
@@ -315,7 +376,10 @@ def render_missing_values(missing_values: DictSection) -> str:
     )
     return missing_values_html
 
-def render_benchmark_missing_values(missing_values_base: DictSection, missing_values_alternative: DictSection, re:dict) -> str:
+
+def render_benchmark_missing_values(
+    missing_values_base: DictSection, missing_values_alternative: DictSection, re: dict
+) -> str:
     moe_base = round(missing_values_base.margin_of_error_laplace, 1)
     moe_alternative = round(missing_values_alternative.margin_of_error_laplace, 1)
     data_base = missing_values_base.data
@@ -325,34 +389,35 @@ def render_benchmark_missing_values(missing_values_base: DictSection, missing_va
         {
             "name": "User ID (uid)",
             "estimate": (fmt(data_base[const.UID]), fmt(data_alternative[const.UID])),
-            "margin_of_error": (fmt_moe(moe_base),fmt_moe(moe_alternative)),
-            "relative_error": re['uid']
-
+            "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
+            "relative_error": re["uid"],
         },
         {
             "name": "Trip ID (tid)",
             "estimate": (fmt(data_base[const.TID]), fmt(data_alternative[const.TID])),
-            "margin_of_error": (fmt_moe(moe_base),fmt_moe(moe_alternative)),
-            "relative_error": re['tid']
-
+            "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
+            "relative_error": re["tid"],
         },
         {
             "name": "Timestamp (datetime)",
-            "estimate": (fmt(data_base[const.DATETIME]), fmt(data_alternative[const.DATETIME])),
-            "margin_of_error": (fmt_moe(moe_base),fmt_moe(moe_alternative)),
-            "relative_error": re['datetime']
+            "estimate": (
+                fmt(data_base[const.DATETIME]),
+                fmt(data_alternative[const.DATETIME]),
+            ),
+            "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
+            "relative_error": re["datetime"],
         },
         {
             "name": "Latitude (lat)",
             "estimate": (fmt(data_base[const.LAT]), fmt(data_alternative[const.LAT])),
-            "margin_of_error": (fmt_moe(moe_base),fmt_moe(moe_alternative)),
-            "relative_error": re['lat']
+            "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
+            "relative_error": re["lat"],
         },
         {
             "name": "Longitude (lng)",
             "estimate": (fmt(data_base[const.LNG]), fmt(data_alternative[const.LNG])),
-            "margin_of_error": (fmt_moe(moe_base),fmt_moe(moe_alternative)),
-            "relative_error": re['lng']
+            "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
+            "relative_error": re["lng"],
         },
     ]
 
@@ -360,7 +425,9 @@ def render_benchmark_missing_values(missing_values_base: DictSection, missing_va
     missing_values_html = template_table.render(
         name="Missing values",
         privacy_budget_base=render_eps(missing_values_base.privacy_budget),
-        privacy_budget_alternative=render_eps(missing_values_alternative.privacy_budget),
+        privacy_budget_alternative=render_eps(
+            missing_values_alternative.privacy_budget
+        ),
         rows=missing_values_list,
     )
 
@@ -396,15 +463,20 @@ def render_trips_over_time(trips_over_time: DfSection) -> str:
     plt.close()
     return html
 
-def render_benchmark_trips_over_time(trips_over_time: DfSection, trips_over_time_alternative: DfSection) -> str:
+
+def render_benchmark_trips_over_time(
+    trips_over_time: DfSection, trips_over_time_alternative: DfSection
+) -> str:
     if len(trips_over_time.data) <= 14:
         chart = plot.barchart(
             x=trips_over_time.data[const.DATETIME].to_numpy(),
-            #x_alternative=trips_over_time_alternative.data[const.DATETIME].to_numpy(),
+            # x_alternative=trips_over_time_alternative.data[const.DATETIME].to_numpy(),
             y=trips_over_time.data["trips"].to_numpy(),
             y_alternative=trips_over_time_alternative.data["trips"].to_numpy(),
             margin_of_error=fmt_moe(trips_over_time.margin_of_error_laplace),
-            margin_of_error_alternative=fmt_moe(trips_over_time_alternative.margin_of_error_laplace),
+            margin_of_error_alternative=fmt_moe(
+                trips_over_time_alternative.margin_of_error_laplace
+            ),
             x_axis_label="Date",
             y_axis_label="% of trips",
             rotate_label=True,
@@ -427,6 +499,7 @@ def render_benchmark_trips_over_time(trips_over_time: DfSection, trips_over_time
     plt.close()
     return html
 
+
 def render_trips_per_weekday(trips_per_weekday: SeriesSection) -> str:
     chart = plot.barchart(
         x=trips_per_weekday.data.index.to_numpy(),
@@ -439,13 +512,16 @@ def render_trips_per_weekday(trips_per_weekday: SeriesSection) -> str:
     plt.close()
     return v_utils.fig_to_html(chart)
 
-def render_benchmark_trips_per_weekday(trips_per_weekday: SeriesSection, trips_per_weekday_alternative: SeriesSection) -> str:
+
+def render_benchmark_trips_per_weekday(
+    trips_per_weekday: SeriesSection, trips_per_weekday_alternative: SeriesSection
+) -> str:
     chart = plot.barchart(
         x=trips_per_weekday.data.index.to_numpy(),
         y=trips_per_weekday.data.values,
         y_alternative=trips_per_weekday_alternative.data.values,
         margin_of_error=trips_per_weekday.margin_of_error_laplace,
-        margin_of_error_alternative = trips_per_weekday_alternative.margin_of_error_laplace,
+        margin_of_error_alternative=trips_per_weekday_alternative.margin_of_error_laplace,
         x_axis_label="Weekday",
         y_axis_label="% of trips",
         rotate_label=True,
@@ -454,7 +530,11 @@ def render_benchmark_trips_per_weekday(trips_per_weekday: SeriesSection, trips_p
     return v_utils.fig_to_html(chart)
 
 
-def render_trips_per_hour(trips_per_hour: pd.DataFrame, margin_of_error: Optional[float], style: Optional[str]=None) -> str:
+def render_trips_per_hour(
+    trips_per_hour: pd.DataFrame,
+    margin_of_error: Optional[float],
+    style: Optional[str] = None,
+) -> str:
     chart = plot.multi_linechart(
         data=trips_per_hour,
         x=const.HOUR,
@@ -469,6 +549,7 @@ def render_trips_per_hour(trips_per_hour: pd.DataFrame, margin_of_error: Optiona
     html = v_utils.fig_to_html(chart)
     plt.close()
     return html
+
 
 # def render_benchmark_trips_per_hour(trips_per_hour: DfSection) -> str:
 #     chart = plot.multi_linechart(

@@ -6,7 +6,7 @@ import dp_mobility_report.constants as const
 from dp_mobility_report.report.html.html_utils import fmt, get_template
 
 if TYPE_CHECKING:
-    from dp_mobility_report import DpMobilityReport, BenchmarkReport
+    from dp_mobility_report import BenchmarkReport, DpMobilityReport
 
 
 def render_config(dpmreport: "DpMobilityReport") -> str:
@@ -28,27 +28,26 @@ def render_config(dpmreport: "DpMobilityReport") -> str:
     template_structure = get_template("config_segment.html")
     return template_structure.render(args)
 
+
 def render_benchmark_config(benchmarkreport: "BenchmarkReport") -> str:
 
-    config_table = render_benchmark_config_table(benchmarkreport)
-    # privacy_info = render_privacy_info(benchmarkreport.privacy_budget is not None)
-    # tessellation_info = (
+    args: dict = {}
+
+    args["config_table"] = render_benchmark_config_table(benchmarkreport)
+    # args["privacy_info"] = render_privacy_info(benchmarkreport.privacy_budget is not None)
+    # args["tessellation_info"] = (
     #     ""
     #     if (benchmarkreport.tessellation is not None)
     #     else "<br> <br>No tessellation has been provided. All analyses based on the tessellation have been excluded."
     # )
-    # timestamp_info = (
+    # args["timestamp_info"] = (
     #     ""
     #     if pd.core.dtypes.common.is_datetime64_dtype(benchmarkreport.df[const.DATETIME])
     #     else "<br> <br>Dataframe does not contain timestamps. All analyses based on timestamps have been excluded."
     # )
+
     template_structure = get_template("config_segment.html")
-    return template_structure.render(
-        config_table=config_table,
-        #privacy_info=privacy_info,
-        #tessellation_info=tessellation_info,
-        #timestamp_info=timestamp_info,
-    )
+    return template_structure.render(args)
 
 
 def render_config_table(dpmreport: "DpMobilityReport") -> str:
@@ -67,16 +66,52 @@ def render_config_table(dpmreport: "DpMobilityReport") -> str:
     dataset_stats_html = template_table.render(name="Configuration", rows=config_list)
     return dataset_stats_html
 
+
 def render_benchmark_config_table(benchmarkreport: "BenchmarkReport") -> str:
 
     config_list = [
-        {"name": "Max. trips per user", "value": (fmt(benchmarkreport.report_base.max_trips_per_user),fmt(benchmarkreport.report_alternative.max_trips_per_user))},
-        {"name": "Privacy budget", "value": (fmt(benchmarkreport.report_base.privacy_budget), fmt(benchmarkreport.report_alternative.privacy_budget))},
-        {"name": "User privacy", "value": (fmt(benchmarkreport.report_base.user_privacy), fmt(benchmarkreport.report_alternative.privacy_budget))},
-        {"name": "Budget split", "value": (fmt(benchmarkreport.report_base.budget_split), fmt(benchmarkreport.report_alternative.budget_split))},
-        {"name": "Evaluation dev. mode", "value": (fmt(benchmarkreport.report_base.evalu),fmt(benchmarkreport.report_alternative.evalu))},
-        {"name": "Excluded analyses", "value": (fmt(benchmarkreport.analysis_exclusion),fmt(benchmarkreport.analysis_exclusion))} #TODO verbundene zelle
-
+        {
+            "name": "Max. trips per user",
+            "value": (
+                fmt(benchmarkreport.report_base.max_trips_per_user),
+                fmt(benchmarkreport.report_alternative.max_trips_per_user),
+            ),
+        },
+        {
+            "name": "Privacy budget",
+            "value": (
+                fmt(benchmarkreport.report_base.privacy_budget),
+                fmt(benchmarkreport.report_alternative.privacy_budget),
+            ),
+        },
+        {
+            "name": "User privacy",
+            "value": (
+                fmt(benchmarkreport.report_base.user_privacy),
+                fmt(benchmarkreport.report_alternative.privacy_budget),
+            ),
+        },
+        {
+            "name": "Budget split",
+            "value": (
+                fmt(benchmarkreport.report_base.budget_split),
+                fmt(benchmarkreport.report_alternative.budget_split),
+            ),
+        },
+        {
+            "name": "Evaluation dev. mode",
+            "value": (
+                fmt(benchmarkreport.report_base.evalu),
+                fmt(benchmarkreport.report_alternative.evalu),
+            ),
+        },
+        {
+            "name": "Excluded analyses",
+            "value": (
+                fmt(benchmarkreport.analysis_exclusion),
+                fmt(benchmarkreport.analysis_exclusion),
+            ),
+        },  # TODO verbundene zelle
     ]
 
     # create html from template
