@@ -1,5 +1,6 @@
 <h2>Place analysis</h2>
 
+{% if visits_per_tile_cumsum_linechart %}
 <div>
 
     <h3>Visits per tile</h3>
@@ -28,8 +29,10 @@
 
 
 <div>
+    <h4>Five-number summary: visits per tile</h4>
     {{visits_per_tile_summary_table}}
-    
+
+    <h4>Cumulated sum of visits per tile</h4>
     {{visits_per_tile_cumsum_linechart}}
     <p class="info">
         The cumulated sum of visits visualizes the distribution of visits over tiles:
@@ -44,7 +47,9 @@
     <p class="measure info">
         {{visits_per_tile_ranking[0]}}: {{visits_per_tile_ranking[1]}}</p>
 </div>
-    
+{% endif %} 
+
+{% if visits_per_tile_time_map %}
 <div>
     <h3>Visits per tile and time window</h3>
     <p>privacy budget base: {{ visits_per_time_tile_eps[0] }}</p>
@@ -62,3 +67,4 @@
     <p class="measure info">
         {{visits_per_time_tile_measure[0]}}: {{visits_per_time_tile_measure[1]}}</p>
 </div>
+{% endif %}

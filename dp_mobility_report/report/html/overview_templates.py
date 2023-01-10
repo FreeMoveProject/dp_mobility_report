@@ -107,12 +107,20 @@ def render_benchmark_overview(benchmark: "BenchmarkReport") -> str:
             report_alternative[const.DS_STATISTICS],
             benchmark.re,
         )
+        args["dataset_stats_eps"] = (
+            render_eps(report_base[const.DS_STATISTICS].privacy_budget),
+            render_eps(report_alternative[const.DS_STATISTICS].privacy_budget),
+        )
 
     if const.MISSING_VALUES not in benchmark.analysis_exclusion:
         args["missing_values_table"] = render_benchmark_missing_values(
             report_base[const.MISSING_VALUES],
             report_alternative[const.MISSING_VALUES],
             benchmark.re,
+        )
+        args["missing_values_eps"] = (
+            render_eps(report_base[const.MISSING_VALUES].privacy_budget),
+            render_eps(report_alternative[const.MISSING_VALUES].privacy_budget),
         )
 
     if const.TRIPS_OVER_TIME not in benchmark.analysis_exclusion:
@@ -331,11 +339,6 @@ def render_benchmark_dataset_statistics(
     # create html from template
     template_table = get_template("table_conf_interval_benchmark.html")
     dataset_stats_html = template_table.render(
-        name="Dataset statistics",
-        privacy_budget_base=render_eps(dataset_statistics_base.privacy_budget),
-        privacy_budget_alternative=render_eps(
-            dataset_statistics_alternative.privacy_budget
-        ),
         rows=dataset_stats_list,
     )
     return dataset_stats_html
@@ -426,11 +429,6 @@ def render_benchmark_missing_values(
 
     template_table = get_template("table_conf_interval_benchmark.html")
     missing_values_html = template_table.render(
-        name="Missing values",
-        privacy_budget_base=render_eps(missing_values_base.privacy_budget),
-        privacy_budget_alternative=render_eps(
-            missing_values_alternative.privacy_budget
-        ),
         rows=missing_values_list,
     )
 
