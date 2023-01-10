@@ -27,10 +27,16 @@ def render_overview(dpmreport: "DpMobilityReport") -> str:
         args["dataset_stats_table"] = render_dataset_statistics(
             report[const.DS_STATISTICS]
         )
+        args["dataset_stats_eps"] = (
+            render_eps(report[const.DS_STATISTICS].privacy_budget),
+        )
 
     if const.MISSING_VALUES not in dpmreport.analysis_exclusion:
         args["missing_values_table"] = render_missing_values(
             report[const.MISSING_VALUES]
+        )
+        args["missing_values_eps"] = (
+            render_eps(report[const.MISSING_VALUES].privacy_budget),
         )
 
     if const.TRIPS_OVER_TIME not in dpmreport.analysis_exclusion:
@@ -119,8 +125,6 @@ def render_dataset_statistics(dataset_statistics: DictSection) -> str:
     # create html from template
     template_table = get_template("table_conf_interval.html")
     dataset_stats_html = template_table.render(
-        name="Dataset statistics",
-        privacy_budget=render_eps(dataset_statistics.privacy_budget),
         rows=dataset_stats_list,
     )
     return dataset_stats_html
@@ -159,7 +163,6 @@ def render_missing_values(missing_values: DictSection) -> str:
 
     template_table = get_template("table_conf_interval.html")
     missing_values_html = template_table.render(
-        name="Missing values",
         privacy_budget=render_eps(missing_values.privacy_budget),
         rows=missing_values_list,
     )

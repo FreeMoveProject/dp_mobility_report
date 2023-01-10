@@ -2,12 +2,16 @@
 
 {% if dataset_stats_table %}
 <div>
+    <h3>Dataset statistics</h3>
+    <p>privacy budget: {{dataset_stats_eps}}</p>
     {{dataset_stats_table}}
 </div>
 {% endif %}
 
 {% if missing_values_table %}
 <div>
+    <h3>Missing values</h3>
+    <p>privacy budget: {{missing_values_eps}}</p>
     {{missing_values_table}}
 </div>
 {% endif %}
@@ -15,11 +19,9 @@
 
 {% if trips_over_time_linechart or trips_per_weekday_barchart or trips_per_hour_linechart %}
 <div>
-    <h3>Temporal properties</h3>
-    
     {% if trips_over_time_linechart %}
     <div>
-        <h4>Trips over time</h4>
+        <h3>Trips over time</h3>
         <p>privacy budget: {{trips_over_time_eps}}</p>
         <p>95%-confidence interval: +/- {{trips_over_time_moe}}</p>
         {{trips_over_time_linechart}}
@@ -37,7 +39,7 @@
     
     {% if trips_per_weekday_barchart %}
     <div>
-        <h4>Trips per weekday</h4>        
+        <h3>Trips per weekday</h3>        
         <p>privacy budget: {{trips_per_weekday_eps}}</p>
         <p>95%-confidence interval: +/- {{trips_per_weekday_moe}}</p>
         {{trips_per_weekday_barchart}}
@@ -46,7 +48,7 @@
 
     {% if trips_per_hour_linechart %}
     <div>
-        <h4>Trips per hour of day split by weekday and weekend</h4>
+        <h3>Trips per hour of day split by weekday and weekend</h3>
         <p>privacy budget: {{ trips_per_hour_eps }}</p>
         <p>95%-confidence interval: +/- {{trips_per_hour_moe}}</p>
         {{trips_per_hour_linechart}}

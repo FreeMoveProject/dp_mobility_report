@@ -605,12 +605,14 @@ def test_to_html_file(test_data, test_data_sequence, test_tessellation, tmp_path
     # ).to_file("test1.html")  # type: ignore
 
     # DpMobilityReport(  # type: ignore
-    #     test_data,   # type: ignore
+    #     test_data,  # type: ignore
     #     test_tessellation,  # type: ignore
     #     analysis_exclusion=[],  # type: ignore
     #     privacy_budget=1000,  # type: ignore
     #     max_travel_time=30,  # type: ignore
-    # ).to_file("test2.html")  # type: ignore
+    # ).to_file(
+    #     "test2.html"
+    # )  # type: ignore
 
     file_name = tmp_path / "html/test_output1.html"
     file_name.parent.mkdir()
