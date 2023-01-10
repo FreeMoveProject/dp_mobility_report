@@ -18,16 +18,17 @@
     <div>
         {{visits_per_tile_legend}}
     </div>
-    <p>
-        {{points_outside_tessellation_info}}
-    </p>
+    <p>{{points_outside_tessellation_info}}</p>
 </div>
 
 
 <div>
+    <h4>Five-number summary: visits per tile</h4>
     {{visits_per_tile_summary_table}}
-    
+
+    <h4>Cumulated sum of visits per tile</h4>
     {{visits_per_tile_cumsum_linechart}}
+    
     <p class="info">
         The cumulated sum of visits visualizes the distribution of visits over tiles:
         If all tiles are visited equally, the cumulated sum follows a straight diagonal line (gray line). 

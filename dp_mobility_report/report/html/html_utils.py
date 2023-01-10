@@ -20,7 +20,7 @@ def get_template(template_name: str) -> jinja2.Template:
     return jinja2_env.get_template(template_name)
 
 
-def render_summary(summary: Series, title: str = "") -> str:
+def render_summary(summary: Series) -> str:
     summary_list = [
         {"name": "Min.", "value": fmt(summary["min"])},
         {"name": "Max.", "value": fmt(summary["max"])},
@@ -34,7 +34,7 @@ def render_summary(summary: Series, title: str = "") -> str:
         summary_list.insert(0, {"name": "Mean", "value": fmt(summary["mean"])})
 
     template_table = jinja2_env.get_template("table.html")
-    summary_html = template_table.render(name=title, rows=summary_list)
+    summary_html = template_table.render(rows=summary_list)
     return summary_html
 
 

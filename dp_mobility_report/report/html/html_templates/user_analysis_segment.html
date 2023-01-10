@@ -8,7 +8,7 @@
     <p class="grey info">
         {{trips_per_user_info}}
     </p>
-
+    <h4>Five number summary: trips per user</h4>
     {{trips_per_user_summary_table}}
     <p class="info">
         {{trips_per_user_moe_info}}
@@ -24,6 +24,7 @@
     <p class="grey info">
         {{time_between_traj_hist_info}}
     </p>
+    <h4>Five number summary: time between consecutive trips of a user</h4>
     {{time_between_traj_summary_table}}
     <p class="info">
         {{time_between_traj_moe_info}}
@@ -53,6 +54,7 @@
     <p class="grey info">
         {{radius_of_gyration_hist_info}}
     </p>
+    <h4>Five number summary: radius of gyration</h4>
     {{radius_of_gyration_summary_table}}
     <p class="info">
         {{radius_of_gyration_moe_info}}
@@ -66,9 +68,6 @@
     <h3>Number of distinct tiles per user</h3>
     <p>privacy budget: {{distinct_tiles_user_eps}}</p>
     {{distinct_tiles_user_hist}}
-    <p class="grey info">
-        {{distinct_tiles_hist_info}}
-    </p>
     {{distinct_tiles_user_summary_table}}
     <p class="info">
         {{distinct_tiles_moe_info}}
@@ -92,6 +91,7 @@
     </p>
     
     {{mobility_entropy_hist}}
+    <h4>Five number summary: mobility entropy</h4>
     {{mobility_entropy_summary_table}}
     <p class="info">
         {{mobility_entropy_moe_info}}

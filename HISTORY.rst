@@ -1,6 +1,10 @@
 History
 *********
 
+0.1.7 (2023-01-10)
+------------------
+* Restructuring of HTML headlines.
+
 0.1.6 (2023-01-09)
 ------------------
 * Refactoring of template files.

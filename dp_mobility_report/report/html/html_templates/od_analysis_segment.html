@@ -37,8 +37,9 @@
     </div>
 
     <div>
+        <h4>Five number summary: flows per OD pair</h4>
         {{flows_summary_table}}
-
+        <h4>Cumuluated sum of flows per OD pair</h4>
         {{flows_cumsum_linechart}}
 
         <p class="info">
@@ -57,12 +58,10 @@
 
 
 {% if travel_time_hist or jump_length_hist %}
-<div>
-    <h3>Trip statistics</h3>
-    
+<div>    
     {% if travel_time_hist %}
     <div>
-        <h4>Travel time of trips (in minutes)</h4>
+        <h3>Travel time of trips (in minutes)</h3>
         <p>privacy budget: {{travel_time_eps}}</p>
         <p>95%-confidence interval: +/-: {{travel_time_moe}}</p>
 
@@ -70,6 +69,7 @@
         <p class="grey info">
             {{travel_time_hist_info}}
         </p>
+            <h4>Five number summary: travel time</h4>
             {{travel_time_summary_table}}
             <p class="info">
                 {{travel_time_moe_info}}
@@ -80,7 +80,7 @@
 
     {% if jump_length_hist %}
     <div>
-        <h4>Jump length (in kilometers)</h4>
+        <h3>Jump length (in kilometers)</h3>
         <p>privacy budget: {{travel_time_eps}}</p>
         <p>95%-confidence interval: +/- {{travel_time_moe}}</p>
 
@@ -89,6 +89,7 @@
         <p class="grey info">
             {{jump_length_hist_info}}
         </p>
+            <h4>Five number summary: jump length</h4>
             {{jump_length_summary_table}}
             <p class="info">
                 {{jump_length_moe_info}}
