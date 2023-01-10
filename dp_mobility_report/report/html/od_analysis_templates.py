@@ -59,10 +59,7 @@ def render_od_analysis(
             report[const.OD_FLOWS], len(dpmreport.tessellation)
         )
         quartiles = report[const.OD_FLOWS].quartiles.round()
-        args["flows_summary_table"] = render_summary(
-            quartiles.astype(int),
-            "Distribution of flows per OD pair",
-        )
+        args["flows_summary_table"] = render_summary(quartiles.astype(int))
         args["flows_cumsum_linechart"] = render_flows_cumsum(report[const.OD_FLOWS])
         args["most_freq_flows_ranking"] = render_most_freq_flows_ranking(
             report[const.OD_FLOWS], dpmreport.tessellation
