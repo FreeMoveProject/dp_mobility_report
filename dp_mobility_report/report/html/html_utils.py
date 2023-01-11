@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, TYPE_CHECKING
 
 import geopandas as gpd
 import jinja2
@@ -6,6 +6,9 @@ import numpy as np
 from pandas import Series
 
 from dp_mobility_report import constants as const
+
+if TYPE_CHECKING:
+    from dp_mobility_report import BenchmarkReport
 
 # Initializing Jinja
 package_loader = jinja2.PackageLoader(
@@ -134,3 +137,21 @@ def get_centroids(tessellation: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     lngs = [c[0].pop() for c in centroids]
     lats = [c[1].pop() for c in centroids]
     return dict(zip(tessellation[const.TILE_ID], zip(lngs, lats)))
+
+def all_available_measures(analysis_name: str, benchmarkreport: "BenchmarkReport") -> dict:
+    available_measures = {}
+
+    if analysis_name in benchmarkreport.re.keys():
+        available_measures[const.RE] = str(fmt(benchmarkreport.re[analysis_name]))
+    if analysis_name in benchmarkreport.jsd.keys():
+        available_measures[const.JSD] = str(fmt(benchmarkreport.jsd[analysis_name]))
+    if analysis_name in benchmarkreport.kld.keys():
+        available_measures[const.KLD] = str(fmt(benchmarkreport.kld[analysis_name]))
+    if analysis_name in benchmarkreport.emd.keys():
+        available_measures[const.EMD] = str(fmt(benchmarkreport.emd[analysis_name]))
+    if analysis_name in benchmarkreport.smape.keys():
+        available_measures[const.SMAPE] = str(fmt(benchmarkreport.smape[analysis_name]))
+    elif analysis_name in benchmarkreport.kt.keys():
+        available_measures[const.KT] = str(fmt(benchmarkreport.kt[analysis_name]))
+
+    return available_measures

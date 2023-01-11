@@ -24,8 +24,7 @@
         <div>
             {{od_legend}}
         </div>
-        <p class="measure info">
-            {{flows_measure[0]}}: {{flows_measure[1]}}</p>
+        {{flows_measure}}
 
 <!--        <p>    
             {{intra_tile_flows_info}}
@@ -42,8 +41,7 @@
     <div>
         <h4>Five number summary: flows per OD pair</h4>
         {{flows_summary_table}}
-        <p class="measure info">
-            {{flows_summary_measure[0]}}: {{flows_summary_measure[1]}}</p>
+        {{flows_summary_measure}}
         <h4>Cumulated sum of flows per OD pair</h4>
         {{flows_cumsum_linechart}}
 
@@ -57,8 +55,7 @@
     <div>
         <h4>Ranking of most frequent OD connections</h4>
         {{most_freq_flows_ranking}}
-        <p class="measure info">
-            {{od_flows_ranking_measure[0]}}: {{od_flows_ranking_measure[1]}}</p>
+        {{od_flows_ranking_measure}}
     </div>
 </div>
 {% endif %}
@@ -77,16 +74,14 @@
         <p class="grey info">
             {{travel_time_hist_info}}
         </p>
-        <p class="measure info">
-            {{travel_time_measure[0]}}: {{travel_time_measure[1]}}</p>
+        {{travel_time_measure}}
             
             <h4>Five number summary: travel time</h4>
             {{travel_time_summary_table}}
             <p class="info">
                 {{travel_time_moe_info}}
             </p>
-            <p class="measure info">
-                {{travel_time_summary_measure[0]}}: {{travel_time_summary_measure[1]}}</p>
+            {{travel_time_summary_measure}}
     </div>
     {% endif %} 
 
@@ -103,15 +98,13 @@
         <p class="grey info">
             {{jump_length_hist_info}}
         </p>
-        <p class="measure info">
-            {{jump_length_measure[0]}}: {{jump_length_measure[1]}}</p>
+        {{jump_length_measure}}
             <h4>Five number summary: jump length</h4>
             {{jump_length_summary_table}}
             <p class="info">
                 {{jump_length_moe_info}}
             </p>
-            <p class="measure info">
-                {{jump_length_summary_measure[0]}}: {{jump_length_summary_measure[1]}}</p>
+            {{jump_length_summary_measure}}
 
     </div>
     {% endif %}

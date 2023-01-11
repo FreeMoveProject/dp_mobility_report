@@ -140,7 +140,7 @@ format = {
     "kullback_leibler_divergence": "Kullback-Leibler divergence",
     "earth_movers_distance": "Earth mover's distance",
     "symmetric_mean_absolute_percentage_error": "Symmetric mean absolute percentage error",
-    "kendalls_tau": "Kendall's tau coefficient",
+    "kendalls_tau": "Kendall rank correlation coefficient",
 }
 
 DARK_BLUE = "#283377"
