@@ -131,8 +131,7 @@ def render_benchmark_place_analysis(
         ].quartiles.round()
         args["visits_per_tile_summary_table"] = render_benchmark_summary(
             quartiles_base.astype(int),
-            quartiles_alternative.astype(int),
-            "Distribution of visits per tile",  # extrapolate visits from dp record count
+            quartiles_alternative.astype(int),  # extrapolate visits from dp record count
         )
         args["visits_per_tile_cumsum_linechart"] = render_visits_per_tile_cumsum(
             report_base[const.VISITS_PER_TILE],
@@ -145,6 +144,10 @@ def render_benchmark_place_analysis(
         args["visits_per_tile_measure"] = (
             const.format[benchmark.measure_selection[const.VISITS_PER_TILE]],
             fmt(benchmark.similarity_measures[const.VISITS_PER_TILE]),
+        )
+        args["visits_per_tile_summary_measure"] = (
+            const.format[benchmark.measure_selection[const.VISITS_PER_TILE_QUARTILES]],
+            fmt(benchmark.similarity_measures[const.VISITS_PER_TILE_QUARTILES]),
         )
         args["visits_per_tile_ranking"] = (
             const.format[benchmark.measure_selection[const.VISITS_PER_TILE_RANKING]],

@@ -145,6 +145,10 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
             const.format[benchmark.measure_selection[const.TRIPS_PER_USER]],
             fmt(benchmark.similarity_measures[const.TRIPS_PER_USER]),
         )
+        args["trips_per_user_summary_measure"] = (
+            const.format[benchmark.measure_selection[const.TRIPS_PER_USER_QUARTILES]],
+            fmt(benchmark.similarity_measures[const.TRIPS_PER_USER_QUARTILES]),
+        )
 
     if const.USER_TIME_DELTA not in benchmark.analysis_exclusion:
         args["time_between_traj_eps"] = (
@@ -165,6 +169,10 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
         args["time_between_traj_measure"] = (
             const.format[benchmark.measure_selection[const.USER_TIME_DELTA]],
             fmt(benchmark.similarity_measures[const.USER_TIME_DELTA]),
+        )
+        args["time_between_traj_summary_measure"] = (
+            const.format[benchmark.measure_selection[const.USER_TIME_DELTA_QUARTILES]],
+            fmt(benchmark.similarity_measures[const.USER_TIME_DELTA_QUARTILES]),
         )
 
     if const.RADIUS_OF_GYRATION not in benchmark.analysis_exclusion:
@@ -192,6 +200,10 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
             const.format[benchmark.measure_selection[const.RADIUS_OF_GYRATION]],
             fmt(benchmark.similarity_measures[const.RADIUS_OF_GYRATION]),
         )
+        args["radius_of_gyration_summary_measure"] = (
+            const.format[benchmark.measure_selection[const.RADIUS_OF_GYRATION_QUARTILES]],
+            fmt(benchmark.similarity_measures[const.RADIUS_OF_GYRATION_QUARTILES]),
+        )
 
     if const.USER_TILE_COUNT not in benchmark.analysis_exclusion:
         args["distinct_tiles_user_eps"] = (
@@ -214,6 +226,10 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
             const.format[benchmark.measure_selection[const.USER_TILE_COUNT]],
             fmt(benchmark.similarity_measures[const.USER_TILE_COUNT]),
         )
+        args["distinct_tiles_summary_measure"] = (
+            const.format[benchmark.measure_selection[const.USER_TILE_COUNT_QUARTILES]],
+            fmt(benchmark.similarity_measures[const.USER_TILE_COUNT_QUARTILES]),
+        )
 
     if const.MOBILITY_ENTROPY not in benchmark.analysis_exclusion:
         args["mobility_entropy_eps"] = (
@@ -234,6 +250,10 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
         args["mobility_entropy_measure"] = (
             const.format[benchmark.measure_selection[const.MOBILITY_ENTROPY]],
             fmt(benchmark.similarity_measures[const.MOBILITY_ENTROPY]),
+        )
+        args["mobility_entropy_summary_measure"] = (
+            const.format[benchmark.measure_selection[const.MOBILITY_ENTROPY_QUARTILES]],
+            fmt(benchmark.similarity_measures[const.MOBILITY_ENTROPY_QUARTILES]),
         )
 
     template_structure = get_template("user_analysis_segment_benchmark.html")

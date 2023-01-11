@@ -39,7 +39,7 @@ def render_summary(summary: Series) -> str:
 
 
 def render_benchmark_summary(
-    summary_base: Series, summary_alternative: Series, title: str = ""
+    summary_base: Series, summary_alternative: Series
 ) -> str:
     summary_list = [
         {
@@ -84,7 +84,7 @@ def render_benchmark_summary(
         )
 
     template_table = jinja2_env.get_template("table_benchmark.html")
-    summary_html = template_table.render(name=title, rows=summary_list)
+    summary_html = template_table.render(rows=summary_list)
     return summary_html
 
 

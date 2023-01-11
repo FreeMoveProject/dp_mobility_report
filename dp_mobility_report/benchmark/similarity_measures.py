@@ -286,6 +286,12 @@ def compute_similarity_measures(
             report_alternative[const.VISITS_PER_TILE].n_outliers,
             report_base[const.VISITS_PER_TILE].n_outliers,
         )
+        
+        #Quartiles
+        smape_dict[const.VISITS_PER_TILE_QUARTILES] = symmetric_mape(
+            estimate=report_alternative[const.VISITS_PER_TILE].quartiles,
+            true=report_base[const.VISITS_PER_TILE].quartiles,
+        )
 
     # Spatio-temporal distributions
     if const.VISITS_PER_TIME_TILE not in analysis_exclusion:
@@ -408,6 +414,11 @@ def compute_similarity_measures(
         kendall_dict[const.OD_FLOWS_RANKING], _ = stats.kendalltau(
             list(rel_alternative.sort_values(ascending=False).index.values)[:10],
             list(rel_base.sort_values(ascending=False).index.values)[:10],
+        )
+        #Quartiles
+        smape_dict[const.OD_FLOWS_QUARTILES] = symmetric_mape(
+            estimate=report_alternative[const.OD_FLOWS].quartiles,
+            true=report_base[const.OD_FLOWS].quartiles,
         )
 
     if const.TRAVEL_TIME not in analysis_exclusion:

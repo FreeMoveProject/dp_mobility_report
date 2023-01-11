@@ -155,7 +155,6 @@ def render_benchmark_od_analysis(
         args["flows_summary_table"] = render_benchmark_summary(
             quartiles_base.astype(int),
             quartiles_alternative.astype(int),
-            "Distribution of flows per OD pair",
         )
         args["flows_cumsum_linechart"] = render_flows_cumsum(
             report_base[const.OD_FLOWS], report_alternative[const.OD_FLOWS]
@@ -169,7 +168,11 @@ def render_benchmark_od_analysis(
             const.format[benchmark.measure_selection[const.OD_FLOWS]],
             fmt(benchmark.similarity_measures[const.OD_FLOWS]),
         )
-        args["od_flows_ranking"] = (
+        args["flows_summary_measure"] = (
+            const.format[benchmark.measure_selection[const.OD_FLOWS_QUARTILES]],
+            fmt(benchmark.similarity_measures[const.OD_FLOWS_QUARTILES]),
+        )
+        args["od_flows_ranking_measure"] = (
             const.format[benchmark.measure_selection[const.OD_FLOWS_RANKING]],
             fmt(benchmark.similarity_measures[const.OD_FLOWS_RANKING]),
         )
@@ -198,10 +201,13 @@ def render_benchmark_od_analysis(
             report_base[const.TRAVEL_TIME].quartiles,
             report_alternative[const.TRAVEL_TIME].quartiles,
         )
-
         args["travel_time_measure"] = (
             const.format[benchmark.measure_selection[const.TRAVEL_TIME]],
             fmt(benchmark.similarity_measures[const.TRAVEL_TIME]),
+        )
+        args["travel_time_summary_measure"] = (
+            const.format[benchmark.measure_selection[const.TRAVEL_TIME_QUARTILES]],
+            fmt(benchmark.similarity_measures[const.TRAVEL_TIME_QUARTILES]),
         )
 
     if const.JUMP_LENGTH not in benchmark.analysis_exclusion:
@@ -231,6 +237,10 @@ def render_benchmark_od_analysis(
         args["jump_length_measure"] = (
             const.format[benchmark.measure_selection[const.JUMP_LENGTH]],
             fmt(benchmark.similarity_measures[const.JUMP_LENGTH]),
+        )
+        args["jump_length_summary_measure"] = (
+            const.format[benchmark.measure_selection[const.JUMP_LENGTH_QUARTILES]],
+            fmt(benchmark.similarity_measures[const.JUMP_LENGTH_QUARTILES]),
         )
 
     template_structure = get_template("od_analysis_segment_benchmark.html")
