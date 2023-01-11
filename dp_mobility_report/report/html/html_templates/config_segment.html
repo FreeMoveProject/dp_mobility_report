@@ -4,6 +4,7 @@
 {{config_table}}
 {% endif %}
 
+{% if tessellation_info or timestamp_info or privacy_info %}
 <p class="warning">
     {% if privacy_info %}
     {{privacy_info}}
@@ -17,3 +18,4 @@
     {{timestamp_info}}
     {% endif %}
 </p>
+{% endif %}

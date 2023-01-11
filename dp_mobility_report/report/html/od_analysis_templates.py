@@ -24,6 +24,7 @@ from dp_mobility_report.report.html.html_utils import (
     render_moe_info,
     render_summary,
     render_user_input_info,
+    all_available_measures
 )
 from dp_mobility_report.visualization import plot, v_utils
 
@@ -119,6 +120,7 @@ def render_benchmark_od_analysis(
     report_alternative = benchmark.report_alternative.report
     tessellation = benchmark.report_base.tessellation
     args: dict = {}
+    template_measures = get_template("similarity_measures.html")
 
     # args["privacy_info"] = f"""Intra-tile flows below a certain threshold are grayed out:
     #     Due to the applied noise, tiles with a low intra-tile flow count are likely to contain a high percentage of noise.
@@ -164,18 +166,11 @@ def render_benchmark_od_analysis(
             report_alternative[const.OD_FLOWS],
             tessellation,
         )
-        args["flows_measure"] = (
-            const.format[benchmark.measure_selection[const.OD_FLOWS]],
-            fmt(benchmark.similarity_measures[const.OD_FLOWS]),
-        )
-        args["flows_summary_measure"] = (
-            const.format[benchmark.measure_selection[const.OD_FLOWS_QUARTILES]],
-            fmt(benchmark.similarity_measures[const.OD_FLOWS_QUARTILES]),
-        )
-        args["od_flows_ranking_measure"] = (
-            const.format[benchmark.measure_selection[const.OD_FLOWS_RANKING]],
-            fmt(benchmark.similarity_measures[const.OD_FLOWS_RANKING]),
-        )
+        args["flows_measure"] = template_measures.render(all_available_measures(const.OD_FLOWS, benchmark))
+
+        args["flows_summary_measure"] = template_measures.render(all_available_measures(const.OD_FLOWS_QUARTILES, benchmark))
+        
+        args["od_flows_ranking_measure"] = template_measures.render(all_available_measures(const.OD_FLOWS_RANKING, benchmark))
 
     if const.TRAVEL_TIME not in benchmark.analysis_exclusion:
         args["travel_time_eps"] = (
@@ -201,14 +196,8 @@ def render_benchmark_od_analysis(
             report_base[const.TRAVEL_TIME].quartiles,
             report_alternative[const.TRAVEL_TIME].quartiles,
         )
-        args["travel_time_measure"] = (
-            const.format[benchmark.measure_selection[const.TRAVEL_TIME]],
-            fmt(benchmark.similarity_measures[const.TRAVEL_TIME]),
-        )
-        args["travel_time_summary_measure"] = (
-            const.format[benchmark.measure_selection[const.TRAVEL_TIME_QUARTILES]],
-            fmt(benchmark.similarity_measures[const.TRAVEL_TIME_QUARTILES]),
-        )
+        args["travel_time_measure"] = template_measures.render(all_available_measures(const.TRAVEL_TIME, benchmark))
+        args["travel_time_summary_measure"] = template_measures.render(all_available_measures(const.TRAVEL_TIME_QUARTILES, benchmark))
 
     if const.JUMP_LENGTH not in benchmark.analysis_exclusion:
         args["jump_length_eps"] = (
@@ -234,14 +223,8 @@ def render_benchmark_od_analysis(
             report_base[const.JUMP_LENGTH].quartiles,
             report_alternative[const.JUMP_LENGTH].quartiles,
         )
-        args["jump_length_measure"] = (
-            const.format[benchmark.measure_selection[const.JUMP_LENGTH]],
-            fmt(benchmark.similarity_measures[const.JUMP_LENGTH]),
-        )
-        args["jump_length_summary_measure"] = (
-            const.format[benchmark.measure_selection[const.JUMP_LENGTH_QUARTILES]],
-            fmt(benchmark.similarity_measures[const.JUMP_LENGTH_QUARTILES]),
-        )
+        args["jump_length_measure"] = template_measures.render(all_available_measures(const.JUMP_LENGTH, benchmark))
+        args["jump_length_summary_measure"] = template_measures.render(all_available_measures(const.JUMP_LENGTH_QUARTILES, benchmark))
 
     template_structure = get_template("od_analysis_segment_benchmark.html")
     return template_structure.render(args)
@@ -342,6 +325,7 @@ def render_benchmark_origin_destination_flows(
         "deviation",
         "deviation from base intra-tile flows",
         layer_name="Intra-tile flows",
+        diverging_cmap=True,
     )  # get innerflows as color for choropleth
 
     flows_base = data_base[

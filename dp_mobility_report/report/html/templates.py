@@ -36,6 +36,7 @@ def render_html(
 
     args: dict = {}
 
+    args["title"] = "DP Mobility Report" 
     args["output_filename"] = output_filename
 
     with tqdm(  # progress bar
@@ -89,6 +90,7 @@ def render_benchmark_html(
 
     args: dict = {}
 
+    args["title"] = "DP Mobility Report: Benchmark" 
     args["output_filename"] = output_filename
 
     with tqdm(  # progress bar

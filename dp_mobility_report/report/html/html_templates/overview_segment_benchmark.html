@@ -28,8 +28,7 @@
         <p>privacy budget alternative: {{trips_over_time_eps[1]}}</p>
         <p>95%-confidence interval: +/- {{trips_over_time_moe[1]}}</p>
         {{trips_over_time_linechart}}
-        <p class="measure info">
-            {{trips_over_time_measure[0]}}: {{trips_over_time_measure[1]}}</p>
+        {{trips_over_time_measure}}
         <p class ="info">
             {{trips_over_time_info}}
         </p>
@@ -49,8 +48,7 @@
         <p>privacy budget alternative: {{trips_per_weekday_eps[1]}}</p>
         <p>95%-confidence interval: +/- {{trips_per_weekday_moe[1]}}</p>
         {{trips_per_weekday_barchart}}
-        <p class="measure info">
-            {{trips_per_weekday_measure[0]}}: {{trips_per_weekday_measure[1]}}</p>
+        {{trips_per_weekday_measure}}}}
     </div>
     {% endif %} 
 
@@ -62,8 +60,7 @@
         <p>privacy budget alternative: {{ trips_per_hour_eps[1]}}</p>
         <p>95%-confidence interval: +/- {{trips_per_hour_moe[1]}}</p>
         {{trips_per_hour_linechart}}
-        <p class="measure info">
-            {{trips_per_hour_measure[0]}}: {{trips_per_hour_measure[1]}}</p>
+        {{trips_per_hour_measure}}
     </div>
     {% endif %}
 </div>

@@ -23,16 +23,14 @@
     <p>Base: {{points_outside_tessellation_info_base}}</p>
     <p>Alternative: {{points_outside_tessellation_info_alternative}}</p>
 
-    <p class="measure info">
-        {{visits_per_tile_measure[0]}}: {{visits_per_tile_measure[1]}}</p>
+    {{visits_per_tile_measure}}
 </div>
 
 
 <div>
     <h4>Five-number summary: visits per tile</h4>
     {{visits_per_tile_summary_table}}
-    <p class="measure info">
-        {{visits_per_tile_summary_measure[0]}}: {{visits_per_tile_summary_measure[1]}}</p>
+    {{visits_per_tile_summary_measure}}
     <h4>Cumulated sum of visits per tile</h4>
     {{visits_per_tile_cumsum_linechart}}
     <p class="info">
@@ -45,8 +43,7 @@
 <div>
     <h4>Ranking of most frequently visited tiles</h4>
     {{most_freq_tiles_ranking}}
-    <p class="measure info">
-        {{visits_per_tile_ranking[0]}}: {{visits_per_tile_ranking[1]}}</p>
+    {{visits_per_tile_ranking}}
 </div>
 {% endif %} 
 
@@ -65,7 +62,6 @@
         <div class = "map_png">
         {{visits_per_tile_time_map}}
     </div>
-    <p class="measure info">
-        {{visits_per_time_tile_measure[0]}}: {{visits_per_time_tile_measure[1]}}</p>
+    {{visits_per_time_tile_measure}}
 </div>
 {% endif %}

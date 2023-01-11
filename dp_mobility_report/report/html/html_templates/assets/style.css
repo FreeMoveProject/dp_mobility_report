@@ -3,7 +3,7 @@ div {
 }
 
 p{
-    max-width: 80%;
+    max-width: 100%;
     margin: 6px 0px 6px 0px;
 }
 
@@ -20,7 +20,7 @@ p{
 }
 
 .warning {
-    width: 80%;
+    width: 100%;
     background-color: #FFCCCB;
     padding: 8px;
     border: solid #a94442;
@@ -47,7 +47,7 @@ p{
 }
 
 .medium-size-table{
-    max-width: 80%;
+    max-width: 100%;
 }
 
 .map_png{

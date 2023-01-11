@@ -18,6 +18,7 @@ from dp_mobility_report.report.html.html_utils import (
     render_benchmark_summary,
     render_eps,
     render_summary,
+    all_available_measures
 )
 from dp_mobility_report.visualization import plot, v_utils
 
@@ -93,6 +94,7 @@ def render_benchmark_place_analysis(
     report_base = benchmark.report_base.report
     report_alternative = benchmark.report_alternative.report
     tessellation = benchmark.report_base.tessellation
+    template_measures = get_template("similarity_measures.html")
 
     args["output_filename"] = output_filename
     args[
@@ -141,18 +143,11 @@ def render_benchmark_place_analysis(
             report_base[const.VISITS_PER_TILE],
             report_alternative[const.VISITS_PER_TILE],
         )
-        args["visits_per_tile_measure"] = (
-            const.format[benchmark.measure_selection[const.VISITS_PER_TILE]],
-            fmt(benchmark.similarity_measures[const.VISITS_PER_TILE]),
-        )
-        args["visits_per_tile_summary_measure"] = (
-            const.format[benchmark.measure_selection[const.VISITS_PER_TILE_QUARTILES]],
-            fmt(benchmark.similarity_measures[const.VISITS_PER_TILE_QUARTILES]),
-        )
-        args["visits_per_tile_ranking"] = (
-            const.format[benchmark.measure_selection[const.VISITS_PER_TILE_RANKING]],
-            fmt(benchmark.similarity_measures[const.VISITS_PER_TILE_RANKING]),
-        )
+        args["visits_per_tile_measure"] = template_measures.render(all_available_measures(const.VISITS_PER_TILE, benchmark))
+
+        args["visits_per_tile_summary_measure"] = template_measures.render(all_available_measures(const.VISITS_PER_TILE_QUARTILES, benchmark))
+
+        args["visits_per_tile_ranking"] = template_measures.render(all_available_measures(const.VISITS_PER_TILE_RANKING, benchmark))
 
     if const.VISITS_PER_TIME_TILE not in benchmark.analysis_exclusion:
         args["visits_per_time_tile_eps"] = (
@@ -172,10 +167,7 @@ def render_benchmark_place_analysis(
             tessellation,
             THRESHOLD,
         )
-        args["visits_per_time_tile_measure"] = (
-            const.format[benchmark.measure_selection[const.VISITS_PER_TIME_TILE]],
-            fmt(benchmark.similarity_measures[const.VISITS_PER_TIME_TILE]),
-        )
+        args["visits_per_time_tile_measure"] = template_measures.render(all_available_measures(const.VISITS_PER_TIME_TILE, benchmark))
 
     template_structure = get_template("place_analysis_segment_benchmark.html")
 

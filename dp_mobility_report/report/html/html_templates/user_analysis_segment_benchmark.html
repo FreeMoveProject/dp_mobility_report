@@ -9,15 +9,13 @@
     <p class="grey info">
         {{trips_per_user_info}}
     </p>
-    <p class="measure info">
-        {{trips_per_user_measure[0]}}: {{trips_per_user_measure[1]}}</p>
+    {{trips_per_user_measure}}
     <h4>Five number summary: trips per user</h4>
     {{trips_per_user_summary_table}}
     <p class="info">
         {{trips_per_user_moe_info}}
     </p>
-    <p class="measure info">
-        {{trips_per_user_summary_measure[0]}}: {{trips_per_user_summary_measure[1]}}</p>
+    {{trips_per_user_summary_measure}}
     </p>
 </div>
 {% endif %}
@@ -28,8 +26,7 @@
     <p>privacy budget base: {{time_between_traj_eps[0]}}</p>
     <p>privacy budget alternative: {{time_between_traj_eps[1]}}</p>
     {{time_between_traj_hist}}
-    <p class="measure info">
-        {{time_between_traj_measure[0]}}: {{time_between_traj_measure[1]}}</p>
+    {{time_between_traj_measure}}
     <h4>Five number summary: time between consecutive trips of a user</h4>
     {{time_between_traj_summary_table}}
     <p class="info">
@@ -40,8 +37,7 @@
         {{plausi_check_info}}
     </p>
     {% endif %}
-    <p class="measure info">
-        {{time_between_traj_summary_measure[0]}}: {{time_between_traj_summary_measure[1]}}</p>
+    {{time_between_traj_summary_measure}}
     </p>
 
 </div>
@@ -60,16 +56,14 @@
     {{radius_of_gyration_hist}}
     <p class="grey info">
         {{radius_of_gyration_hist_info}}
-    <p class="measure info">
-        {{radius_of_gyration_measure[0]}}: {{radius_of_gyration_measure[1]}}</p>
+    {{radius_of_gyration_measure}}
     </p>
     <h4>Five number summary: radius of gyration</h4>
     {{radius_of_gyration_summary_table}}
     <p class="info">
         {{radius_of_gyration_moe_info}}
     </p>
-    <p class="measure info">
-        {{radius_of_gyration_summary_measure[0]}}: {{radius_of_gyration_summary_measure[1]}}</p>
+    {{radius_of_gyration_summary_measure}}
 </div>
 {% endif %}
 
@@ -79,15 +73,13 @@
     <p>privacy budget base: {{distinct_tiles_user_eps[0]}}</p>
     <p>privacy budget alternative: {{distinct_tiles_user_eps[1]}}</p>
     {{distinct_tiles_user_hist}}
-    <p class="measure info">
-        {{distinct_tiles_measure[0]}}: {{distinct_tiles_measure[1]}}</p>
+    {{distinct_tiles_measure}}
     <h4>Five number summary: mobility entropy</h4>
     {{distinct_tiles_user_summary_table}}
     <p class="info">
         {{distinct_tiles_moe_info}}
     </p>
-    <p class="measure info">
-        {{distinct_tiles_summary_measure[0]}}: {{distinct_tiles_summary_measure[1]}}</p>
+    {{distinct_tiles_summary_measure}}
 </div>
 {% endif %}
 
@@ -107,14 +99,12 @@
     </p>
     
     {{mobility_entropy_hist}}
-    <p class="measure info">
-        {{mobility_entropy_measure[0]}}: {{mobility_entropy_measure[1]}}</p>
+    {{mobility_entropy_measure}}
     <h4>Five number summary: mobility entropy</h4>
     {{mobility_entropy_summary_table}}
     <p class="info">
         {{mobility_entropy_moe_info}}
     </p>
-    <p class="measure info">
-        {{mobility_entropy_summary_measure[0]}}: {{mobility_entropy_summary_measure[1]}}</p>
+    {{mobility_entropy_summary_measure}}
 </div>
 {% endif %}
