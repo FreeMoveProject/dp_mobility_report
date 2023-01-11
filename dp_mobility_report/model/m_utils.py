@@ -58,9 +58,9 @@ def hist_section(
 
     # if there are max. 10 integers, use value counts of single integers instead of bin ranges for histogram
     if (
-        (bin_range is None or bin_range == 1)
-        and (bin_type is int)
-        and (hist_max - hist_min < 10)
+        (bin_type is int) and
+        ((bin_range == 1) or
+        ((bin_range is None) and (hist_max - hist_min < 10)))
     ):
         bins = np.array(range(int(quartiles["min"]), int(quartiles["max"]) + 1))
         counts = np.bincount(series, minlength=int(quartiles["max"]) + 1)[
