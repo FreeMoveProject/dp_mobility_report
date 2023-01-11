@@ -624,7 +624,7 @@ def get_selected_measures(benchmarkreport: "BenchmarkReport") -> dict:
                 similarity_measures[analysis] = benchmarkreport.kt[analysis]
         except KeyError:
             warnings.warn(
-                f"The selected measure {selected_measure} for {analysis} cannot be computed. Value for {analysis} in `self.similarity_measures` is set to `None`."
+                f"The selected measure {selected_measure} for {analysis} cannot be computed. Value for {analysis} in `self.similarity_measures` will be set to `None`."
             )
             similarity_measures[analysis] = None
 

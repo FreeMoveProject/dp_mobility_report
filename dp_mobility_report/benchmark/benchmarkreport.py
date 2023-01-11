@@ -173,11 +173,12 @@ class BenchmarkReport:
         )
 
         if measure_selection is None:
-            self._measure_selection = b_utils.default_measure_selection()
+            measure_selection = b_utils.default_measure_selection()
         else:
-            self._measure_selection = preprocessing.validate_measure_selection(
+            measure_selection = preprocessing.validate_measure_selection(
                 measure_selection, self.analysis_exclusion
             )
+        self._measure_selection = b_utils.remove_excluded_analyses_from_measure_selection(measure_selection, self.analysis_exclusion)
 
         (
             self._re,
