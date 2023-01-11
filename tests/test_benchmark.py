@@ -227,6 +227,7 @@ def test_measure_selection():
             const.VISITS_PER_TIME_TILE,
             const.VISITS_PER_TILE_RANKING,
             const.OD_FLOWS_RANKING,
+            const.OD_FLOWS_QUARTILES
         ],
     ) == {const.OD_FLOWS: const.SMAPE}
 

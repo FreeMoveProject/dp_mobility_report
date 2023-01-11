@@ -548,7 +548,7 @@ def compute_similarity_measures(
             true=report_base[const.RADIUS_OF_GYRATION].quartiles,
         )
 
-    if const.USER_TILE_COUNT_QUARTILES not in analysis_exclusion:
+    if const.USER_TILE_COUNT not in analysis_exclusion:
         kld_dict[const.USER_TILE_COUNT] = entropy(
             pk=report_alternative[const.USER_TILE_COUNT].data[0],
             qk=report_base[const.USER_TILE_COUNT].data[0],

@@ -300,7 +300,7 @@ def merge_innerflows(base_flows, alternative_flows):
     flows["flow_alt"] = flows["flow_alt"] / np.sum(flows["flow_alt"])
     flows["flow_base"] = flows["flow_base"].fillna(0)
     flows["flow_alt"] = flows["flow_alt"].fillna(0)
-    flows["flow"] = flows["flow_alt"] - flows["flow_base"]
+    flows["deviation"] = flows["flow_alt"] - flows["flow_base"]
     flows.drop(["flow_alt", "flow_base"], axis=1, inplace=True)
     return flows
 
@@ -335,9 +335,11 @@ def render_benchmark_origin_destination_flows(
         right_on="origin",
     )
 
+    tessellation_intra_flows.deviation.fillna(0, inplace=True)
+
     map, intra_tile_legend = plot.choropleth_map(
         tessellation_intra_flows,
-        "flow",
+        "deviation",
         "deviation from base intra-tile flows",
         layer_name="Intra-tile flows",
     )  # get innerflows as color for choropleth
