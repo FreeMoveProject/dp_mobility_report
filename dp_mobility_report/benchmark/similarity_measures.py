@@ -31,7 +31,7 @@ def earth_movers_distance1D(u_hist: tuple, v_hist: tuple) -> float:
     u_weights = u_hist[0]
     v_weights = v_hist[0]
     if (sum(u_weights) == 0) | (sum(v_weights) == 0):
-        return None
+        return np.nan
     return wasserstein_distance(u_values, v_values, u_weights, v_weights)
 
 
@@ -110,17 +110,11 @@ def earth_movers_distance(
     arr_estimate: np.array, arr_true: np.array, cost_matrix: np.array
 ) -> float:  # based on haversine distance
     # normalize input and assign needed type for cv2
-    if all(
-        arr_true == 0
-    ):  # if all values are 0, change all to 1 (otherwise emd cannot be computed)
-        arr_true = np.repeat(1, len(arr_true))
+    if all(arr_estimate == 0) | (all(arr_true) == 0):
+        return np.nan
     arr_true = (arr_true / arr_true.sum() * 100).round(2)
     sig_true = arr_true.astype(np.float32)
 
-    if all(
-        arr_estimate == 0
-    ):  # if all values are 0, change all to 1 (otherwise emd cannot be computed)
-        arr_estimate = np.repeat(1, len(arr_estimate))
     arr_estimate = (arr_estimate / arr_estimate.sum() * 100).round(2)
     sig_estimate = arr_estimate.astype(np.float32)
 

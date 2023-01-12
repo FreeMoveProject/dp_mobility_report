@@ -2,13 +2,17 @@ import base64
 import io
 
 from matplotlib.figure import Figure
-
+import re
 
 def fig_to_html(fig: Figure) -> str:
     img = io.StringIO()
     fig.savefig(img, format="svg", bbox_inches="tight")
     img_string = img.getvalue()
     return img_string
+
+def resize_width(img_string: str, target_width: int) -> str:
+    target_string='width="'+str(target_width)+'%"'
+    return re.sub('width="(.*?)pt"',target_string, img_string)
 
 
 def fig_to_html_as_png(fig: Figure) -> str:

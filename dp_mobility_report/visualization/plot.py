@@ -264,11 +264,14 @@ def choropleth_map(
     aliases: list = None,
     diverging_cmap: bool = False,
     layer_name: str = "Visits",
+    map: folium.Map = None,
+    show: bool = True,
 ) -> folium.Map:
     poly_json = counts_per_tile_gdf.to_json()
 
-    center_x, center_y = _get_center(counts_per_tile_gdf)
-    m = _basemap(center_x, center_y)
+    if not map:
+        center_x, center_y = _get_center(counts_per_tile_gdf)
+        map = _basemap(center_x, center_y)
     min_scale = (
         counts_per_tile_gdf[fill_color_name].min() if min_scale is None else min_scale
     )
@@ -277,7 +280,7 @@ def choropleth_map(
     if diverging_cmap:  # TODO können wir das hier einfach ändern??
         vmin = -1
         vmax = 1
-        cmap = mpl.cm.RdBu_r
+        cmap = mpl.cm.PiYG #RdBu_r
         norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
     else:
         cmap = mpl.cm.YlOrRd
@@ -309,9 +312,11 @@ def choropleth_map(
     folium.GeoJson(
         poly_json,
         name=layer_name,
+        overlay=True,
+        show=show,
         style_function=_style_function,
         popup=folium.GeoJsonPopup(fields=fields, aliases=aliases),
-    ).add_to(m)
+    ).add_to(map)
 
     # colorbar object to create custom legend
     colorbar, ax = plt.subplots(figsize=(6, 1))
@@ -325,7 +330,7 @@ def choropleth_map(
     )
     # TODO: add legend directly to map
 
-    return m, colorbar
+    return map, colorbar
 
 
 def multi_choropleth_map(
