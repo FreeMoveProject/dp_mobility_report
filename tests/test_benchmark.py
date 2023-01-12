@@ -39,6 +39,32 @@ def test_tessellation():
 
 
 @pytest.fixture
+def test_data():
+    """Load a test dataset."""
+    return pd.read_csv("tests/test_files/test_data.csv")
+
+@pytest.fixture
+def test_data_alternative():
+    """Load an alternative test dataset."""
+    return pd.read_csv("tests/test_files/test_data_new_dates.csv", nrows=50)
+
+@pytest.fixture
+def test_data_sequence():
+    test_data = pd.read_csv("tests/test_files/test_data.csv")
+    test_data["datetime"] = (
+        test_data.groupby("tid").rank(method="first").uid.astype(int)
+    )
+    return test_data
+
+@pytest.fixture
+def test_data_sequence_alternative():
+    test_data = pd.read_csv("tests/test_files/test_data_new_dates.csv", nrows=50)
+    test_data["datetime"] = (
+        test_data.groupby("tid").rank(method="first").uid.astype(int)
+    )
+    return test_data
+
+@pytest.fixture
 def benchmark_report():
     test_data = pd.read_csv("tests/test_files/test_data.csv")
     test_data_alternative = pd.read_csv(
@@ -236,3 +262,49 @@ def test_benchmark_to_file(benchmark_report):
 
     benchmark_report.to_file("test_benchmark.html")
     # test linechart
+
+def test_to_html_file(test_data, test_data_alternative, test_tessellation, tmp_path):
+
+    file_name = tmp_path / "html/test_output1.html"
+    file_name.parent.mkdir()
+    BenchmarkReport(df_base=test_data, tessellation=test_tessellation, df_alternative=test_data_alternative, privacy_budget_base=None, privacy_budget_alternative=15).to_file(
+        file_name
+    )
+    assert file_name.is_file()
+
+    file_name = tmp_path / "html/test_output2.html"
+    BenchmarkReport(df_base=test_data, tessellation=test_tessellation, df_alternative=test_data_alternative, privacy_budget_base=15, privacy_budget_alternative=None).to_file(
+        file_name
+    )
+    assert file_name.is_file()
+
+    file_name = tmp_path / "html/test_output3.html"
+    BenchmarkReport(
+        df_base=test_data, 
+        tessellation=test_tessellation, 
+        df_alternative=test_data_alternative, 
+        privacy_budget_base=100, 
+        privacy_budget_alternative=None,
+        analysis_exclusion=[
+            const.RADIUS_OF_GYRATION,
+            const.MOBILITY_ENTROPY,
+            const.TRIPS_PER_USER,
+        ],
+    ).to_file(file_name)
+    assert file_name.is_file()
+
+    # without tessellation
+    file_name = tmp_path / "html/test_output4.html"
+    BenchmarkReport(
+        df_base=test_data, 
+        df_alternative=test_data_alternative, 
+        ).to_file(file_name)
+    assert file_name.is_file()
+
+    # without timestamps
+    file_name = tmp_path / "html/test_output5.html"
+    BenchmarkReport(
+        df_base=test_data_sequence,
+        df_alternative=test_data_sequence_alternative,
+        ).to_file(file_name)
+    assert file_name.is_file()
