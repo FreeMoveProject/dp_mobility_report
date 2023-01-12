@@ -93,6 +93,14 @@ def unify_trips_over_time(base: DfSection, alternative: DfSection):
         ]
     ).sort_values(const.DATETIME)
 
+def _pad_missing_values(hist_bins, hist_values, bins_union):
+    missing_bins = [
+        i for i in bins_union if i not in hist_bins
+    ]
+    n_missing_left = sum(missing_bins < min(hist_bins))
+    n_missing_right = sum(missing_bins > max(hist_bins))
+    return np.append(np.zeros(n_missing_left), np.append(hist_values, np.zeros(n_missing_right)))
+
 
 # check if histograms of both reports have similar bins
 # if bins are missing they can only be at the lower end of the bins as bin_range and max_bins are similar
@@ -121,34 +129,10 @@ def unify_histogram_bins(
                     hist
                 ].data
 
-                max_base = report_base[hist].quartiles["max"]
-                max_alternative = report_alternative[hist].quartiles["max"]
-
-                if isinstance(max_base, timedelta):  # needed for user_time_delta
-                    max_base = max_base.total_seconds() / 3600
-                    max_alternative = max_alternative.total_seconds() / 3600
-
-                combined_max = max([max_base, max_alternative])
-                if math.isinf(hist_base_bins[-1]):
-                    hist_base_bins[-1] = combined_max
-                if math.isinf(hist_alternative_bins[-1]):
-                    hist_alternative_bins[-1] = combined_max
-
                 bins_union = np.union1d(hist_alternative_bins, hist_base_bins)
 
-                missing_in_base = [i for i in bins_union if i not in hist_base_bins]
-                added_value_indizes = np.searchsorted(bins_union, missing_in_base)
-                for i in added_value_indizes:
-                    hist_base_values = np.insert(hist_base_values, i, 0)
-
-                missing_in_alternative = [
-                    i for i in bins_union if i not in hist_alternative_bins
-                ]
-                added_value_indizes = np.searchsorted(
-                    bins_union, missing_in_alternative
-                )
-                for i in added_value_indizes:
-                    hist_alternative_values = np.insert(hist_alternative_values, i, 0)
+                hist_base_values = _pad_missing_values(hist_base_bins, hist_base_values, bins_union)
+                hist_alternative_values = _pad_missing_values(hist_alternative_bins, hist_alternative_values, bins_union)
 
                 report_base[hist].data = (hist_base_values, bins_union)
                 report_alternative[hist].data = (hist_alternative_values, bins_union)
