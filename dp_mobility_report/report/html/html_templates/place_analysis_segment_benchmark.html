@@ -16,10 +16,20 @@
         {{counts_per_tile_map}}
     </div>
 --->
-    
-    <div>
-        {{visits_per_tile_legend}}
+<div class="container_legend">
+    <div class="row">
+      <div class="col-sm">
+        <p style="text-align: center">Deviations from base:</p>
+        {{visits_per_tile_legend[0]}}      </div>
+      <div class="col-sm">
+        <p style="text-align: center">Visits per tile base:</p>
+        {{visits_per_tile_legend[1]}}      </div>
+      <div class="col-sm">
+        <p style="text-align: center">Visits per tile alternative:</p>
+        {{visits_per_tile_legend[2]}}      </div>
     </div>
+  </div>
+
     <p>Base: {{points_outside_tessellation_info_base}}</p>
     <p>Alternative: {{points_outside_tessellation_info_alternative}}</p>
 

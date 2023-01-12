@@ -12,6 +12,11 @@ p{
     padding: 40px 80px 80px 40px;
 }
 
+.container_legend {
+    max-width: 100%;
+    padding: 40px 80px 80px 40px;
+}
+
 .segment {
     margin-top: 20px;
     padding: 35px;
@@ -69,3 +74,5 @@ img {
 .measure{
     background-color: #f8ccb4;
 }
+
+

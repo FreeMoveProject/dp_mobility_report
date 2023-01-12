@@ -21,7 +21,7 @@ from dp_mobility_report.report.html.html_utils import (
     all_available_measures
 )
 from dp_mobility_report.visualization import plot, v_utils
-
+import folium
 
 def render_place_analysis(
     dpmreport: "DpMobilityReport",
@@ -215,7 +215,6 @@ def render_visits_per_tile(
     plt.close()
     return legend_html
 
-
 def render_benchmark_visits_per_tile(
     visits_per_tile_base: DfSection,
     visits_per_tile_alternative: DfSection,
@@ -240,6 +239,8 @@ def render_benchmark_visits_per_tile(
         {
             const.TILE_ID: visits_per_tile_base_sorted[const.TILE_ID],
             "deviation": relative_alternative - relative_base,
+            "relative_base": relative_base,
+            "relative_alternative": relative_alternative,
         }
     )
 
@@ -251,7 +252,7 @@ def render_benchmark_visits_per_tile(
         left_on=const.TILE_ID,
         right_on=const.TILE_ID,
     )
-
+  
     # # filter visit counts above error threshold
     # moe_deviation = (
     #     visits_per_tile.margin_of_error_laplace / counts_per_tile_gdf["deviation"]
@@ -262,16 +263,99 @@ def render_benchmark_visits_per_tile(
     map, legend = plot.choropleth_map(
         counts_per_tile_gdf,
         "deviation",
-        scale_title="deviation of relative counts from base \n deviation = alternative - base",
+        scale_title="deviation of relative counts per tile from base",
         aliases=["Tile ID", "Tile Name", "deviation"],
         diverging_cmap=True,
+        layer_name="Deviation",
     )
+
+    map, legend_base = plot.choropleth_map(
+        counts_per_tile_gdf,
+        "relative_base",
+        scale_title="relative counts per tile",
+        aliases=["Tile ID", "Tile Name", "relative counts"],
+        diverging_cmap=False,
+        map=map,
+        layer_name="Relative visits base",
+        show=False,
+    )
+    map, legend_alternative = plot.choropleth_map(
+        counts_per_tile_gdf,
+        "relative_alternative",
+        scale_title="relative counts per tile",
+        aliases=["Tile ID", "Tile Name", "relative counts"],
+        diverging_cmap=False,
+        map=map,
+        layer_name="Relative visits alternative",
+        show=False,
+    )
+    
+    folium.LayerControl(collapsed=False).add_to(map)
 
     map.save(os.path.join(temp_map_folder, "visits_per_tile_map.html"))
 
-    legend_html = v_utils.fig_to_html(legend)
+    legend_html_deviation = v_utils.fig_to_html(legend)
+    legend_html_base = v_utils.fig_to_html(legend_base)
+    legend_html_alternative = v_utils.fig_to_html(legend_alternative)
     plt.close()
-    return legend_html
+    return [v_utils.resize_width(legend_html_deviation, 100), v_utils.resize_width(legend_html_base,100), v_utils.resize_width(legend_html_alternative,100)]
+
+# def render_benchmark_visits_per_tile(
+#     visits_per_tile_base: DfSection,
+#     visits_per_tile_alternative: DfSection,
+#     tessellation: GeoDataFrame,
+#     threshold: float,
+#     temp_map_folder: Path,
+# ) -> str:
+
+#     visits_per_tile_base_sorted = visits_per_tile_base.data.sort_values("tile_id")
+#     visits_per_tile_alternative_sorted = visits_per_tile_alternative.data.sort_values(
+#         "tile_id"
+#     )
+#     relative_base = (
+#         visits_per_tile_base_sorted["visits"]
+#         / visits_per_tile_base_sorted["visits"].sum()
+#     )
+#     relative_alternative = (
+#         visits_per_tile_alternative_sorted["visits"]
+#         / visits_per_tile_alternative_sorted["visits"].sum()
+#     )
+#     deviation_from_base = pd.DataFrame(
+#         {
+#             const.TILE_ID: visits_per_tile_base_sorted[const.TILE_ID],
+#             "deviation": relative_alternative - relative_base,
+#         }
+#     )
+
+#     # merge count and tessellation
+#     counts_per_tile_gdf = pd.merge(
+#         tessellation,
+#         deviation_from_base,
+#         how="left",
+#         left_on=const.TILE_ID,
+#         right_on=const.TILE_ID,
+#     )
+
+#     # # filter visit counts above error threshold
+#     # moe_deviation = (
+#     #     visits_per_tile.margin_of_error_laplace / counts_per_tile_gdf["deviation"]
+#     # )
+
+#     # counts_per_tile_gdf.loc[moe_deviation > threshold, "visits"] = None
+
+#     map, legend = plot.choropleth_map(
+#         counts_per_tile_gdf,
+#         "deviation",
+#         scale_title="deviation of relative counts from base \n deviation = alternative - base",
+#         aliases=["Tile ID", "Tile Name", "deviation"],
+#         diverging_cmap=True,
+#     )
+
+#     map.save(os.path.join(temp_map_folder, "visits_per_tile_map.html"))
+
+#     legend_html = v_utils.fig_to_html(legend)
+#     plt.close()
+#     return legend_html
 
 
 def render_visits_per_tile_cumsum(
