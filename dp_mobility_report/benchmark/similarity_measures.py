@@ -2,12 +2,13 @@ import warnings
 from typing import TYPE_CHECKING, Union
 
 import cv2
+from datetime import timedelta
 import numpy as np
 import pandas as pd
 from geopandas import GeoDataFrame
 from haversine import Unit, haversine
 from scipy.spatial import distance
-from scipy.stats import entropy, stats, wasserstein_distance
+from scipy.stats import entropy, kendalltau, wasserstein_distance
 
 from dp_mobility_report import constants as const
 
@@ -18,16 +19,29 @@ if TYPE_CHECKING:
 def _moving_average(arr: np.array, size: int) -> np.array:
     return np.convolve(arr, np.ones(size), "valid") / size
 
+def _replace_inf_with_max(bins, max_value):
+    if np.isinf(bins[-1]):
+        if isinstance(max_value, timedelta):  # needed for user_time_delta
+            max_value = max_value.total_seconds() / 3600
+        return np.append(bins[:-1], max_value)
+    return bins
 
-def earth_movers_distance1D(u_hist: tuple, v_hist: tuple) -> float:
-    if len(u_hist[0]) == len(
-        u_hist[1]
-    ):  # checks for histogram buckets with exact sizes or ranges
-        u_values = u_hist[1]
-        v_values = v_hist[1]
-    else:  # computes moving average if histogram buckets are in a range
-        u_values = _moving_average(u_hist[1], 2)
-        v_values = _moving_average(v_hist[1], 2)
+def earth_movers_distance1D(u_hist: tuple, v_hist: tuple, u_max: Union[int, float], v_max: Union[int, float]) -> float:
+    # in emd terms, hist_bins(x-axis) are values and hist_values(y-axis) are weights
+
+    # bins greater than defined hist_max values are summarized as a "greater" bin, named "inf"
+    # to compute the emd, the actual max value is needed
+    u_hist_bins = _replace_inf_with_max(u_hist[1], u_max)
+    v_hist_bins = _replace_inf_with_max(v_hist[1], v_max)
+
+    # distinguish between single int bins and ranges 
+    if len(u_hist[0]) == len(u_hist_bins):  
+        u_values = u_hist_bins
+        v_values = v_hist_bins
+    else:  # computes moving average if hist buckets within a range
+        u_values = _moving_average(u_hist_bins, 2)
+        v_values = _moving_average(v_hist_bins, 2)
+
     u_weights = u_hist[0]
     v_weights = v_hist[0]
     if (sum(u_weights) == 0) | (sum(v_weights) == 0):
@@ -109,12 +123,14 @@ def _compute_cost_matrix(tessellation: GeoDataFrame) -> np.array:
 def earth_movers_distance(
     arr_estimate: np.array, arr_true: np.array, cost_matrix: np.array
 ) -> float:  # based on haversine distance
-    # normalize input and assign needed type for cv2
-    if all(arr_estimate == 0) | (all(arr_true) == 0):
+
+    # set values to 1 (as before) or stay with nan, as now? especially for time windows?
+    if (all(arr_estimate == 0)) | (all(arr_true == 0)):
         return np.nan
     arr_true = (arr_true / arr_true.sum() * 100).round(2)
     sig_true = arr_true.astype(np.float32)
 
+    # normalize input and assign needed type for cv2
     arr_estimate = (arr_estimate / arr_estimate.sum() * 100).round(2)
     sig_estimate = arr_estimate.astype(np.float32)
 
@@ -266,10 +282,14 @@ def compute_similarity_measures(
             .data.sort_values(by=["visits"], ascending=False, ignore_index=True)
             .truncate(after=9)
         )
-        kendall_dict[const.VISITS_PER_TILE_RANKING], _ = stats.kendalltau(
-            most_freq_base["tile_name"], most_freq_alternative["tile_name"]
-        )
 
+        # mute kendall_tau warning by replacing str tile_ids with ints
+        tile_id_to_index = {tile_id: i for tile_id, i in zip(tessellation[const.TILE_ID], range(0,len(tessellation)))}
+
+        kendall_dict[const.VISITS_PER_TILE_RANKING], _ = kendalltau(
+            [tile_id_to_index[tile_id] for tile_id in most_freq_base[const.TILE_ID]],
+            [tile_id_to_index[tile_id] for tile_id in most_freq_alternative[const.TILE_ID]]
+        )
         top_n_coverage_dict[const.VISITS_PER_TILE_RANKING] = top_n_coverage(list(most_freq_base[const.TILE_ID]), list(most_freq_alternative[const.TILE_ID]))
 
         # tile_centroids = (
@@ -380,7 +400,8 @@ def compute_similarity_measures(
                     cost_matrix=cost_matrix,
                 )
             )
-        emd_dict[const.VISITS_PER_TIME_TILE] = np.mean(visits_per_time_tile_emd)
+            # TODO: mean including nan or not?
+        emd_dict[const.VISITS_PER_TIME_TILE] = np.nanmean(visits_per_time_tile_emd)
 
     # Origin-Destination
     if const.OD_FLOWS not in analysis_exclusion:
@@ -419,7 +440,7 @@ def compute_similarity_measures(
         )
 
         # TODO: how to set top n?
-        kendall_dict[const.OD_FLOWS_RANKING], _ = stats.kendalltau(
+        kendall_dict[const.OD_FLOWS_RANKING], _ = kendalltau(
             list(rel_alternative.sort_values(ascending=False).index.values)[:10],
             list(rel_base.sort_values(ascending=False).index.values)[:10],
         )
@@ -445,9 +466,13 @@ def compute_similarity_measures(
             estimate=report_alternative[const.TRAVEL_TIME].data[0],
             true=report_base[const.TRAVEL_TIME].data[0],
         )
+    # TODO: fix warning in travel time emd: /Users/alexandra/opt/anaconda3/envs/dpmr/lib/python3.10/site-packages/numpy/lib/function_base.py:1447: RuntimeWarning: invalid value encountered in subtract a = op(a[slice1], a[slice2])
         emd_dict[const.TRAVEL_TIME] = earth_movers_distance1D(
             report_alternative[const.TRAVEL_TIME].data,
             report_base[const.TRAVEL_TIME].data,
+            report_alternative[const.TRAVEL_TIME].quartiles["max"],
+            report_base[const.TRAVEL_TIME].quartiles["max"],
+
         )
         # Quartiles
         smape_dict[const.TRAVEL_TIME_QUARTILES] = symmetric_mape(
@@ -471,6 +496,8 @@ def compute_similarity_measures(
         emd_dict[const.JUMP_LENGTH] = earth_movers_distance1D(
             report_alternative[const.JUMP_LENGTH].data,
             report_base[const.JUMP_LENGTH].data,
+            report_alternative[const.JUMP_LENGTH].quartiles["max"],
+            report_base[const.JUMP_LENGTH].quartiles["max"],
         )
         # Quartiles
         smape_dict[const.JUMP_LENGTH_QUARTILES] = symmetric_mape(
@@ -494,6 +521,8 @@ def compute_similarity_measures(
         emd_dict[const.TRIPS_PER_USER] = earth_movers_distance1D(
             report_alternative[const.TRIPS_PER_USER].data,
             report_base[const.TRIPS_PER_USER].data,
+            report_alternative[const.TRIPS_PER_USER].quartiles["max"],
+            report_base[const.TRIPS_PER_USER].quartiles["max"],
         )
         # smape_dict[const.TRIPS_PER_USER] = symmetric_mape(
         #     estimate = report_alternative[const.TRIPS_PER_USER].data[0],
@@ -525,6 +554,8 @@ def compute_similarity_measures(
             emd_dict[const.USER_TIME_DELTA] = earth_movers_distance1D(
                 report_alternative[const.USER_TIME_DELTA].data,
                 report_base[const.USER_TIME_DELTA].data,
+                report_alternative[const.USER_TIME_DELTA].quartiles["max"],
+                report_base[const.USER_TIME_DELTA].quartiles["max"],
             )
             smape_dict[const.USER_TIME_DELTA_QUARTILES] = symmetric_mape(
                 estimate=report_alternative[const.USER_TIME_DELTA].quartiles.apply(
@@ -548,6 +579,8 @@ def compute_similarity_measures(
         emd_dict[const.RADIUS_OF_GYRATION] = earth_movers_distance1D(
             report_alternative[const.RADIUS_OF_GYRATION].data,
             report_base[const.RADIUS_OF_GYRATION].data,
+            report_alternative[const.RADIUS_OF_GYRATION].quartiles["max"],
+            report_base[const.RADIUS_OF_GYRATION].quartiles["max"],
         )
         smape_dict[const.RADIUS_OF_GYRATION] = symmetric_mape(
             estimate=report_alternative[const.RADIUS_OF_GYRATION].data[0],
@@ -571,6 +604,8 @@ def compute_similarity_measures(
         emd_dict[const.USER_TILE_COUNT] = earth_movers_distance1D(
             report_alternative[const.USER_TILE_COUNT].data,
             report_base[const.USER_TILE_COUNT].data,
+            report_alternative[const.USER_TILE_COUNT].quartiles["max"],
+            report_base[const.USER_TILE_COUNT].quartiles["max"],
         )
         smape_dict[const.USER_TILE_COUNT] = symmetric_mape(
             estimate=report_alternative[const.USER_TILE_COUNT].data[0],
@@ -594,6 +629,8 @@ def compute_similarity_measures(
         emd_dict[const.MOBILITY_ENTROPY] = earth_movers_distance1D(
             report_alternative[const.MOBILITY_ENTROPY].data,
             report_base[const.MOBILITY_ENTROPY].data,
+            report_alternative[const.MOBILITY_ENTROPY].quartiles["max"],
+            report_base[const.MOBILITY_ENTROPY].quartiles["max"],
         )
         smape_dict[const.MOBILITY_ENTROPY] = symmetric_mape(
             estimate=report_alternative[const.MOBILITY_ENTROPY].data[0],
