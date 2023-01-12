@@ -118,6 +118,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
         emd_dict,
         smape_dict,
         kendall_dict,
+        top_n_cov_dict,
     ) = compute_similarity_measures(
         analysis_exclusion, alternative_dpmreport, base_dpmreport, test_tessellation
     )
@@ -127,6 +128,8 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
     assert isinstance(jsd_dict, dict)
     assert isinstance(emd_dict, dict)
     assert isinstance(smape_dict, dict)
+    assert isinstance(kendall_dict, dict)
+    assert isinstance(top_n_cov_dict, dict)
     assert round(jsd_dict[const.VISITS_PER_TILE], 3) == 0.041
     assert round(emd_dict[const.VISITS_PER_TILE], 2) == 315.75
     assert round(jsd_dict[const.VISITS_PER_TIME_TILE], 3) == 0.268
@@ -140,6 +143,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
         emd_dict,
         smape_dict,
         kendall_dict,
+        top_n_cov_dict,
     ) = compute_similarity_measures(
         analysis_exclusion, alternative_dpmreport, base_dpmreport, test_tessellation
     )
@@ -150,6 +154,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
     assert isinstance(emd_dict, dict)
     assert isinstance(smape_dict, dict)
     assert isinstance(kendall_dict, dict)
+    assert isinstance(top_n_cov_dict, dict)
 
 
 def test_combine_analysis_exclusion():
