@@ -268,7 +268,7 @@ def test_benchmark_to_file(benchmark_report):
     benchmark_report.to_file("test_benchmark.html")
     # test linechart
 
-def test_to_html_file(test_data, test_data_alternative, test_tessellation, tmp_path):
+def test_to_html_file(test_data, test_data_alternative, test_data_sequence, test_data_sequence_alternative, test_tessellation, tmp_path):
 
     file_name = tmp_path / "html/test_output1.html"
     file_name.parent.mkdir()
