@@ -4,6 +4,7 @@ import geopandas as gpd
 import jinja2
 import numpy as np
 from pandas import Series
+import math
 
 from dp_mobility_report import constants as const
 
@@ -109,6 +110,8 @@ def render_moe_info(margin_of_error: int) -> str:
 
 def fmt(value: Any) -> Any:
     if isinstance(value, (float, np.floating)):
+        if math.isinf(value):
+            return "not defined"
         value = round(value, 2)
     if isinstance(value, (float, np.floating, int, np.integer)) and not isinstance(
         value, bool
