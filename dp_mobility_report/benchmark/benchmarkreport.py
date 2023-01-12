@@ -25,7 +25,7 @@ class BenchmarkReport:
     """Evaluate the similarity of two (differentially private) mobility reports from one or two mobility datasets.
         This can be based on two datasets (``df_base`` and ``df_alternative``) or one dataset (``df_base``)) with different privacy settings.
         The arguments ``df``, ``privacy_budget``, ``user_privacy``, ``max_trips_per_user`` and ``budget_split`` can differ for the two datasets set with the according ending ``_base`` and ``_alternative``. The other arguments are the same for both reports.
-        For the evaluation, similarity measures (namely the relative error (RE), Jensen-Shannon divergence (JSD), Kullback-Leibler divergence (KLD), symmetric mean absolute percentage error (SMAPE) and the earth mover's distance (EMD)) are computed to quantify the statistical similarity for each analysis.
+        For the evaluation, similarity measures (namely the relative error (RE), Jensen-Shannon divergence (JSD), Kullback-Leibler divergence (KLD), symmetric mean absolute percentage error (SMAPE), the earth mover's distance (EMD), the Kendall correlation coefficient (KT) and the top n coverage (top_n-cov)) are computed to quantify the statistical similarity for each analysis.
         The evaluation, i.e., benchmark report, will be generated as an HTML file, using the ``.to_file()`` method.
 
     Args:
@@ -66,6 +66,7 @@ class BenchmarkReport:
     _emd: dict
     _smape: dict
     _kt: dict
+    _top_n_cov: dict
     _measure_selection: dict
     _similarity_measures: dict = {}
 
@@ -187,6 +188,7 @@ class BenchmarkReport:
             self._emd,
             self._smape,
             self._kt,
+            self._top_n_cov,
         ) = compute_similarity_measures(
             self.analysis_exclusion,
             self.report_alternative.report,
@@ -246,6 +248,11 @@ class BenchmarkReport:
     def kt(self) -> dict:
         """The Kendall's tau coefficient of base and alternative of all selected analyses, where applicable."""
         return self._kt
+
+    @property
+    def top_n_cov(self) -> dict:
+        """Top n coverage of rankings of base and alternative of all selected analyses, where applicable."""
+        return self._top_n_cov
 
     def to_file(
         self,

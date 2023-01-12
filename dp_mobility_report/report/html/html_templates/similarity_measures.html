@@ -24,6 +24,11 @@
     <br>
     {% endif %} 
 
+    {% if top_n_coverage %}
+    Top 10 coverage [0 to 1]: {{top_n_coverage}} 
+    <br>
+    {% endif %} 
+
     {% if relative_error %}
     Relative error [0 to inf]: {{relative_error}} 
     {% endif %}

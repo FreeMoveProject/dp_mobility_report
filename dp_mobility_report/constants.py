@@ -133,6 +133,7 @@ KLD = "kullback_leibler_divergence"
 EMD = "earth_movers_distance"
 SMAPE = "symmetric_mean_absolute_percentage_error"
 KT = "kendalls_tau"
+TOP_N = "top_n_coverage"
 
 format = {
     "jensen_shannon_divergence": "Jensen-Shannon divergence",

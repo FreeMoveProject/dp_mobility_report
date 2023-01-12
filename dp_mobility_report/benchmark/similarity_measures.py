@@ -63,7 +63,7 @@ def symmetric_mape(
     )
 
 
-def relative_error(estimate: int, true: int) -> int:
+def relative_error(estimate: int, true: int) -> float:
     if estimate is None:
         estimate = 0
     if true == 0:
@@ -71,10 +71,10 @@ def relative_error(estimate: int, true: int) -> int:
     return np.abs(true - estimate) / true
 
 
-def all_relative_errors(true_dict: dict, estimate_dict: dict) -> dict:
+def all_relative_errors(estimate_dict: dict, true_dict: dict) -> dict:
     re = {}
     for key in true_dict:
-        re[key] = relative_error(true_dict[key], estimate_dict[key])
+        re[key] = relative_error(estimate_dict[key], true_dict[key])
     return re
 
 
@@ -130,6 +130,13 @@ def earth_movers_distance(
     return emd_dist
 
 
+def top_n_coverage(top_n_tiles_base: list, top_n_tiles_alt: list) -> float:
+    top_n_base = len(top_n_tiles_base)
+    if top_n_base == 0:
+        return 0
+    top_n_alternative = len([x for x in top_n_tiles_alt if x in top_n_tiles_base])
+    return top_n_alternative / top_n_base
+
 def compute_similarity_measures(
     analysis_exclusion: list,
     report_alternative: dict,
@@ -143,6 +150,7 @@ def compute_similarity_measures(
     emd_dict: dict = {}
     smape_dict: dict = {}
     kendall_dict: dict = {}
+    top_n_coverage_dict: dict = {}
     cost_matrix = None
 
     # Statistics
@@ -252,6 +260,8 @@ def compute_similarity_measures(
         smape_dict[const.VISITS_PER_TILE] = symmetric_mape(
             estimate=rel_counts_alternative, true=rel_counts_base
         )
+
+        # TODO: set top n according to what?
         most_freq_base = (
             report_base[const.VISITS_PER_TILE]
             .data.sort_values(by=["visits"], ascending=False, ignore_index=True)
@@ -265,6 +275,8 @@ def compute_similarity_measures(
         kendall_dict[const.VISITS_PER_TILE_RANKING], _ = stats.kendalltau(
             most_freq_base["tile_name"], most_freq_alternative["tile_name"]
         )
+
+        top_n_coverage_dict[const.VISITS_PER_TILE_RANKING] = top_n_coverage(list(most_freq_base[const.TILE_ID]), list(most_freq_alternative[const.TILE_ID]))
 
         # tile_centroids = (
         #     tessellation.set_index(const.TILE_ID).to_crs(3395).centroid.to_crs(4326)
@@ -386,21 +398,21 @@ def compute_similarity_measures(
         ).drop_duplicates()
         all_od_combinations["flow"] = 0
 
-        estimate = (
+        od_flows_alternative = (
             pd.concat([report_alternative[const.OD_FLOWS].data, all_od_combinations])
             .drop_duplicates(["origin", "destination"], keep="first")
             .sort_values(["origin", "destination"])
             .flow
         )
-        true = (
+        od_flows_base = (
             pd.concat([report_base[const.OD_FLOWS].data, all_od_combinations])
             .drop_duplicates(["origin", "destination"], keep="first")
             .sort_values(["origin", "destination"])
             .flow
         )
 
-        rel_alternative = estimate / (estimate.sum())
-        rel_base = true / true.sum()
+        rel_alternative = od_flows_alternative / (od_flows_alternative.sum())
+        rel_base = od_flows_base / od_flows_base.sum()
 
         kld_dict[const.OD_FLOWS] = entropy(
             pk=rel_alternative.to_numpy(), qk=rel_base.to_numpy()
@@ -411,10 +423,15 @@ def compute_similarity_measures(
         smape_dict[const.OD_FLOWS] = symmetric_mape(
             estimate=rel_alternative.to_numpy(), true=rel_base.to_numpy()
         )
+
+        # TODO: how to set top n?
         kendall_dict[const.OD_FLOWS_RANKING], _ = stats.kendalltau(
             list(rel_alternative.sort_values(ascending=False).index.values)[:10],
             list(rel_base.sort_values(ascending=False).index.values)[:10],
         )
+        top_n_coverage_dict[const.OD_FLOWS_RANKING] = top_n_coverage(list(od_flows_base.sort_values(ascending=False).iloc[0:10].index), 
+            list(od_flows_alternative.sort_values(ascending=False).iloc[0:10].index))
+
         #Quartiles
         smape_dict[const.OD_FLOWS_QUARTILES] = symmetric_mape(
             estimate=report_alternative[const.OD_FLOWS].quartiles,
@@ -594,7 +611,7 @@ def compute_similarity_measures(
             true=report_base[const.MOBILITY_ENTROPY].quartiles,
         )
 
-    return relative_error_dict, kld_dict, jsd_dict, emd_dict, smape_dict, kendall_dict
+    return relative_error_dict, kld_dict, jsd_dict, emd_dict, smape_dict, kendall_dict, top_n_coverage_dict
 
 
 def get_selected_measures(benchmarkreport: "BenchmarkReport") -> dict:

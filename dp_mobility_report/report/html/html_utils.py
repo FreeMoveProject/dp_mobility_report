@@ -154,7 +154,9 @@ def all_available_measures(analysis_name: str, benchmarkreport: "BenchmarkReport
         available_measures[const.EMD] = str(fmt(benchmarkreport.emd[analysis_name]))
     if analysis_name in benchmarkreport.smape.keys():
         available_measures[const.SMAPE] = str(fmt(benchmarkreport.smape[analysis_name]))
-    elif analysis_name in benchmarkreport.kt.keys():
+    if analysis_name in benchmarkreport.kt.keys():
         available_measures[const.KT] = str(fmt(benchmarkreport.kt[analysis_name]))
+    if analysis_name in benchmarkreport.top_n_cov.keys():
+        available_measures[const.TOP_N] = str(fmt(benchmarkreport.top_n_cov[analysis_name]))
 
     return available_measures
