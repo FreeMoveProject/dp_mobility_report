@@ -110,7 +110,7 @@ def render_moe_info(margin_of_error: int) -> str:
 
 def fmt(value: Any) -> Any:
     if isinstance(value, (float, np.floating)):
-        if math.isinf(value):
+        if math.isinf(value) or np.isnan(value):
             return "not defined"
         value = round(value, 2)
     if isinstance(value, (float, np.floating, int, np.integer)) and not isinstance(
