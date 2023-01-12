@@ -114,7 +114,7 @@ def unify_histogram_bins(
         if hist not in analysis_exclusion:
             if hist == const.TRIPS_OVER_TIME:
                 unify_trips_over_time(report_base[hist], report_alternative[hist])
-                # pass
+
             else:
                 hist_base_values, hist_base_bins = report_base[hist].data
                 hist_alternative_values, hist_alternative_bins = report_alternative[
@@ -129,10 +129,9 @@ def unify_histogram_bins(
                     max_alternative = max_alternative.total_seconds() / 3600
 
                 combined_max = max([max_base, max_alternative])
-                if math.isinf(hist_base_bins[-1]) | math.isinf(
-                    hist_alternative_bins[-1]
-                ):
+                if math.isinf(hist_base_bins[-1]):
                     hist_base_bins[-1] = combined_max
+                if math.isinf(hist_alternative_bins[-1]):
                     hist_alternative_bins[-1] = combined_max
 
                 bins_union = np.union1d(hist_alternative_bins, hist_base_bins)

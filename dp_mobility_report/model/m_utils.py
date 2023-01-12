@@ -67,6 +67,15 @@ def hist_section(
             int(quartiles["min"]) :
         ]
 
+        # sum all counts above hist max to single bin >max
+        if bins[-1] > hist_max:
+            bins = bins[bins <= hist_max]
+            bins = np.append(bins, np.Inf)
+            counts[len(bins) - 1] = counts[
+                len(bins) - 1 :
+            ].sum()  # sum up to single > max count
+            counts = counts[: len(bins)]  # remove long tail
+
     # else use ranges for bins to create histogram
     else:
         # if hist range is small (<1), set bin_range to 0.1 to prevent too fine-granular bins
@@ -101,14 +110,14 @@ def hist_section(
         counts = hist[0]
         bins = hist[1].astype(bin_type)
 
-    # sum all counts above hist max to single bin >max
-    if bins[-1] > hist_max:
-        bins = bins[bins <= hist_max]
-        counts[len(bins) - 1] = counts[
-            len(bins) - 1 :
-        ].sum()  # sum up to single > max count
-        counts = counts[: len(bins)]  # remove long tail
-        bins = np.append(bins, np.Inf)
+        # sum all counts above hist max to single bin >max
+        if bins[-1] > hist_max:
+            bins = bins[bins <= hist_max]
+            counts[len(bins) - 1] = counts[
+                len(bins) - 1 :
+            ].sum()  # sum up to single > max count
+            counts = counts[: len(bins)]  # remove long tail
+            bins = np.append(bins, np.Inf)
 
         # as hist_min is currently only used for mobility_entropy with min_value = 0, we dont need to sum all counts below min accordingly
         # to be generically applicable, this would be needed!
@@ -116,8 +125,9 @@ def hist_section(
     dp_counts = diff_privacy.counts_dp(counts, epsi, sensitivity)
 
     # set counts above dp_max(i.e, quartiles["max"]) to 0 (only so that bins are shown according to user input, even if they are empty)
+    # if bin is "inf" it should be maintained as it is the aggregation of everything > hist_max and <= quartiles["max"]
     temp_bins_max = bins if len(bins) == len(dp_counts) else bins[:-1]
-    dp_counts[temp_bins_max > quartiles["max"]] = 0
+    dp_counts[np.logical_and((temp_bins_max > quartiles["max"]), (np.not_equal(temp_bins_max, np.inf)))] = 0
     # set counts below dp_min(i.e, quartiles["min"]) to 0
     # only needed for mobility_entropy (to show all possible bins even if below DP min)
     temp_bins_min = bins if len(bins) == len(dp_counts) else bins[1:]
