@@ -435,6 +435,28 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
         const.MOBILITY_ENTROPY,
     ]
 
+    # without od 
+    df = test_data.groupby(const.TID).first().reset_index()
+    with pytest.warns(Warning):
+        report = DpMobilityReport(df, 
+        test_tessellation,
+        privacy_budget=None).report
+    assert isinstance(report, dict)
+    assert list(report.keys()) == [
+        const.DS_STATISTICS,
+        const.MISSING_VALUES,
+        const.TRIPS_OVER_TIME,
+        const.TRIPS_PER_WEEKDAY,
+        const.TRIPS_PER_HOUR,
+        const.VISITS_PER_TILE,
+        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.TRIPS_PER_USER,
+        const.USER_TIME_DELTA,
+        const.RADIUS_OF_GYRATION,
+        const.USER_TILE_COUNT,
+        const.MOBILITY_ENTROPY,
+
+    ]
 
 def test_analysis_exclusion(test_data, test_tessellation):
     dpmr = DpMobilityReport(

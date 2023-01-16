@@ -54,6 +54,9 @@ def validate_input(
     if not isinstance(df, DataFrame):
         raise TypeError("'df' is not a Pandas DataFrame.")
 
+    if max(df[const.TID].value_counts()) == 1:
+        warnings.warn("There are only incomplete trips, i.e., no trips with more than a single record. OD analyses cannot be conducted, thus they are excluded from the report.")
+
     if tessellation is None:
         warnings.warn(
             "No tessellation has been specified. All analyses based on the tessallation will be omitted."
@@ -157,6 +160,7 @@ def clean_analysis_exclusion(
     analysis_exclusion: Optional[List[str]],
     has_tessellation: bool,
     has_timestamps: bool,
+    has_od_flows: bool,
 ) -> List[str]:
     # TODO: without timestamp: add w/o timestamp analyses to exclude_analysis
 
@@ -166,7 +170,7 @@ def clean_analysis_exclusion(
     if analysis_selection is not None:
         analysis_exclusion = const.ELEMENTS
 
-        # remove all elements of segments
+        # remove all elements of respective segments from analysis_exclusion that are given in analysis_selection
         if const.OVERVIEW in analysis_selection:
             analysis_exclusion = _remove_elements(
                 analysis_exclusion, const.OVERVIEW_ELEMENTS
@@ -213,6 +217,9 @@ def clean_analysis_exclusion(
 
     if not has_timestamps:
         analysis_exclusion += const.TIMESTAMP_ANALYSES
+
+    if not has_od_flows:
+        analysis_exclusion += const.OD_ELEMENTS
 
     # deduplicate in case analyses and segments were included
     analysis_exclusion = list(set(analysis_exclusion))

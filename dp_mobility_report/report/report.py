@@ -53,10 +53,11 @@ def report_elements(dpmreport: "DpMobilityReport") -> dict:
 
         if not set(const.OD_ELEMENTS).issubset(dpmreport.analysis_exclusion):
             _od_shape = od_analysis.get_od_shape(dpmreport.df, dpmreport.tessellation)
-            report = {
-                **report,
-                **add_od_analysis_elements(dpmreport, _od_shape, eps_factor),
-            }
+            if len(_od_shape) > 0:
+                report = {
+                    **report,
+                    **add_od_analysis_elements(dpmreport, _od_shape, eps_factor),
+                }
         pbar.update()
 
         report = {**report, **add_user_analysis_elements(dpmreport, eps_factor)}
