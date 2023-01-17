@@ -109,7 +109,7 @@ def render_moe_info(margin_of_error: int) -> str:
 
 
 def fmt(value: Any, target_type: Optional[type] = None) -> Any:
-    if target_type and value:
+    if target_type and (value is not None):
         value = target_type(value)
     if isinstance(value, (float, np.floating)):
         if math.isinf(value) or np.isnan(value):
@@ -121,7 +121,6 @@ def fmt(value: Any, target_type: Optional[type] = None) -> Any:
         value = f"{value:,}"
     return value
 
-#TODO
 def fmt_moe(margin_of_error: Optional[float]) -> float:
     if (margin_of_error is None) or (margin_of_error == 0):
         return 0
