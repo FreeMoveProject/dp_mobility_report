@@ -56,8 +56,13 @@ def hist_section(
     # min value of histogram: either given as input or determined by dp min
     hist_min = hist_min if (hist_min is not None) else quartiles["min"]
 
+    # if all values above defined max, create one histogram bin greater hist_max
+    if hist_min > hist_max:
+        bins = np.array([hist_max, np.inf])
+        counts = np.array([len(series)])
+
     # if there are max. 10 integers, use value counts of single integers instead of bin ranges for histogram
-    if (
+    elif (
         (bin_type is int) and
         ((bin_range == 1) or
         ((bin_range is None) and (hist_max - hist_min < 10)))
