@@ -34,16 +34,15 @@ def render_benchmark_config(benchmarkreport: "BenchmarkReport") -> str:
     args: dict = {}
 
     args["config_table"] = render_benchmark_config_table(benchmarkreport)
-    args["tessellation_info"] = (
-        ""
-        if (benchmarkreport.report_base.tessellation is not None)
-        else "<br> <br>No tessellation has been provided. All analyses based on the tessellation have been excluded."
-    )
-    args["timestamp_info"] = (
-        ""
-        if pd.core.dtypes.common.is_datetime64_dtype(benchmarkreport.report_base.df[const.DATETIME]) or pd.core.dtypes.common.is_datetime64_dtype(benchmarkreport.report_alternative.df[const.DATETIME])
-        else "<br> <br>At least one of the datasets does not contain timestamps. All analyses based on timestamps have been excluded."
-    )
+
+    if (benchmarkreport.report_base.tessellation is None):
+        args["tessellation_info"] = "<br> <br>No tessellation has been provided. All analyses based on the tessellation have been excluded."
+
+    if not pd.core.dtypes.common.is_datetime64_dtypebenchmarkreport.report_base.df[const.DATETIME]):
+        args["timestamp_info"] = "<br> <br>At least one of the datasets does not contain timestamps. All analyses based on timestamps have been excluded."
+
+    if  (max(benchmarkreport.report_base.df[const.TID].value_counts()) == 1) or (max(benchmarkreport.report_alternative.df[const.TID].value_counts()) == 1):
+        args["od_info"] = "<br> <br>All trips in at least one of the datasets only contain a single record, therefore, all origin-destination analyses (OD Flows, travel time, jump length) have been excluded."
 
     template_structure = get_template("config_segment.html")
     return template_structure.render(args)
