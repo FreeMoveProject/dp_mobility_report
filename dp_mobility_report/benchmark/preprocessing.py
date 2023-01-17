@@ -173,3 +173,14 @@ def validate_measure_selection(
             del measure_selection[item]
 
     return measure_selection
+
+
+def validate_top_n_ranking(top_n_ranking: List[int]) -> List[int]:
+    if not isinstance(top_n_ranking, list):
+        raise TypeError(f"Input parameter top_n_ranking is not a list. Instead: {top_n_ranking}.")
+    for x in top_n_ranking:
+        if not isinstance(x, int):
+            raise TypeError(f"Input parameter top_n_ranking doest not consist of ints. Instead: {top_n_ranking}.")
+        if (x <= 0):
+            raise TypeError(f"Input parameter top_n_ranking doest not consist of ints greater 0. Instead: {top_n_ranking}.")
+    return(top_n_ranking)

@@ -1,5 +1,5 @@
 import warnings
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Union, List, Optional
 
 import cv2
 from datetime import timedelta
@@ -77,11 +77,13 @@ def symmetric_mape(
     )
 
 
-def relative_error(estimate: int, true: int) -> float:
+def relative_error(estimate: Optional[int], true: int) -> float:
     if estimate is None:
         estimate = 0
     if true == 0:
-        return np.abs(true - estimate)
+        if estimate == 0:
+            return 0.0
+        return np.nan
     return np.abs(true - estimate) / true
 
 
@@ -152,6 +154,7 @@ def compute_similarity_measures(
     report_alternative: dict,
     report_base: dict,
     tessellation: pd.DataFrame,
+    top_n_ranking: List[int],
 ):
 
     relative_error_dict: dict = {}
@@ -271,26 +274,29 @@ def compute_similarity_measures(
             estimate=rel_counts_alternative, true=rel_counts_base
         )
 
-        # TODO: set top n according to what?
         most_freq_base = (
             report_base[const.VISITS_PER_TILE]
             .data.sort_values(by=["visits"], ascending=False, ignore_index=True)
-            .truncate(after=9)
+        #    .truncate(after=9)
         )
         most_freq_alternative = (
             report_alternative[const.VISITS_PER_TILE]
             .data.sort_values(by=["visits"], ascending=False, ignore_index=True)
-            .truncate(after=9)
+        #    .truncate(after=9)
         )
 
         # mute kendall_tau warning by replacing str tile_ids with ints
         tile_id_to_index = {tile_id: i for tile_id, i in zip(tessellation[const.TILE_ID], range(0,len(tessellation)))}
+        kendall_dict[const.VISITS_PER_TILE_RANKING] = []
+        top_n_coverage_dict[const.VISITS_PER_TILE_RANKING] = []
+        for top_n in top_n_ranking:
+            kt_temp, _ = kendalltau(
+                [tile_id_to_index[tile_id] for tile_id in most_freq_base.truncate(after=top_n)[const.TILE_ID]],
+                [tile_id_to_index[tile_id] for tile_id in most_freq_alternative.truncate(after=top_n)[const.TILE_ID]]
+            )
+            kendall_dict[const.VISITS_PER_TILE_RANKING] += [kt_temp]
+            top_n_coverage_dict[const.VISITS_PER_TILE_RANKING] += [top_n_coverage(list(most_freq_base.truncate(after=top_n)[const.TILE_ID]), list(most_freq_alternative.truncate(after=top_n)[const.TILE_ID]))]
 
-        kendall_dict[const.VISITS_PER_TILE_RANKING], _ = kendalltau(
-            [tile_id_to_index[tile_id] for tile_id in most_freq_base[const.TILE_ID]],
-            [tile_id_to_index[tile_id] for tile_id in most_freq_alternative[const.TILE_ID]]
-        )
-        top_n_coverage_dict[const.VISITS_PER_TILE_RANKING] = top_n_coverage(list(most_freq_base[const.TILE_ID]), list(most_freq_alternative[const.TILE_ID]))
 
         # tile_centroids = (
         #     tessellation.set_index(const.TILE_ID).to_crs(3395).centroid.to_crs(4326)
@@ -439,13 +445,18 @@ def compute_similarity_measures(
             estimate=rel_alternative.to_numpy(), true=rel_base.to_numpy()
         )
 
-        # TODO: how to set top n?
-        kendall_dict[const.OD_FLOWS_RANKING], _ = kendalltau(
-            list(rel_alternative.sort_values(ascending=False).index.values)[:10],
-            list(rel_base.sort_values(ascending=False).index.values)[:10],
+
+        kendall_dict[const.OD_FLOWS_RANKING] = []
+        top_n_coverage_dict[const.OD_FLOWS_RANKING] = []
+        for top_n in top_n_ranking:
+            kt_temp, _ = kendalltau(
+            list(rel_alternative.sort_values(ascending=False).index.values)[:top_n],
+            list(rel_base.sort_values(ascending=False).index.values)[:top_n],
         )
-        top_n_coverage_dict[const.OD_FLOWS_RANKING] = top_n_coverage(list(od_flows_base.sort_values(ascending=False).iloc[0:10].index), 
-            list(od_flows_alternative.sort_values(ascending=False).iloc[0:10].index))
+            kendall_dict[const.OD_FLOWS_RANKING] += [kt_temp]
+            top_n_coverage_dict[const.OD_FLOWS_RANKING] += [top_n_coverage(list(od_flows_base.sort_values(ascending=False).iloc[0:top_n].index), 
+            list(od_flows_alternative.sort_values(ascending=False).iloc[0:top_n].index))]
+
 
         #Quartiles
         smape_dict[const.OD_FLOWS_QUARTILES] = symmetric_mape(

@@ -8,6 +8,7 @@ from dp_mobility_report import constants as const
 from dp_mobility_report.benchmark.preprocessing import (
     combine_analysis_exclusion,
     validate_measure_selection,
+    validate_top_n_ranking
 )
 from dp_mobility_report.benchmark.similarity_measures import (
     compute_similarity_measures,
@@ -261,6 +262,25 @@ def test_measure_selection():
             const.OD_FLOWS_QUARTILES
         ],
     ) == {const.OD_FLOWS: const.SMAPE}
+
+
+def test_top_n_ranking_input():
+    assert validate_top_n_ranking([1, 10]) == [1, 10]
+    
+    assert validate_top_n_ranking([10]) == [10]
+
+    with pytest.raises(Exception):
+        validate_top_n_ranking(["not", "ints"])
+
+    with pytest.raises(Exception):
+        validate_top_n_ranking([0.4, 10])
+
+    with pytest.raises(Exception):
+        validate_top_n_ranking([0, 10])
+
+    with pytest.raises(Exception):
+        validate_top_n_ranking([-10, 10])
+
 
 
 def test_benchmark_to_file(benchmark_report):

@@ -35,16 +35,9 @@ def render_od_analysis(
     temp_map_folder: Path,
     output_filename: str,
 ) -> str:
-    THRESHOLD = 0.2  # 20 %
     args: dict = {}
     report = dpmreport.report
 
-    args[
-        "privacy_info"
-    ] = f"""Intra-tile flows below a certain threshold are grayed out: 
-        Due to the applied noise, tiles with a low intra-tile flow count are likely to contain a high percentage of noise. 
-        For usability reasons, such unrealistic values are grayed out. 
-        More specifically: The threshold is set so that values for tiles with a 5% chance (or higher) of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are not shown."""
     args[
         "user_config_info"
     ] = f"User configuration: display max. top {top_n_flows} OD connections on map"
@@ -58,7 +51,6 @@ def render_od_analysis(
             report[const.OD_FLOWS],
             dpmreport.tessellation,
             top_n_flows,
-            THRESHOLD,
             temp_map_folder,
         )
         args["intra_tile_flows_info"] = render_intra_tile_flows(
@@ -170,7 +162,9 @@ def render_benchmark_od_analysis(
 
         args["flows_summary_measure"] = template_measures.render(all_available_measures(const.OD_FLOWS_QUARTILES, benchmark))
         
-        args["od_flows_ranking_measure"] = template_measures.render(all_available_measures(const.OD_FLOWS_RANKING, benchmark))
+        args["od_flows_ranking_measure"] = template_measures.render(
+            {**all_available_measures(const.OD_FLOWS_RANKING, benchmark),
+            **{"top_n_object": "flows"}})
 
     if const.TRAVEL_TIME not in benchmark.analysis_exclusion:
         args["travel_time_eps"] = (
@@ -234,7 +228,6 @@ def render_origin_destination_flows(
     od_flows: DfSection,
     tessellation: GeoDataFrame,
     top_n_flows: int,
-    threshold: float,
     temp_map_folder: Path,
 ) -> str:
 

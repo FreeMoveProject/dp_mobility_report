@@ -54,6 +54,7 @@ class BenchmarkReport:
         bin_range_user_tile_count: The range a single histogram bin spans for the distinct tiles per user histogram. If ``None`` is given, the histogram bins will be determined automatically. Defaults to ``None``.
         max_user_time_delta:  Upper bound for user time delta histogram. Defaults to 48 (hours).
         bin_range_user_time_delta: The range a single histogram bin spans for user time delta (e.g., 1 for 1 hour bins). Defaults to 4 (hours).
+        top_n_ranking: List of 'top n' values that are used to compute the Kendall correlation coefficient and the top n coverage for ranking similarity measures. Values need to be integers > 0. Defaults to ``[10, 50, 100]``.
         disable_progress_bar: Whether progress bars should be shown. Defaults to ``False``.
         seed_sampling: Provide seed for down-sampling of dataset (according to ``max_trips_per_user``) so that the sampling is reproducible. Defaults to ``None``, i.e., no seed.
         evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to ``False``."""
@@ -68,6 +69,7 @@ class BenchmarkReport:
     _kt: dict
     _top_n_cov: dict
     _measure_selection: dict
+    _top_n_ranking: List[int]
     _similarity_measures: dict = {}
 
     def __init__(
@@ -93,10 +95,11 @@ class BenchmarkReport:
         bin_range_jump_length: Union[int, float] = 1,
         max_radius_of_gyration: Union[int, float] = 5,
         bin_range_radius_of_gyration: Union[int, float] = 0.5,
-        max_user_tile_count: Optional[int] = 10,
-        bin_range_user_tile_count: Optional[int] = 1,
-        max_user_time_delta: Optional[Union[int, float]] = 48,
-        bin_range_user_time_delta: Optional[Union[int, float]] = 4,
+        max_user_tile_count: int = 10,
+        bin_range_user_tile_count: int = 1,
+        max_user_time_delta: Union[int, float] = 48,
+        bin_range_user_time_delta: Union[int, float] = 4,
+        top_n_ranking: List[int] = [10, 50, 100],
         disable_progress_bar: bool = False,
         seed_sampling: int = None,
         evalu: bool = False,
@@ -180,6 +183,7 @@ class BenchmarkReport:
                 measure_selection, self.analysis_exclusion
             )
         self._measure_selection = b_utils.remove_excluded_analyses_from_measure_selection(measure_selection, self.analysis_exclusion)
+        self._top_n_ranking = preprocessing.validate_top_n_ranking(top_n_ranking)
 
         (
             self._re,
@@ -194,6 +198,7 @@ class BenchmarkReport:
             self.report_alternative.report,
             self.report_base.report,
             self.report_base.tessellation,
+            self.top_n_ranking,
         )
 
     @property
@@ -218,6 +223,11 @@ class BenchmarkReport:
     def measure_selection(self) -> dict:
         """The specified selected similarity measure for each analysis."""
         return self._measure_selection
+
+    @property
+    def top_n_ranking(self) -> dict:
+        """List of 'top n' options that have been provided as user input that are used for compuation of ranking similarity measures."""
+        return self._top_n_ranking
 
     @property
     def re(self) -> dict:
@@ -246,7 +256,7 @@ class BenchmarkReport:
 
     @property
     def kt(self) -> dict:
-        """The Kendall's tau coefficient of base and alternative of all selected analyses, where applicable."""
+        """The Kendall correlation coefficient of base and alternative of all selected analyses, where applicable."""
         return self._kt
 
     @property

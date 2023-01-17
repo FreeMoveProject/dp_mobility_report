@@ -89,7 +89,6 @@ def render_benchmark_place_analysis(
     temp_map_folder: Path,
     output_filename: str,
 ) -> str:
-    THRESHOLD = 0.2  # 20%
     args: dict = {}
     report_base = benchmark.report_base.report
     report_alternative = benchmark.report_alternative.report
@@ -97,12 +96,6 @@ def render_benchmark_place_analysis(
     template_measures = get_template("similarity_measures.html")
 
     args["output_filename"] = output_filename
-    args[
-        "privacy_info"
-    ] = f"""Tiles below a certain threshold are grayed out: 
-        Due to the applied noise, tiles with a low visit count are likely to contain a high percentage of noise. 
-        For usability reasons, such unrealistic values are grayed out. 
-        More specifically: The threshold is set so that values for tiles with a 5% chance (or higher) of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are not shown."""
 
     if const.VISITS_PER_TILE not in benchmark.analysis_exclusion:
         args["visits_per_tile_eps"] = (
@@ -124,7 +117,6 @@ def render_benchmark_place_analysis(
             report_base[const.VISITS_PER_TILE],
             report_alternative[const.VISITS_PER_TILE],
             tessellation,
-            THRESHOLD,
             temp_map_folder,
         )
         quartiles_base = report_base[const.VISITS_PER_TILE].quartiles.round()
@@ -147,7 +139,9 @@ def render_benchmark_place_analysis(
 
         args["visits_per_tile_summary_measure"] = template_measures.render(all_available_measures(const.VISITS_PER_TILE_QUARTILES, benchmark))
 
-        args["visits_per_tile_ranking"] = template_measures.render(all_available_measures(const.VISITS_PER_TILE_RANKING, benchmark))
+        args["visits_per_tile_ranking_measure"] = template_measures.render(
+                {**all_available_measures(const.VISITS_PER_TILE_RANKING, benchmark),
+                **{"top_n_object": "locations"}})
 
     if const.VISITS_PER_TIME_TILE not in benchmark.analysis_exclusion:
         args["visits_per_time_tile_eps"] = (
@@ -165,8 +159,8 @@ def render_benchmark_place_analysis(
             report_base[const.VISITS_PER_TIME_TILE],
             report_alternative[const.VISITS_PER_TIME_TILE],
             tessellation,
-            THRESHOLD,
         )
+
         args["visits_per_time_tile_measure"] = template_measures.render(all_available_measures(const.VISITS_PER_TIME_TILE, benchmark))
 
     template_structure = get_template("place_analysis_segment_benchmark.html")
@@ -219,7 +213,6 @@ def render_benchmark_visits_per_tile(
     visits_per_tile_base: DfSection,
     visits_per_tile_alternative: DfSection,
     tessellation: GeoDataFrame,
-    threshold: float,
     temp_map_folder: Path,
 ) -> str:
 
@@ -476,7 +469,6 @@ def render_visits_per_time_tile_benchmark(
     counts_per_tile_timewindow: DfSection,
     counts_per_tile_timewindow_alternative: DfSection,
     tessellation: GeoDataFrame,
-    threshold: float,
 ) -> str:
     data = counts_per_tile_timewindow.data
     data_alternative = counts_per_tile_timewindow_alternative.data

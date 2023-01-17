@@ -20,12 +20,18 @@
     {% endif %} 
 
     {% if kendalls_tau %}
-    Kendall rank correlation coefficient [-1 to 1]: {{kendalls_tau}} 
+    Kendall rank correlation coefficient of top n {{top_n_object}} [-1 to 1]: 
+    {%for kt in kendalls_tau %} 
+    <br>{{kt}}
+    {% endfor %} 
     <br>
     {% endif %} 
 
     {% if top_n_coverage %}
-    Top 10 coverage [0 to 1]: {{top_n_coverage}} 
+    Coverage of top n {{top_n_object}} [0 to 1]: 
+    {%for top_n_cov in top_n_coverage %} 
+    <br> {{top_n_cov}}
+    {% endfor %}
     <br>
     {% endif %} 
 

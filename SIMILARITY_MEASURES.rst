@@ -172,5 +172,12 @@ The EDM can only be computed, if a notion of distance between histogram bins or 
 For example, there is no trivial distance between weekdays (you could argue that the categorization of weekdays and weekend is more important than the number of days lying inbetween). Thus, we decided to omit the EMD if there is no intuitive distance measure. 
 The EMD is the default measure for visits per tile and visits per tile timewindow, as the underlying geometry is especially important to account for here.
 
+Kendall correlation coefficient (KT)
+**************************************
 
+TODO
 
+Top n coverage (TOP_N)
+**************************************
+
+TODO

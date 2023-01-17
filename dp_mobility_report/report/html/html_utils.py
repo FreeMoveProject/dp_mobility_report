@@ -155,8 +155,8 @@ def all_available_measures(analysis_name: str, benchmarkreport: "BenchmarkReport
     if analysis_name in benchmarkreport.smape.keys():
         available_measures[const.SMAPE] = str(fmt(benchmarkreport.smape[analysis_name]))
     if analysis_name in benchmarkreport.kt.keys():
-        available_measures[const.KT] = str(fmt(benchmarkreport.kt[analysis_name]))
+        available_measures[const.KT] = [f'Top {topn_i}: {fmt(kt_i)}' for kt_i, topn_i in zip(benchmarkreport.kt[analysis_name], benchmarkreport.top_n_ranking)]
     if analysis_name in benchmarkreport.top_n_cov.keys():
-        available_measures[const.TOP_N] = str(fmt(benchmarkreport.top_n_cov[analysis_name]))
+        available_measures[const.TOP_N] = [f'Top {topn_i}: {fmt(topcov_i * 100)}%' for topcov_i, topn_i in zip(benchmarkreport.top_n_cov[analysis_name], benchmarkreport.top_n_ranking)]
 
     return available_measures
