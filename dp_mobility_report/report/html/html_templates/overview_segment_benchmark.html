@@ -48,13 +48,13 @@
         <p>privacy budget alternative: {{trips_per_weekday_eps[1]}}</p>
         <p>95%-confidence interval: +/- {{trips_per_weekday_moe[1]}}</p>
         {{trips_per_weekday_barchart}}
-        {{trips_per_weekday_measure}}}}
+        {{trips_per_weekday_measure}}
     </div>
     {% endif %} 
 
     {% if trips_per_hour_linechart %}
     <div>
-        <h3>Trips per hour of day split by weekday and weekend</h3>
+        <h3>Trips per hour of day</h3>
         <p>privacy budget base: {{ trips_per_hour_eps[0]}}</p>
         <p>95%-confidence interval: +/- {{trips_per_hour_moe[0]}}</p>
         <p>privacy budget alternative: {{ trips_per_hour_eps[1]}}</p>
