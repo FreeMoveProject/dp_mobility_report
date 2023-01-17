@@ -123,7 +123,7 @@ def fmt(value: Any, target_type: Optional[type] = None) -> Any:
 
 #TODO
 def fmt_moe(margin_of_error: Optional[float]) -> float:
-    if margin_of_error is None:
+    if (margin_of_error is None) or (margin_of_error == 0):
         return 0
     return round(margin_of_error, 1)
 
