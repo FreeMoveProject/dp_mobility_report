@@ -155,6 +155,7 @@ class DpMobilityReport:
             analysis_exclusion,
             (tessellation is not None),
             pd.core.dtypes.common.is_datetime64_dtype(self.df[const.DATETIME]),
+            max(self.df[const.TID].value_counts()) > 1, # are there trips with more than a single record?
         )
         self._budget_split = preprocessing.clean_budget_split(
             budget_split, self._analysis_exclusion

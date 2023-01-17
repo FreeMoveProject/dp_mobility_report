@@ -17,7 +17,6 @@ def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame) -> pd.DataFrame:
     ends_od_shape = (
         df[
             (df[const.POINT_TYPE] == const.END)
-            & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
         ][[const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]]
         .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
         .rename(
@@ -33,7 +32,6 @@ def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame) -> pd.DataFrame:
     od_shape = (
         df[
             (df[const.POINT_TYPE] == const.START)
-            & df[const.TILE_ID].isin(tessellation[const.TILE_ID])
         ][[const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]]
         .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
         .merge(ends_od_shape, on=const.TID, how="inner")
@@ -49,7 +47,8 @@ def get_od_flows(
 ) -> DfSection:
     sensitivity = dpmreport.max_trips_per_user
     od_flows = (
-        od_shape.groupby([const.TILE_ID, const.TILE_ID_END])
+        od_shape[od_shape[const.TILE_ID].notna() & od_shape[const.TILE_ID_END].notna()]
+        .groupby([const.TILE_ID, const.TILE_ID_END])
         .aggregate(flow=(const.TID, "count"))
         .reset_index()
         .rename(

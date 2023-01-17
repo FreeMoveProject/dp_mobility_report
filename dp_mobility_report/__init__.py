@@ -2,4 +2,4 @@
 
 from dp_mobility_report.dpmreport import DpMobilityReport  # noqa: F401
 
-__version__ = "0.1.7"
+__version__ = "0.1.8"
