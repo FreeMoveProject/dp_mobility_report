@@ -35,6 +35,7 @@ def render_od_analysis(
     temp_map_folder: Path,
     output_filename: str,
 ) -> str:
+    THRESHOLD = 0.2 # 20 %
     args: dict = {}
     report = dpmreport.report
 
@@ -51,6 +52,7 @@ def render_od_analysis(
             report[const.OD_FLOWS],
             dpmreport.tessellation,
             top_n_flows,
+            THRESHOLD,
             temp_map_folder,
         )
         args["intra_tile_flows_info"] = render_intra_tile_flows(
@@ -231,6 +233,7 @@ def render_origin_destination_flows(
     od_flows: DfSection,
     tessellation: GeoDataFrame,
     top_n_flows: int,
+    threshold: float,
     temp_map_folder: Path,
 ) -> str:
 

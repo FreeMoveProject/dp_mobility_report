@@ -107,6 +107,8 @@ def test_earth_movers_distance1D():
         earth_movers_distance1D(
             (np.array([4, 2, 5, 3]), np.array([0, 2, 5, 7, 9])),
             (np.array([4, 2, 5, 3]), np.array([0, 2, 5, 7, 9])),
+            9,
+            9
         )
         == 0
     )
@@ -114,6 +116,8 @@ def test_earth_movers_distance1D():
         earth_movers_distance1D(
             (np.array([4, 2, 5, 3]), np.array([0, 2, 5, 7, 9])),
             (np.array([8, 2, 3, 5]), np.array([0, 2, 5, 7, 9])),
+            9,
+            9
         )
         == 0.8412698412698414
     )
@@ -121,6 +125,8 @@ def test_earth_movers_distance1D():
         earth_movers_distance1D(
             (np.array([4, 2, 5, 3, 7]), np.array([0, 1, 2, 3, 4])),
             (np.array([4, 2, 5, 3, 7]), np.array([0, 1, 2, 3, 4])),
+            4,
+            4
         )
         == 0
     )
@@ -128,6 +134,8 @@ def test_earth_movers_distance1D():
         earth_movers_distance1D(
             (np.array([4, 2, 5, 3, 7]), np.array([0, 1, 2, 3, 4])),
             (np.array([12, 4, 8, 2, 7]), np.array([0, 1, 2, 3, 4])),
+            4,
+            4
         )
         == 0.696969696969697
     )
@@ -147,7 +155,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
         kendall_dict,
         top_n_cov_dict,
     ) = compute_similarity_measures(
-        analysis_exclusion, alternative_dpmreport, base_dpmreport, test_tessellation
+        analysis_exclusion, alternative_dpmreport, base_dpmreport, test_tessellation, top_n_ranking=[10, 100], disable_progress_bar=True
     )
 
     assert isinstance(relative_error_dict, dict)
@@ -160,7 +168,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
     assert round(jsd_dict[const.VISITS_PER_TILE], 3) == 0.041
     assert round(emd_dict[const.VISITS_PER_TILE], 2) == 315.75
     assert round(jsd_dict[const.VISITS_PER_TIME_TILE], 3) == 0.268
-    assert round(emd_dict[const.VISITS_PER_TIME_TILE], 2) == 1326.41
+    assert np.isnan(emd_dict[const.VISITS_PER_TIME_TILE])
 
     analysis_exclusion = [const.VISITS_PER_TILE]
     (
@@ -172,7 +180,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
         kendall_dict,
         top_n_cov_dict,
     ) = compute_similarity_measures(
-        analysis_exclusion, alternative_dpmreport, base_dpmreport, test_tessellation
+        analysis_exclusion, alternative_dpmreport, base_dpmreport, test_tessellation, top_n_ranking=[10, 100], disable_progress_bar=True
     )
 
     assert isinstance(relative_error_dict, dict)
@@ -182,6 +190,8 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
     assert isinstance(smape_dict, dict)
     assert isinstance(kendall_dict, dict)
     assert isinstance(top_n_cov_dict, dict)
+
+    # TODO: test if emd for time_tile is nan if both (base and alternative) have no values in the same time_window (should then be excluded for computation)
 
 
 def test_combine_analysis_exclusion():

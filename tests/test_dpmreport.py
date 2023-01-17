@@ -471,7 +471,7 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
         const.TRIPS_PER_WEEKDAY,
         const.TRIPS_PER_HOUR,
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.TRIPS_PER_USER,
         const.USER_TIME_DELTA,
         const.RADIUS_OF_GYRATION,

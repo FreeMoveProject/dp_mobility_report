@@ -154,7 +154,7 @@ def compute_similarity_measures(
     analysis_exclusion: list,
     report_alternative: dict,
     report_base: dict,
-    tessellation: pd.DataFrame,
+    tessellation: Optional[GeoDataFrame],
     top_n_ranking: List[int],
     disable_progress_bar: bool,
 ):
@@ -168,7 +168,8 @@ def compute_similarity_measures(
     top_n_coverage_dict: dict = {}
     cost_matrix = None
 
-    disable_emd = len(tessellation)>500
+    disable_emd = len(tessellation)>500 if (tessellation is not None) else True
+
     if disable_emd and ((const.VISITS_PER_TILE not in analysis_exclusion) or (const.VISITS_PER_TIME_TILE not in analysis_exclusion)):
         warnings.warn("EMD computation disables for spatial analysis due to too many tiles in tessellation (results in long computation time).")
 
