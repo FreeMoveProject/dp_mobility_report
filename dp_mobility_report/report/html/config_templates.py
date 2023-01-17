@@ -37,7 +37,7 @@ def render_benchmark_config(benchmarkreport: "BenchmarkReport") -> str:
     if (benchmarkreport.report_base.tessellation is None):
         args["tessellation_info"] = "<br> <br>No tessellation has been provided. All analyses based on the tessellation have been excluded."
 
-    if not pd.core.dtypes.common.is_datetime64_dtypebenchmarkreport.report_base.df[const.DATETIME]):
+    if not pd.core.dtypes.common.is_datetime64_dtypebenchmarkreport.report_base.df[const.DATETIME]:
         args["timestamp_info"] = "<br> <br>At least one of the datasets does not contain timestamps. All analyses based on timestamps have been excluded."
 
     if  (max(benchmarkreport.report_base.df[const.TID].value_counts()) == 1) or (max(benchmarkreport.report_alternative.df[const.TID].value_counts()) == 1):
