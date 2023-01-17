@@ -206,32 +206,32 @@ def render_dataset_statistics(dataset_statistics: DictSection) -> str:
     dataset_stats_list = [
         {
             "name": "Number of records",
-            "estimate": fmt(data[const.N_RECORDS]),
+            "estimate": fmt(data[const.N_RECORDS], target_type=int),
             "margin_of_error": fmt_moe(moe[const.N_RECORDS]),
         },
         {
             "name": "Distinct trips",
-            "estimate": fmt(data[const.N_TRIPS]),
+            "estimate": fmt(data[const.N_TRIPS], target_type=int),
             "margin_of_error": fmt_moe(moe[const.N_TRIPS]),
         },
         {
             "name": "Number of complete trips (start and and point)",
-            "estimate": fmt(data[const.N_COMPLETE_TRIPS]),
+            "estimate": fmt(data[const.N_COMPLETE_TRIPS], target_type=int),
             "margin_of_error": fmt_moe(moe[const.N_COMPLETE_TRIPS]),
         },
         {
             "name": "Number of incomplete trips (single point)",
-            "estimate": fmt(data[const.N_INCOMPLETE_TRIPS]),
+            "estimate": fmt(data[const.N_INCOMPLETE_TRIPS], target_type=int),
             "margin_of_error": fmt_moe(moe[const.N_INCOMPLETE_TRIPS]),
         },
         {
             "name": "Distinct users",
-            "estimate": fmt(data[const.N_USERS]),
+            "estimate": fmt(data[const.N_USERS], target_type=int),
             "margin_of_error": fmt_moe(moe[const.N_USERS]),
         },
         {
             "name": "Distinct locations (lat & lon combination)",
-            "estimate": fmt(data[const.N_LOCATIONS]),
+            "estimate": fmt(data[const.N_LOCATIONS], target_type=int),
             "margin_of_error": fmt_moe(moe[const.N_LOCATIONS]),
         },
     ]
@@ -258,74 +258,74 @@ def render_benchmark_dataset_statistics(
         {
             "name": "Number of records",
             "estimate": (
-                fmt(data_base[const.N_RECORDS]),
-                fmt(data_alternative[const.N_RECORDS]),
+                fmt(data_base[const.N_RECORDS], target_type=int),
+                fmt(data_alternative[const.N_RECORDS], target_type=int),
             ),
             "margin_of_error": (
                 fmt_moe(moe_base[const.N_RECORDS]),
                 fmt_moe(moe_alternative[const.N_RECORDS]),
             ),
-            "relative_error": fmt(re["n_records"]),
+            "relative_error": fmt(re["n_records"], target_type=float),
         },
         {
             "name": "Distinct trips",
             "estimate": (
-                fmt(data_base[const.N_TRIPS]),
-                fmt(data_alternative[const.N_TRIPS]),
+                fmt(data_base[const.N_TRIPS], target_type=int),
+                fmt(data_alternative[const.N_TRIPS], target_type=int),
             ),
             "margin_of_error": (
                 fmt_moe(moe_base[const.N_TRIPS]),
                 fmt_moe(moe_alternative[const.N_TRIPS]),
             ),
-            "relative_error": fmt(re["n_trips"]),
+            "relative_error": fmt(re["n_trips"], target_type=float),
         },
         {
             "name": "Number of complete trips (start and and point)",
             "estimate": (
-                fmt(data_base[const.N_COMPLETE_TRIPS]),
-                fmt(data_alternative[const.N_COMPLETE_TRIPS]),
+                fmt(data_base[const.N_COMPLETE_TRIPS], target_type=int),
+                fmt(data_alternative[const.N_COMPLETE_TRIPS], target_type=int),
             ),
             "margin_of_error": (
                 fmt_moe(moe_base[const.N_COMPLETE_TRIPS]),
                 fmt_moe(moe_alternative[const.N_COMPLETE_TRIPS]),
             ),
-            "relative_error": fmt(re["n_complete_trips"]),
+            "relative_error": fmt(re["n_complete_trips"], target_type=float),
         },
         {
             "name": "Number of incomplete trips (single point)",
             "estimate": (
-                fmt(data_base[const.N_INCOMPLETE_TRIPS]),
-                fmt(data_alternative[const.N_INCOMPLETE_TRIPS]),
+                fmt(data_base[const.N_INCOMPLETE_TRIPS], target_type=int),
+                fmt(data_alternative[const.N_INCOMPLETE_TRIPS], target_type=int),
             ),
             "margin_of_error": (
                 fmt_moe(moe_base[const.N_INCOMPLETE_TRIPS]),
                 fmt_moe(data_alternative[const.N_INCOMPLETE_TRIPS]),
             ),
-            "relative_error": fmt(re["n_incomplete_trips"]),
+            "relative_error": fmt(re["n_incomplete_trips"], target_type=float),
         },
         {
             "name": "Distinct users",
             "estimate": (
-                fmt(data_base[const.N_USERS]),
-                fmt(data_alternative[const.N_USERS]),
+                fmt(data_base[const.N_USERS], target_type=int),
+                fmt(data_alternative[const.N_USERS], target_type=int),
             ),
             "margin_of_error": (
                 fmt_moe(moe_base[const.N_USERS]),
                 fmt_moe(moe_alternative[const.N_USERS]),
             ),
-            "relative_error": fmt(re["n_users"]),
+            "relative_error": fmt(re["n_users"], target_type=float),
         },
         {
             "name": "Distinct locations (lat & lon combination)",
             "estimate": (
-                fmt(data_base[const.N_LOCATIONS]),
-                fmt(data_alternative[const.N_LOCATIONS]),
+                fmt(data_base[const.N_LOCATIONS], target_type=int),
+                fmt(data_alternative[const.N_LOCATIONS], target_type=int),
             ),
             "margin_of_error": (
                 fmt_moe(moe_base[const.N_LOCATIONS]),
                 fmt_moe(moe_alternative[const.N_LOCATIONS]),
             ),
-            "relative_error": fmt(re["n_locations"]),
+            "relative_error": fmt(re["n_locations"], target_type=float),
         },
     ]
 
@@ -343,27 +343,27 @@ def render_missing_values(missing_values: DictSection) -> str:
     missing_values_list = [
         {
             "name": "User ID (uid)",
-            "estimate": fmt(data[const.UID]),
+            "estimate": fmt(data[const.UID], target_type=int),
             "margin_of_error": fmt_moe(moe),
         },
         {
             "name": "Trip ID (tid)",
-            "estimate": fmt(data[const.TID]),
+            "estimate": fmt(data[const.TID], target_type=int),
             "margin_of_error": fmt_moe(moe),
         },
         {
             "name": "Timestamp (datetime)",
-            "estimate": fmt(data[const.DATETIME]),
+            "estimate": fmt(data[const.DATETIME], target_type=int),
             "margin_of_error": fmt_moe(moe),
         },
         {
             "name": "Latitude (lat)",
-            "estimate": fmt(data[const.LAT]),
+            "estimate": fmt(data[const.LAT], target_type=int),
             "margin_of_error": fmt_moe(moe),
         },
         {
             "name": "Longitude (lng)",
-            "estimate": fmt(data[const.LNG]),
+            "estimate": fmt(data[const.LNG], target_type=int),
             "margin_of_error": fmt_moe(moe),
         },
     ]
@@ -387,36 +387,36 @@ def render_benchmark_missing_values(
     missing_values_list = [
         {
             "name": "User ID (uid)",
-            "estimate": (fmt(data_base[const.UID]), fmt(data_alternative[const.UID])),
+            "estimate": (fmt(data_base[const.UID], target_type=int), fmt(data_alternative[const.UID], target_type=int)),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
-            "relative_error": fmt(re["uid"]),
+            "relative_error": fmt(re["uid"], target_type=float),
         },
         {
             "name": "Trip ID (tid)",
-            "estimate": (fmt(data_base[const.TID]), fmt(data_alternative[const.TID])),
+            "estimate": (fmt(data_base[const.TID], target_type=int), fmt(data_alternative[const.TID], target_type=int)),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
-            "relative_error": fmt(re["tid"]),
+            "relative_error": fmt(re["tid"], target_type=float),
         },
         {
             "name": "Timestamp (datetime)",
             "estimate": (
-                fmt(data_base[const.DATETIME]),
-                fmt(data_alternative[const.DATETIME]),
+                fmt(data_base[const.DATETIME], target_type=int),
+                fmt(data_alternative[const.DATETIME], target_type=int),
             ),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
-            "relative_error": fmt(re["datetime"]),
+            "relative_error": fmt(re["datetime"], target_type=float),
         },
         {
             "name": "Latitude (lat)",
-            "estimate": (fmt(data_base[const.LAT]), fmt(data_alternative[const.LAT])),
+            "estimate": (fmt(data_base[const.LAT], target_type=int), fmt(data_alternative[const.LAT], target_type=int)),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
-            "relative_error": fmt(re["lat"]),
+            "relative_error": fmt(re["lat"], target_type=float),
         },
         {
             "name": "Longitude (lng)",
-            "estimate": (fmt(data_base[const.LNG]), fmt(data_alternative[const.LNG])),
+            "estimate": (fmt(data_base[const.LNG], target_type=int), fmt(data_alternative[const.LNG], target_type=int)),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
-            "relative_error": fmt(re["lng"]),
+            "relative_error": fmt(re["lng"], target_type=float),
         },
     ]
 

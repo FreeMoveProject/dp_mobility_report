@@ -199,6 +199,7 @@ class BenchmarkReport:
             self.report_base.report,
             self.report_base.tessellation,
             self.top_n_ranking,
+            self.disable_progress_bar
         )
 
     @property

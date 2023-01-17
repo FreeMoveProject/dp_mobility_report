@@ -147,8 +147,9 @@ def render_benchmark_od_analysis(
         quartiles_base = report_base[const.OD_FLOWS].quartiles.round()
         quartiles_alternative = report_alternative[const.OD_FLOWS].quartiles.round()
         args["flows_summary_table"] = render_benchmark_summary(
-            quartiles_base.astype(int),
-            quartiles_alternative.astype(int),
+            quartiles_base,
+            quartiles_alternative,
+            target_type=int
         )
         args["flows_cumsum_linechart"] = render_flows_cumsum(
             report_base[const.OD_FLOWS], report_alternative[const.OD_FLOWS]
@@ -189,6 +190,7 @@ def render_benchmark_od_analysis(
         args["travel_time_summary_table"] = render_benchmark_summary(
             report_base[const.TRAVEL_TIME].quartiles,
             report_alternative[const.TRAVEL_TIME].quartiles,
+            target_type=float,
         )
         args["travel_time_measure"] = template_measures.render(all_available_measures(const.TRAVEL_TIME, benchmark))
         args["travel_time_summary_measure"] = template_measures.render(all_available_measures(const.TRAVEL_TIME_QUARTILES, benchmark))
@@ -216,6 +218,7 @@ def render_benchmark_od_analysis(
         args["jump_length_summary_table"] = render_benchmark_summary(
             report_base[const.JUMP_LENGTH].quartiles,
             report_alternative[const.JUMP_LENGTH].quartiles,
+            target_type=float,
         )
         args["jump_length_measure"] = template_measures.render(all_available_measures(const.JUMP_LENGTH, benchmark))
         args["jump_length_summary_measure"] = template_measures.render(all_available_measures(const.JUMP_LENGTH_QUARTILES, benchmark))
@@ -498,7 +501,7 @@ def render_most_freq_flows_ranking_benchmark(
         x_axis_label="percentage of flows per OD pair",
         y_labels=labels,
         margin_of_error=od_flows_base.margin_of_error_laplace,
-        # margin_of_error_alternative=od_flows_alternative.margin_of_error_laplace #TODO only works with better example?
+        margin_of_error_alternative=od_flows_alternative.margin_of_error_laplace
     )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close()

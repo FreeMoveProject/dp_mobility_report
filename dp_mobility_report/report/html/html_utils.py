@@ -43,16 +43,16 @@ def render_summary(summary: Series) -> str:
 
 
 def render_benchmark_summary(
-    summary_base: Series, summary_alternative: Series
+    summary_base: Series, summary_alternative: Series, target_type: Optional[type] = None
 ) -> str:
     summary_list = [
         {
             "name": "Min.",
-            "value": (fmt(summary_base["min"]), fmt(summary_alternative["min"])),
+            "value": (fmt(summary_base["min"], target_type), fmt(summary_alternative["min"], target_type)),
         },
         {
             "name": "Max.",
-            "value": (fmt(summary_base["max"]), fmt(summary_alternative["max"])),
+            "value": (fmt(summary_base["max"], target_type), fmt(summary_alternative["max"], target_type)),
         },
     ]
     if "25%" in summary_base:
@@ -60,21 +60,21 @@ def render_benchmark_summary(
             1,
             {
                 "name": "75%",
-                "value": (fmt(summary_base["75%"]), fmt(summary_alternative["75%"])),
+                "value": (fmt(summary_base["75%"], target_type), fmt(summary_alternative["75%"], target_type)),
             },
         )
         summary_list.insert(
             1,
             {
                 "name": "Median",
-                "value": (fmt(summary_base["50%"]), fmt(summary_alternative["50%"])),
+                "value": (fmt(summary_base["50%"], target_type), fmt(summary_alternative["50%"], target_type)),
             },
         )
         summary_list.insert(
             1,
             {
                 "name": "25%",
-                "value": (fmt(summary_base["25%"]), fmt(summary_alternative["25%"])),
+                "value": (fmt(summary_base["25%"], target_type), fmt(summary_alternative["25%"], target_type)),
             },
         )
 
@@ -83,7 +83,7 @@ def render_benchmark_summary(
             0,
             {
                 "name": "Mean",
-                "value": (fmt(summary_base["mean"]), fmt(summary_alternative["mean"])),
+                "value": (fmt(summary_base["mean"], target_type), fmt(summary_alternative["mean"], target_type)),
             },
         )
 
@@ -108,7 +108,9 @@ def render_moe_info(margin_of_error: int) -> str:
     # The true quartile values lie with a <b>95% chance within ± {margin_of_error} records</b> away from the true values.""" # TODO: margin_of_error reveals true record count?
 
 
-def fmt(value: Any) -> Any:
+def fmt(value: Any, target_type: Optional[type] = None) -> Any:
+    if target_type and value:
+        value = target_type(value)
     if isinstance(value, (float, np.floating)):
         if math.isinf(value) or np.isnan(value):
             return "not defined"
@@ -119,9 +121,9 @@ def fmt(value: Any) -> Any:
         value = f"{value:,}"
     return value
 
-
+#TODO
 def fmt_moe(margin_of_error: Optional[float]) -> float:
-    if margin_of_error is None:
+    if (margin_of_error is None) or (margin_of_error == 0):
         return 0
     return round(margin_of_error, 1)
 

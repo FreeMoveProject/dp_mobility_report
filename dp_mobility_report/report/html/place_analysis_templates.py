@@ -112,7 +112,7 @@ def render_benchmark_place_analysis(
         )
         args[
             "points_outside_tessellation_info_alternative"
-        ] = render_points_outside_tess(report_base[const.VISITS_PER_TILE])
+        ] = render_points_outside_tess(report_alternative[const.VISITS_PER_TILE])
         args["visits_per_tile_legend"] = render_benchmark_visits_per_tile(
             report_base[const.VISITS_PER_TILE],
             report_alternative[const.VISITS_PER_TILE],
@@ -124,8 +124,9 @@ def render_benchmark_place_analysis(
             const.VISITS_PER_TILE
         ].quartiles.round()
         args["visits_per_tile_summary_table"] = render_benchmark_summary(
-            quartiles_base.astype(int),
-            quartiles_alternative.astype(int),  # extrapolate visits from dp record count
+            quartiles_base,
+            quartiles_alternative, 
+            target_type=int,
         )
         args["visits_per_tile_cumsum_linechart"] = render_visits_per_tile_cumsum(
             report_base[const.VISITS_PER_TILE],
@@ -216,10 +217,10 @@ def render_benchmark_visits_per_tile(
     temp_map_folder: Path,
 ) -> str:
 
-    visits_per_tile_base_sorted = visits_per_tile_base.data.sort_values("tile_id")
+    visits_per_tile_base_sorted = visits_per_tile_base.data.sort_values("tile_id").reset_index()
     visits_per_tile_alternative_sorted = visits_per_tile_alternative.data.sort_values(
         "tile_id"
-    )
+    ).reset_index()
     relative_base = (
         visits_per_tile_base_sorted["visits"]
         / visits_per_tile_base_sorted["visits"].sum()
@@ -433,7 +434,7 @@ def render_most_freq_tiles_ranking_benchmark(
         y_labels=labels,
         x_alternative=topx_tiles_merged.visits_alternative,
         margin_of_error=visits_per_tile_base.margin_of_error_laplace,
-        # margin_of_error_alternative=visits_per_tile_alternative.margin_of_error_laplace
+        margin_of_error_alternative=visits_per_tile_alternative.margin_of_error_laplace
     )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close()
