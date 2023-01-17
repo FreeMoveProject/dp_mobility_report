@@ -139,6 +139,7 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
         args["trips_per_user_summary_table"] = render_benchmark_summary(
             report_base[const.TRIPS_PER_USER].quartiles,
             report_alternative[const.TRIPS_PER_USER].quartiles,
+            target_type=int,
         )
         args["trips_per_user_moe_info"] = render_moe_info(
             report_base[const.TRIPS_PER_USER].margin_of_error_expmech
@@ -184,6 +185,7 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
         args["radius_of_gyration_summary_table"] = render_benchmark_summary(
             report_base[const.RADIUS_OF_GYRATION].quartiles,
             report_alternative[const.RADIUS_OF_GYRATION].quartiles,
+            target_type=float,
         )
         args["radius_of_gyration_moe_info"] = render_moe_info(
             report_base[const.RADIUS_OF_GYRATION].margin_of_error_expmech
@@ -205,6 +207,7 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
         args["distinct_tiles_user_summary_table"] = render_benchmark_summary(
             report_base[const.USER_TILE_COUNT].quartiles,
             report_alternative[const.USER_TILE_COUNT].quartiles,
+            target_type=int,
         )
         args["distinct_tiles_moe_info"] = render_moe_info(
             report_base[const.USER_TILE_COUNT].margin_of_error_expmech
@@ -225,6 +228,7 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
         args["mobility_entropy_summary_table"] = render_benchmark_summary(
             report_base[const.MOBILITY_ENTROPY].quartiles,
             report_alternative[const.MOBILITY_ENTROPY].quartiles,
+            target_type=float,
         )
         args["mobility_entropy_moe_info"] = render_moe_info(
             report_base[const.MOBILITY_ENTROPY].margin_of_error_expmech
