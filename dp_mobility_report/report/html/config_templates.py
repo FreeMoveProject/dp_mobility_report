@@ -15,16 +15,15 @@ def render_config(dpmreport: "DpMobilityReport") -> str:
 
     args["config_table"] = render_config_table(dpmreport)
     args["privacy_info"] = render_privacy_info(dpmreport.privacy_budget is not None)
-    args["tessellation_info"] = (
-        ""
-        if (dpmreport.tessellation is not None)
-        else "<br> <br>No tessellation has been provided. All analyses based on the tessellation have been excluded."
-    )
-    args["timestamp_info"] = (
-        ""
-        if pd.core.dtypes.common.is_datetime64_dtype(dpmreport.df[const.DATETIME])
-        else "<br> <br>Dataframe does not contain timestamps. All analyses based on timestamps have been excluded."
-    )
+    if (dpmreport.tessellation is None):
+        args["tessellation_info"] = "<br> <br>No tessellation has been provided. All analyses based on the tessellation have been excluded."
+
+    if not pd.core.dtypes.common.is_datetime64_dtype(dpmreport.df[const.DATETIME]):
+        args["timestamp_info"] = "<br> <br>Dataframe does not contain timestamps. All analyses based on timestamps have been excluded."
+
+    if  max(dpmreport.df[const.TID].value_counts()) == 1:
+        args["od_info"] = "<br> <br>All trips in the dataset only contain a single record, therefore, all origin-destination analyses (OD Flows, travel time, jump length) have been excluded."
+
     template_structure = get_template("config_segment.html")
     return template_structure.render(args)
 
