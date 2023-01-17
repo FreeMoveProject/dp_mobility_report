@@ -4,8 +4,8 @@ History
 0.1.8 (2023-01-16)
 ------------------
 * Refine handling of OD Analysis input data:
-(1) warn if there are no trips with more than a single record and exclude OD Analysis
-(2) use all trips for travel time and jump length computation instead of only trips inside tessellation.
+    * warn if there are no trips with more than a single record and exclude OD Analysis
+    * use all trips for travel time and jump length computation instead of only trips inside tessellation.
 
 0.1.7 (2023-01-10)
 ------------------
