@@ -175,9 +175,18 @@ The EMD is the default measure for visits per tile and visits per tile timewindo
 Kendall correlation coefficient (KT)
 **************************************
 
-TODO
+The Kendall's :math:`\tau` coefficient, also known as the Kendall rank correlation coefficient, is a measure of the strength and direction of association that exists between two variables measured on an ordinal scale. It is a non-parametric measure of statistical associations based on the ranks of the data, i.e., the similarity of two rankings such as a ranking of most visited locations of two datasets. 
+It returns a value between :math:`-1` and :math:`1`, where :math:`-1` means no relationship and :math:`1` is a perfect relationship, determining the strength of association based on the pattern of concordance (ordered in the same way) and discordance (ordered differently) between all pairs, defined as follows:
+:math:`\tau= \frac{\textrm{number of concordant pairs} - \textrm{number of discordant pairs}}{\textrm{number of pairs}}`
 
-Top n coverage (TOP_N)
+Let's consider a list of locations :math:`\langle l_1,...,l_n \rangle` and let :math:`pop(D, l_i)` denote the popularity of :math:`l_i`, i.e., the number of times :math:`l_i` is visited by trajectories in dataset :math:`D` and compute the popularity :math:`pop(D_{base}, l_i)` for a base dataset and :math:`pop(D_{alt}, l_i)` for an alternative dataset for all :math:`l_i`. Then, we say that a pair of locations :math:`(l_i, l_j)` are concordant if either of the following hold:
+
+:math:`(pop(D_{ref}, l_i) > pop(D_{ref}, l_j)) \wedge (pop(D_{syn}, l_i) > pop(D_{syn}, l_j))` or 
+
+:math:`(pop(D_{ref}, l_i) < pop(D_{ref}, l_j)) \wedge (pop(D_{syn}, l_i) < pop(D_{syn}, l_j))`, i.e., their popularity ranks (in sorted order) agree. They are said to be discordant if their ranks disagree.
+
+Coverage of the top n locations (TOP_N)
 **************************************
 
-TODO
+The coverage of the top :math:`n` locations is defined by the true positive ratio: :math:`\frac{|top_n(D_{base})\ \cap\ top_n(D_{alt})|}{n}`, where :math:`n` is the number of top locations and :math:`top_n(D_{base})` is the :math:`n` top locations of the base dataset and :math:`top_n(D_{alt})` the :math:`n` top locations of the alternative dataset.
+This measure represents how well the alternative dataset is similar to the base dataset considering the most visited locations.
