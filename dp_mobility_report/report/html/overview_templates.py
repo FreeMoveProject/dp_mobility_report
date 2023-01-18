@@ -191,6 +191,8 @@ def render_benchmark_overview(benchmark: "BenchmarkReport") -> str:
             ]
         )
         combined_trips_per_hour["dataset"] = dataset
+        combined_trips_per_hour.rename(columns={"time_category": "time category"}, inplace=True)
+        combined_trips_per_hour["time category"] = combined_trips_per_hour["time category"].replace({"weekend_end": "weekend end", "weekend_start":"weekend start", "weekday_end":"weekday end", "weekday_start": "weekday start"})
         args["trips_per_hour_linechart"] = render_trips_per_hour(
             combined_trips_per_hour, margin_of_error=None, style="dataset"
         )
@@ -534,10 +536,10 @@ def render_trips_per_hour(
         x=const.HOUR,
         y="perc",
         style=style,
-        color=const.TIME_CATEGORY,
+        color="time category",
         x_axis_label="Hour of day",
         y_axis_label="% of trips",
-        hue_order=["weekday_start", "weekday_end", "weekend_start", "weekend_end"],
+        hue_order=["weekday start", "weekday end", "weekend start", "weekend end"],
         margin_of_error=margin_of_error,
     )
     html = v_utils.fig_to_html(chart)
