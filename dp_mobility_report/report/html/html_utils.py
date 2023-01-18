@@ -126,6 +126,48 @@ def fmt_moe(margin_of_error: Optional[float]) -> float:
         return 0
     return round(margin_of_error, 1)
 
+def fmt_config(value: Union[dict, list]) -> str:
+
+    def _join_tuple_string(strings_tuple) -> str:
+        return ': '.join(strings_tuple)
+    
+    analysis_format = {
+        const.DS_STATISTICS: 'Dataset statistics',
+        const.MISSING_VALUES: 'Missing values',
+        const.TRIPS_OVER_TIME: 'Trips over time',
+        const.TRIPS_PER_WEEKDAY: 'Trips per weekday',
+        const.TRIPS_PER_HOUR: "Trips per hour",
+        const.VISITS_PER_TILE: "Visits per tile",
+        const.VISITS_PER_TIME_TILE: "Visits per time tile",
+        const.VISITS_PER_TILE_OUTLIERS: "Visits per tile outliers",
+        const.VISITS_PER_TILE_RANKING: "Visits per tile ranking",
+        const.VISITS_PER_TILE_QUARTILES: "Visits per tile quartiles",
+        const.OD_FLOWS: "OD flows",
+        const.OD_FLOWS_RANKING: "OD flows ranking",
+        const.OD_FLOWS_QUARTILES: "Od flows quartiles",
+        const.TRAVEL_TIME: "Travel time",
+        const.TRAVEL_TIME_QUARTILES: "Travel time quartiles",
+        const.JUMP_LENGTH: "Jump length",
+        const.JUMP_LENGTH_QUARTILES: "Jump length quartiles",
+        const.TRIPS_PER_USER: "Trips per user",
+        const.TRIPS_PER_USER_QUARTILES: "Trips per user quartiles",
+        const.USER_TIME_DELTA: "User time delta",
+        const.USER_TIME_DELTA_QUARTILES: "User time delta quartiles",
+        const.RADIUS_OF_GYRATION: "Radius of gyration",
+        const.RADIUS_OF_GYRATION_QUARTILES: "Radius of gyration quartiles",
+        const.USER_TILE_COUNT: "User tile count",
+        const.USER_TILE_COUNT_QUARTILES: "User tile count quartiles",
+        const.MOBILITY_ENTROPY: "Mobility entropy",
+        const.MOBILITY_ENTROPY_QUARTILES: "Mobility entropy quartiles",
+        }
+
+    if (value == {}) or (value == []):
+        return "None"
+    if isinstance(value, dict):
+        zipped = zip([analysis_format[s] for s in value.keys()],[str(v) for v in value.values()])
+        return ', '.join(list(map(_join_tuple_string, zipped)))
+    if isinstance(value, list):
+        return ', '.join([analysis_format[s] for s in value])
 
 def render_eps(value: Optional[float]) -> Optional[float]:
     if value is None:

@@ -6,20 +6,18 @@
 
 {% if tessellation_info or timestamp_info or privacy_info or od_info %}
 <p class="warning">
-    {% if privacy_info %}
-    {{privacy_info}}
-    {% endif %} 
+    {% if privacy_info %} {{privacy_info}} {% endif %} 
 
-    {% if tessellation_info %}
-    {{tessellation_info}}
-    {% endif %}
+    {% if privacy_info and tessellation_info %} <br> {% endif %}
 
-    {% if timestamp_info %}
-    {{timestamp_info}}
-    {% endif %}
+    {% if tessellation_info %} {{tessellation_info}} {% endif %}
 
-    {% if od_info %}
-    {{od_info}}
-    {% endif %}
+    {% if tessellation_info and timestamp_info %} <br> {% endif %}
+
+    {% if timestamp_info %} {{timestamp_info}} {% endif %}
+
+    {% if timestamp_info and od_info %} <br> {% endif %}
+    
+    {% if od_info %} {{od_info}} {% endif %}
 </p>
 {% endif %}
