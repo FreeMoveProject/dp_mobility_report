@@ -225,7 +225,7 @@ def multi_linechart(
     hue_order: Optional[list] = None,
     margin_of_error: Optional[float] = None,
 ) -> mpl.figure.Figure:
-    fig = plt.figure()
+    fig = plt.figure(figsize=(9,6))
     plot = fig.add_subplot(111)
     palette = [const.DARK_BLUE, const.LIGHT_BLUE, const.ORANGE, const.LIGHT_ORANGE]
 
@@ -266,6 +266,8 @@ def choropleth_map(
     layer_name: str = "Visits",
     map: folium.Map = None,
     show: bool = True,
+    max_scale: int = None, 
+    cmap: str = None,
 ) -> folium.Map:
     poly_json = counts_per_tile_gdf.to_json()
 
@@ -283,9 +285,12 @@ def choropleth_map(
         cmap = mpl.cm.PiYG #RdBu_r
         norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
     else:
-        cmap = mpl.cm.YlOrRd
+        if not max_scale:
+            max_scale = counts_per_tile_gdf[fill_color_name].max()
+        if not cmap:
+            cmap = mpl.cm.YlOrRd
         norm = mpl.colors.Normalize(
-            vmin=min_scale, vmax=counts_per_tile_gdf[fill_color_name].max()
+            vmin=min_scale, vmax=max_scale
         )
 
     def _hex_color(x: Union[float, int]) -> str:
