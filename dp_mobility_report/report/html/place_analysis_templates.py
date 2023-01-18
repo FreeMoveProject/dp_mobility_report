@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Optional
 import matplotlib.pyplot as plt
 import pandas as pd
 from geopandas import GeoDataFrame
+import matplotlib as mpl
 
 if TYPE_CHECKING:
     from dp_mobility_report import BenchmarkReport, DpMobilityReport
@@ -232,7 +233,7 @@ def render_benchmark_visits_per_tile(
     deviation_from_base = pd.DataFrame(
         {
             const.TILE_ID: visits_per_tile_base_sorted[const.TILE_ID],
-            "deviation": relative_alternative - relative_base,
+            "deviation": (relative_base-relative_alternative)/(relative_base+relative_alternative), #relative_alternative - relative_base,
             "relative_base": relative_base,
             "relative_alternative": relative_alternative,
         }
@@ -262,7 +263,9 @@ def render_benchmark_visits_per_tile(
         diverging_cmap=True,
         layer_name="Deviation",
     )
-
+    min_scale = min(counts_per_tile_gdf['relative_base'].min(), counts_per_tile_gdf['relative_alternative'].min())
+    max_scale = max(counts_per_tile_gdf['relative_base'].max(), counts_per_tile_gdf['relative_alternative'].max())
+    
     map, legend_base = plot.choropleth_map(
         counts_per_tile_gdf,
         "relative_base",
@@ -272,6 +275,9 @@ def render_benchmark_visits_per_tile(
         map=map,
         layer_name="Relative visits base",
         show=False,
+        min_scale=min_scale,
+        max_scale=max_scale,
+        cmap=mpl.cm.Blues,
     )
     map, legend_alternative = plot.choropleth_map(
         counts_per_tile_gdf,
@@ -282,6 +288,9 @@ def render_benchmark_visits_per_tile(
         map=map,
         layer_name="Relative visits alternative",
         show=False,
+        min_scale=min_scale,
+        max_scale=max_scale,
+        cmap=mpl.cm.Oranges,
     )
     
     folium.LayerControl(collapsed=False).add_to(map)
