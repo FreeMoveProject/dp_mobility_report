@@ -135,14 +135,15 @@ SMAPE = "symmetric_mean_absolute_percentage_error"
 KT = "kendalls_tau"
 TOP_N = "top_n_coverage"
 
-format = {
-    "jensen_shannon_divergence": "Jensen-Shannon divergence",
-    "relative_error": "Relative error",
-    "kullback_leibler_divergence": "Kullback-Leibler divergence",
-    "earth_movers_distance": "Earth mover's distance",
-    "symmetric_mean_absolute_percentage_error": "Symmetric mean absolute percentage error",
-    "kendalls_tau": "Kendall rank correlation coefficient",
-}
+# format = {
+#     "jensen_shannon_divergence": "Jensen-Shannon divergence",
+#     "relative_error": "Relative error",
+#     "kullback_leibler_divergence": "Kullback-Leibler divergence",
+#     "earth_movers_distance": "Earth mover's distance",
+#     "symmetric_mean_absolute_percentage_error": "Symmetric mean absolute percentage error",
+#     "kendalls_tau": "Kendall rank correlation coefficient",
+# }
+
 
 DARK_BLUE = "#283377"
 LIGHT_BLUE = "#5D6FFF"
