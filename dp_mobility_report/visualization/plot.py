@@ -286,7 +286,7 @@ def choropleth_map(
     # color
     if not cmap:
         cmap = const.DIVERGING_CMAP2 if is_cmap_diverging else const.STANDARD_CMAP
-        cmap = mpl.colormaps[cmap]
+    cmap = mpl.colormaps[cmap]
 
     if is_cmap_diverging:
         norm = mpl.colors.TwoSlopeNorm(vmin=min_scale, vcenter=0, vmax=max_scale)
