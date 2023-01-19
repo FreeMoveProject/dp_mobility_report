@@ -206,7 +206,7 @@ def linechart_new(
     ax.set_xlabel(x_axis_label)
     ax.set_ylim(bottom=0)
     if add_diagonal:
-        ax.plot([0, data[x].max()], [0, data[y].max()], const.GREY)
+        ax.plot([0, data[x].max()], [0, data[y].max()], const.GREY, alpha=0.4)
 
     if rotate_label:
         plt.xticks(rotation=90)
@@ -227,7 +227,7 @@ def multi_linechart(
 ) -> mpl.figure.Figure:
     fig = plt.figure(figsize=(9,6))
     plot = fig.add_subplot(111)
-    palette = [const.DARK_BLUE, const.LIGHT_BLUE, const.ORANGE, const.LIGHT_ORANGE]
+    palette = plt.cm.get_cmap('tab20b').colors #mpl.cm.tab20c #[const.DARK_BLUE, const.LIGHT_BLUE, const.ORANGE, const.LIGHT_ORANGE]
 
     sns.lineplot(
         data=data,
@@ -370,7 +370,7 @@ def multi_choropleth_map(
         cmap = const.DIVERGING_CMAP2
         norm = mpl.colors.TwoSlopeNorm(vmin=min_scale, vcenter=0, vmax=max_scale)
     else:
-        cmap = const.STANDARD_CMAP
+        cmap = const.BASE_CMAP #STANDARD_CMAP
         norm = mpl.colors.Normalize(vmin=min_scale, vmax=max_scale)
 
     for i in range(0, plots_per_row * row_count):
