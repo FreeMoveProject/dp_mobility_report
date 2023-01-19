@@ -274,7 +274,7 @@ def get_trips_per_hour(
     )
 
     hour_weekday[const.TIME_CATEGORY] = (
-        hour_weekday[const.IS_WEEKEND] + "_" + hour_weekday[const.POINT_TYPE]
+        hour_weekday[const.IS_WEEKEND] + " " + hour_weekday[const.POINT_TYPE]
     )
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, dpmreport.max_trips_per_user)
 

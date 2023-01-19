@@ -245,7 +245,7 @@ def compute_similarity_measures(
             trips_per_hour = report_alternative[const.TRIPS_PER_HOUR].data.merge(
                 report_base[const.TRIPS_PER_HOUR].data,
                 how="outer",
-                on=["hour", "time_category"],
+                on=["hour", const.TIME_CATEGORY],
                 suffixes=("_alternative", "_base"),
             )
             trips_per_hour.fillna(0, inplace=True)

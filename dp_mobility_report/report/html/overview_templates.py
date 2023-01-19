@@ -88,11 +88,9 @@ def render_overview(dpmreport: "DpMobilityReport") -> str:
         args["trips_per_hour_moe"] = fmt_moe(
             report[const.TRIPS_PER_HOUR].margin_of_error_laplace
         )
-        trips_per_hour = pd.DataFrame(report[const.TRIPS_PER_HOUR].data).rename(columns={'time_category': 'time category'})
-        trips_per_hour["time category"] = trips_per_hour["time category"].replace({"weekend_end": "weekend end", "weekend_start":"weekend start", "weekday_end":"weekday end", "weekday_start": "weekday start"})
         
         args["trips_per_hour_linechart"] = render_trips_per_hour(
-            trips_per_hour, margin_of_error=None
+            report[const.TRIPS_PER_HOUR].data, margin_of_error=None
         )
 
     template_structure = get_template("overview_segment.html")
@@ -194,8 +192,6 @@ def render_benchmark_overview(benchmark: "BenchmarkReport") -> str:
             ]
         )
         combined_trips_per_hour["dataset"] = dataset
-        combined_trips_per_hour.rename(columns={"time_category": "time category"}, inplace=True)
-        combined_trips_per_hour["time category"] = combined_trips_per_hour["time category"].replace({"weekend_end": "weekend end", "weekend_start":"weekend start", "weekday_end":"weekday end", "weekday_start": "weekday start"})
         args["trips_per_hour_linechart"] = render_trips_per_hour(
             combined_trips_per_hour, margin_of_error=None, style="dataset"
         )
@@ -539,7 +535,7 @@ def render_trips_per_hour(
         x=const.HOUR,
         y="perc",
         style=style,
-        color="time category",
+        color=const.TIME_CATEGORY,
         x_axis_label="Hour of day",
         y_axis_label="% of trips",
         hue_order=["weekday start", "weekday end", "weekend start", "weekend end"],
