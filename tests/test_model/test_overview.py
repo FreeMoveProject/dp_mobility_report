@@ -84,10 +84,10 @@ def test_get_trips_per_hour(test_dpmreport):
     assert trips_per_hour[const.HOUR].min() == 0
     assert trips_per_hour[const.HOUR].max() == 23
     assert trips_per_hour[const.TIME_CATEGORY].unique().tolist() == [
-        "weekday_end",
-        "weekday_start",
-        "weekend_end",
-        "weekend_start",
+        "weekday end",
+        "weekday start",
+        "weekend end",
+        "weekend start",
     ]
     assert trips_per_hour.columns.tolist() == [const.HOUR, const.TIME_CATEGORY, "perc"]
     assert len(trips_per_hour) == 96
