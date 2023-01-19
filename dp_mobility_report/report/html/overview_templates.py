@@ -88,8 +88,11 @@ def render_overview(dpmreport: "DpMobilityReport") -> str:
         args["trips_per_hour_moe"] = fmt_moe(
             report[const.TRIPS_PER_HOUR].margin_of_error_laplace
         )
+        trips_per_hour = pd.DataFrame(report[const.TRIPS_PER_HOUR].data).rename(columns={'time_category': 'time category'})
+        trips_per_hour["time category"] = trips_per_hour["time category"].replace({"weekend_end": "weekend end", "weekend_start":"weekend start", "weekday_end":"weekday end", "weekday_start": "weekday start"})
+        
         args["trips_per_hour_linechart"] = render_trips_per_hour(
-            report[const.TRIPS_PER_HOUR].data, margin_of_error=None
+            trips_per_hour, margin_of_error=None
         )
 
     template_structure = get_template("overview_segment.html")
