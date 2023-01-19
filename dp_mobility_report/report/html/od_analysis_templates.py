@@ -60,7 +60,7 @@ def render_od_analysis(
         )
         quartiles = report[const.OD_FLOWS].quartiles.round()
         args["flows_summary_table"] = render_summary(quartiles.astype(int))
-        args["flows_cumsum_linechart"] = render_flows_cumsum(report[const.OD_FLOWS])
+        args["flows_cumsum_linechart"] = render_flows_cumsum(report[const.OD_FLOWS], diagonal=True)
         args["most_freq_flows_ranking"] = render_most_freq_flows_ranking(
             report[const.OD_FLOWS], dpmreport.tessellation
         )
@@ -154,7 +154,7 @@ def render_benchmark_od_analysis(
             target_type=int
         )
         args["flows_cumsum_linechart"] = render_flows_cumsum(
-            report_base[const.OD_FLOWS], report_alternative[const.OD_FLOWS]
+            report_base[const.OD_FLOWS], report_alternative[const.OD_FLOWS],
         )
         args["most_freq_flows_ranking"] = render_most_freq_flows_ranking_benchmark(
             report_base[const.OD_FLOWS],
@@ -252,7 +252,7 @@ def render_origin_destination_flows(
     )
 
     map, intra_tile_legend = plot.choropleth_map(
-        tessellation_intra_flows, const.FLOW, "intra-tile flows"
+        tessellation_intra_flows, const.FLOW, "intra-tile flows", cmap=const.BASE_CMAP,
     )  # get innerflows as color for choropleth
 
     # create od flows map
@@ -389,7 +389,7 @@ def render_intra_tile_flows(od_flows: DfSection, n_tiles: int) -> str:
 
 
 def render_flows_cumsum(
-    od_flows: DfSection, od_flows_alternative: Optional[DfSection] = None
+    od_flows: DfSection, od_flows_alternative: Optional[DfSection] = None, diagonal: bool = False,
 ) -> str:
     df_cumsum = od_flows.cumsum
     if od_flows_alternative:
@@ -404,7 +404,7 @@ def render_flows_cumsum(
         data_alternative=df_cumsum_alternative,
         x_axis_label="Number of OD tile pairs",
         y_axis_label="Cumulated sum of flows between OD pairs",
-        add_diagonal=False,
+        add_diagonal=diagonal,
     )
     html = v_utils.fig_to_html(chart)
     plt.close()

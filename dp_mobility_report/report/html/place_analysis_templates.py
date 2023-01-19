@@ -62,7 +62,7 @@ def render_place_analysis(
             quartiles.astype(int),  # extrapolate visits from dp record count
         )
         args["visits_per_tile_cumsum_linechart"] = render_visits_per_tile_cumsum(
-            report[const.VISITS_PER_TILE]
+            report[const.VISITS_PER_TILE], 
         )
         args["most_freq_tiles_ranking"] = render_most_freq_tiles_ranking(
             report[const.VISITS_PER_TILE],
@@ -132,6 +132,7 @@ def render_benchmark_place_analysis(
         args["visits_per_tile_cumsum_linechart"] = render_visits_per_tile_cumsum(
             report_base[const.VISITS_PER_TILE],
             report_alternative[const.VISITS_PER_TILE],
+            diagonal=True,
         )
         args["most_freq_tiles_ranking"] = render_most_freq_tiles_ranking_benchmark(
             report_base[const.VISITS_PER_TILE],
@@ -203,6 +204,7 @@ def render_visits_per_tile(
         "visits",
         scale_title="number of visits",
         aliases=["Tile ID", "Tile Name", "number of visits"],
+        cmap=const.BASE_CMAP,
     )
 
     map.save(os.path.join(temp_map_folder, "visits_per_tile_map.html"))
@@ -364,7 +366,7 @@ def render_benchmark_visits_per_tile(
 
 
 def render_visits_per_tile_cumsum(
-    counts_per_tile: DfSection, counts_per_tile_alternative: Optional[DfSection] = None
+    counts_per_tile: DfSection, counts_per_tile_alternative: Optional[DfSection] = None, diagonal: bool = False,
 ) -> str:
     df_cumsum = counts_per_tile.cumsum
     if counts_per_tile_alternative:
@@ -379,7 +381,7 @@ def render_visits_per_tile_cumsum(
         data_alternative=df_cumsum_alternative,
         x_axis_label="Number of tiles",
         y_axis_label="Cumulated sum of visits per tile",
-        add_diagonal=False,
+        add_diagonal=diagonal,
     )
     html = v_utils.fig_to_html(chart)
     plt.close()
