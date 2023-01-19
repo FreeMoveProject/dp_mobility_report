@@ -176,7 +176,7 @@ Kendall correlation coefficient (KT)
 **************************************
 
 The Kendall's :math:`\tau` coefficient, also known as the Kendall rank correlation coefficient, is a measure of the strength and direction of association that exists between two variables measured on an ordinal scale. It is a non-parametric measure of statistical associations based on the ranks of the data, i.e., the similarity of two rankings such as a ranking of most visited locations of two datasets. 
-It returns a value between :math:`-1` and :math:`1`, where :math:`-1` means no relationship and :math:`1` is a perfect relationship, determining the strength of association based on the pattern of concordance (ordered in the same way) and discordance (ordered differently) between all pairs, defined as follows:
+It returns a value between :math:`-1` and :math:`1`, where :math:`-1` means negative correlation, :math:`0` means no relationship and :math:`1` means positive correlation, determining the strength of association based on the pattern of concordance (ordered in the same way) and discordance (ordered differently) between all pairs, defined as follows:
 :math:`\tau= \frac{\textrm{number of concordant pairs} - \textrm{number of discordant pairs}}{\textrm{number of pairs}}`
 
 Let's consider a list of locations :math:`\langle l_1,...,l_n \rangle` and let :math:`pop(D, l_i)` denote the popularity of :math:`l_i`, i.e., the number of times :math:`l_i` is visited by trajectories in dataset :math:`D` and compute the popularity :math:`pop(D_{base}, l_i)` for a base dataset and :math:`pop(D_{alt}, l_i)` for an alternative dataset for all :math:`l_i`. Then, we say that a pair of locations :math:`(l_i, l_j)` are concordant if either of the following hold:
