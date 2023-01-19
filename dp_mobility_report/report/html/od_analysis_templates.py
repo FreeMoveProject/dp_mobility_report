@@ -324,7 +324,9 @@ def render_benchmark_origin_destination_flows(
         "deviation",
         "deviation from base intra-tile flows",
         layer_name="Intra-tile flows",
-        diverging_cmap=True,
+        is_cmap_diverging=True,
+        min_scale=-1,
+        max_scale=1
     )  # get innerflows as color for choropleth
 
     flows_base = data_base[

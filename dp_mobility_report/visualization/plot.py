@@ -260,35 +260,37 @@ def choropleth_map(
     counts_per_tile_gdf: GeoDataFrame,
     fill_color_name: str,
     scale_title: str = "Visit count",
-    min_scale: Optional[Union[int, float]] = None,
-    aliases: list = None,
-    diverging_cmap: bool = False,
-    layer_name: str = "Visits",
     map: folium.Map = None,
-    show: bool = True,
-    max_scale: int = None, 
+    is_cmap_diverging: bool = False,
     cmap: str = None,
+    min_scale: Optional[Union[int, float]] = None,
+    max_scale: int = None, 
+    aliases: list = None,
+    layer_name: str = "Visits",
+    show: bool = True,
 ) -> folium.Map:
     poly_json = counts_per_tile_gdf.to_json()
 
     if not map:
         center_x, center_y = _get_center(counts_per_tile_gdf)
         map = _basemap(center_x, center_y)
+
     min_scale = (
-        counts_per_tile_gdf[fill_color_name].min() if min_scale is None else min_scale
+        min_scale if min_scale is not None else counts_per_tile_gdf[fill_color_name].min() 
+    )
+    
+    max_scale = (
+        max_scale if max_scale is not None else counts_per_tile_gdf[fill_color_name].max()
     )
 
     # color
-    if diverging_cmap:  # TODO können wir das hier einfach ändern??
-        vmin = -1
-        vmax = 1
-        cmap = mpl.cm.PiYG #RdBu_r
-        norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
+    if not cmap:
+        cmap = const.DIVERGING_CMAP2 if is_cmap_diverging else const.STANDARD_CMAP
+        cmap = mpl.colormaps[cmap]
+
+    if is_cmap_diverging:
+        norm = mpl.colors.TwoSlopeNorm(vmin=min_scale, vcenter=0, vmax=max_scale)
     else:
-        if not max_scale:
-            max_scale = counts_per_tile_gdf[fill_color_name].max()
-        if not cmap:
-            cmap = mpl.cm.YlOrRd
         norm = mpl.colors.Normalize(
             vmin=min_scale, vmax=max_scale
         )
@@ -341,7 +343,7 @@ def choropleth_map(
 def multi_choropleth_map(
     counts_per_tile_timewindow: DataFrame,
     tessellation: GeoDataFrame,
-    diverging_cmap: bool = False,
+    is_cmap_diverging: bool = False,
 ) -> mpl.figure.Figure:
     counts_per_tile_timewindow = tessellation[["tile_id", "geometry"]].merge(
         counts_per_tile_timewindow, left_on="tile_id", right_index=True, how="left"
@@ -360,13 +362,13 @@ def multi_choropleth_map(
     vmax = vmax if not math.isnan(vmax) else 2
 
     # color
-    if diverging_cmap:  # TODO können wir das hier einfach ändern?
+    if is_cmap_diverging:
         vmin = -1
         vmax = 1  # if vmax <= 1 else vmax
-        cmap = "RdBu_r"
+        cmap = const.DIVERGING_CMAP1
         norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
     else:
-        cmap = "YlOrRd"
+        cmap = const.STANDARD_CMAP
         norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
 
     for i in range(0, plots_per_row * row_count):

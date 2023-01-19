@@ -260,7 +260,9 @@ def render_benchmark_visits_per_tile(
         "deviation",
         scale_title="deviation of relative counts per tile from base",
         aliases=["Tile ID", "Tile Name", "deviation"],
-        diverging_cmap=True,
+        is_cmap_diverging=True,
+        min_scale=-1,
+        max_scale=1,
         layer_name="Deviation",
     )
     min_scale = min(counts_per_tile_gdf['relative_base'].min(), counts_per_tile_gdf['relative_alternative'].min())
@@ -271,26 +273,26 @@ def render_benchmark_visits_per_tile(
         "relative_base",
         scale_title="relative counts per tile",
         aliases=["Tile ID", "Tile Name", "relative counts"],
-        diverging_cmap=False,
+        is_cmap_diverging=False,
         map=map,
         layer_name="Relative visits base",
         show=False,
         min_scale=min_scale,
         max_scale=max_scale,
-        cmap=mpl.cm.Blues,
+        cmap=const.BASE_CMAP,
     )
     map, legend_alternative = plot.choropleth_map(
         counts_per_tile_gdf,
         "relative_alternative",
         scale_title="relative counts per tile",
         aliases=["Tile ID", "Tile Name", "relative counts"],
-        diverging_cmap=False,
+        is_cmap_diverging=False,
         map=map,
         layer_name="Relative visits alternative",
         show=False,
         min_scale=min_scale,
         max_scale=max_scale,
-        cmap=mpl.cm.Oranges,
+        cmap=const.ALT_CMAP,
     )
     
     folium.LayerControl(collapsed=False).add_to(map)
@@ -528,7 +530,7 @@ def _create_timewindow_segment(df: pd.DataFrame, tessellation: GeoDataFrame) -> 
     tile_means = df.mean(axis=1)
     dev_from_avg = df.div(tile_means, axis=0)
     deviation_choropleth = plot.multi_choropleth_map(
-        dev_from_avg, tessellation, diverging_cmap=True
+        dev_from_avg, tessellation, is_cmap_diverging=True
     )
     return f"""<h4>Number of visits</h4>
         {v_utils.fig_to_html_as_png(visits_choropleth)}
@@ -542,6 +544,6 @@ def _create_timewindow_segment(df: pd.DataFrame, tessellation: GeoDataFrame) -> 
 def _create_timewindow_segment_benchmark(
     df: pd.DataFrame, tessellation: GeoDataFrame
 ) -> str:
-    visits_choropleth = plot.multi_choropleth_map(df, tessellation, diverging_cmap=True)
+    visits_choropleth = plot.multi_choropleth_map(df, tessellation, is_cmap_diverging=True)
     return f"""<h4>Deviation from base</h4>
         {v_utils.fig_to_html_as_png(visits_choropleth)}"""  # svg might get too large
