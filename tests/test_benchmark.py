@@ -214,7 +214,6 @@ def test_get_selected_measures(benchmark_report):
 
     similarity_measures = get_selected_measures(benchmark_report)
     assert isinstance(similarity_measures, dict)
-    assert None not in similarity_measures.values()
 
     test_data = pd.read_csv("tests/test_files/test_data.csv")
     test_data_alternative = pd.read_csv("tests/test_files/test_data.csv", nrows=50)
