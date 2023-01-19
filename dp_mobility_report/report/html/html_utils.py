@@ -161,7 +161,9 @@ def fmt_config(value: Union[dict, list]) -> str:
         const.MOBILITY_ENTROPY_QUARTILES: "Mobility entropy quartiles",
         }
 
-    if (value == {}) or (value == []):
+    if (value == {}): 
+        return "Evenly distributed"
+    if (value == []):
         return "None"
     if isinstance(value, dict):
         zipped = zip([analysis_format[s] for s in value.keys()],[str(v) for v in value.values()])
