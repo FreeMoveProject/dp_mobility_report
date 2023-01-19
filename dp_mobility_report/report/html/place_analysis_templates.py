@@ -507,7 +507,7 @@ def render_visits_per_time_tile_benchmark(
         )
         output_html += "<h4>Weekday</h4>"
         output_html += _create_timewindow_segment_benchmark(
-            weekday_base - weekday_alternative, tessellation
+            (weekday_base - weekday_alternative)/(weekday_base+weekday_alternative), tessellation
         )
 
     if "weekend" in data.columns:
@@ -518,7 +518,7 @@ def render_visits_per_time_tile_benchmark(
         )
         output_html += "<h4>Weekend</h4>"
         output_html += _create_timewindow_segment_benchmark(
-            weekend_base - weekend_alternative, tessellation
+            (weekend_base - weekend_alternative)/(weekend_base+weekend_alternative), tessellation
         )
     plt.close()
     return output_html
