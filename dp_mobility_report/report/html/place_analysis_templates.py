@@ -65,7 +65,7 @@ def render_place_analysis(
             quartiles.astype(int),  # extrapolate visits from dp record count
         )
         args["visits_per_tile_cumsum_linechart"] = render_visits_per_tile_cumsum(
-            report[const.VISITS_PER_TILE], 
+            report[const.VISITS_PER_TILE], diagonal=True,
         )
         args["most_freq_tiles_ranking"] = render_most_freq_tiles_ranking(
             report[const.VISITS_PER_TILE],
@@ -135,7 +135,7 @@ def render_benchmark_place_analysis(
         args["visits_per_tile_cumsum_linechart"] = render_visits_per_tile_cumsum(
             report_base[const.VISITS_PER_TILE],
             report_alternative[const.VISITS_PER_TILE],
-            diagonal=True,
+            diagonal=False,
         )
         args["most_freq_tiles_ranking"] = render_most_freq_tiles_ranking_benchmark(
             report_base[const.VISITS_PER_TILE],
