@@ -227,7 +227,7 @@ def multi_linechart(
 ) -> mpl.figure.Figure:
     fig = plt.figure(figsize=(9,6))
     plot = fig.add_subplot(111)
-    palette = plt.cm.get_cmap('tab20b').colors #mpl.cm.tab20c #[const.DARK_BLUE, const.LIGHT_BLUE, const.ORANGE, const.LIGHT_ORANGE]
+    palette = ['#99065a', '#e289ba', '#2c6a19', '#99cd60']
 
     sns.lineplot(
         data=data,
