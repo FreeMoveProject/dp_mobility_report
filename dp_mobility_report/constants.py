@@ -127,13 +127,13 @@ DS_STATISTICS_ELEMENTS = [
 MISSING_VALUES_ELEMENTS = [UID, TID, DATETIME, LAT, LNG]
 
 # SIMILARITY MEASURES
-PE = "percentage_error"
+SMAPE = "symmetric_mean_absolute_percentage_error"
 JSD = "jensen_shannon_divergence"
 KLD = "kullback_leibler_divergence"
 EMD = "earth_movers_distance"
 KT = "kendalls_tau"
 TOP_N = "top_n_coverage"
-SIMILARITY_MEASURES = [PE, JSD, KLD, EMD, KT, TOP_N]
+SIMILARITY_MEASURES = [SMAPE, JSD, KLD, EMD, KT, TOP_N]
 
 DARK_BLUE = "#283377"
 LIGHT_BLUE = "#5D6FFF"

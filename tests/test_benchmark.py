@@ -148,7 +148,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
 
     analysis_exclusion = [const.MOBILITY_ENTROPY]
     (
-        percentage_error_dict,
+        symmetric_mean_absolute_percentage_error_dict,
         kld_dict,
         jsd_dict,
         emd_dict,
@@ -158,7 +158,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
         analysis_exclusion, alternative_dpmreport, base_dpmreport, test_tessellation, top_n_ranking=[10, 100], disable_progress_bar=True
     )
 
-    assert isinstance(percentage_error_dict, dict)
+    assert isinstance(symmetric_mean_absolute_percentage_error_dict, dict)
     assert isinstance(kld_dict, dict)
     assert isinstance(jsd_dict, dict)
     assert isinstance(emd_dict, dict)
@@ -171,7 +171,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
 
     analysis_exclusion = [const.VISITS_PER_TILE]
     (
-        percentage_error_dict,
+        symmetric_mean_absolute_percentage_error_dict,
         kld_dict,
         jsd_dict,
         emd_dict,
@@ -181,7 +181,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
         analysis_exclusion, alternative_dpmreport, base_dpmreport, test_tessellation, top_n_ranking=[10, 100], disable_progress_bar=True
     )
 
-    assert isinstance(percentage_error_dict, dict)
+    assert isinstance(symmetric_mean_absolute_percentage_error_dict, dict)
     assert isinstance(kld_dict, dict)
     assert isinstance(jsd_dict, dict)
     assert isinstance(emd_dict, dict)
@@ -232,7 +232,7 @@ def test_benchmark_report(benchmark_report):
     assert isinstance(benchmark_report.emd, dict)
     assert isinstance(benchmark_report.jsd, dict)
     assert isinstance(benchmark_report.kld, dict)
-    assert isinstance(benchmark_report.perc_error, dict)
+    assert isinstance(benchmark_report.smape, dict)
     assert isinstance(benchmark_report.measure_selection, dict)
     assert isinstance(benchmark_report.similarity_measures, dict)
 
@@ -251,7 +251,7 @@ def test_measure_selection():
         )
 
     assert validate_measure_selection(
-        measure_selection={const.OD_FLOWS: const.PE},
+        measure_selection={const.OD_FLOWS: const.SMAPE},
         analysis_exclusion=[
             const.VISITS_PER_TILE,
             const.DS_STATISTICS,
@@ -271,7 +271,7 @@ def test_measure_selection():
             const.OD_FLOWS_RANKING,
             const.OD_FLOWS_QUARTILES
         ],
-    ) == {const.OD_FLOWS: const.PE}
+    ) == {const.OD_FLOWS: const.SMAPE}
 
 
 def test_top_n_ranking_input():
