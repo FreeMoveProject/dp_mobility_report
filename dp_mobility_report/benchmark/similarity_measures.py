@@ -257,7 +257,7 @@ def compute_similarity_measures(
                 p=trips_per_hour.perc_alternative, q=trips_per_hour.perc_base
             )
             smape_dict[const.TRIPS_PER_HOUR] = symmetric_mape(
-                alternative=trips_per_hour.perc_alternative,  # TODO im eval package change to perc
+                alternative=trips_per_hour.perc_alternative,
                 base=trips_per_hour.perc_base,
             )
         pbar.update()
@@ -295,13 +295,11 @@ def compute_similarity_measures(
                 report_base[const.VISITS_PER_TILE].data.sort_values(
                     by=["visits"], ascending=False, ignore_index=True
                 )
-                #    .truncate(after=9)
             )
             most_freq_alternative = (
                 report_alternative[const.VISITS_PER_TILE].data.sort_values(
                     by=["visits"], ascending=False, ignore_index=True
                 )
-                #    .truncate(after=9)
             )
 
             # mute kendall_tau warning by replacing str tile_ids with ints

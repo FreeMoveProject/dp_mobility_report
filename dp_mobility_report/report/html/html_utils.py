@@ -1,5 +1,5 @@
 import math
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import geopandas as gpd
 import jinja2
@@ -214,7 +214,7 @@ def get_centroids(tessellation: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 def all_available_measures(
     analysis_name: str, benchmarkreport: "BenchmarkReport"
 ) -> dict:
-    available_measures = {}
+    available_measures: Dict[str, Union[str, List[str]]] = {}
 
     if analysis_name in benchmarkreport.smape:
         available_measures[const.SMAPE] = str(fmt(benchmarkreport.smape[analysis_name]))
