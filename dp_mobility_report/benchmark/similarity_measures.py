@@ -163,7 +163,7 @@ def compute_similarity_measures(
     top_n_coverage_dict: dict = {}
     cost_matrix = None
 
-    disable_emd = len(tessellation) > 500 if (tessellation is not None) else True
+    disable_emd = len(tessellation) > const.DISABLE_EMD_THRESHOLD if (tessellation is not None) else True
 
     if disable_emd and (
         (const.VISITS_PER_TILE not in analysis_exclusion)
