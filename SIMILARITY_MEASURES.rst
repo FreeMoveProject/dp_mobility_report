@@ -5,8 +5,9 @@ Similarity Measures
 The similarity of two mobility reports is evaluated with a set of similarity measures. Specifically, a measure is computed for each analysis of the report.
 The following table shows the analysis segments 
 that can be included/exluded in the benchmark report and their corresponding analyses and similarity measures. The default measures are in bold. 
-In the following the similarity measures (mean) absolute percentage error (PE), Kullback-Leibler divergence (KLD), Jensen-Shannon divergence (JSD), earth mover's distance (EMD) and
-symmetric mean average percentage error (SMAPE) will be explained, as well as the reasoning why the specific measures are available for each analyses and why the default measure was chosen. 
+In the following the similarity measures symmetric mean average percentage error (SMAPE), Kullback-Leibler divergence (KLD), Jensen-Shannon divergence (JSD), earth mover's distance (EMD) and 
+will be explained, as well as the reasoning why the specific measures are available for each analyses and how the default measure was chosen. 
+The default measure is the measure most suitable for each analysis and the chosen set of default measures will be returned as the property ``similarity_measures`` when creating a benchmark report. 
 
 Overview and default measures
 ********************************
@@ -21,86 +22,104 @@ Overview and default measures
      - Similarity measures (Default bold)
    * - Overview
      - Dataset Statistics
-     - **RE**
+     - **SMAPE**
    * - 
      - Missing values
-     - **RE**
+     - **SMAPE**
    * - 
      - Trips over time
-     - KLD, **JSD**, PE
+     -  SMAPE, KLD, **JSD**
    * - 
      - Trips per weekday
-     - KLD, **JSD**, PE
+     - SMAPE, KLD, **JSD**
    * - 
      - Trips per hour
-     - KLD, **JSD**, PE
+     - SMAPE, KLD, **JSD**
    * - Place
      - Visits per tile
-     - KLD, JSD, PE, **EMD**
+     -  SMAPE, KLD, JSD, **EMD**
+   * - 
+     - Visits per tile quartiles
+     - **SMAPE**
    * - 
      - Visits per tile outliers
-     - **RE**
+     - **SMAPE**     
+   * - 
+     - Visits per tile ranking
+     - **KT**, TOP_N
    * - 
      - Visits per time tile
-     - KLD, JSD, PE, **EMD**
+     - SMAPE, KLD, JSD, **EMD**
    * - OD
      - OD flows
-     - KLD, **JSD**, PE
+     - SMAPE, KLD, **JSD**   
+   * -
+     - OD flows ranking
+     - **KT**, TOP_N     
+   * -
+     - OD flows quartiles
+     - **SMAPE**
    * - 
      - Travel time
-     - KLD, **JSD**, PE, EMD
+     - SMAPE, KLD, **JSD**, EMD
    * - 
      - Travel time quartiles
-     - **PE**
+     - **SMAPE**
    * - 
      - Jump length
-     - KLD, **JSD**, PE, EMD
+     - SMAPE, KLD, **JSD**, EMD
    * - 
      - Jump length quartiles
-     - **PE**
+     - **SMAPE**
    * - User 
      - Trips per user
-     - **EMD**, Todo: JSD, KLD, PE
+     - **EMD** TODO: KLD; JSD, SMAPE
    * -  
      - Trips per user quartiles
-     - **PE**
+     - **SMAPE**
    * -  
      - User time delta
-     - Todo
+     - SMAPE, KLD, **JSD**, EMD
    * -  
      - User time delta quartiles
-     - **PE**
+     - **SMAPE**
    * - 
      - Radius of gyration
-     - KLD, **JSD**, EMD, PE
+     - SMAPE, KLD, **JSD**, EMD
    * - 
      - Radius of gyration quartiles
-     - **PE**
+     - **SMAPE**
+   * - 
+     - User tile count
+     - SMAPE, KLD, **JSD**, EMD
    * - 
      - User tile count quartiles
-     - **PE**
+     - **SMAPE**
    * -  
      - Mobility entropy
-     - KLD, **JSD**, EMD, PE
+     - SMAPE, KLD, **JSD**, EMD
+   * -  
+     - Mobility entropy quartiles
+     - **SMAPE**
    
    
 
 
-# TODO: text anpassen (combine RE and SMAPE)
 
-Symmetric (mean absolute) percentage error (PE)
+Symmetric mean absolute percentage error (SMAPE)
 ***************************************************
 
-Relative error is the absolute error divided by the magnitude of the exact value and is computed as :math:`\frac{ \bar{y} - y }{y}`, with :math:`\bar{y}` equals the estimated value and :math:`y` the true value.
-The relative error is used for the analyses of the dataset statistics (e.g.,record count, trip count, user count), missing values and outliers. The relative error can only be computed for single values (e.g., not for histograms) and thus is not computed for other analyses.
 
 The symmetric mean absolute percentage error (SMAPE) is an accuracy measure based on percentage (or relative) errors. 
-In contrast to the mean absolute percentage error, SMAPE has both a lower bound (0, meaning entirely different) and an upper bound (2, meaning identical). 
-SMAPE is computed for all analyses, that entail more than a single value, in contrast to analyses the relativ error is used for. 
-SMAPE is employed as the default measure for the evaluation of quartiles, as KLD, JSD and EMD are not suitable.
+In contrast to the mean absolute percentage error, SMAPE has both a lower bound (0, meaning identical) and an upper bound (2, meaning entirely different). 
+
+:math:`SMAPE:= \frac{1}{n} \sum_{i=1}^{n} \frac {|alternative_{i} - base_{i}|}{(|base_{i}| + |alternative_{i}|) \div 2}`, for :math:`|base_{i}| + |alternative_{i}| > 0`
+
+SMAPE is computed for all analyses.
+SMAPE is employed as the default measure for single counts (e.g., dataset statistics, missing values, where n=1) and the evaluation of quartiles, as KLD, JSD and EMD are not suitable.
 
 
-Kullback Leibler Divergence (KLD)
+Kullback-Leibler Divergence (KLD)
 **********************************
 The Kullback-Leibler divergence (KLD), also called relative entropy, is a widely used statistic to measure how far a probability distribution :math:`P` deviates from a reference probability distribution :math:`Q` on the same probability space :math:`\mathcal{X}`.
 For discrete distributions :math:`P` and :math:`Q`, it is formally defined as 
@@ -164,18 +183,27 @@ Thus the EMD is available for the following analyses provided in the following u
 
 * trips per user: distance in counts of trips
 
+* user time delta: distance in hours
+
 * radius of gyration: distance in kilometers
 
+* user tile count: distance in counts of tiles
+
+* mobility entropy: distance in mobility entropy
+ 
 
 The EDM can only be computed, if a notion of distance between histogram bins or tiles can be computed. 
 For example, there is no trivial distance between weekdays (you could argue that the categorization of weekdays and weekend is more important than the number of days lying inbetween). Thus, we decided to omit the EMD if there is no intuitive distance measure. 
-The EMD is the default measure for visits per tile and visits per tile timewindow, as the underlying geometry is especially important to account for here.
+The EMD is the default measure for visits per tile and visits per tile timewindow, as the underlying geometry is especially important to account for here. The EMD is also the default measure for the trips per user.
 
 Kendall correlation coefficient (KT)
 **************************************
 
-The Kendall's :math:`\tau` coefficient, also known as the Kendall rank correlation coefficient, is a measure of the strength and direction of association that exists between two variables measured on an ordinal scale. It is a non-parametric measure of statistical associations based on the ranks of the data, i.e., the similarity of two rankings such as a ranking of most visited locations of two datasets. 
-It returns a value between :math:`-1` and :math:`1`, where :math:`-1` means negative correlation, :math:`0` means no relationship and :math:`1` means positive correlation, determining the strength of association based on the pattern of concordance (ordered in the same way) and discordance (ordered differently) between all pairs, defined as follows:
+The Kendall's :math:`\tau` coefficient, also known as the Kendall rank correlation coefficient, is a measure of the strength and direction of association that exists between 
+two variables measured on an ordinal scale. It is a non-parametric measure of statistical associations based on the ranks of the data, i.e., the similarity of two rankings 
+such as a ranking of most visited locations of two datasets. 
+It returns a value between :math:`-1` and :math:`1`, where :math:`-1` means negative correlation, :math:`0` means no relationship and :math:`1` means positive correlation, 
+determining the strength of association based on the pattern of concordance (ordered in the same way) and discordance (ordered differently) between all pairs, defined as follows [1]:
 :math:`\tau= \frac{\textrm{number of concordant pairs} - \textrm{number of discordant pairs}}{\textrm{number of pairs}}`
 
 Let's consider a list of locations :math:`\langle l_1,...,l_n \rangle` and let :math:`pop(D, l_i)` denote the popularity of :math:`l_i`, i.e., the number of times :math:`l_i` is visited by trajectories in dataset :math:`D` and compute the popularity :math:`pop(D_{base}, l_i)` for a base dataset and :math:`pop(D_{alt}, l_i)` for an alternative dataset for all :math:`l_i`. Then, we say that a pair of locations :math:`(l_i, l_j)` are concordant if either of the following hold:
@@ -185,7 +213,12 @@ Let's consider a list of locations :math:`\langle l_1,...,l_n \rangle` and let :
 :math:`(pop(D_{ref}, l_i) < pop(D_{ref}, l_j)) \wedge (pop(D_{syn}, l_i) < pop(D_{syn}, l_j))`, i.e., their popularity ranks (in sorted order) agree. They are said to be discordant if their ranks disagree.
 
 Coverage of the top n locations (TOP_N)
-**************************************
+********************************************
 
-The coverage of the top :math:`n` locations is defined by the true positive ratio: :math:`\frac{|top_n(D_{base})\ \cap\ top_n(D_{alt})|}{n}`, where :math:`n` is the number of top locations and :math:`top_n(D_{base})` is the :math:`n` top locations of the base dataset and :math:`top_n(D_{alt})` the :math:`n` top locations of the alternative dataset.
+The coverage of the top :math:`n` locations [2] is defined by the true positive ratio: :math:`\frac{|top_n(D_{base})\ \cap\ top_n(D_{alt})|}{n}`, where :math:`n` is the number of top locations and :math:`top_n(D_{base})` is the :math:`n` top locations of the base dataset and :math:`top_n(D_{alt})` the :math:`n` top locations of the alternative dataset.
 This measure represents how well the alternative dataset is similar to the base dataset considering the most visited locations.
+
+
+
+[1] Gursoy, M. E., Liu, L., Truex, S., Yu, L., & Wei, W. (2018, October). Utility-aware synthesis of differentially private and attack-resilient location traces. In Proceedings of the 2018 ACM SIGSAC conference on computer and communications security (pp. 196-211).
+[2] Bindschaedler, V., & Shokri, R. (2016, May). Synthesizing plausible privacy-preserving location traces. In 2016 IEEE Symposium on Security and Privacy (SP) (pp. 546-563). IEEE.

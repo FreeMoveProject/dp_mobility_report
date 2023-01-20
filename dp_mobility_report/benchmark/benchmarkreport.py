@@ -23,9 +23,9 @@ from dp_mobility_report.report.html.templates import (
 
 class BenchmarkReport:
     """Evaluate the similarity of two (differentially private) mobility reports from one or two mobility datasets.
-        This can be based on two datasets (``df_base`` and ``df_alternative``) or one dataset (``df_base``)) with different privacy settings.
+        This can be based on two datasets (``df_base`` and ``df_alternative``) or one dataset (``df_base``) with different privacy settings.
         The arguments ``df``, ``privacy_budget``, ``user_privacy``, ``max_trips_per_user`` and ``budget_split`` can differ for the two datasets set with the according ending ``_base`` and ``_alternative``. The other arguments are the same for both reports.
-        For the evaluation, similarity measures (namely the symmetric (mean absolute) percentage error (PE), Jensen-Shannon divergence (JSD), Kullback-Leibler divergence (KLD), the earth mover's distance (EMD), the Kendall correlation coefficient (KT) and the top n coverage (top_n-cov)) are computed to quantify the statistical similarity for each analysis.
+        For the evaluation, similarity measures (namely the symmetric mean absolute percentage error (SMAPE), Jensen-Shannon divergence (JSD), Kullback-Leibler divergence (KLD), the earth mover's distance (EMD), the Kendall correlation coefficient (KT) and the top n coverage (TOP_N_COV)) are computed to quantify the statistical similarity for each analysis.
         The evaluation, i.e., benchmark report, will be generated as an HTML file, using the ``.to_file()`` method.
 
     Args:
@@ -34,7 +34,6 @@ class BenchmarkReport:
         df_alternative: ``DataFrame`` containing the alternative mobility data to be compared against the baseline dataset, see argument ``df`` of ``DpMobilityReport``. If ``None``, ``df_base`` is used for both reports.
         privacy_budget_base: privacy_budget for the differentially private base report. Defaults to ``None``, i.e., no privacy guarantee is provided.
         privacy_budget_alternative: privacy_budget for the differentially private alternative report. Defaults to ``None``, i.e., no privacy guarantee is provided.
-        measure_selection: Select similarity measure for each analysis. If ``None``, the default from ``default_measure_selection()`` will be used.
         user_privacy_base: Whether item-level or user-level privacy is applied for the base report. Defaults to ``True`` (user-level privacy).
         user_privacy_alternative: Whether item-level or user-level privacy is applied for the alternative report. Defaults to ``True`` (user-level privacy).
         max_trips_per_user_base: maximum number of trips a user shall contribute to the data. Dataset will be sampled accordingly. Defaults to ``None``, i.e., all trips included.
@@ -50,11 +49,12 @@ class BenchmarkReport:
         bin_range_jump_length: The range a single histogram bin spans for jump length (e.g., 1 for 1 km bins). Defaults to 1 (km).
         max_radius_of_gyration: Upper bound for radius of gyration histogram. Defaults to 5 (km).
         bin_range_radius_of_gyration: The range a single histogram bin spans for the radius of gyration (e.g., 1 for 1 km bins). Defaults to 0.5 (km).
-        max_user_tile_count: Upper bound for distinct tiles per user histogram. If ``None`` is given, no upper bound is set. Defaults to ``None``.
-        bin_range_user_tile_count: The range a single histogram bin spans for the distinct tiles per user histogram. If ``None`` is given, the histogram bins will be determined automatically. Defaults to ``None``.
+        max_user_tile_count: Upper bound for distinct tiles per user histogram. Defaults to 10.
+        bin_range_user_tile_count: The range a single histogram bin spans for the distinct tiles per user histogram. Defaults to 1.
         max_user_time_delta:  Upper bound for user time delta histogram. Defaults to 48 (hours).
         bin_range_user_time_delta: The range a single histogram bin spans for user time delta (e.g., 1 for 1 hour bins). Defaults to 4 (hours).
         top_n_ranking: List of 'top n' values that are used to compute the Kendall correlation coefficient and the top n coverage for ranking similarity measures. Values need to be integers > 0. Defaults to ``[10, 50, 100]``.
+        measure_selection: Select similarity measure for each analysis that is used for the ``similarity_measures`` property of the ``BenchmarkReport``. If ``None``, the default from ``default_measure_selection()`` will be used. 
         disable_progress_bar: Whether progress bars should be shown. Defaults to ``False``.
         seed_sampling: Provide seed for down-sampling of dataset (according to ``max_trips_per_user``) so that the sampling is reproducible. Defaults to ``None``, i.e., no seed.
         evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to ``False``."""
@@ -78,7 +78,6 @@ class BenchmarkReport:
         df_alternative: Optional[DataFrame] = None,
         privacy_budget_base: Optional[Union[int, float]] = None,
         privacy_budget_alternative: Optional[Union[int, float]] = None,
-        measure_selection: dict = None,
         user_privacy_base: bool = True,
         user_privacy_alternative: bool = True,
         max_trips_per_user_base: Optional[int] = None,
@@ -99,6 +98,7 @@ class BenchmarkReport:
         max_user_time_delta: Union[int, float] = 48,
         bin_range_user_time_delta: Union[int, float] = 4,
         top_n_ranking: List[int] = [10, 50, 100],
+        measure_selection: dict = None,
         disable_progress_bar: bool = False,
         seed_sampling: int = None,
         evalu: bool = False,

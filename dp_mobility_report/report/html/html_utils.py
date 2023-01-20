@@ -200,6 +200,6 @@ def all_available_measures(analysis_name: str, benchmarkreport: "BenchmarkReport
     if analysis_name in benchmarkreport.kt.keys():
         available_measures[const.KT] = [f'Top {topn_i}: {fmt(kt_i)}' for kt_i, topn_i in zip(benchmarkreport.kt[analysis_name], benchmarkreport.top_n_ranking)]
     if analysis_name in benchmarkreport.top_n_cov.keys():
-        available_measures[const.TOP_N] = [f'Top {topn_i}: {fmt(topcov_i * 100)}%' for topcov_i, topn_i in zip(benchmarkreport.top_n_cov[analysis_name], benchmarkreport.top_n_ranking)]
+        available_measures[const.TOP_N_COV] = [f'Top {topn_i}: {fmt(topcov_i * 100)}%' for topcov_i, topn_i in zip(benchmarkreport.top_n_cov[analysis_name], benchmarkreport.top_n_ranking)]
 
     return available_measures
