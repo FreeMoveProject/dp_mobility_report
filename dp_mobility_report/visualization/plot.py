@@ -1,4 +1,5 @@
 import math
+from functools import partial
 from typing import Callable, Optional, Tuple, Type, Union
 
 import folium
@@ -225,9 +226,9 @@ def multi_linechart(
     hue_order: Optional[list] = None,
     margin_of_error: Optional[float] = None,
 ) -> mpl.figure.Figure:
-    fig = plt.figure(figsize=(9,6))
+    fig = plt.figure(figsize=(9, 6))
     plot = fig.add_subplot(111)
-    palette = ['#99065a', '#e289ba', '#2c6a19', '#99cd60']
+    palette = ["#99065a", "#e289ba", "#2c6a19", "#99cd60"]
 
     sns.lineplot(
         data=data,
@@ -264,7 +265,7 @@ def choropleth_map(
     is_cmap_diverging: bool = False,
     cmap: Optional[str] = None,
     min_scale: Optional[Union[int, float]] = None,
-    max_scale: Optional[Union[int, float]] = None, 
+    max_scale: Optional[Union[int, float]] = None,
     aliases: Optional[list] = None,
     layer_name: str = "Visits",
     show: bool = True,
@@ -276,41 +277,49 @@ def choropleth_map(
         map = _basemap(center_x, center_y)
 
     min_scale = (
-        min_scale if min_scale is not None else counts_per_tile_gdf[fill_color_name].min() 
+        min_scale
+        if min_scale is not None
+        else counts_per_tile_gdf[fill_color_name].min()
     )
-    
+
     max_scale = (
-        max_scale if max_scale is not None else counts_per_tile_gdf[fill_color_name].max()
+        max_scale
+        if max_scale is not None
+        else counts_per_tile_gdf[fill_color_name].max()
     )
 
     # color
     if not cmap:
         cmap = const.DIVERGING_CMAP if is_cmap_diverging else const.STANDARD_CMAP
-    cmap = mpl.colormaps[cmap]
+    mpl_cmap = mpl.colormaps[cmap]
 
     if is_cmap_diverging:
         norm = mpl.colors.TwoSlopeNorm(vmin=min_scale, vcenter=0, vmax=max_scale)
     else:
-        norm = mpl.colors.Normalize(
-            vmin=min_scale, vmax=max_scale
-        )
+        norm = mpl.colors.Normalize(vmin=min_scale, vmax=max_scale)
 
-    def _hex_color(x: Union[float, int]) -> str:
+    def _hex_color(x: Union[float, int], mpl_cmap: mpl.colors.Colormap) -> str:
         rgb = norm(x)
-        return matplotlib.colors.rgb2hex(cmap(rgb))
+        return matplotlib.colors.rgb2hex(mpl_cmap(rgb))
 
-    def _get_color(x: dict, fill_color_name: str) -> str:
+    def _get_color(x: dict, fill_color_name: str, mpl_cmap: mpl.colors.Colormap) -> str:
         if x["properties"][fill_color_name] is None:
             return "#8c8c8c"
-        return _hex_color(x["properties"][fill_color_name])
+        return _hex_color(x["properties"][fill_color_name], mpl_cmap)
 
-    def _style_function(x: dict) -> dict:
+    def _style_function(
+        x: dict, fill_color_name: str, mpl_cmap: mpl.colors.Colormap
+    ) -> dict:
         return {
-            "fillColor": _get_color(x, fill_color_name),
+            "fillColor": _get_color(x, fill_color_name, mpl_cmap),
             "color": const.GREY,
             "weight": 1.5,
             "fillOpacity": 0.6,
         }
+
+    _style_function_partial = partial(
+        _style_function, fill_color_name=fill_color_name, mpl_cmap=mpl_cmap
+    )
 
     if "tile_name" in counts_per_tile_gdf:
         fields = ["tile_id", "tile_name", fill_color_name]
@@ -321,7 +330,7 @@ def choropleth_map(
         name=layer_name,
         overlay=True,
         show=show,
-        style_function=_style_function,
+        style_function=_style_function_partial,
         popup=folium.GeoJsonPopup(fields=fields, aliases=aliases),
     ).add_to(map)
 
@@ -345,7 +354,7 @@ def multi_choropleth_map(
     tessellation: GeoDataFrame,
     is_cmap_diverging: bool = False,
     min_scale: Optional[Union[int, float]] = None,
-    max_scale: Optional[Union[int, float]] = None, 
+    max_scale: Optional[Union[int, float]] = None,
 ) -> mpl.figure.Figure:
     counts_per_tile_timewindow = tessellation[["tile_id", "geometry"]].merge(
         counts_per_tile_timewindow, left_on="tile_id", right_index=True, how="left"
@@ -370,7 +379,7 @@ def multi_choropleth_map(
         cmap = const.DIVERGING_CMAP
         norm = mpl.colors.TwoSlopeNorm(vmin=min_scale, vcenter=0, vmax=max_scale)
     else:
-        cmap = const.BASE_CMAP #STANDARD_CMAP
+        cmap = const.BASE_CMAP  # STANDARD_CMAP
         norm = mpl.colors.Normalize(vmin=min_scale, vmax=max_scale)
 
     for i in range(0, plots_per_row * row_count):
@@ -528,7 +537,6 @@ def flows(
         name = f"origin: {origin}"
         popup = folium.Popup(name + "<br/>" + trips_info, max_width=300)
         fmarker = fmarker.add_child(popup)
-        # fmarker.add_to(basemap)
         feature_group.add_child(fmarker)
 
     feature_group.add_to(basemap)

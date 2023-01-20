@@ -62,10 +62,8 @@ def hist_section(
         counts = np.array([len(series)])
 
     # if there are max. 10 integers, use value counts of single integers instead of bin ranges for histogram
-    elif (
-        (bin_type is int) and
-        ((bin_range == 1) or
-        ((bin_range is None) and (hist_max - hist_min < 10)))
+    elif (bin_type is int) and (
+        (bin_range == 1) or ((bin_range is None) and (hist_max - hist_min < 10))
     ):
         bins = np.array(range(int(quartiles["min"]), int(quartiles["max"]) + 1))
         counts = np.bincount(series, minlength=int(quartiles["max"]) + 1)[
@@ -132,7 +130,11 @@ def hist_section(
     # set counts above dp_max(i.e, quartiles["max"]) to 0 (only so that bins are shown according to user input, even if they are empty)
     # if bin is "inf" it should be maintained as it is the aggregation of everything > hist_max and <= quartiles["max"]
     temp_bins_max = bins if len(bins) == len(dp_counts) else bins[:-1]
-    dp_counts[np.logical_and((temp_bins_max > quartiles["max"]), (np.not_equal(temp_bins_max, np.inf)))] = 0
+    dp_counts[
+        np.logical_and(
+            (temp_bins_max > quartiles["max"]), (np.not_equal(temp_bins_max, np.inf))
+        )
+    ] = 0
     # set counts below dp_min(i.e, quartiles["min"]) to 0
     # only needed for mobility_entropy (to show all possible bins even if below DP min)
     temp_bins_min = bins if len(bins) == len(dp_counts) else bins[1:]

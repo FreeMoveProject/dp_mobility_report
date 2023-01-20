@@ -59,7 +59,9 @@ def validate_input(
         raise TypeError("'df' is not a Pandas DataFrame.")
 
     if max(df[const.TID].value_counts()) == 1:
-        warnings.warn("There are only incomplete trips, i.e., no trips with more than a single record. OD analyses cannot be conducted, thus they are excluded from the report.")
+        warnings.warn(
+            "There are only incomplete trips, i.e., no trips with more than a single record. OD analyses cannot be conducted, thus they are excluded from the report."
+        )
 
     if tessellation is None:
         warnings.warn(

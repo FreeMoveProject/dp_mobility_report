@@ -54,7 +54,7 @@ class BenchmarkReport:
         max_user_time_delta:  Upper bound for user time delta histogram. Defaults to 48 (hours).
         bin_range_user_time_delta: The range a single histogram bin spans for user time delta (e.g., 1 for 1 hour bins). Defaults to 4 (hours).
         top_n_ranking: List of 'top n' values that are used to compute the Kendall correlation coefficient and the top n coverage for ranking similarity measures. Values need to be integers > 0. Defaults to ``[10, 50, 100]``.
-        measure_selection: Select similarity measure for each analysis that is used for the ``similarity_measures`` property of the ``BenchmarkReport``. If ``None``, the default from ``default_measure_selection()`` will be used. 
+        measure_selection: Select similarity measure for each analysis that is used for the ``similarity_measures`` property of the ``BenchmarkReport``. If ``None``, the default from ``default_measure_selection()`` will be used.
         disable_progress_bar: Whether progress bars should be shown. Defaults to ``False``.
         seed_sampling: Provide seed for down-sampling of dataset (according to ``max_trips_per_user``) so that the sampling is reproducible. Defaults to ``None``, i.e., no seed.
         evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to ``False``."""
@@ -181,7 +181,11 @@ class BenchmarkReport:
             measure_selection = preprocessing.validate_measure_selection(
                 measure_selection, self.analysis_exclusion
             )
-        self._measure_selection = b_utils.remove_excluded_analyses_from_measure_selection(measure_selection, self.analysis_exclusion)
+        self._measure_selection = (
+            b_utils.remove_excluded_analyses_from_measure_selection(
+                measure_selection, self.analysis_exclusion
+            )
+        )
         self._top_n_ranking = preprocessing.validate_top_n_ranking(top_n_ranking)
 
         (
@@ -197,7 +201,7 @@ class BenchmarkReport:
             self.report_base.report,
             self.report_base.tessellation,
             self.top_n_ranking,
-            self.disable_progress_bar
+            self.disable_progress_bar,
         )
 
     @property
@@ -224,7 +228,7 @@ class BenchmarkReport:
         return self._measure_selection
 
     @property
-    def top_n_ranking(self) -> dict:
+    def top_n_ranking(self) -> List[int]:
         """List of 'top n' options that have been provided as user input that are used for compuation of ranking similarity measures."""
         return self._top_n_ranking
 

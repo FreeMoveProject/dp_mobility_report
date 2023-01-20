@@ -457,12 +457,10 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
         const.MOBILITY_ENTROPY,
     ]
 
-    # without od 
+    # without od
     df = test_data.groupby(const.TID).first().reset_index()
     with pytest.warns(Warning):
-        report = DpMobilityReport(df, 
-        test_tessellation,
-        privacy_budget=None).report
+        report = DpMobilityReport(df, test_tessellation, privacy_budget=None).report
     assert isinstance(report, dict)
     assert list(report.keys()) == [
         const.DS_STATISTICS,
@@ -477,8 +475,8 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
         const.RADIUS_OF_GYRATION,
         const.USER_TILE_COUNT,
         const.MOBILITY_ENTROPY,
-
     ]
+
 
 def test_analysis_exclusion(test_data, test_tessellation):
     dpmr = DpMobilityReport(

@@ -1,10 +1,10 @@
-from typing import Any, Optional, Union, TYPE_CHECKING
+import math
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 import geopandas as gpd
 import jinja2
 import numpy as np
 from pandas import Series
-import math
 
 from dp_mobility_report import constants as const
 
@@ -43,16 +43,24 @@ def render_summary(summary: Series) -> str:
 
 
 def render_benchmark_summary(
-    summary_base: Series, summary_alternative: Series, target_type: Optional[type] = None
+    summary_base: Series,
+    summary_alternative: Series,
+    target_type: Optional[type] = None,
 ) -> str:
     summary_list = [
         {
             "name": "Min.",
-            "value": (fmt(summary_base["min"], target_type), fmt(summary_alternative["min"], target_type)),
+            "value": (
+                fmt(summary_base["min"], target_type),
+                fmt(summary_alternative["min"], target_type),
+            ),
         },
         {
             "name": "Max.",
-            "value": (fmt(summary_base["max"], target_type), fmt(summary_alternative["max"], target_type)),
+            "value": (
+                fmt(summary_base["max"], target_type),
+                fmt(summary_alternative["max"], target_type),
+            ),
         },
     ]
     if "25%" in summary_base:
@@ -60,21 +68,30 @@ def render_benchmark_summary(
             1,
             {
                 "name": "75%",
-                "value": (fmt(summary_base["75%"], target_type), fmt(summary_alternative["75%"], target_type)),
+                "value": (
+                    fmt(summary_base["75%"], target_type),
+                    fmt(summary_alternative["75%"], target_type),
+                ),
             },
         )
         summary_list.insert(
             1,
             {
                 "name": "Median",
-                "value": (fmt(summary_base["50%"], target_type), fmt(summary_alternative["50%"], target_type)),
+                "value": (
+                    fmt(summary_base["50%"], target_type),
+                    fmt(summary_alternative["50%"], target_type),
+                ),
             },
         )
         summary_list.insert(
             1,
             {
                 "name": "25%",
-                "value": (fmt(summary_base["25%"], target_type), fmt(summary_alternative["25%"], target_type)),
+                "value": (
+                    fmt(summary_base["25%"], target_type),
+                    fmt(summary_alternative["25%"], target_type),
+                ),
             },
         )
 
@@ -83,7 +100,10 @@ def render_benchmark_summary(
             0,
             {
                 "name": "Mean",
-                "value": (fmt(summary_base["mean"], target_type), fmt(summary_alternative["mean"], target_type)),
+                "value": (
+                    fmt(summary_base["mean"], target_type),
+                    fmt(summary_alternative["mean"], target_type),
+                ),
             },
         )
 
@@ -121,21 +141,22 @@ def fmt(value: Any, target_type: Optional[type] = None) -> Any:
         value = f"{value:,}"
     return value
 
+
 def fmt_moe(margin_of_error: Optional[float]) -> float:
     if (margin_of_error is None) or (margin_of_error == 0):
         return 0
     return round(margin_of_error, 1)
 
-def fmt_config(value: Union[dict, list]) -> str:
 
-    def _join_tuple_string(strings_tuple) -> str:
-        return ': '.join(strings_tuple)
-    
+def fmt_config(value: Union[dict, list]) -> str:
+    def _join_tuple_string(strings_tuple: tuple) -> str:
+        return ": ".join(strings_tuple)
+
     analysis_format = {
-        const.DS_STATISTICS: 'Dataset statistics',
-        const.MISSING_VALUES: 'Missing values',
-        const.TRIPS_OVER_TIME: 'Trips over time',
-        const.TRIPS_PER_WEEKDAY: 'Trips per weekday',
+        const.DS_STATISTICS: "Dataset statistics",
+        const.MISSING_VALUES: "Missing values",
+        const.TRIPS_OVER_TIME: "Trips over time",
+        const.TRIPS_PER_WEEKDAY: "Trips per weekday",
         const.TRIPS_PER_HOUR: "Trips per hour",
         const.VISITS_PER_TILE: "Visits per tile",
         const.VISITS_PER_TIME_TILE: "Visits per time tile",
@@ -159,17 +180,20 @@ def fmt_config(value: Union[dict, list]) -> str:
         const.USER_TILE_COUNT_QUARTILES: "User tile count quartiles",
         const.MOBILITY_ENTROPY: "Mobility entropy",
         const.MOBILITY_ENTROPY_QUARTILES: "Mobility entropy quartiles",
-        }
+    }
 
-    if (value == {}): 
+    if value == {}:
         return "Evenly distributed"
-    if (value == []):
+    if value == []:
         return "None"
     if isinstance(value, dict):
-        zipped = zip([analysis_format[s] for s in value.keys()],[str(v) for v in value.values()])
-        return ', '.join(list(map(_join_tuple_string, zipped)))
+        zipped = zip(
+            [analysis_format[s] for s in value.keys()], [str(v) for v in value.values()]
+        )
+        return ", ".join(list(map(_join_tuple_string, zipped)))
     if isinstance(value, list):
-        return ', '.join([analysis_format[s] for s in value])
+        return ", ".join([analysis_format[s] for s in value])
+
 
 def render_eps(value: Optional[float]) -> Optional[float]:
     if value is None:
@@ -186,20 +210,33 @@ def get_centroids(tessellation: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     lats = [c[1].pop() for c in centroids]
     return dict(zip(tessellation[const.TILE_ID], zip(lngs, lats)))
 
-def all_available_measures(analysis_name: str, benchmarkreport: "BenchmarkReport") -> dict:
+
+def all_available_measures(
+    analysis_name: str, benchmarkreport: "BenchmarkReport"
+) -> dict:
     available_measures = {}
 
-    if analysis_name in benchmarkreport.smape.keys():
+    if analysis_name in benchmarkreport.smape:
         available_measures[const.SMAPE] = str(fmt(benchmarkreport.smape[analysis_name]))
-    if analysis_name in benchmarkreport.jsd.keys():
+    if analysis_name in benchmarkreport.jsd:
         available_measures[const.JSD] = str(fmt(benchmarkreport.jsd[analysis_name]))
-    if analysis_name in benchmarkreport.kld.keys():
+    if analysis_name in benchmarkreport.kld:
         available_measures[const.KLD] = str(fmt(benchmarkreport.kld[analysis_name]))
-    if analysis_name in benchmarkreport.emd.keys():
+    if analysis_name in benchmarkreport.emd:
         available_measures[const.EMD] = str(fmt(benchmarkreport.emd[analysis_name]))
-    if analysis_name in benchmarkreport.kt.keys():
-        available_measures[const.KT] = [f'Top {topn_i}: {fmt(kt_i)}' for kt_i, topn_i in zip(benchmarkreport.kt[analysis_name], benchmarkreport.top_n_ranking)]
-    if analysis_name in benchmarkreport.top_n_cov.keys():
-        available_measures[const.TOP_N_COV] = [f'Top {topn_i}: {fmt(topcov_i * 100)}%' for topcov_i, topn_i in zip(benchmarkreport.top_n_cov[analysis_name], benchmarkreport.top_n_ranking)]
+    if analysis_name in benchmarkreport.kt:
+        available_measures[const.KT] = [
+            f"Top {topn_i}: {fmt(kt_i)}"
+            for kt_i, topn_i in zip(
+                benchmarkreport.kt[analysis_name], benchmarkreport.top_n_ranking
+            )
+        ]
+    if analysis_name in benchmarkreport.top_n_cov:
+        available_measures[const.TOP_N_COV] = [
+            f"Top {topn_i}: {fmt(topcov_i * 100)}%"
+            for topcov_i, topn_i in zip(
+                benchmarkreport.top_n_cov[analysis_name], benchmarkreport.top_n_ranking
+            )
+        ]
 
     return available_measures

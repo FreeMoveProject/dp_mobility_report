@@ -1,31 +1,29 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 import matplotlib.pyplot as plt
 import pandas as pd
 from geopandas import GeoDataFrame
-import matplotlib as mpl
 
 if TYPE_CHECKING:
     from dp_mobility_report import BenchmarkReport, DpMobilityReport
 
+import folium
+
 from dp_mobility_report import constants as const
+from dp_mobility_report.benchmark.similarity_measures import symmetric_perc_error
 from dp_mobility_report.model.section import DfSection
 from dp_mobility_report.report.html.html_utils import (
-    fmt,
+    all_available_measures,
     fmt_moe,
     get_template,
     render_benchmark_summary,
     render_eps,
     render_summary,
-    all_available_measures
 )
-
-from dp_mobility_report.benchmark.similarity_measures import symmetric_perc_error
-
 from dp_mobility_report.visualization import plot, v_utils
-import folium
+
 
 def render_place_analysis(
     dpmreport: "DpMobilityReport",
@@ -65,7 +63,8 @@ def render_place_analysis(
             quartiles.astype(int),  # extrapolate visits from dp record count
         )
         args["visits_per_tile_cumsum_linechart"] = render_visits_per_tile_cumsum(
-            report[const.VISITS_PER_TILE], diagonal=True,
+            report[const.VISITS_PER_TILE],
+            diagonal=True,
         )
         args["most_freq_tiles_ranking"] = render_most_freq_tiles_ranking(
             report[const.VISITS_PER_TILE],
@@ -129,7 +128,7 @@ def render_benchmark_place_analysis(
         ].quartiles.round()
         args["visits_per_tile_summary_table"] = render_benchmark_summary(
             quartiles_base,
-            quartiles_alternative, 
+            quartiles_alternative,
             target_type=int,
         )
         args["visits_per_tile_cumsum_linechart"] = render_visits_per_tile_cumsum(
@@ -141,13 +140,20 @@ def render_benchmark_place_analysis(
             report_base[const.VISITS_PER_TILE],
             report_alternative[const.VISITS_PER_TILE],
         )
-        args["visits_per_tile_measure"] = template_measures.render(all_available_measures(const.VISITS_PER_TILE, benchmark))
+        args["visits_per_tile_measure"] = template_measures.render(
+            all_available_measures(const.VISITS_PER_TILE, benchmark)
+        )
 
-        args["visits_per_tile_summary_measure"] = template_measures.render(all_available_measures(const.VISITS_PER_TILE_QUARTILES, benchmark))
+        args["visits_per_tile_summary_measure"] = template_measures.render(
+            all_available_measures(const.VISITS_PER_TILE_QUARTILES, benchmark)
+        )
 
         args["visits_per_tile_ranking_measure"] = template_measures.render(
-                {**all_available_measures(const.VISITS_PER_TILE_RANKING, benchmark),
-                **{"top_n_object": "locations"}})
+            {
+                **all_available_measures(const.VISITS_PER_TILE_RANKING, benchmark),
+                **{"top_n_object": "locations"},
+            }
+        )
 
     if const.VISITS_PER_TIME_TILE not in benchmark.analysis_exclusion:
         args["visits_per_time_tile_eps"] = (
@@ -167,7 +173,9 @@ def render_benchmark_place_analysis(
             tessellation,
         )
 
-        args["visits_per_time_tile_measure"] = template_measures.render(all_available_measures(const.VISITS_PER_TIME_TILE, benchmark))
+        args["visits_per_time_tile_measure"] = template_measures.render(
+            all_available_measures(const.VISITS_PER_TIME_TILE, benchmark)
+        )
 
     template_structure = get_template("place_analysis_segment_benchmark.html")
 
@@ -216,14 +224,17 @@ def render_visits_per_tile(
     plt.close()
     return legend_html
 
+
 def render_benchmark_visits_per_tile(
     visits_per_tile_base: DfSection,
     visits_per_tile_alternative: DfSection,
     tessellation: GeoDataFrame,
     temp_map_folder: Path,
-) -> str:
+) -> List[str]:
 
-    visits_per_tile_base_sorted = visits_per_tile_base.data.sort_values("tile_id").reset_index()
+    visits_per_tile_base_sorted = visits_per_tile_base.data.sort_values(
+        "tile_id"
+    ).reset_index()
     visits_per_tile_alternative_sorted = visits_per_tile_alternative.data.sort_values(
         "tile_id"
     ).reset_index()
@@ -238,13 +249,17 @@ def render_benchmark_visits_per_tile(
     deviation_from_base = pd.DataFrame(
         {
             const.TILE_ID: visits_per_tile_base_sorted[const.TILE_ID],
-#            "deviation": (relative_base-relative_alternative)/(relative_base+relative_alternative), #relative_alternative - relative_base,
             "relative_base": relative_base,
             "relative_alternative": relative_alternative,
         }
     )
 
-    deviation_from_base["deviation"] = deviation_from_base.apply(lambda x: symmetric_perc_error(x["relative_alternative"], x["relative_base"], keep_direction = True), axis=1)
+    deviation_from_base["deviation"] = deviation_from_base.apply(
+        lambda x: symmetric_perc_error(
+            x["relative_alternative"], x["relative_base"], keep_direction=True
+        ),
+        axis=1,
+    )
 
     # merge count and tessellation
     counts_per_tile_gdf = pd.merge(
@@ -265,9 +280,15 @@ def render_benchmark_visits_per_tile(
         max_scale=2,
         layer_name="Deviation",
     )
-    min_scale = min(counts_per_tile_gdf['relative_base'].min(), counts_per_tile_gdf['relative_alternative'].min())
-    max_scale = max(counts_per_tile_gdf['relative_base'].max(), counts_per_tile_gdf['relative_alternative'].max())
-    
+    min_scale = min(
+        counts_per_tile_gdf["relative_base"].min(),
+        counts_per_tile_gdf["relative_alternative"].min(),
+    )
+    max_scale = max(
+        counts_per_tile_gdf["relative_base"].max(),
+        counts_per_tile_gdf["relative_alternative"].max(),
+    )
+
     map, legend_base = plot.choropleth_map(
         counts_per_tile_gdf,
         "relative_base",
@@ -294,7 +315,7 @@ def render_benchmark_visits_per_tile(
         max_scale=max_scale,
         cmap=const.ALT_CMAP,
     )
-    
+
     folium.LayerControl(collapsed=False).add_to(map)
 
     map.save(os.path.join(temp_map_folder, "visits_per_tile_map.html"))
@@ -303,68 +324,17 @@ def render_benchmark_visits_per_tile(
     legend_html_base = v_utils.fig_to_html(legend_base)
     legend_html_alternative = v_utils.fig_to_html(legend_alternative)
     plt.close()
-    return [v_utils.resize_width(legend_html_deviation, 100), v_utils.resize_width(legend_html_base,100), v_utils.resize_width(legend_html_alternative,100)]
-
-# def render_benchmark_visits_per_tile(
-#     visits_per_tile_base: DfSection,
-#     visits_per_tile_alternative: DfSection,
-#     tessellation: GeoDataFrame,
-#     threshold: float,
-#     temp_map_folder: Path,
-# ) -> str:
-
-#     visits_per_tile_base_sorted = visits_per_tile_base.data.sort_values("tile_id")
-#     visits_per_tile_alternative_sorted = visits_per_tile_alternative.data.sort_values(
-#         "tile_id"
-#     )
-#     relative_base = (
-#         visits_per_tile_base_sorted["visits"]
-#         / visits_per_tile_base_sorted["visits"].sum()
-#     )
-#     relative_alternative = (
-#         visits_per_tile_alternative_sorted["visits"]
-#         / visits_per_tile_alternative_sorted["visits"].sum()
-#     )
-#     deviation_from_base = pd.DataFrame(
-#         {
-#             const.TILE_ID: visits_per_tile_base_sorted[const.TILE_ID],
-#             "deviation": relative_alternative - relative_base,
-#         }
-#     )
-
-#     # merge count and tessellation
-#     counts_per_tile_gdf = pd.merge(
-#         tessellation,
-#         deviation_from_base,
-#         how="left",
-#         left_on=const.TILE_ID,
-#         right_on=const.TILE_ID,
-#     )
-
-#     # # filter visit counts above error threshold
-#     # moe_deviation = (
-#     #     visits_per_tile.margin_of_error_laplace / counts_per_tile_gdf["deviation"]
-#     # )
-
-#     # counts_per_tile_gdf.loc[moe_deviation > threshold, "visits"] = None
-
-#     map, legend = plot.choropleth_map(
-#         counts_per_tile_gdf,
-#         "deviation",
-#         scale_title="deviation of relative counts from base \n deviation = alternative - base",
-#         aliases=["Tile ID", "Tile Name", "deviation"],
-#         diverging_cmap=True,
-#     )
-
-#     map.save(os.path.join(temp_map_folder, "visits_per_tile_map.html"))
-
-#     legend_html = v_utils.fig_to_html(legend)
-#     plt.close()
-#     return legend_html
+    return [
+        v_utils.resize_width(legend_html_deviation, 100),
+        v_utils.resize_width(legend_html_base, 100),
+        v_utils.resize_width(legend_html_alternative, 100),
+    ]
 
 
 def render_visits_per_tile_cumsum(
-    counts_per_tile: DfSection, counts_per_tile_alternative: Optional[DfSection] = None, diagonal: bool = False,
+    counts_per_tile: DfSection,
+    counts_per_tile_alternative: Optional[DfSection] = None,
+    diagonal: bool = False,
 ) -> str:
     df_cumsum = counts_per_tile.cumsum
     if counts_per_tile_alternative:
@@ -445,7 +415,7 @@ def render_most_freq_tiles_ranking_benchmark(
         y_labels=labels,
         x_alternative=topx_tiles_merged.visits_alternative,
         margin_of_error=visits_per_tile_base.margin_of_error_laplace,
-        margin_of_error_alternative=visits_per_tile_alternative.margin_of_error_laplace
+        margin_of_error_alternative=visits_per_tile_alternative.margin_of_error_laplace,
     )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close()
@@ -485,18 +455,10 @@ def render_visits_per_time_tile_benchmark(
     data = counts_per_tile_timewindow.data
     data_alternative = counts_per_tile_timewindow_alternative.data
 
-    # moe_perc_per_tile_timewindow_base = (
-    #     counts_per_tile_timewindow.margin_of_error_laplace / data
-    # )
-    # moe_perc_per_tile_timewindow_alternative = (
-    #     counts_per_tile_timewindow_alternative.margin_of_error_laplace / data_alternative
-    # )
     if data is None:
         return None
     if data_alternative is None:
         return None
-
-    # data[moe_perc_per_tile_timewindow > threshold] = None
 
     output_html = ""
     if "weekday" in data.columns:
@@ -505,10 +467,18 @@ def render_visits_per_time_tile_benchmark(
             data_alternative.loc[:, "weekday"]
             / data_alternative.loc[:, "weekday"].sum().sum()
         )
-            
-        deviation = [[symmetric_perc_error(alt, base, keep_direction=True) for alt, base in zip(alt_array, base_array)] for alt_array, base_array in zip(weekday_alternative.values, weekday_base.values)]
-        deviation = pd.DataFrame(deviation)
-        deviation.index = weekday_base.index
+
+        deviation_values = [
+            [
+                symmetric_perc_error(alt, base, keep_direction=True)
+                for alt, base in zip(alt_array, base_array)
+            ]
+            for alt_array, base_array in zip(
+                weekday_alternative.values, weekday_base.values
+            )
+        ]
+        deviation = pd.DataFrame(deviation_values)
+        deviation.set_index(weekday_base.index, inplace=True)
         deviation.columns = weekday_base.columns
 
         output_html += "<h4>Weekday</h4>"
@@ -520,8 +490,15 @@ def render_visits_per_time_tile_benchmark(
             data_alternative.loc[:, "weekend"]
             / data_alternative.loc[:, "weekend"].sum().sum()
         )
-        deviation = [[symmetric_perc_error(alt, base, keep_direction=True) for alt, base in zip(alt_array, base_array)] \
-            for alt_array, base_array in zip(weekend_alternative.values, weekend_base.values)]
+        deviation = [
+            [
+                symmetric_perc_error(alt, base, keep_direction=True)
+                for alt, base in zip(alt_array, base_array)
+            ]
+            for alt_array, base_array in zip(
+                weekend_alternative.values, weekend_base.values
+            )
+        ]
         deviation = pd.DataFrame(deviation)
         deviation.index = weekend_base.index
         deviation.columns = weekend_base.columns
@@ -552,6 +529,8 @@ def _create_timewindow_segment(df: pd.DataFrame, tessellation: GeoDataFrame) -> 
 def _create_timewindow_segment_benchmark(
     df: pd.DataFrame, tessellation: GeoDataFrame
 ) -> str:
-    visits_choropleth = plot.multi_choropleth_map(df, tessellation, is_cmap_diverging=True, min_scale=-2, max_scale=2)
+    visits_choropleth = plot.multi_choropleth_map(
+        df, tessellation, is_cmap_diverging=True, min_scale=-2, max_scale=2
+    )
     return f"""<h4>Deviation from base</h4>
         {v_utils.fig_to_html_as_png(visits_choropleth)}"""  # svg might get too large

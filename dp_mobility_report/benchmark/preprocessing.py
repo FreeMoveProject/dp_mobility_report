@@ -1,6 +1,4 @@
-import math
 import warnings
-from datetime import timedelta
 from typing import List, Tuple
 
 import numpy as np
@@ -22,7 +20,9 @@ def combine_analysis_exclusion(
     return analysis_exclusion
 
 
-def _resample_to_prec(df, current_precision, target_precision):
+def _resample_to_prec(
+    df: pd.DataFrame, current_precision: str, target_precision: str
+) -> pd.DataFrame:
     if current_precision == target_precision:
         return df
     precision_names = {
@@ -39,7 +39,7 @@ def _resample_to_prec(df, current_precision, target_precision):
     )
 
 
-def unify_trips_over_time(base: DfSection, alternative: DfSection):
+def unify_trips_over_time(base: DfSection, alternative: DfSection) -> None:
     if base.datetime_precision != alternative.datetime_precision:
         if const.PREC_MONTH in [
             base.datetime_precision,
@@ -93,13 +93,16 @@ def unify_trips_over_time(base: DfSection, alternative: DfSection):
         ]
     ).sort_values(const.DATETIME)
 
-def _pad_missing_values(hist_bins, hist_values, bins_union):
-    missing_bins = [
-        i for i in bins_union if i not in hist_bins
-    ]
+
+def _pad_missing_values(
+    hist_bins: np.array, hist_values: np.array, bins_union: np.array
+) -> np.array:
+    missing_bins = [i for i in bins_union if i not in hist_bins]
     n_missing_left = sum(missing_bins < min(hist_bins))
     n_missing_right = sum(missing_bins > max(hist_bins))
-    return np.append(np.zeros(n_missing_left), np.append(hist_values, np.zeros(n_missing_right)))
+    return np.append(
+        np.zeros(n_missing_left), np.append(hist_values, np.zeros(n_missing_right))
+    )
 
 
 # check if histograms of both reports have similar bins
@@ -131,8 +134,12 @@ def unify_histogram_bins(
 
                 bins_union = np.union1d(hist_alternative_bins, hist_base_bins)
 
-                hist_base_values = _pad_missing_values(hist_base_bins, hist_base_values, bins_union)
-                hist_alternative_values = _pad_missing_values(hist_alternative_bins, hist_alternative_values, bins_union)
+                hist_base_values = _pad_missing_values(
+                    hist_base_bins, hist_base_values, bins_union
+                )
+                hist_alternative_values = _pad_missing_values(
+                    hist_alternative_bins, hist_alternative_values, bins_union
+                )
 
                 report_base[hist].data = (hist_base_values, bins_union)
                 report_alternative[hist].data = (hist_alternative_values, bins_union)
@@ -177,10 +184,16 @@ def validate_measure_selection(
 
 def validate_top_n_ranking(top_n_ranking: List[int]) -> List[int]:
     if not isinstance(top_n_ranking, list):
-        raise TypeError(f"Input parameter top_n_ranking is not a list. Instead: {top_n_ranking}.")
+        raise TypeError(
+            f"Input parameter top_n_ranking is not a list. Instead: {top_n_ranking}."
+        )
     for x in top_n_ranking:
         if not isinstance(x, int):
-            raise TypeError(f"Input parameter top_n_ranking doest not consist of ints. Instead: {top_n_ranking}.")
-        if (x <= 0):
-            raise TypeError(f"Input parameter top_n_ranking doest not consist of ints greater 0. Instead: {top_n_ranking}.")
-    return(top_n_ranking)
+            raise TypeError(
+                f"Input parameter top_n_ranking doest not consist of ints. Instead: {top_n_ranking}."
+            )
+        if x <= 0:
+            raise TypeError(
+                f"Input parameter top_n_ranking doest not consist of ints greater 0. Instead: {top_n_ranking}."
+            )
+    return top_n_ranking

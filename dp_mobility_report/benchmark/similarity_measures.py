@@ -1,17 +1,17 @@
 import warnings
-from typing import TYPE_CHECKING, Union, List, Optional
+from datetime import timedelta
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 import cv2
-from datetime import timedelta
 import numpy as np
 import pandas as pd
 from geopandas import GeoDataFrame
 from haversine import Unit, haversine
 from scipy.spatial import distance
 from scipy.stats import entropy, kendalltau, wasserstein_distance
+from tqdm.auto import tqdm
 
 from dp_mobility_report import constants as const
-from tqdm.auto import tqdm
 
 if TYPE_CHECKING:
     from dp_mobility_report import BenchmarkReport
@@ -20,14 +20,20 @@ if TYPE_CHECKING:
 def _moving_average(arr: np.array, size: int) -> np.array:
     return np.convolve(arr, np.ones(size), "valid") / size
 
-def _replace_inf_with_max(bins, max_value):
+
+def _replace_inf_with_max(
+    bins: np.array, max_value: Union[int, float, timedelta]
+) -> np.array:
     if np.isinf(bins[-1]):
         if isinstance(max_value, timedelta):  # needed for user_time_delta
             max_value = max_value.total_seconds() / 3600
         return np.append(bins[:-1], max_value)
     return bins
 
-def earth_movers_distance1D(u_hist: tuple, v_hist: tuple, u_max: Union[int, float], v_max: Union[int, float]) -> float:
+
+def earth_movers_distance1D(
+    u_hist: tuple, v_hist: tuple, u_max: Union[int, float], v_max: Union[int, float]
+) -> float:
     # in emd terms, hist_bins(x-axis) are values and hist_values(y-axis) are weights
 
     # bins greater than defined hist_max values are summarized as a "greater" bin, named "inf"
@@ -35,8 +41,8 @@ def earth_movers_distance1D(u_hist: tuple, v_hist: tuple, u_max: Union[int, floa
     u_hist_bins = _replace_inf_with_max(u_hist[1], u_max)
     v_hist_bins = _replace_inf_with_max(v_hist[1], v_max)
 
-    # distinguish between single int bins and ranges 
-    if len(u_hist[0]) == len(u_hist_bins):  
+    # distinguish between single int bins and ranges
+    if len(u_hist[0]) == len(u_hist_bins):
         u_values = u_hist_bins
         v_values = v_hist_bins
     else:  # computes moving average if hist buckets within a range
@@ -51,29 +57,31 @@ def earth_movers_distance1D(u_hist: tuple, v_hist: tuple, u_max: Union[int, floa
 
 
 # keep_direction: whether to use absolute difference or keep direction of difference
-def symmetric_perc_error(alternative: Optional[Union[int, float]], 
-                base: Optional[Union[int, float]], keep_direction=False):
+def symmetric_perc_error(
+    alternative: Optional[Union[int, float]],
+    base: Optional[Union[int, float]],
+    keep_direction: bool = False,
+) -> float:
     if (alternative is None) or (base is None):
         return None
     if abs(base) + abs(alternative) == 0:
         return 0
-    
-    diff_alt_base = (alternative - base) 
+
+    diff_alt_base = alternative - base
     if not keep_direction:
         diff_alt_base = np.abs(diff_alt_base)
-    
+
     return diff_alt_base / ((abs(base) + abs(alternative)) / 2)
+
 
 def symmetric_mape(
     alternative: Union[pd.Series, np.array],
     base: Union[pd.Series, np.array],
-    keep_direction = False,
 ) -> float:
-    n =  len(base)
+    n = len(base)
     return (
         1 / n * np.sum([symmetric_perc_error(a, b) for a, b in zip(alternative, base)])
     )
-
 
 
 def all_perc_errors(alt_dict: dict, base_dict: dict) -> dict:
@@ -138,6 +146,7 @@ def top_n_coverage(top_n_tiles_base: list, top_n_tiles_alt: list) -> float:
     top_n_alternative = len([x for x in top_n_tiles_alt if x in top_n_tiles_base])
     return top_n_alternative / top_n_base
 
+
 def compute_similarity_measures(
     analysis_exclusion: list,
     report_alternative: dict,
@@ -145,8 +154,7 @@ def compute_similarity_measures(
     tessellation: Optional[GeoDataFrame],
     top_n_ranking: List[int],
     disable_progress_bar: bool,
-):
-
+) -> Any:
     smape_dict: dict = {}
     kld_dict: dict = {}
     jsd_dict: dict = {}
@@ -155,14 +163,19 @@ def compute_similarity_measures(
     top_n_coverage_dict: dict = {}
     cost_matrix = None
 
-    disable_emd = len(tessellation)>500 if (tessellation is not None) else True
+    disable_emd = len(tessellation) > 500 if (tessellation is not None) else True
 
-    if disable_emd and ((const.VISITS_PER_TILE not in analysis_exclusion) or (const.VISITS_PER_TIME_TILE not in analysis_exclusion)):
-        warnings.warn("EMD computation disables for spatial analysis due to too many tiles in tessellation (results in long computation time).")
+    if disable_emd and (
+        (const.VISITS_PER_TILE not in analysis_exclusion)
+        or (const.VISITS_PER_TIME_TILE not in analysis_exclusion)
+    ):
+        warnings.warn(
+            "EMD computation disables for spatial analysis due to too many tiles in tessellation (results in long computation time)."
+        )
 
     with tqdm(  # progress bar
-            total=15, desc="Compute similarity measures:", disable=disable_progress_bar
-        ) as pbar:
+        total=15, desc="Compute similarity measures:", disable=disable_progress_bar
+    ) as pbar:
 
         # Statistics
         if const.DS_STATISTICS not in analysis_exclusion:
@@ -224,7 +237,8 @@ def compute_similarity_measures(
                 p=trips_per_weekday.iloc[:, 0], q=trips_per_weekday.iloc[:, 1]
             )
             smape_dict[const.TRIPS_PER_WEEKDAY] = symmetric_mape(
-                alternative=trips_per_weekday.iloc[:, 0], base=trips_per_weekday.iloc[:, 1]
+                alternative=trips_per_weekday.iloc[:, 0],
+                base=trips_per_weekday.iloc[:, 1],
             )
         pbar.update()
 
@@ -278,28 +292,51 @@ def compute_similarity_measures(
             )
 
             most_freq_base = (
-                report_base[const.VISITS_PER_TILE]
-                .data.sort_values(by=["visits"], ascending=False, ignore_index=True)
-            #    .truncate(after=9)
+                report_base[const.VISITS_PER_TILE].data.sort_values(
+                    by=["visits"], ascending=False, ignore_index=True
+                )
+                #    .truncate(after=9)
             )
             most_freq_alternative = (
-                report_alternative[const.VISITS_PER_TILE]
-                .data.sort_values(by=["visits"], ascending=False, ignore_index=True)
-            #    .truncate(after=9)
+                report_alternative[const.VISITS_PER_TILE].data.sort_values(
+                    by=["visits"], ascending=False, ignore_index=True
+                )
+                #    .truncate(after=9)
             )
 
             # mute kendall_tau warning by replacing str tile_ids with ints
-            tile_id_to_index = {tile_id: i for tile_id, i in zip(tessellation[const.TILE_ID], range(0,len(tessellation)))}
+            tile_id_to_index = {
+                tile_id: i
+                for tile_id, i in zip(
+                    tessellation[const.TILE_ID], range(0, len(tessellation))
+                )
+            }
             kendall_dict[const.VISITS_PER_TILE_RANKING] = []
             top_n_coverage_dict[const.VISITS_PER_TILE_RANKING] = []
             for top_n in top_n_ranking:
                 kt_temp, _ = kendalltau(
-                    [tile_id_to_index[tile_id] for tile_id in most_freq_base.truncate(after=top_n)[const.TILE_ID]],
-                    [tile_id_to_index[tile_id] for tile_id in most_freq_alternative.truncate(after=top_n)[const.TILE_ID]]
+                    [
+                        tile_id_to_index[tile_id]
+                        for tile_id in most_freq_base.truncate(after=top_n)[
+                            const.TILE_ID
+                        ]
+                    ],
+                    [
+                        tile_id_to_index[tile_id]
+                        for tile_id in most_freq_alternative.truncate(after=top_n)[
+                            const.TILE_ID
+                        ]
+                    ],
                 )
                 kendall_dict[const.VISITS_PER_TILE_RANKING] += [kt_temp]
-                top_n_coverage_dict[const.VISITS_PER_TILE_RANKING] += [top_n_coverage(list(most_freq_base.truncate(after=top_n)[const.TILE_ID]), list(most_freq_alternative.truncate(after=top_n)[const.TILE_ID]))]
-
+                top_n_coverage_dict[const.VISITS_PER_TILE_RANKING] += [
+                    top_n_coverage(
+                        list(most_freq_base.truncate(after=top_n)[const.TILE_ID]),
+                        list(
+                            most_freq_alternative.truncate(after=top_n)[const.TILE_ID]
+                        ),
+                    )
+                ]
 
             if not disable_emd:
                 # create custom cost matrix with distances between all tiles
@@ -316,8 +353,8 @@ def compute_similarity_measures(
                 report_alternative[const.VISITS_PER_TILE].n_outliers,
                 report_base[const.VISITS_PER_TILE].n_outliers,
             )
-            
-            #Quartiles
+
+            # Quartiles
             smape_dict[const.VISITS_PER_TILE_QUARTILES] = symmetric_mape(
                 alternative=report_alternative[const.VISITS_PER_TILE].quartiles,
                 base=report_base[const.VISITS_PER_TILE].quartiles,
@@ -326,11 +363,12 @@ def compute_similarity_measures(
 
         # Spatio-temporal distributions
         if const.VISITS_PER_TIME_TILE not in analysis_exclusion:
-            
 
             counts_timew_alternative = (
                 report_alternative[const.VISITS_PER_TIME_TILE]
-                .data[report_alternative[const.VISITS_PER_TIME_TILE].data.index != "None"]
+                .data[
+                    report_alternative[const.VISITS_PER_TIME_TILE].data.index != "None"
+                ]
                 .unstack()
             )
             counts_timew_base = (
@@ -341,7 +379,8 @@ def compute_similarity_measures(
 
             indices = np.unique(
                 np.append(
-                    counts_timew_alternative.index.values, counts_timew_base.index.values
+                    counts_timew_alternative.index.values,
+                    counts_timew_base.index.values,
                 )
             )
             counts_timew_alternative = counts_timew_alternative.reindex(index=indices)
@@ -379,14 +418,16 @@ def compute_similarity_measures(
                     # if time window not in proposal report, add time windows with count zero
                     if (
                         time_window
-                        not in report_alternative[const.VISITS_PER_TIME_TILE].data.columns
+                        not in report_alternative[
+                            const.VISITS_PER_TIME_TILE
+                        ].data.columns
                     ):
                         tw_alternative = tw_base.copy()
                         tw_alternative[:] = 0
                     else:
-                        tw_alternative = report_alternative[const.VISITS_PER_TIME_TILE].data[
-                            time_window
-                        ]
+                        tw_alternative = report_alternative[
+                            const.VISITS_PER_TIME_TILE
+                        ].data[time_window]
                         tw_alternative = tw_alternative / tw_alternative.sum()
                     tw = pd.merge(
                         tw_alternative,
@@ -398,7 +439,9 @@ def compute_similarity_measures(
                         sort=True,  # sort according to tile_id for cost_matrix
                     )
 
-                    tw = tw[tw.notna().sum(axis=1) > 0]  # remove instances where both are NaN
+                    tw = tw[
+                        tw.notna().sum(axis=1) > 0
+                    ]  # remove instances where both are NaN
                     tw.fillna(0, inplace=True)
                     visits_per_time_tile_emd.append(
                         earth_movers_distance(
@@ -422,7 +465,9 @@ def compute_similarity_measures(
             all_od_combinations["flow"] = 0
 
             od_flows_alternative = (
-                pd.concat([report_alternative[const.OD_FLOWS].data, all_od_combinations])
+                pd.concat(
+                    [report_alternative[const.OD_FLOWS].data, all_od_combinations]
+                )
                 .drop_duplicates(["origin", "destination"], keep="first")
                 .sort_values(["origin", "destination"])
                 .flow
@@ -451,14 +496,28 @@ def compute_similarity_measures(
             top_n_coverage_dict[const.OD_FLOWS_RANKING] = []
             for top_n in top_n_ranking:
                 kt_temp, _ = kendalltau(
-                list(rel_alternative.sort_values(ascending=False).index.values)[:top_n],
-                list(rel_base.sort_values(ascending=False).index.values)[:top_n],
-            )
+                    list(rel_alternative.sort_values(ascending=False).index.values)[
+                        :top_n
+                    ],
+                    list(rel_base.sort_values(ascending=False).index.values)[:top_n],
+                )
                 kendall_dict[const.OD_FLOWS_RANKING] += [kt_temp]
-                top_n_coverage_dict[const.OD_FLOWS_RANKING] += [top_n_coverage(list(od_flows_base.sort_values(ascending=False).iloc[0:top_n].index), 
-                list(od_flows_alternative.sort_values(ascending=False).iloc[0:top_n].index))]
+                top_n_coverage_dict[const.OD_FLOWS_RANKING] += [
+                    top_n_coverage(
+                        list(
+                            od_flows_base.sort_values(ascending=False)
+                            .iloc[0:top_n]
+                            .index
+                        ),
+                        list(
+                            od_flows_alternative.sort_values(ascending=False)
+                            .iloc[0:top_n]
+                            .index
+                        ),
+                    )
+                ]
 
-            #Quartiles
+            # Quartiles
             smape_dict[const.OD_FLOWS_QUARTILES] = symmetric_mape(
                 alternative=report_alternative[const.OD_FLOWS].quartiles,
                 base=report_base[const.OD_FLOWS].quartiles,
@@ -483,7 +542,6 @@ def compute_similarity_measures(
                 report_base[const.TRAVEL_TIME].data,
                 report_alternative[const.TRAVEL_TIME].quartiles["max"],
                 report_base[const.TRAVEL_TIME].quartiles["max"],
-
             )
             # Quartiles
             smape_dict[const.TRAVEL_TIME_QUARTILES] = symmetric_mape(
@@ -519,27 +577,16 @@ def compute_similarity_measures(
         pbar.update()
 
         # User
-        # TODO bin sizes do not align
+        # TODO bin sizes do not align for kld, jsd, smape
         if const.TRIPS_PER_USER not in analysis_exclusion:
 
-            # kld_dict[const.TRIPS_PER_USER] = entropy(
-            #     pk = report_alternative[const.TRIPS_PER_USER].data[0],
-            #     qk = report_base[const.TRIPS_PER_USER].data[0],
-            # )
-            # jsd_dict[const.TRIPS_PER_USER] = distance.jensenshannon(
-            #     p = report_alternative[const.TRIPS_PER_USER].data[0],
-            #     q = report_base[const.TRIPS_PER_USER].data[0],
-            # )
             emd_dict[const.TRIPS_PER_USER] = earth_movers_distance1D(
                 report_alternative[const.TRIPS_PER_USER].data,
                 report_base[const.TRIPS_PER_USER].data,
                 report_alternative[const.TRIPS_PER_USER].quartiles["max"],
                 report_base[const.TRIPS_PER_USER].quartiles["max"],
             )
-            # smape_dict[const.TRIPS_PER_USER] = symmetric_mape(
-            #     estimate = report_alternative[const.TRIPS_PER_USER].data[0],
-            #     true = report_base[const.TRIPS_PER_USER].data[0],
-            # )
+
             # Quartiles
             smape_dict[const.TRIPS_PER_USER_QUARTILES] = symmetric_mape(
                 alternative=report_alternative[const.TRIPS_PER_USER].quartiles,
@@ -572,9 +619,9 @@ def compute_similarity_measures(
                     report_base[const.USER_TIME_DELTA].quartiles["max"],
                 )
                 smape_dict[const.USER_TIME_DELTA_QUARTILES] = symmetric_mape(
-                    alternative=report_alternative[const.USER_TIME_DELTA].quartiles.apply(
-                        lambda x: x.total_seconds() / 3600
-                    ),
+                    alternative=report_alternative[
+                        const.USER_TIME_DELTA
+                    ].quartiles.apply(lambda x: x.total_seconds() / 3600),
                     base=report_base[const.USER_TIME_DELTA].quartiles.apply(
                         lambda x: x.total_seconds() / 3600
                     ),

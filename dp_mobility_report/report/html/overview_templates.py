@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from dp_mobility_report import constants as const
 from dp_mobility_report.model.section import DfSection, DictSection, SeriesSection
 from dp_mobility_report.report.html.html_utils import (
+    all_available_measures,
     fmt,
     fmt_moe,
     get_template,
@@ -12,7 +13,6 @@ from dp_mobility_report.report.html.html_utils import (
     render_eps,
     render_moe_info,
     render_summary,
-    all_available_measures,
 )
 
 if TYPE_CHECKING:
@@ -88,7 +88,7 @@ def render_overview(dpmreport: "DpMobilityReport") -> str:
         args["trips_per_hour_moe"] = fmt_moe(
             report[const.TRIPS_PER_HOUR].margin_of_error_laplace
         )
-        
+
         args["trips_per_hour_linechart"] = render_trips_per_hour(
             report[const.TRIPS_PER_HOUR].data, margin_of_error=None
         )
@@ -149,7 +149,9 @@ def render_benchmark_overview(benchmark: "BenchmarkReport") -> str:
             report_base[const.TRIPS_OVER_TIME].quartiles,
             report_alternative[const.TRIPS_OVER_TIME].quartiles,
         )
-        args["trips_over_time_measure"] = template_measures.render(all_available_measures(const.TRIPS_OVER_TIME, benchmark))
+        args["trips_over_time_measure"] = template_measures.render(
+            all_available_measures(const.TRIPS_OVER_TIME, benchmark)
+        )
 
     if const.TRIPS_PER_WEEKDAY not in benchmark.analysis_exclusion:
         args["trips_per_weekday_eps"] = (
@@ -167,7 +169,9 @@ def render_benchmark_overview(benchmark: "BenchmarkReport") -> str:
             report_base[const.TRIPS_PER_WEEKDAY],
             report_alternative[const.TRIPS_PER_WEEKDAY],
         )
-        args["trips_per_weekday_measure"] = template_measures.render(all_available_measures(const.TRIPS_PER_WEEKDAY, benchmark))
+        args["trips_per_weekday_measure"] = template_measures.render(
+            all_available_measures(const.TRIPS_PER_WEEKDAY, benchmark)
+        )
 
     if const.TRIPS_PER_HOUR not in benchmark.analysis_exclusion:
         args["trips_per_hour_eps"] = (
@@ -195,7 +199,9 @@ def render_benchmark_overview(benchmark: "BenchmarkReport") -> str:
         args["trips_per_hour_linechart"] = render_trips_per_hour(
             combined_trips_per_hour, margin_of_error=None, style="dataset"
         )
-        args["trips_per_hour_measure"] = template_measures.render(all_available_measures(const.TRIPS_PER_HOUR, benchmark))
+        args["trips_per_hour_measure"] = template_measures.render(
+            all_available_measures(const.TRIPS_PER_HOUR, benchmark)
+        )
 
     template_structure = get_template("overview_segment_benchmark.html")
     return template_structure.render(args)
@@ -378,7 +384,9 @@ def render_missing_values(missing_values: DictSection) -> str:
 
 
 def render_benchmark_missing_values(
-    missing_values_base: DictSection, missing_values_alternative: DictSection, smape: dict
+    missing_values_base: DictSection,
+    missing_values_alternative: DictSection,
+    smape: dict,
 ) -> str:
     moe_base = round(missing_values_base.margin_of_error_laplace, 1)
     moe_alternative = round(missing_values_alternative.margin_of_error_laplace, 1)
@@ -388,13 +396,19 @@ def render_benchmark_missing_values(
     missing_values_list = [
         {
             "name": "User ID (uid)",
-            "estimate": (fmt(data_base[const.UID], target_type=int), fmt(data_alternative[const.UID], target_type=int)),
+            "estimate": (
+                fmt(data_base[const.UID], target_type=int),
+                fmt(data_alternative[const.UID], target_type=int),
+            ),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
             const.SMAPE: fmt(smape[const.UID], target_type=float),
         },
         {
             "name": "Trip ID (tid)",
-            "estimate": (fmt(data_base[const.TID], target_type=int), fmt(data_alternative[const.TID], target_type=int)),
+            "estimate": (
+                fmt(data_base[const.TID], target_type=int),
+                fmt(data_alternative[const.TID], target_type=int),
+            ),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
             const.SMAPE: fmt(smape[const.TID], target_type=float),
         },
@@ -409,13 +423,19 @@ def render_benchmark_missing_values(
         },
         {
             "name": "Latitude (lat)",
-            "estimate": (fmt(data_base[const.LAT], target_type=int), fmt(data_alternative[const.LAT], target_type=int)),
+            "estimate": (
+                fmt(data_base[const.LAT], target_type=int),
+                fmt(data_alternative[const.LAT], target_type=int),
+            ),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
             const.SMAPE: fmt(smape[const.LAT], target_type=float),
         },
         {
             "name": "Longitude (lng)",
-            "estimate": (fmt(data_base[const.LNG], target_type=int), fmt(data_alternative[const.LNG], target_type=int)),
+            "estimate": (
+                fmt(data_base[const.LNG], target_type=int),
+                fmt(data_alternative[const.LNG], target_type=int),
+            ),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
             const.SMAPE: fmt(smape[const.LNG], target_type=float),
         },
@@ -465,7 +485,6 @@ def render_benchmark_trips_over_time(
     if len(trips_over_time.data) <= 14:
         chart = plot.barchart(
             x=trips_over_time.data[const.DATETIME].to_numpy(),
-            # x_alternative=trips_over_time_alternative.data[const.DATETIME].to_numpy(),
             y=trips_over_time.data["trips"].to_numpy(),
             y_alternative=trips_over_time_alternative.data["trips"].to_numpy(),
             margin_of_error=fmt_moe(trips_over_time.margin_of_error_laplace),
@@ -544,20 +563,3 @@ def render_trips_per_hour(
     html = v_utils.fig_to_html(chart)
     plt.close()
     return html
-
-
-# def render_benchmark_trips_per_hour(trips_per_hour: DfSection) -> str:
-#     chart = plot.multi_linechart(
-#         data=trips_per_hour.data,
-#         x=const.HOUR,
-#         y="perc",
-#         style="Dataset",
-#         color=const.TIME_CATEGORY,
-#         x_axis_label="Hour of day",
-#         y_axis_label="% of trips",
-#         hue_order=["weekday_start", "weekday_end", "weekend_start", "weekend_end"],
-#         margin_of_error=trips_per_hour.margin_of_error_laplace,
-#     )
-#     html = v_utils.fig_to_html(chart)
-#     plt.close()
-#     return html

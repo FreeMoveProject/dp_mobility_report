@@ -4,8 +4,8 @@ import config
 import geopandas as gpd
 import pandas as pd
 
-from dp_mobility_report.benchmark.benchmarkreport import BenchmarkReport
 from dp_mobility_report import constants as const
+from dp_mobility_report.benchmark.benchmarkreport import BenchmarkReport
 
 path_data = config.path_data
 path_html_output = config.path_html_output
@@ -30,9 +30,7 @@ benchmarkreport = BenchmarkReport(
 )
 
 measures = benchmarkreport.similarity_measures
-print(measures)
 
-print(benchmarkreport.measure_selection)
-
-# measures.to_file(os.path.join(path_html_output, "measures.html"))
-benchmarkreport.to_file(os.path.join(path_html_output, "geolife_benchmark.html"), top_n_flows=10)
+benchmarkreport.to_file(
+    os.path.join(path_html_output, "geolife_benchmark.html"), top_n_flows=10
+)

@@ -15,9 +15,9 @@ from dp_mobility_report.privacy import diff_privacy
 
 def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame) -> pd.DataFrame:
     ends_od_shape = (
-        df[
-            (df[const.POINT_TYPE] == const.END)
-        ][[const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]]
+        df[(df[const.POINT_TYPE] == const.END)][
+            [const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]
+        ]
         .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
         .rename(
             columns={
@@ -30,9 +30,9 @@ def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame) -> pd.DataFrame:
     )
 
     od_shape = (
-        df[
-            (df[const.POINT_TYPE] == const.START)
-        ][[const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]]
+        df[(df[const.POINT_TYPE] == const.START)][
+            [const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]
+        ]
         .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
         .merge(ends_od_shape, on=const.TID, how="inner")
     )

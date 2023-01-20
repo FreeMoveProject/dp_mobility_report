@@ -9,14 +9,13 @@ if TYPE_CHECKING:
 from dp_mobility_report import constants as const
 from dp_mobility_report.model.section import TupleSection
 from dp_mobility_report.report.html.html_utils import (
-    fmt,
+    all_available_measures,
     get_template,
     render_benchmark_summary,
     render_eps,
     render_moe_info,
     render_summary,
     render_user_input_info,
-    all_available_measures,
 )
 from dp_mobility_report.visualization import plot, v_utils
 
@@ -144,9 +143,13 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
         args["trips_per_user_moe_info"] = render_moe_info(
             report_base[const.TRIPS_PER_USER].margin_of_error_expmech
         )
-        args["trips_per_user_measure"] = template_measures.render(all_available_measures(const.TRIPS_PER_USER, benchmark))
+        args["trips_per_user_measure"] = template_measures.render(
+            all_available_measures(const.TRIPS_PER_USER, benchmark)
+        )
 
-        args["trips_per_user_summary_measure"] = template_measures.render(all_available_measures(const.TRIPS_PER_USER_QUARTILES, benchmark))
+        args["trips_per_user_summary_measure"] = template_measures.render(
+            all_available_measures(const.TRIPS_PER_USER_QUARTILES, benchmark)
+        )
 
     if const.USER_TIME_DELTA not in benchmark.analysis_exclusion:
         args["time_between_traj_eps"] = (
@@ -164,9 +167,13 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
         args["time_between_traj_moe_info"] = render_moe_info(
             report_base[const.USER_TIME_DELTA].margin_of_error_expmech
         )
-        args["time_between_traj_measure"] = template_measures.render(all_available_measures(const.USER_TIME_DELTA, benchmark))
+        args["time_between_traj_measure"] = template_measures.render(
+            all_available_measures(const.USER_TIME_DELTA, benchmark)
+        )
 
-        args["time_between_traj_summary_measure"] = template_measures.render(all_available_measures(const.USER_TIME_DELTA_QUARTILES, benchmark))
+        args["time_between_traj_summary_measure"] = template_measures.render(
+            all_available_measures(const.USER_TIME_DELTA_QUARTILES, benchmark)
+        )
 
     if const.RADIUS_OF_GYRATION not in benchmark.analysis_exclusion:
         args["radius_of_gyration_eps"] = (
@@ -190,9 +197,13 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
         args["radius_of_gyration_moe_info"] = render_moe_info(
             report_base[const.RADIUS_OF_GYRATION].margin_of_error_expmech
         )
-        args["radius_of_gyration_measure"] = template_measures.render(all_available_measures(const.RADIUS_OF_GYRATION, benchmark))
+        args["radius_of_gyration_measure"] = template_measures.render(
+            all_available_measures(const.RADIUS_OF_GYRATION, benchmark)
+        )
 
-        args["radius_of_gyration_summary_measure"] = template_measures.render(all_available_measures(const.RADIUS_OF_GYRATION_QUARTILES, benchmark))
+        args["radius_of_gyration_summary_measure"] = template_measures.render(
+            all_available_measures(const.RADIUS_OF_GYRATION_QUARTILES, benchmark)
+        )
 
     if const.USER_TILE_COUNT not in benchmark.analysis_exclusion:
         args["distinct_tiles_user_eps"] = (
@@ -212,9 +223,13 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
         args["distinct_tiles_moe_info"] = render_moe_info(
             report_base[const.USER_TILE_COUNT].margin_of_error_expmech
         )
-        args["distinct_tiles_measure"] = template_measures.render(all_available_measures(const.USER_TILE_COUNT, benchmark))
+        args["distinct_tiles_measure"] = template_measures.render(
+            all_available_measures(const.USER_TILE_COUNT, benchmark)
+        )
 
-        args["distinct_tiles_summary_measure"] = template_measures.render(all_available_measures(const.USER_TILE_COUNT_QUARTILES, benchmark))
+        args["distinct_tiles_summary_measure"] = template_measures.render(
+            all_available_measures(const.USER_TILE_COUNT_QUARTILES, benchmark)
+        )
 
     if const.MOBILITY_ENTROPY not in benchmark.analysis_exclusion:
         args["mobility_entropy_eps"] = (
@@ -233,9 +248,13 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
         args["mobility_entropy_moe_info"] = render_moe_info(
             report_base[const.MOBILITY_ENTROPY].margin_of_error_expmech
         )
-        args["mobility_entropy_measure"] = template_measures.render(all_available_measures(const.MOBILITY_ENTROPY, benchmark))
+        args["mobility_entropy_measure"] = template_measures.render(
+            all_available_measures(const.MOBILITY_ENTROPY, benchmark)
+        )
 
-        args["mobility_entropy_summary_measure"] = template_measures.render(all_available_measures(const.MOBILITY_ENTROPY_QUARTILES, benchmark))
+        args["mobility_entropy_summary_measure"] = template_measures.render(
+            all_available_measures(const.MOBILITY_ENTROPY_QUARTILES, benchmark)
+        )
 
     template_structure = get_template("user_analysis_segment_benchmark.html")
 
