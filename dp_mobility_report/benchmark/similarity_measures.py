@@ -147,7 +147,7 @@ def compute_similarity_measures(
     disable_progress_bar: bool,
 ):
 
-    perc_error_dict: dict = {}
+    smape_dict: dict = {}
     kld_dict: dict = {}
     jsd_dict: dict = {}
     emd_dict: dict = {}
@@ -166,8 +166,8 @@ def compute_similarity_measures(
 
         # Statistics
         if const.DS_STATISTICS not in analysis_exclusion:
-            perc_error_dict = dict(
-                **perc_error_dict,
+            smape_dict = dict(
+                **smape_dict,
                 **all_perc_errors(
                     report_alternative[const.DS_STATISTICS].data,
                     report_base[const.DS_STATISTICS].data,
@@ -177,8 +177,8 @@ def compute_similarity_measures(
 
         # Missing values
         if const.MISSING_VALUES not in analysis_exclusion:
-            perc_error_dict = dict(
-                **perc_error_dict,
+            smape_dict = dict(
+                **smape_dict,
                 **all_perc_errors(
                     report_alternative[const.MISSING_VALUES].data,
                     report_base[const.MISSING_VALUES].data,
@@ -201,7 +201,7 @@ def compute_similarity_measures(
             jsd_dict[const.TRIPS_OVER_TIME] = distance.jensenshannon(
                 p=trips_over_time.trips_alternative, q=trips_over_time.trips_base
             )
-            perc_error_dict[const.TRIPS_OVER_TIME] = symmetric_mape(
+            smape_dict[const.TRIPS_OVER_TIME] = symmetric_mape(
                 alternative=trips_over_time.trips_alternative,
                 base=trips_over_time.trip_count_base,
             )
@@ -223,7 +223,7 @@ def compute_similarity_measures(
             jsd_dict[const.TRIPS_PER_WEEKDAY] = distance.jensenshannon(
                 p=trips_per_weekday.iloc[:, 0], q=trips_per_weekday.iloc[:, 1]
             )
-            perc_error_dict[const.TRIPS_PER_WEEKDAY] = symmetric_mape(
+            smape_dict[const.TRIPS_PER_WEEKDAY] = symmetric_mape(
                 alternative=trips_per_weekday.iloc[:, 0], base=trips_per_weekday.iloc[:, 1]
             )
         pbar.update()
@@ -242,7 +242,7 @@ def compute_similarity_measures(
             jsd_dict[const.TRIPS_PER_HOUR] = distance.jensenshannon(
                 p=trips_per_hour.perc_alternative, q=trips_per_hour.perc_base
             )
-            perc_error_dict[const.TRIPS_PER_HOUR] = symmetric_mape(
+            smape_dict[const.TRIPS_PER_HOUR] = symmetric_mape(
                 alternative=trips_per_hour.perc_alternative,  # TODO im eval package change to perc
                 base=trips_per_hour.perc_base,
             )
@@ -273,7 +273,7 @@ def compute_similarity_measures(
             jsd_dict[const.VISITS_PER_TILE] = distance.jensenshannon(
                 p=rel_counts_alternative, q=rel_counts_base
             )
-            perc_error_dict[const.VISITS_PER_TILE] = symmetric_mape(
+            smape_dict[const.VISITS_PER_TILE] = symmetric_mape(
                 alternative=rel_counts_alternative, base=rel_counts_base
             )
 
@@ -312,13 +312,13 @@ def compute_similarity_measures(
                 )
 
             # Outliers
-            perc_error_dict[const.VISITS_PER_TILE_OUTLIERS] = symmetric_perc_error(
+            smape_dict[const.VISITS_PER_TILE_OUTLIERS] = symmetric_perc_error(
                 report_alternative[const.VISITS_PER_TILE].n_outliers,
                 report_base[const.VISITS_PER_TILE].n_outliers,
             )
             
             #Quartiles
-            perc_error_dict[const.VISITS_PER_TILE_QUARTILES] = symmetric_mape(
+            smape_dict[const.VISITS_PER_TILE_QUARTILES] = symmetric_mape(
                 alternative=report_alternative[const.VISITS_PER_TILE].quartiles,
                 base=report_base[const.VISITS_PER_TILE].quartiles,
             )
@@ -363,7 +363,7 @@ def compute_similarity_measures(
                 p=rel_counts_timew_alternative.to_numpy().flatten(),
                 q=rel_counts_timew_base.to_numpy().flatten(),
             )
-            perc_error_dict[const.VISITS_PER_TIME_TILE] = symmetric_mape(
+            smape_dict[const.VISITS_PER_TIME_TILE] = symmetric_mape(
                 alternative=rel_counts_timew_alternative.to_numpy().flatten(),
                 base=rel_counts_timew_base.to_numpy().flatten(),
             )
@@ -443,7 +443,7 @@ def compute_similarity_measures(
             jsd_dict[const.OD_FLOWS] = distance.jensenshannon(
                 p=rel_alternative.to_numpy(), q=rel_base.to_numpy()
             )
-            perc_error_dict[const.OD_FLOWS] = symmetric_mape(
+            smape_dict[const.OD_FLOWS] = symmetric_mape(
                 alternative=rel_alternative.to_numpy(), base=rel_base.to_numpy()
             )
 
@@ -459,7 +459,7 @@ def compute_similarity_measures(
                 list(od_flows_alternative.sort_values(ascending=False).iloc[0:top_n].index))]
 
             #Quartiles
-            perc_error_dict[const.OD_FLOWS_QUARTILES] = symmetric_mape(
+            smape_dict[const.OD_FLOWS_QUARTILES] = symmetric_mape(
                 alternative=report_alternative[const.OD_FLOWS].quartiles,
                 base=report_base[const.OD_FLOWS].quartiles,
             )
@@ -474,7 +474,7 @@ def compute_similarity_measures(
                 p=report_alternative[const.TRAVEL_TIME].data[0],
                 q=report_base[const.TRAVEL_TIME].data[0],
             )
-            perc_error_dict[const.TRAVEL_TIME] = symmetric_mape(
+            smape_dict[const.TRAVEL_TIME] = symmetric_mape(
                 alternative=report_alternative[const.TRAVEL_TIME].data[0],
                 base=report_base[const.TRAVEL_TIME].data[0],
             )
@@ -486,7 +486,7 @@ def compute_similarity_measures(
 
             )
             # Quartiles
-            perc_error_dict[const.TRAVEL_TIME_QUARTILES] = symmetric_mape(
+            smape_dict[const.TRAVEL_TIME_QUARTILES] = symmetric_mape(
                 alternative=report_alternative[const.TRAVEL_TIME].quartiles,
                 base=report_base[const.TRAVEL_TIME].quartiles,
             )
@@ -501,7 +501,7 @@ def compute_similarity_measures(
                 p=report_alternative[const.JUMP_LENGTH].data[0],
                 q=report_base[const.JUMP_LENGTH].data[0],
             )
-            perc_error_dict[const.JUMP_LENGTH] = symmetric_mape(
+            smape_dict[const.JUMP_LENGTH] = symmetric_mape(
                 alternative=report_alternative[const.JUMP_LENGTH].data[0],
                 base=report_base[const.JUMP_LENGTH].data[0],
             )
@@ -512,7 +512,7 @@ def compute_similarity_measures(
                 report_base[const.JUMP_LENGTH].quartiles["max"],
             )
             # Quartiles
-            perc_error_dict[const.JUMP_LENGTH_QUARTILES] = symmetric_mape(
+            smape_dict[const.JUMP_LENGTH_QUARTILES] = symmetric_mape(
                 alternative=report_alternative[const.JUMP_LENGTH].quartiles,
                 base=report_base[const.JUMP_LENGTH].quartiles,
             )
@@ -536,12 +536,12 @@ def compute_similarity_measures(
                 report_alternative[const.TRIPS_PER_USER].quartiles["max"],
                 report_base[const.TRIPS_PER_USER].quartiles["max"],
             )
-            # perc_error_dict[const.TRIPS_PER_USER] = symmetric_mape(
+            # smape_dict[const.TRIPS_PER_USER] = symmetric_mape(
             #     estimate = report_alternative[const.TRIPS_PER_USER].data[0],
             #     true = report_base[const.TRIPS_PER_USER].data[0],
             # )
             # Quartiles
-            perc_error_dict[const.TRIPS_PER_USER_QUARTILES] = symmetric_mape(
+            smape_dict[const.TRIPS_PER_USER_QUARTILES] = symmetric_mape(
                 alternative=report_alternative[const.TRIPS_PER_USER].quartiles,
                 base=report_base[const.TRIPS_PER_USER].quartiles,
             )
@@ -551,7 +551,7 @@ def compute_similarity_measures(
             if (
                 report_alternative[const.USER_TIME_DELTA] is None
             ):  # if each user only has one trip then `USER_TIME_DELTA` is None
-                perc_error_dict[const.USER_TIME_DELTA_QUARTILES] = None
+                smape_dict[const.USER_TIME_DELTA_QUARTILES] = None
             else:
                 kld_dict[const.USER_TIME_DELTA] = entropy(
                     pk=report_alternative[const.USER_TIME_DELTA].data[0],
@@ -561,7 +561,7 @@ def compute_similarity_measures(
                     p=report_alternative[const.USER_TIME_DELTA].data[0],
                     q=report_base[const.USER_TIME_DELTA].data[0],
                 )
-                perc_error_dict[const.USER_TIME_DELTA] = symmetric_mape(
+                smape_dict[const.USER_TIME_DELTA] = symmetric_mape(
                     alternative=report_alternative[const.USER_TIME_DELTA].data[0],
                     base=report_base[const.USER_TIME_DELTA].data[0],
                 )
@@ -571,7 +571,7 @@ def compute_similarity_measures(
                     report_alternative[const.USER_TIME_DELTA].quartiles["max"],
                     report_base[const.USER_TIME_DELTA].quartiles["max"],
                 )
-                perc_error_dict[const.USER_TIME_DELTA_QUARTILES] = symmetric_mape(
+                smape_dict[const.USER_TIME_DELTA_QUARTILES] = symmetric_mape(
                     alternative=report_alternative[const.USER_TIME_DELTA].quartiles.apply(
                         lambda x: x.total_seconds() / 3600
                     ),
@@ -597,12 +597,12 @@ def compute_similarity_measures(
                 report_alternative[const.RADIUS_OF_GYRATION].quartiles["max"],
                 report_base[const.RADIUS_OF_GYRATION].quartiles["max"],
             )
-            perc_error_dict[const.RADIUS_OF_GYRATION] = symmetric_mape(
+            smape_dict[const.RADIUS_OF_GYRATION] = symmetric_mape(
                 alternative=report_alternative[const.RADIUS_OF_GYRATION].data[0],
                 base=report_base[const.RADIUS_OF_GYRATION].data[0],
             )
             # Quartiles
-            perc_error_dict[const.RADIUS_OF_GYRATION_QUARTILES] = symmetric_mape(
+            smape_dict[const.RADIUS_OF_GYRATION_QUARTILES] = symmetric_mape(
                 alternative=report_alternative[const.RADIUS_OF_GYRATION].quartiles,
                 base=report_base[const.RADIUS_OF_GYRATION].quartiles,
             )
@@ -623,12 +623,12 @@ def compute_similarity_measures(
                 report_alternative[const.USER_TILE_COUNT].quartiles["max"],
                 report_base[const.USER_TILE_COUNT].quartiles["max"],
             )
-            perc_error_dict[const.USER_TILE_COUNT] = symmetric_mape(
+            smape_dict[const.USER_TILE_COUNT] = symmetric_mape(
                 alternative=report_alternative[const.USER_TILE_COUNT].data[0],
                 base=report_base[const.USER_TILE_COUNT].data[0],
             )
 
-            perc_error_dict[const.USER_TILE_COUNT_QUARTILES] = symmetric_mape(
+            smape_dict[const.USER_TILE_COUNT_QUARTILES] = symmetric_mape(
                 alternative=report_alternative[const.USER_TILE_COUNT].quartiles,
                 base=report_base[const.USER_TILE_COUNT].quartiles,
             )
@@ -649,18 +649,18 @@ def compute_similarity_measures(
                 report_alternative[const.MOBILITY_ENTROPY].quartiles["max"],
                 report_base[const.MOBILITY_ENTROPY].quartiles["max"],
             )
-            perc_error_dict[const.MOBILITY_ENTROPY] = symmetric_mape(
+            smape_dict[const.MOBILITY_ENTROPY] = symmetric_mape(
                 alternative=report_alternative[const.MOBILITY_ENTROPY].data[0],
                 base=report_base[const.MOBILITY_ENTROPY].data[0],
             )
             # Quartiles
-            perc_error_dict[const.MOBILITY_ENTROPY_QUARTILES] = symmetric_mape(
+            smape_dict[const.MOBILITY_ENTROPY_QUARTILES] = symmetric_mape(
                 alternative=report_alternative[const.MOBILITY_ENTROPY].quartiles,
                 base=report_base[const.MOBILITY_ENTROPY].quartiles,
             )
         pbar.update()
 
-    return perc_error_dict, kld_dict, jsd_dict, emd_dict, kendall_dict, top_n_coverage_dict
+    return smape_dict, kld_dict, jsd_dict, emd_dict, kendall_dict, top_n_coverage_dict
 
 
 def get_selected_measures(benchmarkreport: "BenchmarkReport") -> dict:
@@ -669,15 +669,15 @@ def get_selected_measures(benchmarkreport: "BenchmarkReport") -> dict:
     for analysis in benchmarkreport.measure_selection.keys():
         selected_measure = benchmarkreport.measure_selection[analysis]
         try:
-            if selected_measure == const.PE:
+            if selected_measure == const.SMAPE:
                 if analysis == const.DS_STATISTICS:
                     for element in const.DS_STATISTICS_ELEMENTS:
-                        similarity_measures[element] = benchmarkreport.perc_error[element]
+                        similarity_measures[element] = benchmarkreport.smape[element]
                 elif analysis == const.MISSING_VALUES:
                     for element in const.MISSING_VALUES_ELEMENTS:
-                        similarity_measures[element] = benchmarkreport.perc_error[element]
+                        similarity_measures[element] = benchmarkreport.smape[element]
                 else:
-                    similarity_measures[analysis] = benchmarkreport.perc_error[analysis]
+                    similarity_measures[analysis] = benchmarkreport.smape[analysis]
             elif selected_measure == const.KLD:
                 similarity_measures[analysis] = benchmarkreport.kld[analysis]
             elif selected_measure == const.JSD:

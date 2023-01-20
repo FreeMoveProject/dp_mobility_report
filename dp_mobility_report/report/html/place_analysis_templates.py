@@ -498,7 +498,6 @@ def render_visits_per_time_tile_benchmark(
 
     # data[moe_perc_per_tile_timewindow > threshold] = None
 
-    # TODO: adjust relative error
     output_html = ""
     if "weekday" in data.columns:
         weekday_base = data.loc[:, "weekday"] / data.loc[:, "weekday"].sum().sum()

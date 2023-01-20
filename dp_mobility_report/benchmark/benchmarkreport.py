@@ -61,7 +61,7 @@ class BenchmarkReport:
 
     _report_base: DpMobilityReport
     _report_alternative: DpMobilityReport
-    _perc_error: dict
+    _smape: dict
     _jsd: dict
     _kld: dict
     _emd: dict
@@ -185,7 +185,7 @@ class BenchmarkReport:
         self._top_n_ranking = preprocessing.validate_top_n_ranking(top_n_ranking)
 
         (
-            self._perc_error,
+            self._smape,
             self._kld,
             self._jsd,
             self._emd,
@@ -229,9 +229,9 @@ class BenchmarkReport:
         return self._top_n_ranking
 
     @property
-    def perc_error(self) -> dict:
+    def smape(self) -> dict:
         """The symmetric (mean absolute) percentage error, based on the relative error, between base and alternative of all selected analyses, where applicable."""
-        return self._perc_error
+        return self._smape
 
     @property
     def kld(self) -> dict:
