@@ -50,48 +50,46 @@ def earth_movers_distance1D(u_hist: tuple, v_hist: tuple, u_max: Union[int, floa
     return wasserstein_distance(u_values, v_values, u_weights, v_weights)
 
 
-# TODO: `n_true_positive_zeros` not needed anymore
+# def relative_error(estimate: Optional[int], true: int) -> float:
+#     if estimate is None:
+#         estimate = 0
+#     if true == 0:
+#         if estimate == 0:
+#             return 0.0
+#         return np.nan
+#     return np.abs(true - estimate) / true
+
+# TODO: also use this new rel error for dataset statistics table?
+def relative_error(alternative: Optional[Union[int, float]], 
+                base: Optional[Union[int, float]], keep_direction=False):
+    if (alternative is None) or (base is None):
+        return None
+    if abs(base) + abs(alternative) == 0:
+        return 0
+    
+    diff_alt_base = (alternative - base) 
+    if not keep_direction:
+        diff_alt_base = np.abs(diff_alt_base)
+    
+    return diff_alt_base / ((abs(base) + abs(alternative)) / 2)
+
 def symmetric_mape(
-    estimate: Union[pd.Series, np.array],
-    true: Union[pd.Series, np.array],
-    n_true_positive_zeros: int = None,
+    alternative: Union[pd.Series, np.array],
+    base: Union[pd.Series, np.array],
+    keep_direction = False,
 ) -> float:
-    n = (
-        len(true)
-        if n_true_positive_zeros is None
-        else (len(true) + n_true_positive_zeros)
-    )
+    n =  len(base)
     return (
-        1
-        / n
-        * np.sum(
-            np.where(
-                abs(true + estimate) == 0,
-                0,  # return 0 if true and estimate are both 0
-                np.divide(
-                    abs(estimate - true),
-                    ((abs(true) + abs(estimate)) / 2),
-                    where=(abs(true + estimate) != 0),
-                ),
-            )
-        )
+        1 / n * np.sum([relative_error(a, b) for a, b in zip(alternative, base)])
     )
 
 
-def relative_error(estimate: Optional[int], true: int) -> float:
-    if estimate is None:
-        estimate = 0
-    if true == 0:
-        if estimate == 0:
-            return 0.0
-        return np.nan
-    return np.abs(true - estimate) / true
 
-
-def all_relative_errors(estimate_dict: dict, true_dict: dict) -> dict:
+def all_relative_errors(alt_dict: dict, base_dict: dict) -> dict:
     re = {}
-    for key in true_dict:
-        re[key] = relative_error(estimate_dict[key], true_dict[key])
+    for key in base_dict:
+        re[key] = relative_error(alt_dict[key], base_dict[key])
+        #re[key] = relative_error(estimate_dict[key], true_dict[key])
     return re
 
 
@@ -124,18 +122,18 @@ def _compute_cost_matrix(tessellation: GeoDataFrame) -> np.array:
 
 
 def earth_movers_distance(
-    arr_estimate: np.array, arr_true: np.array, cost_matrix: np.array
+    arr_alt: np.array, arr_base: np.array, cost_matrix: np.array
 ) -> float:  # based on haversine distance
 
     # set values to 1 (as before) or stay with nan, as now? especially for time windows?
-    if (all(arr_estimate == 0)) | (all(arr_true == 0)):
+    if (all(arr_alt == 0)) | (all(arr_base == 0)):
         return np.nan
-    arr_true = (arr_true / arr_true.sum() * 100).round(2)
-    sig_true = arr_true.astype(np.float32)
+    arr_base = (arr_base / arr_base.sum() * 100).round(2)
+    sig_true = arr_base.astype(np.float32)
 
     # normalize input and assign needed type for cv2
-    arr_estimate = (arr_estimate / arr_estimate.sum() * 100).round(2)
-    sig_estimate = arr_estimate.astype(np.float32)
+    arr_alt = (arr_alt / arr_alt.sum() * 100).round(2)
+    sig_estimate = arr_alt.astype(np.float32)
 
     emd_dist, _, _ = cv2.EMD(
         sig_true, sig_estimate, distType=cv2.DIST_USER, cost=cost_matrix
@@ -159,6 +157,7 @@ def compute_similarity_measures(
     disable_progress_bar: bool,
 ):
 
+    # TODO: make rel_error and smape same dict
     relative_error_dict: dict = {}
     kld_dict: dict = {}
     jsd_dict: dict = {}
@@ -215,8 +214,8 @@ def compute_similarity_measures(
                 p=trips_over_time.trips_alternative, q=trips_over_time.trips_base
             )
             smape_dict[const.TRIPS_OVER_TIME] = symmetric_mape(
-                estimate=trips_over_time.trips_alternative,
-                true=trips_over_time.trip_count_base,
+                alternative=trips_over_time.trips_alternative,
+                base=trips_over_time.trip_count_base,
             )
         pbar.update()
 
@@ -237,7 +236,7 @@ def compute_similarity_measures(
                 p=trips_per_weekday.iloc[:, 0], q=trips_per_weekday.iloc[:, 1]
             )
             smape_dict[const.TRIPS_PER_WEEKDAY] = symmetric_mape(
-                estimate=trips_per_weekday.iloc[:, 0], true=trips_per_weekday.iloc[:, 1]
+                alternative=trips_per_weekday.iloc[:, 0], base=trips_per_weekday.iloc[:, 1]
             )
         pbar.update()
 
@@ -256,8 +255,8 @@ def compute_similarity_measures(
                 p=trips_per_hour.perc_alternative, q=trips_per_hour.perc_base
             )
             smape_dict[const.TRIPS_PER_HOUR] = symmetric_mape(
-                estimate=trips_per_hour.perc_alternative,  # TODO im eval package change to perc
-                true=trips_per_hour.perc_base,
+                alternative=trips_per_hour.perc_alternative,  # TODO im eval package change to perc
+                base=trips_per_hour.perc_base,
             )
         pbar.update()
 
@@ -287,7 +286,7 @@ def compute_similarity_measures(
                 p=rel_counts_alternative, q=rel_counts_base
             )
             smape_dict[const.VISITS_PER_TILE] = symmetric_mape(
-                estimate=rel_counts_alternative, true=rel_counts_base
+                alternative=rel_counts_alternative, base=rel_counts_base
             )
 
             most_freq_base = (
@@ -319,8 +318,8 @@ def compute_similarity_measures(
                 cost_matrix = _compute_cost_matrix(tessellation)
 
                 emd_dict[const.VISITS_PER_TILE] = earth_movers_distance(
-                    arr_estimate=visits_per_tile.visits_alternative.to_numpy(),
-                    arr_true=visits_per_tile.visits_base.to_numpy(),
+                    arr_alt=visits_per_tile.visits_alternative.to_numpy(),
+                    arr_base=visits_per_tile.visits_base.to_numpy(),
                     cost_matrix=cost_matrix,
                 )
 
@@ -332,8 +331,8 @@ def compute_similarity_measures(
             
             #Quartiles
             smape_dict[const.VISITS_PER_TILE_QUARTILES] = symmetric_mape(
-                estimate=report_alternative[const.VISITS_PER_TILE].quartiles,
-                true=report_base[const.VISITS_PER_TILE].quartiles,
+                alternative=report_alternative[const.VISITS_PER_TILE].quartiles,
+                base=report_base[const.VISITS_PER_TILE].quartiles,
             )
         pbar.update()
 
@@ -377,8 +376,8 @@ def compute_similarity_measures(
                 q=rel_counts_timew_base.to_numpy().flatten(),
             )
             smape_dict[const.VISITS_PER_TIME_TILE] = symmetric_mape(
-                estimate=rel_counts_timew_alternative.to_numpy().flatten(),
-                true=rel_counts_timew_base.to_numpy().flatten(),
+                alternative=rel_counts_timew_alternative.to_numpy().flatten(),
+                base=rel_counts_timew_base.to_numpy().flatten(),
             )
             if not disable_emd:
                 if cost_matrix is None:
@@ -415,8 +414,8 @@ def compute_similarity_measures(
                     tw.fillna(0, inplace=True)
                     visits_per_time_tile_emd.append(
                         earth_movers_distance(
-                            arr_estimate=tw.iloc[:, 0].to_numpy(),
-                            arr_true=tw.iloc[:, 1].to_numpy(),
+                            arr_alt=tw.iloc[:, 0].to_numpy(),
+                            arr_base=tw.iloc[:, 1].to_numpy(),
                             cost_matrix=cost_matrix,
                         )
                     )
@@ -457,7 +456,7 @@ def compute_similarity_measures(
                 p=rel_alternative.to_numpy(), q=rel_base.to_numpy()
             )
             smape_dict[const.OD_FLOWS] = symmetric_mape(
-                estimate=rel_alternative.to_numpy(), true=rel_base.to_numpy()
+                alternative=rel_alternative.to_numpy(), base=rel_base.to_numpy()
             )
 
             kendall_dict[const.OD_FLOWS_RANKING] = []
@@ -473,8 +472,8 @@ def compute_similarity_measures(
 
             #Quartiles
             smape_dict[const.OD_FLOWS_QUARTILES] = symmetric_mape(
-                estimate=report_alternative[const.OD_FLOWS].quartiles,
-                true=report_base[const.OD_FLOWS].quartiles,
+                alternative=report_alternative[const.OD_FLOWS].quartiles,
+                base=report_base[const.OD_FLOWS].quartiles,
             )
         pbar.update()
 
@@ -488,10 +487,9 @@ def compute_similarity_measures(
                 q=report_base[const.TRAVEL_TIME].data[0],
             )
             smape_dict[const.TRAVEL_TIME] = symmetric_mape(
-                estimate=report_alternative[const.TRAVEL_TIME].data[0],
-                true=report_base[const.TRAVEL_TIME].data[0],
+                alternative=report_alternative[const.TRAVEL_TIME].data[0],
+                base=report_base[const.TRAVEL_TIME].data[0],
             )
-        # TODO: fix warning in travel time emd: /Users/alexandra/opt/anaconda3/envs/dpmr/lib/python3.10/site-packages/numpy/lib/function_base.py:1447: RuntimeWarning: invalid value encountered in subtract a = op(a[slice1], a[slice2])
             emd_dict[const.TRAVEL_TIME] = earth_movers_distance1D(
                 report_alternative[const.TRAVEL_TIME].data,
                 report_base[const.TRAVEL_TIME].data,
@@ -501,8 +499,8 @@ def compute_similarity_measures(
             )
             # Quartiles
             smape_dict[const.TRAVEL_TIME_QUARTILES] = symmetric_mape(
-                estimate=report_alternative[const.TRAVEL_TIME].quartiles,
-                true=report_base[const.TRAVEL_TIME].quartiles,
+                alternative=report_alternative[const.TRAVEL_TIME].quartiles,
+                base=report_base[const.TRAVEL_TIME].quartiles,
             )
         pbar.update()
 
@@ -516,8 +514,8 @@ def compute_similarity_measures(
                 q=report_base[const.JUMP_LENGTH].data[0],
             )
             smape_dict[const.JUMP_LENGTH] = symmetric_mape(
-                estimate=report_alternative[const.JUMP_LENGTH].data[0],
-                true=report_base[const.JUMP_LENGTH].data[0],
+                alternative=report_alternative[const.JUMP_LENGTH].data[0],
+                base=report_base[const.JUMP_LENGTH].data[0],
             )
             emd_dict[const.JUMP_LENGTH] = earth_movers_distance1D(
                 report_alternative[const.JUMP_LENGTH].data,
@@ -527,8 +525,8 @@ def compute_similarity_measures(
             )
             # Quartiles
             smape_dict[const.JUMP_LENGTH_QUARTILES] = symmetric_mape(
-                estimate=report_alternative[const.JUMP_LENGTH].quartiles,
-                true=report_base[const.JUMP_LENGTH].quartiles,
+                alternative=report_alternative[const.JUMP_LENGTH].quartiles,
+                base=report_base[const.JUMP_LENGTH].quartiles,
             )
         pbar.update()
 
@@ -544,7 +542,6 @@ def compute_similarity_measures(
             #     p = report_alternative[const.TRIPS_PER_USER].data[0],
             #     q = report_base[const.TRIPS_PER_USER].data[0],
             # )
-            # TODO discussion: potentially different results depending on histogram bin sizes
             emd_dict[const.TRIPS_PER_USER] = earth_movers_distance1D(
                 report_alternative[const.TRIPS_PER_USER].data,
                 report_base[const.TRIPS_PER_USER].data,
@@ -557,8 +554,8 @@ def compute_similarity_measures(
             # )
             # Quartiles
             smape_dict[const.TRIPS_PER_USER_QUARTILES] = symmetric_mape(
-                estimate=report_alternative[const.TRIPS_PER_USER].quartiles,
-                true=report_base[const.TRIPS_PER_USER].quartiles,
+                alternative=report_alternative[const.TRIPS_PER_USER].quartiles,
+                base=report_base[const.TRIPS_PER_USER].quartiles,
             )
         pbar.update()
 
@@ -577,8 +574,8 @@ def compute_similarity_measures(
                     q=report_base[const.USER_TIME_DELTA].data[0],
                 )
                 smape_dict[const.USER_TIME_DELTA] = symmetric_mape(
-                    estimate=report_alternative[const.USER_TIME_DELTA].data[0],
-                    true=report_base[const.USER_TIME_DELTA].data[0],
+                    alternative=report_alternative[const.USER_TIME_DELTA].data[0],
+                    base=report_base[const.USER_TIME_DELTA].data[0],
                 )
                 emd_dict[const.USER_TIME_DELTA] = earth_movers_distance1D(
                     report_alternative[const.USER_TIME_DELTA].data,
@@ -587,10 +584,10 @@ def compute_similarity_measures(
                     report_base[const.USER_TIME_DELTA].quartiles["max"],
                 )
                 smape_dict[const.USER_TIME_DELTA_QUARTILES] = symmetric_mape(
-                    estimate=report_alternative[const.USER_TIME_DELTA].quartiles.apply(
+                    alternative=report_alternative[const.USER_TIME_DELTA].quartiles.apply(
                         lambda x: x.total_seconds() / 3600
                     ),
-                    true=report_base[const.USER_TIME_DELTA].quartiles.apply(
+                    base=report_base[const.USER_TIME_DELTA].quartiles.apply(
                         lambda x: x.total_seconds() / 3600
                     ),
                 )
@@ -613,13 +610,13 @@ def compute_similarity_measures(
                 report_base[const.RADIUS_OF_GYRATION].quartiles["max"],
             )
             smape_dict[const.RADIUS_OF_GYRATION] = symmetric_mape(
-                estimate=report_alternative[const.RADIUS_OF_GYRATION].data[0],
-                true=report_base[const.RADIUS_OF_GYRATION].data[0],
+                alternative=report_alternative[const.RADIUS_OF_GYRATION].data[0],
+                base=report_base[const.RADIUS_OF_GYRATION].data[0],
             )
             # Quartiles
             smape_dict[const.RADIUS_OF_GYRATION_QUARTILES] = symmetric_mape(
-                estimate=report_alternative[const.RADIUS_OF_GYRATION].quartiles,
-                true=report_base[const.RADIUS_OF_GYRATION].quartiles,
+                alternative=report_alternative[const.RADIUS_OF_GYRATION].quartiles,
+                base=report_base[const.RADIUS_OF_GYRATION].quartiles,
             )
         pbar.update()
 
@@ -639,13 +636,13 @@ def compute_similarity_measures(
                 report_base[const.USER_TILE_COUNT].quartiles["max"],
             )
             smape_dict[const.USER_TILE_COUNT] = symmetric_mape(
-                estimate=report_alternative[const.USER_TILE_COUNT].data[0],
-                true=report_base[const.USER_TILE_COUNT].data[0],
+                alternative=report_alternative[const.USER_TILE_COUNT].data[0],
+                base=report_base[const.USER_TILE_COUNT].data[0],
             )
 
             smape_dict[const.USER_TILE_COUNT_QUARTILES] = symmetric_mape(
-                estimate=report_alternative[const.USER_TILE_COUNT].quartiles,
-                true=report_base[const.USER_TILE_COUNT].quartiles,
+                alternative=report_alternative[const.USER_TILE_COUNT].quartiles,
+                base=report_base[const.USER_TILE_COUNT].quartiles,
             )
         pbar.update()
 
@@ -665,13 +662,13 @@ def compute_similarity_measures(
                 report_base[const.MOBILITY_ENTROPY].quartiles["max"],
             )
             smape_dict[const.MOBILITY_ENTROPY] = symmetric_mape(
-                estimate=report_alternative[const.MOBILITY_ENTROPY].data[0],
-                true=report_base[const.MOBILITY_ENTROPY].data[0],
+                alternative=report_alternative[const.MOBILITY_ENTROPY].data[0],
+                base=report_base[const.MOBILITY_ENTROPY].data[0],
             )
             # Quartiles
             smape_dict[const.MOBILITY_ENTROPY_QUARTILES] = symmetric_mape(
-                estimate=report_alternative[const.MOBILITY_ENTROPY].quartiles,
-                true=report_base[const.MOBILITY_ENTROPY].quartiles,
+                alternative=report_alternative[const.MOBILITY_ENTROPY].quartiles,
+                base=report_base[const.MOBILITY_ENTROPY].quartiles,
             )
         pbar.update()
 

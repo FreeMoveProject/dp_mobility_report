@@ -300,7 +300,7 @@ def render_benchmark_dataset_statistics(
             ),
             "margin_of_error": (
                 fmt_moe(moe_base[const.N_INCOMPLETE_TRIPS]),
-                fmt_moe(data_alternative[const.N_INCOMPLETE_TRIPS]),
+                fmt_moe(moe_alternative[const.N_INCOMPLETE_TRIPS]),
             ),
             "relative_error": fmt(re["n_incomplete_trips"], target_type=float),
         },

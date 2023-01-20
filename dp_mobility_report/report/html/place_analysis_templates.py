@@ -21,6 +21,9 @@ from dp_mobility_report.report.html.html_utils import (
     render_summary,
     all_available_measures
 )
+
+from dp_mobility_report.benchmark.similarity_measures import relative_error
+
 from dp_mobility_report.visualization import plot, v_utils
 import folium
 
@@ -235,11 +238,13 @@ def render_benchmark_visits_per_tile(
     deviation_from_base = pd.DataFrame(
         {
             const.TILE_ID: visits_per_tile_base_sorted[const.TILE_ID],
-            "deviation": (relative_base-relative_alternative)/(relative_base+relative_alternative), #relative_alternative - relative_base,
+#            "deviation": (relative_base-relative_alternative)/(relative_base+relative_alternative), #relative_alternative - relative_base,
             "relative_base": relative_base,
             "relative_alternative": relative_alternative,
         }
     )
+
+    deviation_from_base["deviation"] = deviation_from_base.apply(lambda x: relative_error(x["relative_alternative"], x["relative_base"], keep_direction = True), axis=1)
 
     # merge count and tessellation
     counts_per_tile_gdf = pd.merge(
@@ -249,13 +254,6 @@ def render_benchmark_visits_per_tile(
         left_on=const.TILE_ID,
         right_on=const.TILE_ID,
     )
-  
-    # # filter visit counts above error threshold
-    # moe_deviation = (
-    #     visits_per_tile.margin_of_error_laplace / counts_per_tile_gdf["deviation"]
-    # )
-
-    # counts_per_tile_gdf.loc[moe_deviation > threshold, "visits"] = None
 
     map, legend = plot.choropleth_map(
         counts_per_tile_gdf,
@@ -263,8 +261,8 @@ def render_benchmark_visits_per_tile(
         scale_title="deviation of relative counts per tile from base",
         aliases=["Tile ID", "Tile Name", "deviation"],
         is_cmap_diverging=True,
-        min_scale=-1,
-        max_scale=1,
+        min_scale=-2,
+        max_scale=2,
         layer_name="Deviation",
     )
     min_scale = min(counts_per_tile_gdf['relative_base'].min(), counts_per_tile_gdf['relative_alternative'].min())
@@ -500,6 +498,7 @@ def render_visits_per_time_tile_benchmark(
 
     # data[moe_perc_per_tile_timewindow > threshold] = None
 
+    # TODO: adjust relative error
     output_html = ""
     if "weekday" in data.columns:
         weekday_base = data.loc[:, "weekday"] / data.loc[:, "weekday"].sum().sum()
@@ -507,10 +506,14 @@ def render_visits_per_time_tile_benchmark(
             data_alternative.loc[:, "weekday"]
             / data_alternative.loc[:, "weekday"].sum().sum()
         )
+            
+        deviation = [[relative_error(alt, base, keep_direction=True) for alt, base in zip(alt_array, base_array)] for alt_array, base_array in zip(weekday_alternative.values, weekday_base.values)]
+        deviation = pd.DataFrame(deviation)
+        deviation.index = weekday_base.index
+        deviation.columns = weekday_base.columns
+
         output_html += "<h4>Weekday</h4>"
-        output_html += _create_timewindow_segment_benchmark(
-            (weekday_base - weekday_alternative)/(weekday_base+weekday_alternative), tessellation
-        )
+        output_html += _create_timewindow_segment_benchmark(deviation, tessellation)
 
     if "weekend" in data.columns:
         weekend_base = data.loc[:, "weekend"] / data.loc[:, "weekend"].sum().sum()
@@ -518,10 +521,14 @@ def render_visits_per_time_tile_benchmark(
             data_alternative.loc[:, "weekend"]
             / data_alternative.loc[:, "weekend"].sum().sum()
         )
+        deviation = [[relative_error(alt, base, keep_direction=True) for alt, base in zip(alt_array, base_array)] \
+            for alt_array, base_array in zip(weekend_alternative.values, weekend_base.values)]
+        deviation = pd.DataFrame(deviation)
+        deviation.index = weekend_base.index
+        deviation.columns = weekend_base.columns
+
         output_html += "<h4>Weekend</h4>"
-        output_html += _create_timewindow_segment_benchmark(
-            (weekend_base - weekend_alternative)/(weekend_base+weekend_alternative), tessellation
-        )
+        output_html += _create_timewindow_segment_benchmark(deviation, tessellation)
     plt.close()
     return output_html
 
@@ -532,7 +539,7 @@ def _create_timewindow_segment(df: pd.DataFrame, tessellation: GeoDataFrame) -> 
     tile_means = df.mean(axis=1)
     dev_from_avg = df.div(tile_means, axis=0)
     deviation_choropleth = plot.multi_choropleth_map(
-        dev_from_avg, tessellation, is_cmap_diverging=True
+        dev_from_avg, tessellation, is_cmap_diverging=True, min_scale=-2, max_scale=2
     )
     return f"""<h4>Number of visits</h4>
         {v_utils.fig_to_html_as_png(visits_choropleth)}
@@ -546,6 +553,6 @@ def _create_timewindow_segment(df: pd.DataFrame, tessellation: GeoDataFrame) -> 
 def _create_timewindow_segment_benchmark(
     df: pd.DataFrame, tessellation: GeoDataFrame
 ) -> str:
-    visits_choropleth = plot.multi_choropleth_map(df, tessellation, is_cmap_diverging=True)
+    visits_choropleth = plot.multi_choropleth_map(df, tessellation, is_cmap_diverging=True, min_scale=-2, max_scale=2)
     return f"""<h4>Deviation from base</h4>
         {v_utils.fig_to_html_as_png(visits_choropleth)}"""  # svg might get too large

@@ -14,6 +14,7 @@ from dp_mobility_report.benchmark.similarity_measures import (
     compute_similarity_measures,
     earth_movers_distance1D,
     get_selected_measures,
+    symmetric_mape
 )
 
 
@@ -204,11 +205,15 @@ def test_combine_analysis_exclusion():
     assert combined_exclusion == [const.VISITS_PER_TILE, const.RADIUS_OF_GYRATION]
 
 
+def test_symmetric_mape():
+    assert symmetric_mape([1,2,3], [1,2,3]) == 0
+    assert round(symmetric_mape([0,1,1], [0,2,2]), 2) == 0.44
+    assert round(symmetric_mape([0,-1,-1], [0,-2,-2]),2) == 0.44
+
 def test_get_selected_measures(benchmark_report):
 
     similarity_measures = get_selected_measures(benchmark_report)
     assert isinstance(similarity_measures, dict)
-    assert None not in similarity_measures.values()
 
     test_data = pd.read_csv("tests/test_files/test_data.csv")
     test_data_alternative = pd.read_csv("tests/test_files/test_data.csv", nrows=50)

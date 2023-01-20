@@ -260,12 +260,12 @@ def choropleth_map(
     counts_per_tile_gdf: GeoDataFrame,
     fill_color_name: str,
     scale_title: str = "Visit count",
-    map: folium.Map = None,
+    map: Optional[folium.Map] = None,
     is_cmap_diverging: bool = False,
-    cmap: str = None,
+    cmap: Optional[str] = None,
     min_scale: Optional[Union[int, float]] = None,
-    max_scale: int = None, 
-    aliases: list = None,
+    max_scale: Optional[Union[int, float]] = None, 
+    aliases: Optional[list] = None,
     layer_name: str = "Visits",
     show: bool = True,
 ) -> folium.Map:
@@ -344,6 +344,8 @@ def multi_choropleth_map(
     counts_per_tile_timewindow: DataFrame,
     tessellation: GeoDataFrame,
     is_cmap_diverging: bool = False,
+    min_scale: Optional[Union[int, float]] = None,
+    max_scale: Optional[Union[int, float]] = None, 
 ) -> mpl.figure.Figure:
     counts_per_tile_timewindow = tessellation[["tile_id", "geometry"]].merge(
         counts_per_tile_timewindow, left_on="tile_id", right_index=True, how="left"
@@ -356,20 +358,20 @@ def multi_choropleth_map(
     fig, axes = plt.subplots(row_count, plots_per_row, figsize=(18, 12))
 
     # upper and lower bound
-    vmin = counts_per_tile_timewindow.iloc[:, 2:].min().min()
-    vmin = vmin if not math.isnan(vmin) else 0
-    vmax = counts_per_tile_timewindow.iloc[:, 2:].max().max()
-    vmax = vmax if not math.isnan(vmax) else 2
+    if min_scale is None:
+        min_scale = counts_per_tile_timewindow.iloc[:, 2:].min().min()
+        min_scale = min_scale if not math.isnan(min_scale) else 0
+    if max_scale is None:
+        max_scale = counts_per_tile_timewindow.iloc[:, 2:].max().max()
+        max_scale = max_scale if not math.isnan(max_scale) else 2
 
     # color
     if is_cmap_diverging:
-        vmin = -1
-        vmax = 1  # if vmax <= 1 else vmax
         cmap = const.DIVERGING_CMAP2
-        norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
+        norm = mpl.colors.TwoSlopeNorm(vmin=min_scale, vcenter=0, vmax=max_scale)
     else:
         cmap = const.BASE_CMAP #STANDARD_CMAP
-        norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+        norm = mpl.colors.Normalize(vmin=min_scale, vmax=max_scale)
 
     for i in range(0, plots_per_row * row_count):
         facet_row = math.ceil((i - plots_per_row + 1) / plots_per_row)
