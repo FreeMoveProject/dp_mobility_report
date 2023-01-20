@@ -148,7 +148,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
 
     analysis_exclusion = [const.MOBILITY_ENTROPY]
     (
-        symmetric_mean_absolute_percentage_error_dict,
+        smape_dict,
         kld_dict,
         jsd_dict,
         emd_dict,
@@ -158,7 +158,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
         analysis_exclusion, alternative_dpmreport, base_dpmreport, test_tessellation, top_n_ranking=[10, 100], disable_progress_bar=True
     )
 
-    assert isinstance(symmetric_mean_absolute_percentage_error_dict, dict)
+    assert isinstance(smape_dict, dict)
     assert isinstance(kld_dict, dict)
     assert isinstance(jsd_dict, dict)
     assert isinstance(emd_dict, dict)
@@ -171,7 +171,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
 
     analysis_exclusion = [const.VISITS_PER_TILE]
     (
-        symmetric_mean_absolute_percentage_error_dict,
+        smape_dict,
         kld_dict,
         jsd_dict,
         emd_dict,
@@ -181,7 +181,7 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
         analysis_exclusion, alternative_dpmreport, base_dpmreport, test_tessellation, top_n_ranking=[10, 100], disable_progress_bar=True
     )
 
-    assert isinstance(symmetric_mean_absolute_percentage_error_dict, dict)
+    assert isinstance(smape_dict, dict)
     assert isinstance(kld_dict, dict)
     assert isinstance(jsd_dict, dict)
     assert isinstance(emd_dict, dict)

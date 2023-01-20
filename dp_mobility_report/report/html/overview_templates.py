@@ -248,7 +248,7 @@ def render_dataset_statistics(dataset_statistics: DictSection) -> str:
 def render_benchmark_dataset_statistics(
     dataset_statistics_base: DictSection,
     dataset_statistics_alternative: DictSection,
-    re: dict,
+    smape: dict,
 ) -> str:
     moe_base = dataset_statistics_base.margin_of_errors_laplace
     moe_alternative = dataset_statistics_alternative.margin_of_errors_laplace
@@ -266,7 +266,7 @@ def render_benchmark_dataset_statistics(
                 fmt_moe(moe_base[const.N_RECORDS]),
                 fmt_moe(moe_alternative[const.N_RECORDS]),
             ),
-            "symmetric_mean_absolute_percentage_error": fmt(re["n_records"], target_type=float),
+            const.SMAPE: fmt(smape[const.N_RECORDS], target_type=float),
         },
         {
             "name": "Distinct trips",
@@ -278,7 +278,7 @@ def render_benchmark_dataset_statistics(
                 fmt_moe(moe_base[const.N_TRIPS]),
                 fmt_moe(moe_alternative[const.N_TRIPS]),
             ),
-            "symmetric_mean_absolute_percentage_error": fmt(re["n_trips"], target_type=float),
+            const.SMAPE: fmt(smape[const.N_TRIPS], target_type=float),
         },
         {
             "name": "Number of complete trips (start and and point)",
@@ -290,7 +290,7 @@ def render_benchmark_dataset_statistics(
                 fmt_moe(moe_base[const.N_COMPLETE_TRIPS]),
                 fmt_moe(moe_alternative[const.N_COMPLETE_TRIPS]),
             ),
-            "symmetric_mean_absolute_percentage_error": fmt(re["n_complete_trips"], target_type=float),
+            const.SMAPE: fmt(smape[const.N_COMPLETE_TRIPS], target_type=float),
         },
         {
             "name": "Number of incomplete trips (single point)",
@@ -302,7 +302,7 @@ def render_benchmark_dataset_statistics(
                 fmt_moe(moe_base[const.N_INCOMPLETE_TRIPS]),
                 fmt_moe(moe_alternative[const.N_INCOMPLETE_TRIPS]),
             ),
-            "symmetric_mean_absolute_percentage_error": fmt(re["n_incomplete_trips"], target_type=float),
+            const.SMAPE: fmt(smape[const.N_INCOMPLETE_TRIPS], target_type=float),
         },
         {
             "name": "Distinct users",
@@ -314,7 +314,7 @@ def render_benchmark_dataset_statistics(
                 fmt_moe(moe_base[const.N_USERS]),
                 fmt_moe(moe_alternative[const.N_USERS]),
             ),
-            "symmetric_mean_absolute_percentage_error": fmt(re["n_users"], target_type=float),
+            const.SMAPE: fmt(smape[const.N_USERS], target_type=float),
         },
         {
             "name": "Distinct locations (lat & lon combination)",
@@ -326,7 +326,7 @@ def render_benchmark_dataset_statistics(
                 fmt_moe(moe_base[const.N_LOCATIONS]),
                 fmt_moe(moe_alternative[const.N_LOCATIONS]),
             ),
-            "symmetric_mean_absolute_percentage_error": fmt(re["n_locations"], target_type=float),
+            const.SMAPE: fmt(smape[const.N_LOCATIONS], target_type=float),
         },
     ]
 
@@ -378,7 +378,7 @@ def render_missing_values(missing_values: DictSection) -> str:
 
 
 def render_benchmark_missing_values(
-    missing_values_base: DictSection, missing_values_alternative: DictSection, re: dict
+    missing_values_base: DictSection, missing_values_alternative: DictSection, smape: dict
 ) -> str:
     moe_base = round(missing_values_base.margin_of_error_laplace, 1)
     moe_alternative = round(missing_values_alternative.margin_of_error_laplace, 1)
@@ -390,13 +390,13 @@ def render_benchmark_missing_values(
             "name": "User ID (uid)",
             "estimate": (fmt(data_base[const.UID], target_type=int), fmt(data_alternative[const.UID], target_type=int)),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
-            "": fmt(re["uid"], target_type=float),
+            const.SMAPE: fmt(smape[const.UID], target_type=float),
         },
         {
             "name": "Trip ID (tid)",
             "estimate": (fmt(data_base[const.TID], target_type=int), fmt(data_alternative[const.TID], target_type=int)),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
-            "": fmt(re["tid"], target_type=float),
+            const.SMAPE: fmt(smape[const.TID], target_type=float),
         },
         {
             "name": "Timestamp (datetime)",
@@ -405,19 +405,19 @@ def render_benchmark_missing_values(
                 fmt(data_alternative[const.DATETIME], target_type=int),
             ),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
-            "": fmt(re["datetime"], target_type=float),
+            const.SMAPE: fmt(smape[const.DATETIME], target_type=float),
         },
         {
             "name": "Latitude (lat)",
             "estimate": (fmt(data_base[const.LAT], target_type=int), fmt(data_alternative[const.LAT], target_type=int)),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
-            "": fmt(re["lat"], target_type=float),
+            const.SMAPE: fmt(smape[const.LAT], target_type=float),
         },
         {
             "name": "Longitude (lng)",
             "estimate": (fmt(data_base[const.LNG], target_type=int), fmt(data_alternative[const.LNG], target_type=int)),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
-            "": fmt(re["lng"], target_type=float),
+            const.SMAPE: fmt(smape[const.LNG], target_type=float),
         },
     ]
 
