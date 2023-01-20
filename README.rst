@@ -93,7 +93,7 @@ Create a BenchmarkReport
 
 A benchmark report evaluate the similarity of two (differentially private) mobility reports from one or two mobility datasets. This can be based on two datasets (``df_base`` and ``df_alternative``) or one dataset (``df_base``)) with different privacy settings.
 The arguments ``df``, ``privacy_budget``, ``user_privacy``, ``max_trips_per_user`` and ``budget_split`` can differ for the two datasets set with the according ending ``_base`` and ``_alternative``. The other arguments are the same for both reports.
-For the evaluation, `similarity measures`_ (namely the relative error (RE), Jensen-Shannon divergence (JSD), Kullback-Leibler divergence (KLD), symmetric mean absolute percentage error (SMAPE) and the earth mover's distance (EMD)) are computed to quantify the statistical similarity for each analysis.
+For the evaluation, `similarity measures`_ (namely the (mean) absolute percentage error (PE), Jensen-Shannon divergence (JSD), Kullback-Leibler divergence (KLD), and the earth mover's distance (EMD)) are computed to quantify the statistical similarity for each analysis.
 The evaluation, i.e., benchmark report, will be generated as an HTML file, using the ``.to_file()`` method.
 
 
@@ -120,7 +120,7 @@ This example creates a benchmark report with similarity measures for two mobilit
         # Dictionary containing the similarity measures for each analysis
         similarity_measures = benchmark_report.similarity_measures
         # The measure selection indicates which similarity measure
-        # (e.g. KLD, JSD, EMD, RE, SMAPE) has been selected for each analysis
+        # (e.g. KLD, JSD, EMD, PE) has been selected for each analysis
         measure_selection = benchmark_report.measure_selection
 
         # If you do not want to access the selection of similarity measures

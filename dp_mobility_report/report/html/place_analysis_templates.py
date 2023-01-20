@@ -22,7 +22,7 @@ from dp_mobility_report.report.html.html_utils import (
     all_available_measures
 )
 
-from dp_mobility_report.benchmark.similarity_measures import relative_error
+from dp_mobility_report.benchmark.similarity_measures import symmetric_perc_error
 
 from dp_mobility_report.visualization import plot, v_utils
 import folium
@@ -244,7 +244,7 @@ def render_benchmark_visits_per_tile(
         }
     )
 
-    deviation_from_base["deviation"] = deviation_from_base.apply(lambda x: relative_error(x["relative_alternative"], x["relative_base"], keep_direction = True), axis=1)
+    deviation_from_base["deviation"] = deviation_from_base.apply(lambda x: symmetric_perc_error(x["relative_alternative"], x["relative_base"], keep_direction = True), axis=1)
 
     # merge count and tessellation
     counts_per_tile_gdf = pd.merge(
@@ -507,7 +507,7 @@ def render_visits_per_time_tile_benchmark(
             / data_alternative.loc[:, "weekday"].sum().sum()
         )
             
-        deviation = [[relative_error(alt, base, keep_direction=True) for alt, base in zip(alt_array, base_array)] for alt_array, base_array in zip(weekday_alternative.values, weekday_base.values)]
+        deviation = [[symmetric_perc_error(alt, base, keep_direction=True) for alt, base in zip(alt_array, base_array)] for alt_array, base_array in zip(weekday_alternative.values, weekday_base.values)]
         deviation = pd.DataFrame(deviation)
         deviation.index = weekday_base.index
         deviation.columns = weekday_base.columns
@@ -521,7 +521,7 @@ def render_visits_per_time_tile_benchmark(
             data_alternative.loc[:, "weekend"]
             / data_alternative.loc[:, "weekend"].sum().sum()
         )
-        deviation = [[relative_error(alt, base, keep_direction=True) for alt, base in zip(alt_array, base_array)] \
+        deviation = [[symmetric_perc_error(alt, base, keep_direction=True) for alt, base in zip(alt_array, base_array)] \
             for alt_array, base_array in zip(weekend_alternative.values, weekend_base.values)]
         deviation = pd.DataFrame(deviation)
         deviation.index = weekend_base.index

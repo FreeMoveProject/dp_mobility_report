@@ -189,16 +189,14 @@ def get_centroids(tessellation: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 def all_available_measures(analysis_name: str, benchmarkreport: "BenchmarkReport") -> dict:
     available_measures = {}
 
-    if analysis_name in benchmarkreport.re.keys():
-        available_measures[const.RE] = str(fmt(benchmarkreport.re[analysis_name]))
+    if analysis_name in benchmarkreport.perc_error.keys():
+        available_measures[const.PE] = str(fmt(benchmarkreport.perc_error[analysis_name]))
     if analysis_name in benchmarkreport.jsd.keys():
         available_measures[const.JSD] = str(fmt(benchmarkreport.jsd[analysis_name]))
     if analysis_name in benchmarkreport.kld.keys():
         available_measures[const.KLD] = str(fmt(benchmarkreport.kld[analysis_name]))
     if analysis_name in benchmarkreport.emd.keys():
         available_measures[const.EMD] = str(fmt(benchmarkreport.emd[analysis_name]))
-    if analysis_name in benchmarkreport.smape.keys():
-        available_measures[const.SMAPE] = str(fmt(benchmarkreport.smape[analysis_name]))
     if analysis_name in benchmarkreport.kt.keys():
         available_measures[const.KT] = [f'Top {topn_i}: {fmt(kt_i)}' for kt_i, topn_i in zip(benchmarkreport.kt[analysis_name], benchmarkreport.top_n_ranking)]
     if analysis_name in benchmarkreport.top_n_cov.keys():

@@ -157,7 +157,7 @@ def validate_measure_selection(
 
     for key, value in list(measure_selection.items()):
 
-        if value not in [const.KLD, const.JSD, const.EMD, const.RE, const.SMAPE]:
+        if value not in const.SIMILARITY_MEASURES:
             warnings.warn(
                 f"{value} is not a valid value (similarity measure) and will be removed from the measure selection."
             )

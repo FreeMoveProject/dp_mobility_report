@@ -5,7 +5,7 @@ Similarity Measures
 The similarity of two mobility reports is evaluated with a set of similarity measures. Specifically, a measure is computed for each analysis of the report.
 The following table shows the analysis segments 
 that can be included/exluded in the benchmark report and their corresponding analyses and similarity measures. The default measures are in bold. 
-In the following the similarity measures relative error (RE), Kullback-Leibler divergence (KLD), Jensen-Shannon divergence (JSD), earth mover's distance (EMD) and
+In the following the similarity measures (mean) absolute percentage error (PE), Kullback-Leibler divergence (KLD), Jensen-Shannon divergence (JSD), earth mover's distance (EMD) and
 symmetric mean average percentage error (SMAPE) will be explained, as well as the reasoning why the specific measures are available for each analyses and why the default measure was chosen. 
 
 Overview and default measures
@@ -27,73 +27,72 @@ Overview and default measures
      - **RE**
    * - 
      - Trips over time
-     - KLD, **JSD**, SMAPE
+     - KLD, **JSD**, PE
    * - 
      - Trips per weekday
-     - KLD, **JSD**, SMAPE
+     - KLD, **JSD**, PE
    * - 
      - Trips per hour
-     - KLD, **JSD**, SMAPE
+     - KLD, **JSD**, PE
    * - Place
      - Visits per tile
-     - KLD, JSD, SMAPE, **EMD**
+     - KLD, JSD, PE, **EMD**
    * - 
      - Visits per tile outliers
      - **RE**
    * - 
      - Visits per time tile
-     - KLD, JSD, SMAPE, **EMD**
+     - KLD, JSD, PE, **EMD**
    * - OD
      - OD flows
-     - KLD, **JSD**, SMAPE
+     - KLD, **JSD**, PE
    * - 
      - Travel time
-     - KLD, **JSD**, SMAPE, EMD
+     - KLD, **JSD**, PE, EMD
    * - 
      - Travel time quartiles
-     - **SMAPE**
+     - **PE**
    * - 
      - Jump length
-     - KLD, **JSD**, SMAPE, EMD
+     - KLD, **JSD**, PE, EMD
    * - 
      - Jump length quartiles
-     - **SMAPE**
+     - **PE**
    * - User 
      - Trips per user
-     - **EMD**, Todo: JSD, KLD, SMAPE
+     - **EMD**, Todo: JSD, KLD, PE
    * -  
      - Trips per user quartiles
-     - **SMAPE**
+     - **PE**
    * -  
      - User time delta
      - Todo
    * -  
      - User time delta quartiles
-     - **SMAPE**
+     - **PE**
    * - 
      - Radius of gyration
-     - KLD, **JSD**, EMD, SMAPE
+     - KLD, **JSD**, EMD, PE
    * - 
      - Radius of gyration quartiles
-     - **SMAPE**
+     - **PE**
    * - 
      - User tile count quartiles
-     - **SMAPE**
+     - **PE**
    * -  
      - Mobility entropy
-     - KLD, **JSD**, EMD, SMAPE
+     - KLD, **JSD**, EMD, PE
    
    
 
 
-Relative Error (RE)
-********************
+# TODO: text anpassen (combine RE and SMAPE)
+
+Symmetric (mean absolute) percentage error (PE)
+***************************************************
+
 Relative error is the absolute error divided by the magnitude of the exact value and is computed as :math:`\frac{ \bar{y} - y }{y}`, with :math:`\bar{y}` equals the estimated value and :math:`y` the true value.
 The relative error is used for the analyses of the dataset statistics (e.g.,record count, trip count, user count), missing values and outliers. The relative error can only be computed for single values (e.g., not for histograms) and thus is not computed for other analyses.
-
-
-Symmetric mean absolute percentage error (SMAPE)
-***************************************************
 
 The symmetric mean absolute percentage error (SMAPE) is an accuracy measure based on percentage (or relative) errors. 
 In contrast to the mean absolute percentage error, SMAPE has both a lower bound (0, meaning entirely different) and an upper bound (2, meaning identical). 

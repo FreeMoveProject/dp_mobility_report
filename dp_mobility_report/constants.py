@@ -127,23 +127,13 @@ DS_STATISTICS_ELEMENTS = [
 MISSING_VALUES_ELEMENTS = [UID, TID, DATETIME, LAT, LNG]
 
 # SIMILARITY MEASURES
-RE = "relative_error"
+PE = "percentage_error"
 JSD = "jensen_shannon_divergence"
 KLD = "kullback_leibler_divergence"
 EMD = "earth_movers_distance"
-SMAPE = "symmetric_mean_absolute_percentage_error"
 KT = "kendalls_tau"
 TOP_N = "top_n_coverage"
-
-# format = {
-#     "jensen_shannon_divergence": "Jensen-Shannon divergence",
-#     "relative_error": "Relative error",
-#     "kullback_leibler_divergence": "Kullback-Leibler divergence",
-#     "earth_movers_distance": "Earth mover's distance",
-#     "symmetric_mean_absolute_percentage_error": "Symmetric mean absolute percentage error",
-#     "kendalls_tau": "Kendall rank correlation coefficient",
-# }
-
+SIMILARITY_MEASURES = [PE, JSD, KLD, EMD, KT, TOP_N]
 
 DARK_BLUE = "#283377"
 LIGHT_BLUE = "#5D6FFF"

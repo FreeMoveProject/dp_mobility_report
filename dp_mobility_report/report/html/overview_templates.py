@@ -108,7 +108,7 @@ def render_benchmark_overview(benchmark: "BenchmarkReport") -> str:
         args["dataset_stats_table"] = render_benchmark_dataset_statistics(
             report_base[const.DS_STATISTICS],
             report_alternative[const.DS_STATISTICS],
-            benchmark.re,
+            benchmark.perc_error,
         )
         args["dataset_stats_eps"] = (
             render_eps(report_base[const.DS_STATISTICS].privacy_budget),
@@ -119,7 +119,7 @@ def render_benchmark_overview(benchmark: "BenchmarkReport") -> str:
         args["missing_values_table"] = render_benchmark_missing_values(
             report_base[const.MISSING_VALUES],
             report_alternative[const.MISSING_VALUES],
-            benchmark.re,
+            benchmark.perc_error,
         )
         args["missing_values_eps"] = (
             render_eps(report_base[const.MISSING_VALUES].privacy_budget),
@@ -266,7 +266,7 @@ def render_benchmark_dataset_statistics(
                 fmt_moe(moe_base[const.N_RECORDS]),
                 fmt_moe(moe_alternative[const.N_RECORDS]),
             ),
-            "relative_error": fmt(re["n_records"], target_type=float),
+            "percentage_error": fmt(re["n_records"], target_type=float),
         },
         {
             "name": "Distinct trips",
@@ -278,7 +278,7 @@ def render_benchmark_dataset_statistics(
                 fmt_moe(moe_base[const.N_TRIPS]),
                 fmt_moe(moe_alternative[const.N_TRIPS]),
             ),
-            "relative_error": fmt(re["n_trips"], target_type=float),
+            "percentage_error": fmt(re["n_trips"], target_type=float),
         },
         {
             "name": "Number of complete trips (start and and point)",
@@ -290,7 +290,7 @@ def render_benchmark_dataset_statistics(
                 fmt_moe(moe_base[const.N_COMPLETE_TRIPS]),
                 fmt_moe(moe_alternative[const.N_COMPLETE_TRIPS]),
             ),
-            "relative_error": fmt(re["n_complete_trips"], target_type=float),
+            "percentage_error": fmt(re["n_complete_trips"], target_type=float),
         },
         {
             "name": "Number of incomplete trips (single point)",
@@ -302,7 +302,7 @@ def render_benchmark_dataset_statistics(
                 fmt_moe(moe_base[const.N_INCOMPLETE_TRIPS]),
                 fmt_moe(moe_alternative[const.N_INCOMPLETE_TRIPS]),
             ),
-            "relative_error": fmt(re["n_incomplete_trips"], target_type=float),
+            "percentage_error": fmt(re["n_incomplete_trips"], target_type=float),
         },
         {
             "name": "Distinct users",
@@ -314,7 +314,7 @@ def render_benchmark_dataset_statistics(
                 fmt_moe(moe_base[const.N_USERS]),
                 fmt_moe(moe_alternative[const.N_USERS]),
             ),
-            "relative_error": fmt(re["n_users"], target_type=float),
+            "percentage_error": fmt(re["n_users"], target_type=float),
         },
         {
             "name": "Distinct locations (lat & lon combination)",
@@ -326,7 +326,7 @@ def render_benchmark_dataset_statistics(
                 fmt_moe(moe_base[const.N_LOCATIONS]),
                 fmt_moe(moe_alternative[const.N_LOCATIONS]),
             ),
-            "relative_error": fmt(re["n_locations"], target_type=float),
+            "percentage_error": fmt(re["n_locations"], target_type=float),
         },
     ]
 
@@ -390,13 +390,13 @@ def render_benchmark_missing_values(
             "name": "User ID (uid)",
             "estimate": (fmt(data_base[const.UID], target_type=int), fmt(data_alternative[const.UID], target_type=int)),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
-            "relative_error": fmt(re["uid"], target_type=float),
+            "percentage_error": fmt(re["uid"], target_type=float),
         },
         {
             "name": "Trip ID (tid)",
             "estimate": (fmt(data_base[const.TID], target_type=int), fmt(data_alternative[const.TID], target_type=int)),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
-            "relative_error": fmt(re["tid"], target_type=float),
+            "percentage_error": fmt(re["tid"], target_type=float),
         },
         {
             "name": "Timestamp (datetime)",
@@ -405,19 +405,19 @@ def render_benchmark_missing_values(
                 fmt(data_alternative[const.DATETIME], target_type=int),
             ),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
-            "relative_error": fmt(re["datetime"], target_type=float),
+            "percentage_error": fmt(re["datetime"], target_type=float),
         },
         {
             "name": "Latitude (lat)",
             "estimate": (fmt(data_base[const.LAT], target_type=int), fmt(data_alternative[const.LAT], target_type=int)),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
-            "relative_error": fmt(re["lat"], target_type=float),
+            "percentage_error": fmt(re["lat"], target_type=float),
         },
         {
             "name": "Longitude (lng)",
             "estimate": (fmt(data_base[const.LNG], target_type=int), fmt(data_alternative[const.LNG], target_type=int)),
             "margin_of_error": (fmt_moe(moe_base), fmt_moe(moe_alternative)),
-            "relative_error": fmt(re["lng"], target_type=float),
+            "percentage_error": fmt(re["lng"], target_type=float),
         },
     ]
 

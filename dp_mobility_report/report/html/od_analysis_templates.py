@@ -27,7 +27,7 @@ from dp_mobility_report.report.html.html_utils import (
     all_available_measures
 )
 from dp_mobility_report.visualization import plot, v_utils
-from dp_mobility_report.benchmark.similarity_measures import relative_error
+from dp_mobility_report.benchmark.similarity_measures import symmetric_perc_error
 
 
 def render_od_analysis(
@@ -283,7 +283,7 @@ def merge_innerflows(base_flows, alternative_flows):
     flows["flow_alt"] = flows["flow_alt"] / np.sum(flows["flow_alt"])
     flows["flow_base"] = flows["flow_base"].fillna(0)
     flows["flow_alt"] = flows["flow_alt"].fillna(0)
-    flows["deviation"] = flows.apply(lambda x: relative_error(x["flow_alt"], x["flow_base"], keep_direction=True), axis=1)
+    flows["deviation"] = flows.apply(lambda x: symmetric_perc_error(x["flow_alt"], x["flow_base"], keep_direction=True), axis=1)
     flows.drop(["flow_alt", "flow_base"], axis=1, inplace=True)
     return flows
 

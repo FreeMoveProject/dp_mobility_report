@@ -25,7 +25,7 @@ class BenchmarkReport:
     """Evaluate the similarity of two (differentially private) mobility reports from one or two mobility datasets.
         This can be based on two datasets (``df_base`` and ``df_alternative``) or one dataset (``df_base``)) with different privacy settings.
         The arguments ``df``, ``privacy_budget``, ``user_privacy``, ``max_trips_per_user`` and ``budget_split`` can differ for the two datasets set with the according ending ``_base`` and ``_alternative``. The other arguments are the same for both reports.
-        For the evaluation, similarity measures (namely the relative error (RE), Jensen-Shannon divergence (JSD), Kullback-Leibler divergence (KLD), symmetric mean absolute percentage error (SMAPE), the earth mover's distance (EMD), the Kendall correlation coefficient (KT) and the top n coverage (top_n-cov)) are computed to quantify the statistical similarity for each analysis.
+        For the evaluation, similarity measures (namely the symmetric (mean absolute) percentage error (PE), Jensen-Shannon divergence (JSD), Kullback-Leibler divergence (KLD), the earth mover's distance (EMD), the Kendall correlation coefficient (KT) and the top n coverage (top_n-cov)) are computed to quantify the statistical similarity for each analysis.
         The evaluation, i.e., benchmark report, will be generated as an HTML file, using the ``.to_file()`` method.
 
     Args:
@@ -61,11 +61,10 @@ class BenchmarkReport:
 
     _report_base: DpMobilityReport
     _report_alternative: DpMobilityReport
-    _re: dict
+    _perc_error: dict
     _jsd: dict
     _kld: dict
     _emd: dict
-    _smape: dict
     _kt: dict
     _top_n_cov: dict
     _measure_selection: dict
@@ -186,11 +185,10 @@ class BenchmarkReport:
         self._top_n_ranking = preprocessing.validate_top_n_ranking(top_n_ranking)
 
         (
-            self._re,
+            self._perc_error,
             self._kld,
             self._jsd,
             self._emd,
-            self._smape,
             self._kt,
             self._top_n_cov,
         ) = compute_similarity_measures(
@@ -231,9 +229,9 @@ class BenchmarkReport:
         return self._top_n_ranking
 
     @property
-    def re(self) -> dict:
-        """The relative error between base and alternative of all selected analyses, where applicable."""
-        return self._re
+    def perc_error(self) -> dict:
+        """The symmetric (mean absolute) percentage error, based on the relative error, between base and alternative of all selected analyses, where applicable."""
+        return self._perc_error
 
     @property
     def kld(self) -> dict:
@@ -249,11 +247,6 @@ class BenchmarkReport:
     def emd(self) -> dict:
         """The earth mover's distance between base and alternative of all selected analyses, where applicable."""
         return self._emd
-
-    @property
-    def smape(self) -> dict:
-        """The symmetric mean absolute percentage error between base and alternative of all selected analyses, where applicable."""
-        return self._smape
 
     @property
     def kt(self) -> dict:

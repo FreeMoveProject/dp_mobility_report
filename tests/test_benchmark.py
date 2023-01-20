@@ -148,22 +148,20 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
 
     analysis_exclusion = [const.MOBILITY_ENTROPY]
     (
-        relative_error_dict,
+        percentage_error_dict,
         kld_dict,
         jsd_dict,
         emd_dict,
-        smape_dict,
         kendall_dict,
         top_n_cov_dict,
     ) = compute_similarity_measures(
         analysis_exclusion, alternative_dpmreport, base_dpmreport, test_tessellation, top_n_ranking=[10, 100], disable_progress_bar=True
     )
 
-    assert isinstance(relative_error_dict, dict)
+    assert isinstance(percentage_error_dict, dict)
     assert isinstance(kld_dict, dict)
     assert isinstance(jsd_dict, dict)
     assert isinstance(emd_dict, dict)
-    assert isinstance(smape_dict, dict)
     assert isinstance(kendall_dict, dict)
     assert isinstance(top_n_cov_dict, dict)
     assert round(jsd_dict[const.VISITS_PER_TILE], 3) == 0.041
@@ -173,22 +171,20 @@ def test_similarity_measures(alternative_dpmreport, base_dpmreport, test_tessell
 
     analysis_exclusion = [const.VISITS_PER_TILE]
     (
-        relative_error_dict,
+        percentage_error_dict,
         kld_dict,
         jsd_dict,
         emd_dict,
-        smape_dict,
         kendall_dict,
         top_n_cov_dict,
     ) = compute_similarity_measures(
         analysis_exclusion, alternative_dpmreport, base_dpmreport, test_tessellation, top_n_ranking=[10, 100], disable_progress_bar=True
     )
 
-    assert isinstance(relative_error_dict, dict)
+    assert isinstance(percentage_error_dict, dict)
     assert isinstance(kld_dict, dict)
     assert isinstance(jsd_dict, dict)
     assert isinstance(emd_dict, dict)
-    assert isinstance(smape_dict, dict)
     assert isinstance(kendall_dict, dict)
     assert isinstance(top_n_cov_dict, dict)
 
@@ -225,7 +221,7 @@ def test_get_selected_measures(benchmark_report):
         measure_selection={const.TRAVEL_TIME_QUARTILES: const.JSD},
     )
 
-    assert const.JSD == benchmark_report.measure_selection[const.TRAVEL_TIME_QUARTILES]
+    assert benchmark_report.measure_selection[const.TRAVEL_TIME_QUARTILES] ==  const.JSD
     with pytest.warns(Warning):
         similarity_measures = get_selected_measures(benchmark_report)
     assert similarity_measures[const.TRAVEL_TIME_QUARTILES] is None
@@ -236,8 +232,7 @@ def test_benchmark_report(benchmark_report):
     assert isinstance(benchmark_report.emd, dict)
     assert isinstance(benchmark_report.jsd, dict)
     assert isinstance(benchmark_report.kld, dict)
-    assert isinstance(benchmark_report.re, dict)
-    assert isinstance(benchmark_report.smape, dict)
+    assert isinstance(benchmark_report.perc_error, dict)
     assert isinstance(benchmark_report.measure_selection, dict)
     assert isinstance(benchmark_report.similarity_measures, dict)
 
@@ -256,7 +251,7 @@ def test_measure_selection():
         )
 
     assert validate_measure_selection(
-        measure_selection={const.OD_FLOWS: const.SMAPE},
+        measure_selection={const.OD_FLOWS: const.PE},
         analysis_exclusion=[
             const.VISITS_PER_TILE,
             const.DS_STATISTICS,
@@ -276,7 +271,7 @@ def test_measure_selection():
             const.OD_FLOWS_RANKING,
             const.OD_FLOWS_QUARTILES
         ],
-    ) == {const.OD_FLOWS: const.SMAPE}
+    ) == {const.OD_FLOWS: const.PE}
 
 
 def test_top_n_ranking_input():
