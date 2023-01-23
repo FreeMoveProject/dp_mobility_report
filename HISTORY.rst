@@ -3,7 +3,7 @@ History
 
 0.2.0 (2023-01-23)
 ------------------
-TODO
+* Create a BenchmarkReport class that evaluates the similarity of two (differentially private) mobility reports from one or two mobility datasets and creates an HTML output similar to the DpMobilityReport.
 
 0.1.8 (2023-01-16)
 ------------------
