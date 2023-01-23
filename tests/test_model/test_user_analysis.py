@@ -96,13 +96,32 @@ def test_get_user_tile_count(test_dpmreport):
 
 def test_get_mobility_entropy(test_dpmreport):
     mobility_entropy = user_analysis.get_mobility_entropy(test_dpmreport, None)
-    assert mobility_entropy.data[0].round().tolist() == [10.0, 90.0]
+    assert mobility_entropy.data[0].round().tolist() == [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        10.0,
+        90.0,
+    ]
     assert mobility_entropy.data[1].round(2).tolist() == [
+        0.0,
+        0.1,
+        0.2,
+        0.3,
+        0.4,
+        0.5,
+        0.6,
+        0.7,
         0.8,
         0.9,
         1.0,
     ]
-    assert len(mobility_entropy.data[0]) == 2
+    assert len(mobility_entropy.data[0]) == 10
     assert all(np.diff(mobility_entropy.data[1]).round(1) == 0.1)
     assert mobility_entropy.quartiles.round(2).tolist() == [
         0.83,

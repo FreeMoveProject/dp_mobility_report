@@ -1,4 +1,3 @@
-from datetime import timedelta
 from typing import TYPE_CHECKING, List, Optional
 
 if TYPE_CHECKING:
@@ -11,7 +10,6 @@ from scipy import stats
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import m_utils
 from dp_mobility_report.model.section import TupleSection
-from dp_mobility_report.privacy import diff_privacy
 
 
 def get_trips_per_user(
@@ -33,7 +31,6 @@ def get_trips_per_user(
 def get_user_time_delta(
     dpmreport: "DpMobilityReport", eps: Optional[float]
 ) -> Optional[TupleSection]:
-    epsi = m_utils.get_epsi(dpmreport.evalu, eps, 6)
 
     dpmreport._df = dpmreport.df.sort_values(
         [const.UID, const.TID, const.DATETIME]
@@ -45,7 +42,6 @@ def get_user_time_delta(
     )
     user_time_delta[(same_tid) | (~same_user)] = None
     user_time_delta = user_time_delta[user_time_delta.notnull()]
-    overlaps = len(user_time_delta[user_time_delta < timedelta(seconds=0)])
 
     if len(user_time_delta) < 1:
         return None
@@ -53,21 +49,14 @@ def get_user_time_delta(
     sec = m_utils.hist_section(
         (user_time_delta.dt.total_seconds() / 3600),  # convert to hours
         eps,
+        hist_max=dpmreport.max_user_time_delta,
+        bin_range=dpmreport.bin_range_user_time_delta,
         sensitivity=dpmreport.max_trips_per_user,
         evalu=dpmreport.evalu,
     )
-    if sec.quartiles["min"] < 0:  # are there overlaps according to dp minimum?
-        sec.n_outliers = diff_privacy.count_dp(
-            overlaps,
-            epsi,
-            dpmreport.max_trips_per_user,
-        )
-    else:
-        sec.n_outliers = None
     sec.quartiles = pd.to_timedelta(sec.quartiles, unit="h").apply(
         lambda x: x.round(freq="s")
     )
-
     return sec
 
 
@@ -133,6 +122,8 @@ def get_user_tile_count(
         eps,
         sensitivity=1,
         bin_type=int,
+        hist_max=dpmreport.max_user_tile_count,
+        bin_range=dpmreport.bin_range_user_tile_count,
         evalu=dpmreport.evalu,
     )
 
@@ -172,5 +163,6 @@ def get_mobility_entropy(
         sensitivity=1,
         bin_range=0.1,
         hist_max=1,
+        hist_min=0,
         evalu=dpmreport.evalu,
     )

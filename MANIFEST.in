@@ -3,6 +3,8 @@ include CONTRIBUTING.rst
 include HISTORY.rst
 include LICENSE
 include README.rst
+include ANALYSES.rst
+include SIMILARITY_MEASURES.rst
 
 include *.py
 recursive-exclude * __pycache__

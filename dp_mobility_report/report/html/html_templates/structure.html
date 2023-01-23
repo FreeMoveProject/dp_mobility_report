@@ -15,27 +15,37 @@
 <body>
     
 <div class="container">
-    <h1>DP Mobility Report</h1>
+    <h1>{{title}}</h1>
 
+    {%if config_segment %}
     <div class="segment grey">
         {{config_segment}}
     </div>
+    {% endif %}
 
+    {% if overview_segment %}
     <div class="segment">
         {{overview_segment}}
     </div>
+    {% endif %}
 
+    {% if place_analysis_segment %}
     <div class="segment">
         {{place_analysis_segment}}
     </div>
+    {% endif %}
 
+    {% if od_analysis_segment %}
     <div class="segment">
         {{od_analysis_segment}}
     </div>
+    {% endif %}
 
+    {% if user_analysis_segment %}
     <div class="segment">
         {{user_analysis_segment}}
     </div>
+    {% endif %}
 </div>
 
 </body>

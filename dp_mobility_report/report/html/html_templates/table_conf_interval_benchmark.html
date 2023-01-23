@@ -1,0 +1,38 @@
+<table class="table align-right">
+    <tbody>
+        <tr>
+            {% if rows[0]['rank'] %}
+                <th class ="table-header"></th>
+            {% endif %}
+            <th class ="table-header"></th>
+            <th class ="table-header" colspan="4" style="width:30%">Estimate (+/- 95% cofidence interval)</th>
+            <th class ="table-header" style="width:10%">Error [0 to 2]</th>
+        </tr>
+        <tr>
+            <td ></td>
+            <th >Base</th>
+            <th style="width:5%"></th>
+            <th >Alternative</th>
+            <th style="width:5%"></th>
+            <td ></td>
+          </tr>
+        {% for row in rows %}
+        <tr>
+            {% if row['rank'] %}
+                <th class="table-rowheader" style="width:5%">{{ row['rank'] }}</th>
+            {% endif %}
+            <th class = "table-rowheader">{{ row['name'] }}</th>
+            <td >{{ row['estimate'][0] }} </td>
+            <td >(+/-{{ row['margin_of_error'][0] }})</td>
+            <td>{{ row['estimate'][1] }}</td>
+            <td>(+/-{{ row['margin_of_error'][1] }})</td>
+            <td>{{ row['symmetric_mean_absolute_percentage_error'] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% if caption %}
+    <div class="caption text-center text-muted">
+        {{ caption }}
+    </div>
+{% endif %}

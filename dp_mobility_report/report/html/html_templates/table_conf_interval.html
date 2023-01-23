@@ -1,7 +1,3 @@
-{% if name %}
-    <h4>{{ name }}</h3>
-    <p>privacy budget: {{ privacy_budget }}</p>
-{% endif %}
 <table class="table align-right">
     <tbody>
         <tr>
@@ -9,8 +5,8 @@
                 <th class ="table-header"></th>
             {% endif %}
             <th class ="table-header"></th>
-            <th class ="table-header">estimate</th>
-            <th class ="table-header">95%-confidence interval: +/- </th>
+            <th class ="table-header" style="width:30%">estimate</th>
+            <th class ="table-header" style="width:30%">95%-confidence interval: +/- </th>
         </tr>
         {% for row in rows %}
         <tr>

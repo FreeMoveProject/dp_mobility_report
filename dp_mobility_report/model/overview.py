@@ -79,21 +79,21 @@ def get_dataset_statistics(
     )
 
     stats = {
-        "n_records": n_records,
-        "n_trips": n_trips,
-        "n_complete_trips": n_complete_trips,
-        "n_incomplete_trips": n_incomplete_trips,
-        "n_users": n_users,
-        "n_locations": n_locations,
+        const.N_RECORDS: n_records,
+        const.N_TRIPS: n_trips,
+        const.N_COMPLETE_TRIPS: n_complete_trips,
+        const.N_INCOMPLETE_TRIPS: n_incomplete_trips,
+        const.N_USERS: n_users,
+        const.N_LOCATIONS: n_locations,
     }
 
     moe = {
-        "records": moe_records,
-        "trips": moe_trips,
-        "complete_trips": moe_complete_trips,
-        "incomplete_trips": moe_incomplete_trips,
-        "users": moe_users,
-        "locations": moe_locations,
+        const.N_RECORDS: moe_records,
+        const.N_TRIPS: moe_trips,
+        const.N_COMPLETE_TRIPS: moe_complete_trips,
+        const.N_INCOMPLETE_TRIPS: moe_incomplete_trips,
+        const.N_USERS: moe_users,
+        const.N_LOCATIONS: moe_locations,
     }
 
     return DictSection(data=stats, privacy_budget=eps, margin_of_errors_laplace=moe)
@@ -274,7 +274,7 @@ def get_trips_per_hour(
     )
 
     hour_weekday[const.TIME_CATEGORY] = (
-        hour_weekday[const.IS_WEEKEND] + "_" + hour_weekday[const.POINT_TYPE]
+        hour_weekday[const.IS_WEEKEND] + " " + hour_weekday[const.POINT_TYPE]
     )
     moe = diff_privacy.laplace_margin_of_error(0.95, eps, dpmreport.max_trips_per_user)
 
