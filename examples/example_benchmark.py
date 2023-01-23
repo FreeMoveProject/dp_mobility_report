@@ -26,7 +26,6 @@ benchmarkreport = BenchmarkReport(
     privacy_budget_alternative=15.0,
     max_trips_per_user_base=10,
     max_trips_per_user_alternative=10,
-    analysis_exclusion=[const.USER_ANALYSIS],
 )
 
 measures = benchmarkreport.similarity_measures
