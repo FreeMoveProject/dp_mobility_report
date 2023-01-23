@@ -1,0 +1,75 @@
+<h2>Place analysis</h2>
+
+{% if visits_per_tile_cumsum_linechart %}
+<div>
+
+    <h3>Visits per tile</h3>
+    <p>privacy budget base: {{ visits_per_tile_eps[0] }}</p>
+    <p>95%-confidence interval: +/- {{ visits_per_tile_moe[0] }}</p>
+    <p>privacy budget alternative: {{ visits_per_tile_eps[1] }}</p>
+    <p>95%-confidence interval: +/- {{ visits_per_tile_moe[1] }}</p>
+    <p class="info">{{privacy_info}}</p>
+    
+    <iframe src="{{output_filename}}/maps/visits_per_tile_map.html" width="100%" height="600" style="border:1px solid black;">
+    </iframe>
+<!---    <div style="width: 800px; height: 600px;">
+        {{counts_per_tile_map}}
+    </div>
+--->
+<div class="container_legend">
+    <div class="row">
+      <div class="col-sm">
+        <p style="text-align: center">Deviations from base:</p>
+        {{visits_per_tile_legend[0]}}      </div>
+      <div class="col-sm">
+        <p style="text-align: center">Visits per tile base:</p>
+        {{visits_per_tile_legend[1]}}      </div>
+      <div class="col-sm">
+        <p style="text-align: center">Visits per tile alternative:</p>
+        {{visits_per_tile_legend[2]}}      </div>
+    </div>
+  </div>
+
+    <p>Base: {{points_outside_tessellation_info_base}}</p>
+    <p>Alternative: {{points_outside_tessellation_info_alternative}}</p>
+
+    {{visits_per_tile_measure}}
+</div>
+
+
+<div>
+    <h4>Five-number summary: visits per tile</h4>
+    {{visits_per_tile_summary_table}}
+    {{visits_per_tile_summary_measure}}
+    <h4>Cumulated sum of visits per tile</h4>
+    {{visits_per_tile_cumsum_linechart}}
+    <p class="info">
+        The cumulated sum of visits visualizes the distribution of visits over tiles:
+        If all tiles are visited equally, the cumulated sum follows a straight diagonal line. 
+        The larger the share of single tiles in the total number of visits, the steeper the curve.
+    </p>
+</div>
+
+<div>
+    <h4>Ranking of most frequently visited tiles</h4>
+    {{most_freq_tiles_ranking}}
+    {{visits_per_tile_ranking_measure}}
+</div>
+{% endif %} 
+
+{% if visits_per_tile_time_map %}
+<div>
+    <h3>Visits per tile and time window</h3>
+    <p>privacy budget base: {{ visits_per_time_tile_eps[0] }}</p>
+    <p>95%-confidence interval: +/- {{ visits_per_time_tile_moe[0] }}</p>
+    <p>privacy budget alternative: {{ visits_per_time_tile_eps[0] }}</p>
+    <p>95%-confidence interval: +/- {{ visits_per_time_tile_moe[1] }}</p>
+
+    <p class="info">Each map shows the <strong>arrivals (destinations)</strong> for the respective time window for each tile, split by weekday and weekend, as absolute counts and as the deviation from tile average.<br>    
+    
+        <div class = "map_png">
+        {{visits_per_tile_time_map}}
+    </div>
+    {{visits_per_time_tile_measure}}
+</div>
+{% endif %}

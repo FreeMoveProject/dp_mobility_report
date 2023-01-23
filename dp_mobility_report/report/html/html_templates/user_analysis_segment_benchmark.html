@@ -1,0 +1,110 @@
+<h2>User analysis</h2>
+
+{%if trips_per_user_hist %}
+<div>
+    <h3>Number of trips per user</h3>
+    <p>privacy budget base: {{trips_per_user_eps[0]}}</p>
+    <p>privacy budget alternative: {{trips_per_user_eps[1]}}</p>
+    {{trips_per_user_hist}}
+    <p class="grey info">
+        {{trips_per_user_info}}
+    </p>
+    {{trips_per_user_measure}}
+    <h4>Five number summary: trips per user</h4>
+    {{trips_per_user_summary_table}}
+    <p class="info">
+        {{trips_per_user_moe_info}}
+    </p>
+    {{trips_per_user_summary_measure}}
+    </p>
+</div>
+{% endif %}
+
+{%if time_between_traj_hist %}
+<div>
+    <h3>Time between consecutive trips of a user</h3>
+    <p>privacy budget base: {{time_between_traj_eps[0]}}</p>
+    <p>privacy budget alternative: {{time_between_traj_eps[1]}}</p>
+    {{time_between_traj_hist}}
+    {{time_between_traj_measure}}
+    <h4>Five number summary: time between consecutive trips of a user</h4>
+    {{time_between_traj_summary_table}}
+    <p class="info">
+        {{time_between_traj_moe_info}}
+    </p>
+    {%if plausi_check_info %}
+    <p class="warning-text">
+        {{plausi_check_info}}
+    </p>
+    {% endif %}
+    {{time_between_traj_summary_measure}}
+    </p>
+
+</div>
+{% endif %}
+
+{%if radius_of_gyration_hist %}
+<div>
+    <h3>Radius of gyration (in kilometers)</h3>
+    <p>privacy budget base: {{radius_of_gyration_eps[0]}}</p>
+    <p>privacy budget alternative: {{radius_of_gyration_eps[1]}}</p>
+
+    <p class ="info">
+        The radius of gyration is the characteristic distance traveled by an individual during a period of time.
+    </p>
+    
+    {{radius_of_gyration_hist}}
+    <p class="grey info">
+        {{radius_of_gyration_hist_info}}
+    {{radius_of_gyration_measure}}
+    </p>
+    <h4>Five number summary: radius of gyration</h4>
+    {{radius_of_gyration_summary_table}}
+    <p class="info">
+        {{radius_of_gyration_moe_info}}
+    </p>
+    {{radius_of_gyration_summary_measure}}
+</div>
+{% endif %}
+
+{%if distinct_tiles_user_hist %}
+<div>
+    <h3>Number of distinct tiles per user</h3>
+    <p>privacy budget base: {{distinct_tiles_user_eps[0]}}</p>
+    <p>privacy budget alternative: {{distinct_tiles_user_eps[1]}}</p>
+    {{distinct_tiles_user_hist}}
+    {{distinct_tiles_measure}}
+    <h4>Five number summary: distinct tiles per user</h4>
+    {{distinct_tiles_user_summary_table}}
+    <p class="info">
+        {{distinct_tiles_moe_info}}
+    </p>
+    {{distinct_tiles_summary_measure}}
+</div>
+{% endif %}
+
+{%if mobility_entropy_hist %}
+<div>
+    <h3>Mobility entropy</h3>
+    <p>privacy budget base: {{mobility_entropy_eps[0]}}</p>
+    <p>privacy budget alternative: {{mobility_entropy_eps[1]}}</p>
+    <p class="info">
+        The mobility entropy characterizes the heterogeneity of the users visitation patterns
+        and can be interpreted as a measure for the predictability of a users location.
+        If a user only visits a single tile, the entropy is 0, i.e., their location is highly predictable.
+        It a user visits, e.g., four different tiles each 10 times, the entropy is 1, i.e., their 
+        location is not predictable as every of the four tiles has the same probability 
+        to be visited by the user.
+        Intuitively, the more trips per user are entailed in the data, the more meaningful the mobility entropy.
+    </p>
+    
+    {{mobility_entropy_hist}}
+    {{mobility_entropy_measure}}
+    <h4>Five number summary: mobility entropy</h4>
+    {{mobility_entropy_summary_table}}
+    <p class="info">
+        {{mobility_entropy_moe_info}}
+    </p>
+    {{mobility_entropy_summary_measure}}
+</div>
+{% endif %}

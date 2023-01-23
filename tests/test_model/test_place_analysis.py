@@ -24,8 +24,8 @@ def test_get_visits_per_tile(test_dpmreport):
     assert visits_per_location.n_outliers == 1
 
 
-def test_get_visits_per_tile_timewindow(test_dpmreport):
-    visits_timewindow = place_analysis.get_visits_per_tile_timewindow(
+def test_get_visits_per_time_tile(test_dpmreport):
+    visits_timewindow = place_analysis.get_visits_per_time_tile(
         test_dpmreport, None
     ).data
     assert len(visits_timewindow.columns) == 12

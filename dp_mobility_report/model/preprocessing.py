@@ -49,13 +49,19 @@ def validate_input(
     bin_range_jump_length: Optional[Union[int, float]],
     max_radius_of_gyration: Optional[Union[int, float]],
     bin_range_radius_of_gyration: Optional[Union[int, float]],
+    max_user_tile_count: Optional[int],
+    bin_range_user_tile_count: Optional[int],
+    max_user_time_delta: Optional[Union[int, float]],
+    bin_range_user_time_delta: Optional[Union[int, float]],
     seed_sampling: Optional[int],
 ) -> None:
     if not isinstance(df, DataFrame):
         raise TypeError("'df' is not a Pandas DataFrame.")
 
     if max(df[const.TID].value_counts()) == 1:
-        warnings.warn("There are only incomplete trips, i.e., no trips with more than a single record. OD analyses cannot be conducted, thus they are excluded from the report.")
+        warnings.warn(
+            "There are only incomplete trips, i.e., no trips with more than a single record. OD analyses cannot be conducted, thus they are excluded from the report."
+        )
 
     if tessellation is None:
         warnings.warn(
@@ -118,8 +124,8 @@ def validate_input(
                 "Input parameter `max_trips_per_user` is `None` even though a privacy budget is given. The actual maximum number of trips per user will be used according to the data, though this violates Differential Privacy."
             )
 
-    _validate_numeric_greater_zero(max_travel_time, f"{max_travel_time=}".split("=")[0])
-    _validate_numeric_greater_zero(
+    _validate_int_greater_zero(max_travel_time, f"{max_travel_time=}".split("=")[0])
+    _validate_int_greater_zero(
         bin_range_travel_time, f"{bin_range_travel_time=}".split("=")[0]
     )
     _validate_numeric_greater_zero(max_jump_length, f"{max_jump_length=}".split("=")[0])
@@ -132,6 +138,18 @@ def validate_input(
     _validate_numeric_greater_zero(
         bin_range_radius_of_gyration, f"{bin_range_radius_of_gyration=}".split("=")[0]
     )
+    _validate_int_greater_zero(
+        max_user_tile_count, f"{max_user_tile_count=}".split("=")[0]
+    )
+    _validate_int_greater_zero(
+        bin_range_user_tile_count, f"{bin_range_user_tile_count=}".split("=")[0]
+    )
+    _validate_numeric_greater_zero(
+        max_user_time_delta, f"{max_user_time_delta=}".split("=")[0]
+    )
+    _validate_numeric_greater_zero(
+        bin_range_user_time_delta, f"{bin_range_user_time_delta=}".split("=")[0]
+    )
     _validate_bool(user_privacy, f"{user_privacy=}".split("=")[0])
     _validate_bool(evalu, f"{user_privacy=}".split("=")[0])
     _validate_bool(disable_progress_bar, f"{user_privacy=}".split("=")[0])
@@ -140,6 +158,13 @@ def validate_input(
         raise TypeError("'seed_sampling' is not an integer.")
     if (seed_sampling is not None) and (seed_sampling <= 0):
         raise ValueError("'seed_sampling' has to be greater 0.")
+
+
+def _validate_int_greater_zero(var: Any, name: str) -> None:
+    if not ((var is None) or isinstance(var, int)):
+        raise TypeError(f"{name} is not an int.")
+    if (var is not None) and (var <= 0):
+        raise ValueError(f"'{name}' has to be greater 0.")
 
 
 def _validate_numeric_greater_zero(var: Any, name: str) -> None:
@@ -162,8 +187,6 @@ def clean_analysis_exclusion(
     has_timestamps: bool,
     has_od_flows: bool,
 ) -> List[str]:
-    # TODO: without timestamp: add w/o timestamp analyses to exclude_analysis
-
     def _remove_elements(elements: list, remove_list: list) -> list:
         return [e for e in elements if e not in remove_list]
 

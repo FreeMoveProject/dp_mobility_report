@@ -83,7 +83,7 @@ def _get_hour_bin(hour: int, timewindows: np.ndarray) -> str:
     return f"{i + 1}: {min_v}-{max_v}"
 
 
-def get_visits_per_tile_timewindow(
+def get_visits_per_time_tile(
     dpmreport: "DpMobilityReport",
     eps: Optional[float],
     # trip_count: Optional[int], outlier_count: Optional[None]

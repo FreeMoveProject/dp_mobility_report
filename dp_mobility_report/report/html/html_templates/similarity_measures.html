@@ -1,0 +1,37 @@
+<p class="measure info">
+    {% if kullback_leibler_divergence %}
+    Kullback-Leibler divergence [0 to &infin;]: {{kullback_leibler_divergence}} 
+    <br>
+    {% endif %} 
+
+    {% if jensen_shannon_divergence %}
+    Jensen Shannon divergence [0 to 1]: {{jensen_shannon_divergence}} 
+    <br>
+    {% endif %} 
+
+    {% if earth_movers_distance %}
+    Earth mover's distance [0 to &infin;]: {{earth_movers_distance}} 
+    <br>
+    {% endif %} 
+
+    {% if symmetric_mean_absolute_percentage_error %}
+    Symmetric mean absolute percentage error [0 to 2]: {{symmetric_mean_absolute_percentage_error}} 
+    <br>
+    {% endif %} 
+
+    {% if kendalls_tau %}
+    Kendall rank correlation coefficient of top n {{top_n_object}} [-1 to 1]: 
+    {%for kt in kendalls_tau %} 
+    <br>{{kt}}
+    {% endfor %} 
+    <br>
+    {% endif %} 
+
+    {% if top_n_coverage %}
+    Coverage of top n {{top_n_object}} [0 to 1]: 
+    {%for top_n_cov in top_n_coverage %} 
+    <br> {{top_n_cov}}
+    {% endfor %}
+    <br>
+    {% endif %} 
+</p>

@@ -1,0 +1,110 @@
+<h2>Origin-destination (OD) analysis</h2>
+
+{% if flows_cumsum_linechart %}
+<div>
+    <h3>OD flows between tiles</h3>
+    <p>privacy budget base: {{od_eps[0]}}</p>
+    <p>95%-confidence interval: +/-{{od_moe[0]}}</p>
+    <p>privacy budget alternative: {{od_eps[1]}}</p>
+    <p>95%-confidence interval: +/-{{od_moe[1]}}</p>
+    <div>
+
+        <iframe src="{{output_filename}}/maps/od_map.html" width="100%" height="600" style="border:1px solid black;">
+        </iframe>
+        <!-- <div style="width: 800px; height: 600px;">
+            {{od_map}}
+        </div> -->
+
+        <p class="grey info">
+            {{user_config_info}}
+        </p>
+        
+        <div>
+            {{od_legend}}
+        </div>
+        {{flows_measure}}
+
+<!--        <p>    
+            {{intra_tile_flows_info}}
+        </p>
+        
+        <p class = "info">
+            A large number of intra-cell flows either indicate many round-trips 
+            (i.e., start and end location are the same) 
+            or the start and end location lie within the same tile due to a coarse tessellation.
+        </p>
+    -->
+    </div>
+
+    <div>
+        <h4>Five number summary: flows per OD pair</h4>
+        {{flows_summary_table}}
+        {{flows_summary_measure}}
+        <h4>Cumulated sum of flows per OD pair</h4>
+        {{flows_cumsum_linechart}}
+
+        <p class="info">
+            The cumulated sum of flows visualizes the distribution of flows over OD pairs:
+            If all OD connections are traveled equally, the cumulated sum follows a straight diagonal line. 
+            The larger the share of single OD connections in the total number of flows, the steeper the curve.
+        </p>
+    </div>  
+    
+    <div>
+        <h4>Ranking of most frequent OD connections</h4>
+        {{most_freq_flows_ranking}}
+        {{od_flows_ranking_measure}}
+    </div>
+</div>
+{% endif %}
+
+{% if travel_time_hist or jump_length_hist %}
+<div>
+    {% if travel_time_hist %}
+    <div>
+        <h3>Travel time of trips (in minutes)</h3>
+        <p>privacy budget base: {{travel_time_eps[0]}}</p>
+        <p>95%-confidence interval: +/-: {{travel_time_moe[0]}}</p>
+        <p>privacy budget alternative: {{travel_time_eps[1]}}</p>
+        <p>95%-confidence interval: +/-: {{travel_time_moe[1]}}</p>
+
+        {{travel_time_hist}}
+        <p class="grey info">
+            {{travel_time_hist_info}}
+        </p>
+        {{travel_time_measure}}
+            
+            <h4>Five number summary: travel time</h4>
+            {{travel_time_summary_table}}
+            <p class="info">
+                {{travel_time_moe_info}}
+            </p>
+            {{travel_time_summary_measure}}
+    </div>
+    {% endif %} 
+
+    {% if jump_length_hist %}  
+    <div>
+        <h3>Jump length (in kilometers)</h3>
+        <p>privacy budget base: {{jump_length_eps[0]}}</p>
+        <p>95%-confidence interval: +/- {{jump_length_moe[0]}}</p>
+        <p>privacy budget alternative: {{jump_length_eps[1]}}</p>
+        <p>95%-confidence interval: +/- {{jump_length_moe[1]}}</p>
+
+        <p class="info">The jump length is the straight-line distance between the origin and destination.</p>
+        {{jump_length_hist}}
+        <p class="grey info">
+            {{jump_length_hist_info}}
+        </p>
+        {{jump_length_measure}}
+            <h4>Five number summary: jump length</h4>
+            {{jump_length_summary_table}}
+            <p class="info">
+                {{jump_length_moe_info}}
+            </p>
+            {{jump_length_summary_measure}}
+
+    </div>
+    {% endif %}
+</div>
+{% endif %}

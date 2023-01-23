@@ -89,3 +89,26 @@ def test_hist_section():
     assert hist_sec.data[1].tolist() == [10, 15, np.Inf]
     assert hist_sec.privacy_budget is None
     assert hist_sec.quartiles.tolist() == [10.0, 12.0, 14.0, 15.5, 20.0]
+    series = np.array([0.1, 0.8, 0.4, 0.2, 0.1])
+    hist_sec = m_utils.hist_section(
+        series, None, 1, bin_range=0.3, bin_type=float, hist_max=0.7
+    )
+    assert hist_sec.data[0].round().tolist() == [60.0, 20.0, 20.0]
+    assert hist_sec.data[1].tolist() == [0.0, 0.3, 0.6, np.Inf]
+    assert hist_sec.privacy_budget is None
+    assert hist_sec.quartiles.tolist() == [0.1, 0.1, 0.2, 0.4, 0.8]
+
+    series = np.array([10, 12, 12, 14, 15, 16, 20])
+    hist_sec = m_utils.hist_section(
+        series, None, 1, bin_range=5, bin_type=int, hist_max=30
+    )
+    assert hist_sec.data[0].round().tolist() == [57.0, 29.0, 14.0, 0]
+    assert hist_sec.data[1].tolist() == [10, 15, 20, 25, 30]
+    assert hist_sec.privacy_budget is None
+    assert hist_sec.quartiles.tolist() == [10.0, 12.0, 14.0, 15.5, 20.0]
+
+    hist_sec = m_utils.hist_section(
+        series, 10, 1, bin_range=5, bin_type=int, hist_max=20
+    )
+    assert sum(hist_sec.data[0]).round() == 100
+    assert hist_sec.data[1].tolist() == [10, 15, 20]

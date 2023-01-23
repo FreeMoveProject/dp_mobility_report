@@ -1,0 +1,68 @@
+<h2>Overview</h2>
+
+{% if dataset_stats_table %}
+<div>
+    <h3>Dataset statistics</h3>
+    <p>privacy budget base: {{ dataset_stats_eps[0] }}</p>
+    <p>privacy budget alternative: {{ dataset_stats_eps[1] }}</p>
+    {{dataset_stats_table}}
+</div>
+{% endif %}
+
+{% if missing_values_table %}
+<div>
+    <h3>Missing values</h3>
+    <p>privacy budget base: {{ missing_values_eps[0] }}</p>
+    <p>privacy budget alternative: {{ missing_values_eps[1] }}</p>
+    {{missing_values_table}}
+</div>
+{% endif %}
+
+{% if trips_over_time_linechart or trips_per_weekday_barchart or trips_per_hour_linechart %}
+<div>
+    {% if trips_over_time_linechart %}
+    <div>
+        <h3>Trips over time</h3>
+        <p>privacy budget base: {{trips_over_time_eps[0]}}</p>
+        <p>95%-confidence interval: +/- {{trips_over_time_moe[0]}}</p>
+        <p>privacy budget alternative: {{trips_over_time_eps[1]}}</p>
+        <p>95%-confidence interval: +/- {{trips_over_time_moe[1]}}</p>
+        {{trips_over_time_linechart}}
+        <p class ="info">
+            {{trips_over_time_info}}
+        </p>
+        {{trips_over_time_measure}}
+    </div>
+
+    {{trips_over_time_summary_table}}
+    <p class="info">
+        {{trips_over_time_moe_info}}
+    </p>
+    {% endif %}
+
+    {% if trips_per_weekday_barchart %}
+    <div>
+        <h3>Trips per weekday</h3>        
+        <p>privacy budget base: {{trips_per_weekday_eps[0]}}</p>
+        <p>95%-confidence interval: +/- {{trips_per_weekday_moe[0]}}</p>
+        <p>privacy budget alternative: {{trips_per_weekday_eps[1]}}</p>
+        <p>95%-confidence interval: +/- {{trips_per_weekday_moe[1]}}</p>
+        {{trips_per_weekday_barchart}}
+        {{trips_per_weekday_measure}}
+    </div>
+    {% endif %} 
+
+    {% if trips_per_hour_linechart %}
+    <div>
+        <h3>Trips per hour of day</h3>
+        <p>privacy budget base: {{ trips_per_hour_eps[0]}}</p>
+        <p>95%-confidence interval: +/- {{trips_per_hour_moe[0]}}</p>
+        <p>privacy budget alternative: {{ trips_per_hour_eps[1]}}</p>
+        <p>95%-confidence interval: +/- {{trips_per_hour_moe[1]}}</p>
+        {{trips_per_hour_linechart}}
+        {{trips_per_hour_measure}}
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+   

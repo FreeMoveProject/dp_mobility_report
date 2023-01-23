@@ -300,6 +300,28 @@ def test_wrong_input_params_DpMobilityReport(
             bin_range_radius_of_gyration=-1,
             privacy_budget=None,
         )
+
+    # wrong input for max_user_time_delta
+    with pytest.raises(ValueError):
+        DpMobilityReport(
+            test_data, test_tessellation, max_user_time_delta=-1, privacy_budget=None
+        )
+    with pytest.raises(TypeError):
+        DpMobilityReport(
+            test_data,
+            test_tessellation,
+            max_user_time_delta="not a number",
+            privacy_budget=None,
+        )
+
+    # wrong input for bin_range_radius_of_gyration
+    with pytest.raises(ValueError):
+        DpMobilityReport(
+            test_data,
+            test_tessellation,
+            bin_range_user_time_delta=-1,
+            privacy_budget=None,
+        )
     with pytest.raises(TypeError):
         DpMobilityReport(
             test_data,
@@ -371,7 +393,7 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
         const.TRIPS_PER_WEEKDAY,
         const.TRIPS_PER_HOUR,
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.OD_FLOWS,
         const.TRAVEL_TIME,
         const.JUMP_LENGTH,
@@ -391,7 +413,7 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
         const.TRIPS_PER_WEEKDAY,
         const.TRIPS_PER_HOUR,
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.OD_FLOWS,
         const.TRAVEL_TIME,
         const.JUMP_LENGTH,
@@ -435,12 +457,10 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
         const.MOBILITY_ENTROPY,
     ]
 
-    # without od 
+    # without od
     df = test_data.groupby(const.TID).first().reset_index()
     with pytest.warns(Warning):
-        report = DpMobilityReport(df, 
-        test_tessellation,
-        privacy_budget=None).report
+        report = DpMobilityReport(df, test_tessellation, privacy_budget=None).report
     assert isinstance(report, dict)
     assert list(report.keys()) == [
         const.DS_STATISTICS,
@@ -449,14 +469,14 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
         const.TRIPS_PER_WEEKDAY,
         const.TRIPS_PER_HOUR,
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.TRIPS_PER_USER,
         const.USER_TIME_DELTA,
         const.RADIUS_OF_GYRATION,
         const.USER_TILE_COUNT,
         const.MOBILITY_ENTROPY,
-
     ]
+
 
 def test_analysis_exclusion(test_data, test_tessellation):
     dpmr = DpMobilityReport(
@@ -474,7 +494,7 @@ def test_analysis_exclusion(test_data, test_tessellation):
     }
     assert list(dpmr.report.keys()) == [
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.OD_FLOWS,
         const.TRAVEL_TIME,
         const.JUMP_LENGTH,
@@ -500,7 +520,7 @@ def test_analysis_exclusion(test_data, test_tessellation):
     }
     assert list(dpmr.report.keys()) == [
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.OD_FLOWS,
         const.TRAVEL_TIME,
         const.JUMP_LENGTH,
@@ -529,7 +549,7 @@ def test_analysis_exclusion(test_data, test_tessellation):
         const.TRIPS_PER_WEEKDAY,
         const.TRIPS_PER_HOUR,
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.OD_FLOWS,
         const.TRAVEL_TIME,
         const.TRIPS_PER_USER,
@@ -548,7 +568,7 @@ def test_analysis_selection(test_data, test_tessellation):
     )
     assert set(dpmr.analysis_exclusion) == {
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.OD_FLOWS,
         const.TRAVEL_TIME,
         const.JUMP_LENGTH,
@@ -574,7 +594,7 @@ def test_analysis_selection(test_data, test_tessellation):
     )
     assert set(dpmr.analysis_exclusion) == {
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.OD_FLOWS,
         const.TRAVEL_TIME,
         const.JUMP_LENGTH,
@@ -605,7 +625,7 @@ def test_analysis_selection(test_data, test_tessellation):
         const.TRIPS_PER_WEEKDAY,
         const.TRIPS_PER_HOUR,
         const.VISITS_PER_TILE,
-        const.VISITS_PER_TILE_TIMEWINDOW,
+        const.VISITS_PER_TIME_TILE,
         const.OD_FLOWS,
         const.TRAVEL_TIME,
         const.TRIPS_PER_USER,
@@ -622,9 +642,9 @@ def test_analysis_selection(test_data, test_tessellation):
 
 def test_to_html_file(test_data, test_data_sequence, test_tessellation, tmp_path):
 
-    # DpMobilityReport( # type: ignore
-    #     test_data, privacy_budget=None  # type: ignore
-    # ).to_file("test1.html")  # type: ignore
+    # DpMobilityReport(  # type: ignore
+    #     test_data, test_tessellation, privacy_budget=None  # type: ignore
+    # ).report  # .to_file("test1.html")  # type: ignore
 
     # DpMobilityReport(  # type: ignore
     #     test_data,  # type: ignore

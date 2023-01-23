@@ -1,0 +1,27 @@
+<table class="table medium-size-table">
+    <tbody>
+        <tr>
+            <th style="width:20%"></th>
+            <th style="width:35%">Base</th>
+            <th style="width:35%">Alternative</th>
+        </tr>
+        {% for row in rows %}
+        <tr>
+            {% if row['name']!="Excluded analyses" or row['name']!="Evaluation dev. mode" %}
+            <th class="table-rowheader">{{ row['name'] }}</th>
+            <td>{{ row['value'][0] }}</td>
+            <td>{{ row['value'][1] }}</td>
+            {% endif %}
+            {% if row['name']=="Excluded analyses" or row['name']=="Evaluation dev. mode" %}
+            <th class="table-rowheader" >{{ row['name'] }}</th>
+            <td style="width:70%" colspan="2">{{ row['value'][0] }}</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% if caption %}
+    <div class="caption text-center">
+        {{ caption }}
+    </div> 
+{% endif %}

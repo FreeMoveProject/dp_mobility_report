@@ -3,7 +3,7 @@
 {% if dataset_stats_table %}
 <div>
     <h3>Dataset statistics</h3>
-    <p>privacy budget: {{dataset_stats_eps}}</p>
+    <p>privacy budget: {{dataset_stats_eps[0]}}</p>
     {{dataset_stats_table}}
 </div>
 {% endif %}
@@ -11,7 +11,7 @@
 {% if missing_values_table %}
 <div>
     <h3>Missing values</h3>
-    <p>privacy budget: {{missing_values_eps}}</p>
+    <p>privacy budget: {{missing_values_eps[0]}}</p>
     {{missing_values_table}}
 </div>
 {% endif %}
@@ -48,7 +48,7 @@
 
     {% if trips_per_hour_linechart %}
     <div>
-        <h3>Trips per hour of day split by weekday and weekend</h3>
+        <h3>Trips per hour of day</h3>
         <p>privacy budget: {{ trips_per_hour_eps }}</p>
         <p>95%-confidence interval: +/- {{trips_per_hour_moe}}</p>
         {{trips_per_hour_linechart}}

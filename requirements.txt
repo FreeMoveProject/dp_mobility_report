@@ -21,3 +21,4 @@ scikit-learn
 Shapely
 tqdm
 typing
+opencv-python

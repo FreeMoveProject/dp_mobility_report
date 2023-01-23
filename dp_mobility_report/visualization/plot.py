@@ -1,4 +1,5 @@
 import math
+from functools import partial
 from typing import Callable, Optional, Tuple, Type, Union
 
 import folium
@@ -17,12 +18,6 @@ import dp_mobility_report.constants as const
 from dp_mobility_report.report.html.html_utils import get_centroids
 
 sns.set_theme()
-dark_blue = "#283377"
-light_blue = "#5D6FFF"
-orange = "#D9642C"
-light_orange = "#FFAD6F"
-grey = "#8A8A8A"
-light_grey = "##f2f2f2"
 
 
 def format(value: Union[float, int], type: Type, ndigits: int = 2) -> Union[float, int]:
@@ -35,14 +30,18 @@ def format(value: Union[float, int], type: Type, ndigits: int = 2) -> Union[floa
 def histogram(
     hist: Tuple,
     x_axis_label: str,
+    hist_alternative: Optional[Tuple] = None,
+    min_value: Union[int, float] = None,
     y_axis_label: str = "Frequency",
-    margin_of_error: float = None,
+    margin_of_error: Union[float, list] = None,
+    margin_of_error_alternative: Union[float, list] = None,
     rotate_label: bool = False,
     x_axis_type: Type = float,
     ndigits_x_label: int = 2,
 ) -> mpl.figure.Figure:
     bins = hist[1]
     counts = hist[0]
+    counts_alternative = hist_alternative[0] if hist_alternative else None
 
     # single integers (instead of bin ranges) as x axis labels
     if len(bins) == len(counts):
@@ -51,6 +50,8 @@ def histogram(
             labels = np.append(labels, f"> {labels[-1]}")
         else:
             labels = np.append(labels, format(bins[-1], x_axis_type))
+        # needed for margin of error (see below)
+        upper_limits = bins
 
     # bin ranges as labels
     else:
@@ -71,12 +72,21 @@ def histogram(
                 labels[-1][:-1] + "]"
             )  # fix label string of last bin to include last value
 
+    # margin of error only for bins above min value
+    if min_value:
+        margin_of_error = [
+            0 if (min_value > upper_limits[i]) else margin_of_error
+            for i in range(0, len(upper_limits))
+        ]
+
     return barchart(
-        labels,
-        counts,
-        x_axis_label,
-        y_axis_label,
+        x=labels,
+        y=counts,
+        x_axis_label=x_axis_label,
+        y_axis_label=y_axis_label,
+        y_alternative=counts_alternative,
         margin_of_error=margin_of_error,
+        margin_of_error_alternative=margin_of_error_alternative,
         rotate_label=rotate_label,
     )
 
@@ -86,11 +96,29 @@ def barchart(
     y: np.ndarray,
     x_axis_label: str,
     y_axis_label: str,
-    margin_of_error: Optional[float] = None,
+    y_alternative: Optional[np.ndarray] = None,
+    margin_of_error: Optional[Union[float, list]] = None,
+    margin_of_error_alternative: Optional[Union[float, list]] = None,
     rotate_label: bool = False,
 ) -> mpl.figure.Figure:
     fig, ax = plt.subplots()
-    ax.bar(x, y, yerr=margin_of_error, align="center", alpha=0.5, capsize=10)
+    bar_base = ax.bar(
+        x, y, yerr=margin_of_error, align="center", alpha=0.5, capsize=10, label="base"
+    )
+    if y_alternative is not None:
+        bar_alt = ax.bar(
+            x,
+            y_alternative,
+            yerr=margin_of_error_alternative,
+            width=0.3,
+            align="center",
+            alpha=0.5,
+            capsize=10,
+            color=const.LIGHT_ORANGE,
+            ecolor=const.LIGHT_ORANGE,
+            label="alternative",
+        )
+        ax.legend(handles=[bar_base, bar_alt])
     ax.set_ylabel(y_axis_label)
     ax.set_xlabel(x_axis_label)
     plt.xticks(x)
@@ -107,6 +135,7 @@ def linechart(
     y: str,
     x_axis_label: str,
     y_axis_label: str,
+    x_alternative: Optional[str] = None,
     margin_of_error: float = None,
     add_diagonal: bool = False,
     rotate_label: bool = False,
@@ -121,11 +150,64 @@ def linechart(
             alpha=0.1,
         )
     ax.plot(data[x], data[y])
+    if x_alternative is not None:
+        ax.plot(data[x_alternative], data[y], color=const.LIGHT_ORANGE)
+        ax.legend({"base", "alt"})
     ax.set_ylabel(y_axis_label)
     ax.set_xlabel(x_axis_label)
     ax.set_ylim(bottom=0)
     if add_diagonal:
-        ax.plot([0, data[x].max()], [0, data[y].max()], grey)
+        ax.plot([0, data[x].max()], [0, data[y].max()], const.GREY)
+
+    if rotate_label:
+        plt.xticks(rotation=90)
+
+    return fig
+
+
+def linechart_new(
+    data: DataFrame,
+    x: str,
+    y: str,
+    x_axis_label: str,
+    y_axis_label: str,
+    data_alternative: Optional[DataFrame] = None,
+    margin_of_error: float = None,
+    margin_of_error_alternative: float = None,
+    add_diagonal: bool = False,
+    rotate_label: bool = False,
+) -> mpl.figure.Figure:
+    fig, ax = plt.subplots()
+    if margin_of_error is not None:
+        ax.fill_between(
+            data[x],
+            (data[y] - margin_of_error),
+            (data[y] + margin_of_error),
+            color=const.LIGHT_BLUE,
+            alpha=0.1,
+        )
+    (line_base,) = ax.plot(data[x], data[y], color=const.LIGHT_BLUE, label="base")
+    if data_alternative is not None:
+        (line_alt,) = ax.plot(
+            data_alternative[x],
+            data_alternative[y],
+            color=const.LIGHT_ORANGE,
+            label="alternative",
+        )
+        ax.legend(handles=[line_base, line_alt])
+        if margin_of_error_alternative is not None:
+            ax.fill_between(
+                data_alternative[x],
+                (data_alternative[y] - margin_of_error_alternative),
+                (data_alternative[y] + margin_of_error_alternative),
+                color=const.LIGHT_ORANGE,
+                alpha=0.1,
+            )
+    ax.set_ylabel(y_axis_label)
+    ax.set_xlabel(x_axis_label)
+    ax.set_ylim(bottom=0)
+    if add_diagonal:
+        ax.plot([0, data[x].max()], [0, data[y].max()], const.GREY, alpha=0.4)
 
     if rotate_label:
         plt.xticks(rotation=90)
@@ -140,12 +222,13 @@ def multi_linechart(
     color: str,
     x_axis_label: str,
     y_axis_label: str,
+    style: Optional[str] = None,
     hue_order: Optional[list] = None,
     margin_of_error: Optional[float] = None,
 ) -> mpl.figure.Figure:
-    fig = plt.figure()
+    fig = plt.figure(figsize=(9, 6))
     plot = fig.add_subplot(111)
-    palette = [dark_blue, light_blue, orange, light_orange]
+    palette = ["#99065a", "#e289ba", "#2c6a19", "#99cd60"]
 
     sns.lineplot(
         data=data,
@@ -153,6 +236,7 @@ def multi_linechart(
         y=y,
         hue=color,
         ax=plot,
+        style=style,
         hue_order=hue_order,
         palette=palette,
     )
@@ -177,39 +261,65 @@ def choropleth_map(
     counts_per_tile_gdf: GeoDataFrame,
     fill_color_name: str,
     scale_title: str = "Visit count",
+    map: Optional[folium.Map] = None,
+    is_cmap_diverging: bool = False,
+    cmap: Optional[str] = None,
     min_scale: Optional[Union[int, float]] = None,
-    aliases: list = None,
+    max_scale: Optional[Union[int, float]] = None,
+    aliases: Optional[list] = None,
+    layer_name: str = "Visits",
+    show: bool = True,
 ) -> folium.Map:
     poly_json = counts_per_tile_gdf.to_json()
 
-    center_x, center_y = _get_center(counts_per_tile_gdf)
-    m = _basemap(center_x, center_y)
+    if not map:
+        center_x, center_y = _get_center(counts_per_tile_gdf)
+        map = _basemap(center_x, center_y)
+
     min_scale = (
-        counts_per_tile_gdf[fill_color_name].min() if min_scale is None else min_scale
+        min_scale
+        if min_scale is not None
+        else counts_per_tile_gdf[fill_color_name].min()
+    )
+
+    max_scale = (
+        max_scale
+        if max_scale is not None
+        else counts_per_tile_gdf[fill_color_name].max()
     )
 
     # color
-    cmap = mpl.cm.YlOrRd
-    norm = mpl.colors.Normalize(
-        vmin=min_scale, vmax=counts_per_tile_gdf[fill_color_name].max()
-    )
+    if not cmap:
+        cmap = const.DIVERGING_CMAP if is_cmap_diverging else const.STANDARD_CMAP
+    mpl_cmap = mpl.colormaps[cmap]
 
-    def _hex_color(x: Union[float, int]) -> str:
+    if is_cmap_diverging:
+        norm = mpl.colors.TwoSlopeNorm(vmin=min_scale, vcenter=0, vmax=max_scale)
+    else:
+        norm = mpl.colors.Normalize(vmin=min_scale, vmax=max_scale)
+
+    def _hex_color(x: Union[float, int], mpl_cmap: mpl.colors.Colormap) -> str:
         rgb = norm(x)
-        return matplotlib.colors.rgb2hex(cmap(rgb))
+        return matplotlib.colors.rgb2hex(mpl_cmap(rgb))
 
-    def _get_color(x: dict, fill_color_name: str) -> str:
+    def _get_color(x: dict, fill_color_name: str, mpl_cmap: mpl.colors.Colormap) -> str:
         if x["properties"][fill_color_name] is None:
             return "#8c8c8c"
-        return _hex_color(x["properties"][fill_color_name])
+        return _hex_color(x["properties"][fill_color_name], mpl_cmap)
 
-    def _style_function(x: dict) -> dict:
+    def _style_function(
+        x: dict, fill_color_name: str, mpl_cmap: mpl.colors.Colormap
+    ) -> dict:
         return {
-            "fillColor": _get_color(x, fill_color_name),
-            "color": grey,
+            "fillColor": _get_color(x, fill_color_name, mpl_cmap),
+            "color": const.GREY,
             "weight": 1.5,
             "fillOpacity": 0.6,
         }
+
+    _style_function_partial = partial(
+        _style_function, fill_color_name=fill_color_name, mpl_cmap=mpl_cmap
+    )
 
     if "tile_name" in counts_per_tile_gdf:
         fields = ["tile_id", "tile_name", fill_color_name]
@@ -217,9 +327,12 @@ def choropleth_map(
         fields = ["tile_id", fill_color_name]
     folium.GeoJson(
         poly_json,
-        style_function=_style_function,
+        name=layer_name,
+        overlay=True,
+        show=show,
+        style_function=_style_function_partial,
         popup=folium.GeoJsonPopup(fields=fields, aliases=aliases),
-    ).add_to(m)
+    ).add_to(map)
 
     # colorbar object to create custom legend
     colorbar, ax = plt.subplots(figsize=(6, 1))
@@ -233,13 +346,15 @@ def choropleth_map(
     )
     # TODO: add legend directly to map
 
-    return m, colorbar
+    return map, colorbar
 
 
 def multi_choropleth_map(
     counts_per_tile_timewindow: DataFrame,
     tessellation: GeoDataFrame,
-    diverging_cmap: bool = False,
+    is_cmap_diverging: bool = False,
+    min_scale: Optional[Union[int, float]] = None,
+    max_scale: Optional[Union[int, float]] = None,
 ) -> mpl.figure.Figure:
     counts_per_tile_timewindow = tessellation[["tile_id", "geometry"]].merge(
         counts_per_tile_timewindow, left_on="tile_id", right_index=True, how="left"
@@ -252,20 +367,20 @@ def multi_choropleth_map(
     fig, axes = plt.subplots(row_count, plots_per_row, figsize=(18, 12))
 
     # upper and lower bound
-    vmin = counts_per_tile_timewindow.iloc[:, 2:].min().min()
-    vmin = vmin if not math.isnan(vmin) else 0
-    vmax = counts_per_tile_timewindow.iloc[:, 2:].max().max()
-    vmax = vmax if not math.isnan(vmax) else 2
+    if min_scale is None:
+        min_scale = counts_per_tile_timewindow.iloc[:, 2:].min().min()
+        min_scale = min_scale if not math.isnan(min_scale) else 0
+    if max_scale is None:
+        max_scale = counts_per_tile_timewindow.iloc[:, 2:].max().max()
+        max_scale = max_scale if not math.isnan(max_scale) else 2
 
     # color
-    if diverging_cmap:
-        vmin = 0
-        vmax = 2 if vmax <= 1 else vmax
-        cmap = "RdBu_r"
-        norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=1, vmax=vmax)
+    if is_cmap_diverging:
+        cmap = const.DIVERGING_CMAP
+        norm = mpl.colors.TwoSlopeNorm(vmin=min_scale, vcenter=0, vmax=max_scale)
     else:
-        cmap = "YlOrRd"
-        norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+        cmap = const.BASE_CMAP  # STANDARD_CMAP
+        norm = mpl.colors.Normalize(vmin=min_scale, vmax=max_scale)
 
     for i in range(0, plots_per_row * row_count):
         facet_row = math.ceil((i - plots_per_row + 1) / plots_per_row)
@@ -287,7 +402,7 @@ def multi_choropleth_map(
                 ax=ax,
                 edgecolor="#FFFFFF",
                 missing_kwds={
-                    "color": "lightgrey",
+                    "color": const.LIGHT_GREY,
                 },
             )
             ax.set_title(column_name)
@@ -322,13 +437,15 @@ def _basemap(center_x: float, center_y: float, zoom_start: int = 10) -> folium.M
 def ranking(
     x: np.ndarray,
     x_axis_label: str,
+    x_alternative: Optional[np.ndarray] = None,
     y_labels: list = None,
     margin_of_error: Optional[float] = None,
+    margin_of_error_alternative: Optional[float] = None,
 ) -> mpl.figure.Figure:
     y = list(range(1, len(x) + 1))[::-1]
     y_labels = y if y_labels is None else y_labels
     fig, ax = plt.subplots()
-    ax.errorbar(
+    bar_base = ax.errorbar(
         x,
         y,
         xerr=margin_of_error,
@@ -336,7 +453,20 @@ def ranking(
         ecolor="lightblue",
         elinewidth=5,
         capsize=10,
+        label="base",
     )
+    if x_alternative is not None:
+        bar_alt = ax.errorbar(
+            x_alternative,
+            y,
+            xerr=margin_of_error_alternative,
+            fmt="o",
+            ecolor=const.LIGHT_ORANGE,
+            elinewidth=5,
+            capsize=10,
+            label="alternative",
+        )
+        ax.legend(handles=[bar_base, bar_alt])
     ax.set_yticks(y)
     ax.set_yticklabels(y_labels)
     ax.set_ylabel("Rank")
@@ -345,7 +475,12 @@ def ranking(
 
 
 def flows(
-    basemap: folium.Map, data: pd.DataFrame, tessellation: gpd.GeoDataFrame
+    basemap: folium.Map,
+    data: pd.DataFrame,
+    tessellation: gpd.GeoDataFrame,
+    flow_color: str = const.DARK_BLUE,
+    marker_color: str = const.LIGHT_BLUE,
+    layer_name: str = "flows",
 ) -> folium.Map:
     centroids = get_centroids(tessellation)
     mean_flows = data["flow"].mean()
@@ -357,18 +492,20 @@ def flows(
             "opacity": 0.65,
         }
 
+    feature_group = folium.FeatureGroup(name=layer_name)
+
     origin_groups = data.groupby(by=const.ORIGIN)
     for origin, OD in origin_groups:
         lonO, latO = centroids[origin]
+
         for destination, flow in OD[[const.DESTINATION, const.FLOW]].values:
             lonD, latD = centroids[destination]
             gjc = LineString([(lonO, latO), (lonD, latD)])
 
             fgeojson = folium.GeoJson(
                 gjc,
-                name="flows",
                 style_function=_flow_style_function(
-                    weight=flow / mean_flows, color=dark_blue
+                    weight=flow / mean_flows, color=flow_color
                 ),
             )
 
@@ -376,17 +513,16 @@ def flows(
                 f"flow from {origin} to {destination}: {int(flow)}", max_width=300
             )
             fgeojson = fgeojson.add_child(popup)
-
-            fgeojson.add_to(basemap)
+            feature_group.add_child(fgeojson)
 
         # Plot marker
         fmarker = folium.CircleMarker(
             [latO, lonO],
             radius=5,
             weight=2,
-            color=light_blue,
+            color=marker_color,
             fill=True,
-            fill_color=light_blue,
+            fill_color=marker_color,
         )
         T_D = [
             [destination, int(flow)]
@@ -401,5 +537,8 @@ def flows(
         name = f"origin: {origin}"
         popup = folium.Popup(name + "<br/>" + trips_info, max_width=300)
         fmarker = fmarker.add_child(popup)
-        fmarker.add_to(basemap)
+        feature_group.add_child(fmarker)
+
+    feature_group.add_to(basemap)
+
     return basemap

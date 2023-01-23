@@ -18,12 +18,12 @@ def test_dpmreport():
 def test_get_dataset_statistics(test_dpmreport):
     """Correct dateset statistics without noise."""
     ds_stats = overview.get_dataset_statistics(test_dpmreport, None).data
-    assert ds_stats["n_records"] == 200
-    assert ds_stats["n_trips"] == 100
-    assert ds_stats["n_complete_trips"] == 100
-    assert ds_stats["n_incomplete_trips"] == 0
-    assert ds_stats["n_users"] == 20
-    assert ds_stats["n_locations"] == 200
+    assert ds_stats[const.N_RECORDS] == 200
+    assert ds_stats[const.N_TRIPS] == 100
+    assert ds_stats[const.N_COMPLETE_TRIPS] == 100
+    assert ds_stats[const.N_INCOMPLETE_TRIPS] == 0
+    assert ds_stats[const.N_USERS] == 20
+    assert ds_stats[const.N_LOCATIONS] == 200
 
 
 def test_get_missing_values(test_dpmreport):
@@ -84,10 +84,10 @@ def test_get_trips_per_hour(test_dpmreport):
     assert trips_per_hour[const.HOUR].min() == 0
     assert trips_per_hour[const.HOUR].max() == 23
     assert trips_per_hour[const.TIME_CATEGORY].unique().tolist() == [
-        "weekday_end",
-        "weekday_start",
-        "weekend_end",
-        "weekend_start",
+        "weekday end",
+        "weekday start",
+        "weekend end",
+        "weekend start",
     ]
     assert trips_per_hour.columns.tolist() == [const.HOUR, const.TIME_CATEGORY, "perc"]
     assert len(trips_per_hour) == 96
