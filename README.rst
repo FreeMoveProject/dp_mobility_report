@@ -201,10 +201,11 @@ Madrid `CRTM survey`_ data: [`Code used for Madrid`_]
 * `Report of Madrid without DP`_
 * `Report of Madrid with DP epsilon=10`_
 
-Beijing `Geolife`_ dataset: [`Code used for Beijing`_]
+Beijing `Geolife`_ dataset: [`Code used for Beijing`_][`Code used for Benchmarkreport of Beijing`_]
 
 * `Report of Beijing without DP`_
 * `Report of Beijing with DP epsilon=50`_
+* `Benchmarkreport of Beijing without DP and with DP epsilon=15`_
 
 (Here you find the `code of the data preprocessing`_ to obtain the needed format)
 
@@ -251,6 +252,8 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 .. _`Report of Beijing without DP`: https://freemoveproject.github.io/dp_mobility_report/examples/html/geolife_noPrivacy.html
 .. _`Report of Beijing with DP epsilon=50`: https://freemoveproject.github.io/dp_mobility_report/examples/html/geolife.html
 .. _`Code used for Beijing`: https://github.com/FreeMoveProject/dp_mobility_report/blob/main/examples/example_geolife.py
+.. _`Benchmarkreport of Beijing without DP and with DP epsilon=15`: https://freemoveproject.github.io/dp_mobility_report/examples/html/geolife_benchmark.html
+.. _`Code used for Benchmarkreport of Beijing`: https://github.com/FreeMoveProject/dp_mobility_report/blob/main/examples/example_benchmark.py
 .. _`code of the data preprocessing`: https://github.com/FreeMoveProject/evaluation_dp_mobility_report/blob/main/01_preprocess_evaluation_data.py
 .. _`following paper`: https://www.tandfonline.com/doi/full/10.1080/17489725.2022.2148008
 .. _`pandas-profiling/pandas-profiling`: https://github.com/pandas-profiling/pandas-profiling
