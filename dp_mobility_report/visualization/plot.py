@@ -355,6 +355,7 @@ def multi_choropleth_map(
     is_cmap_diverging: bool = False,
     min_scale: Optional[Union[int, float]] = None,
     max_scale: Optional[Union[int, float]] = None,
+    vcenter: Optional[Union[int, float]] = 0,
 ) -> mpl.figure.Figure:
     counts_per_tile_timewindow = tessellation[["tile_id", "geometry"]].merge(
         counts_per_tile_timewindow, left_on="tile_id", right_index=True, how="left"
@@ -377,7 +378,7 @@ def multi_choropleth_map(
     # color
     if is_cmap_diverging:
         cmap = const.DIVERGING_CMAP
-        norm = mpl.colors.TwoSlopeNorm(vmin=min_scale, vcenter=0, vmax=max_scale)
+        norm = mpl.colors.TwoSlopeNorm(vmin=min_scale, vcenter=vcenter, vmax=max_scale)
     else:
         cmap = const.BASE_CMAP  # STANDARD_CMAP
         norm = mpl.colors.Normalize(vmin=min_scale, vmax=max_scale)

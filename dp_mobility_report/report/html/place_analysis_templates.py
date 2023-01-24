@@ -515,7 +515,7 @@ def _create_timewindow_segment(df: pd.DataFrame, tessellation: GeoDataFrame) -> 
     tile_means = df.mean(axis=1)
     dev_from_avg = df.div(tile_means, axis=0)
     deviation_choropleth = plot.multi_choropleth_map(
-        dev_from_avg, tessellation, is_cmap_diverging=True, min_scale=-2, max_scale=2
+        dev_from_avg, tessellation, is_cmap_diverging=True, min_scale=0, vcenter=1
     )
     return f"""<h4>Number of visits</h4>
         {v_utils.fig_to_html_as_png(visits_choropleth)}
@@ -527,10 +527,10 @@ def _create_timewindow_segment(df: pd.DataFrame, tessellation: GeoDataFrame) -> 
 
 
 def _create_timewindow_segment_benchmark(
-    df: pd.DataFrame, tessellation: GeoDataFrame
+    df_deviation: pd.DataFrame, tessellation: GeoDataFrame
 ) -> str:
     visits_choropleth = plot.multi_choropleth_map(
-        df, tessellation, is_cmap_diverging=True, min_scale=-2, max_scale=2
+        df_deviation, tessellation, is_cmap_diverging=True, min_scale=-2, max_scale=2
     )
     return f"""<h4>Deviation from base</h4>
         {v_utils.fig_to_html_as_png(visits_choropleth)}"""  # svg might get too large
