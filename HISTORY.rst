@@ -1,6 +1,10 @@
 History
 *********
 
+0.2.1 (2023-01-24)
+==================
+* Bug fix: Correct range of scale for visits per time and tile map. 
+
 0.2.0 (2023-01-23)
 ==================
 * Create a BenchmarkReport class that evaluates the similarity of two (differentially private) mobility reports from one or two mobility datasets and creates an HTML output similar to the DpMobilityReport.
