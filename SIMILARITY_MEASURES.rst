@@ -115,8 +115,8 @@ In contrast to the mean absolute percentage error, SMAPE has both a lower bound 
 
 :math:`SMAPE:= \frac{1}{n} \sum_{i=1}^{n} \frac {|alternative_{i} - base_{i}|}{(|base_{i}| + |alternative_{i}|) \div 2}`, for :math:`|base_{i}| + |alternative_{i}| > 0`
 
-SMAPE is computed for all analyses.
-SMAPE is employed as the default measure for single counts (e.g., dataset statistics, missing values, where n=1) and the evaluation of quartiles, as KLD, JSD and EMD are not suitable.
+SMAPE is computed for all analyses. For single counts (e.g., dataset statistics, missing values),n=1 with :math:`base_{i}` (:math:`alternative_{i}` respectively) refering to the respective count value. For the five number summary, n=5 with :math:`base_{i}` (:math:`alternative_{i}` respectively) refering to :math:`i_{th}` value of the summary. For all other analyses, n equals the number of histogram bins. 
+SMAPE is employed as the default measure for single counts and for the evaluation of the five number summary, as KLD, JSD and EMD are not suitable. 
 
 
 Kullback-Leibler Divergence (KLD)

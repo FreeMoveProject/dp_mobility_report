@@ -7,7 +7,7 @@
         </tr>
         {% for row in rows %}
         <tr>
-            {% if row['name']!="Excluded analyses" or row['name']!="Evaluation dev. mode" %}
+            {% if row['name']!="Excluded analyses" and row['name']!="Evaluation dev. mode" %}
             <th class="table-rowheader">{{ row['name'] }}</th>
             <td>{{ row['value'][0] }}</td>
             <td>{{ row['value'][1] }}</td>
