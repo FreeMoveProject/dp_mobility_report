@@ -1,6 +1,16 @@
 {% if flows_cumsum_linechart %}
 <div>
-    <h3>OD flows between tiles</h3>
+    <h3>OD flows between tiles         
+        <button type="button" class="btn btn-outline-dark btn-sm" data-toggle="tooltip" data-placement="center" 
+        title="The following visualization shows the OD flows between the tiles (according to the provided tessellation) for the base and the alternative dataset as well as the intra-tile flow deviations. These three visualizations can be chosen in the layer control. 
+        The origin of the OD flows is indicated by a small circle and by clicking on one OD connection, information on the origin and destination cell name as well as the number of OD connections will show up. 
+        The legend for the intra-tile flow deviations are below and range from -2 to 2. The intra-tile flow is defined as the number of OD connections that start and end in the same tile. This visualizations shows the deviation of intra-tile flows of the alternative dataset from the base dataset.">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+          </svg>
+        </button>
+    </h3>
     <p>privacy budget base: {{od_eps[0]}}</p>
     <p>95% CI base: +/-{{od_moe[0]}}</p>
     <p>privacy budget alternative: {{od_eps[1]}}</p>
