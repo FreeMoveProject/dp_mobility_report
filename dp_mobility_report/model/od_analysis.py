@@ -45,7 +45,7 @@ def get_od_flows(
     dpmreport: "DpMobilityReport",
     eps: Optional[float],
 ) -> DfSection:
-    sensitivity = dpmreport.max_trips_per_user
+    sensitivity = dpmreport.count_sensitivity_base
     od_flows = (
         od_shape[od_shape[const.TILE_ID].notna() & od_shape[const.TILE_ID_END].notna()]
         .groupby([const.TILE_ID, const.TILE_ID_END])
@@ -108,7 +108,7 @@ def get_travel_time(
     return m_utils.hist_section(
         travel_time,
         eps,
-        dpmreport.max_trips_per_user,
+        dpmreport.count_sensitivity_base,
         hist_max=dpmreport.max_travel_time,
         bin_range=dpmreport.bin_range_travel_time,
         bin_type=int,
@@ -127,7 +127,7 @@ def get_jump_length(
     return m_utils.hist_section(
         jump_length,
         eps,
-        dpmreport.max_trips_per_user,
+        dpmreport.count_sensitivity_base,
         hist_max=dpmreport.max_jump_length,
         bin_range=dpmreport.bin_range_jump_length,
         evalu=dpmreport.evalu,

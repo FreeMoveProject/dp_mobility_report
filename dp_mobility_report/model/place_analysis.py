@@ -18,7 +18,7 @@ def get_visits_per_tile(
 ) -> DfSection:
     epsi = eps
 
-    sensitivity = 2 * dpmreport.max_trips_per_user
+    sensitivity = 2 * dpmreport.count_sensitivity_base
     # count number of visits for each location
     visits_per_tile = (
         dpmreport.df[
@@ -98,7 +98,7 @@ def get_visits_per_time_tile(
         & dpmreport.df[const.TILE_ID].isin(dpmreport.tessellation[const.TILE_ID])
     ][[const.TILE_ID, const.IS_WEEKEND, "timewindows"]]
 
-    moe = diff_privacy.laplace_margin_of_error(0.95, eps, dpmreport.max_trips_per_user)
+    moe = diff_privacy.laplace_margin_of_error(0.95, eps, dpmreport.count_sensitivity_base)
 
     # create full combination of all times and tiles for application of dp
     tile_ids = dpmreport.tessellation[const.TILE_ID].unique()
@@ -129,7 +129,7 @@ def get_visits_per_time_tile(
     counts_per_tile_timewindow = pd.Series(
         index=counts_per_tile_timewindow.index,
         data=diff_privacy.counts_dp(
-            counts_per_tile_timewindow.values, eps, dpmreport.max_trips_per_user
+            counts_per_tile_timewindow.values, eps, dpmreport.count_sensitivity_base
         ),
     )
 

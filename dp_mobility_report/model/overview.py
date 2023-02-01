@@ -27,21 +27,21 @@ def get_dataset_statistics(
     n_incomplete_trips = diff_privacy.count_dp(
         n_incomplete_trips,
         epsi,
-        dpmreport.max_trips_per_user,
+        dpmreport.count_sensitivity_base,
     )
 
     moe_incomplete_trips = diff_privacy.laplace_margin_of_error(
-        0.95, epsi, dpmreport.max_trips_per_user
+        0.95, epsi, dpmreport.count_sensitivity_base
     )
 
     n_complete_trips = 0 if 2 not in points_per_trip else points_per_trip[2]
     n_complete_trips = diff_privacy.count_dp(
         n_complete_trips,
         epsi,
-        2 * dpmreport.max_trips_per_user,
+        2 * dpmreport.count_sensitivity_base,
     )
     moe_complete_trips = diff_privacy.laplace_margin_of_error(
-        0.95, epsi, 2 * dpmreport.max_trips_per_user
+        0.95, epsi, 2 * dpmreport.count_sensitivity_base
     )
 
     n_trips = n_incomplete_trips + n_complete_trips
@@ -71,11 +71,11 @@ def get_dataset_statistics(
     n_locations = diff_privacy.count_dp(
         dpmreport.df.groupby([const.LAT, const.LNG]).ngroups,
         epsi,
-        2 * dpmreport.max_trips_per_user,
+        2 * dpmreport.count_sensitivity_base,
         nonzero=True,
     )
     moe_locations = diff_privacy.laplace_margin_of_error(
-        0.95, epsi, 2 * dpmreport.max_trips_per_user
+        0.95, epsi, 2 * dpmreport.count_sensitivity_base
     )
 
     stats = {
@@ -108,12 +108,12 @@ def get_missing_values(
     missings = dict((len(dpmreport.df) - dpmreport.df.count())[columns])
 
     moe = diff_privacy.laplace_margin_of_error(
-        0.95, epsi, 2 * dpmreport.max_trips_per_user
+        0.95, epsi, 2 * dpmreport.count_sensitivity_base
     )
     conf_interval = {}
     for col in columns:
         missings[col] = diff_privacy.count_dp(
-            missings[col], epsi, 2 * dpmreport.max_trips_per_user
+            missings[col], epsi, 2 * dpmreport.count_sensitivity_base
         )
         conf_interval["ci95_" + col] = diff_privacy.conf_interval(missings[col], moe)
 
@@ -130,7 +130,7 @@ def get_trips_over_time(
         (dpmreport.df[const.POINT_TYPE] == const.END)
     ]  # only count each trip once
     dp_bounds = diff_privacy.bounds_dp(
-        df_trip[const.DATETIME], epsi_limits, dpmreport.max_trips_per_user
+        df_trip[const.DATETIME], epsi_limits, dpmreport.count_sensitivity_base
     )
 
     # cut based on dp min and max values
@@ -168,11 +168,11 @@ def get_trips_over_time(
     trips_over_time["trip_count"] = diff_privacy.counts_dp(
         trips_over_time["trip_count"].values,
         epsi,
-        dpmreport.max_trips_per_user,
+        dpmreport.count_sensitivity_base,
     )
 
     moe_laplace = diff_privacy.laplace_margin_of_error(
-        0.95, epsi, dpmreport.max_trips_per_user
+        0.95, epsi, dpmreport.count_sensitivity_base
     )
 
     # as percent instead of absolute values
@@ -223,10 +223,10 @@ def get_trips_per_weekday(
         data=diff_privacy.counts_dp(
             trips_per_weekday.values,
             eps,
-            dpmreport.max_trips_per_user,
+            dpmreport.count_sensitivity_base,
         ),
     )
-    moe = diff_privacy.laplace_margin_of_error(0.95, eps, dpmreport.max_trips_per_user)
+    moe = diff_privacy.laplace_margin_of_error(0.95, eps, dpmreport.count_sensitivity_base)
 
     # as percent instead of absolute values
     trip_sum = np.sum(trips_per_weekday)
@@ -270,13 +270,13 @@ def get_trips_per_hour(
 
     hour_weekday = hour_weekday.reset_index()
     hour_weekday["count"] = diff_privacy.counts_dp(
-        hour_weekday["count"], eps, dpmreport.max_trips_per_user
+        hour_weekday["count"], eps, dpmreport.count_sensitivity_base
     )
 
     hour_weekday[const.TIME_CATEGORY] = (
         hour_weekday[const.IS_WEEKEND] + " " + hour_weekday[const.POINT_TYPE]
     )
-    moe = diff_privacy.laplace_margin_of_error(0.95, eps, dpmreport.max_trips_per_user)
+    moe = diff_privacy.laplace_margin_of_error(0.95, eps, dpmreport.count_sensitivity_base)
 
     # as percent instead of absolute values
     trip_sum = np.sum(
