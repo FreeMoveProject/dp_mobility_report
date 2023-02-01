@@ -18,7 +18,9 @@
     
 <div class="container">
     <h1>{{title}}</h1>
-
+    {% if subtitle %} 
+    <h3 style="text-align: center"> {{subtitle}} </h3>
+    {% endif %}
     {%if config_segment %}
     <div class="segment grey">
         {{config_segment}}

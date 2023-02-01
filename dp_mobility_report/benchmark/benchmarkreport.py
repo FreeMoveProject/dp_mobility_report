@@ -102,6 +102,7 @@ class BenchmarkReport:
         disable_progress_bar: bool = False,
         seed_sampling: int = None,
         evalu: bool = False,
+        subtitle: str = None,
     ) -> None:
 
         self.disable_progress_bar = disable_progress_bar
@@ -129,6 +130,7 @@ class BenchmarkReport:
             disable_progress_bar,
             seed_sampling,
             evalu,
+            subtitle,
         )
         self.report_base.report
 
@@ -158,6 +160,7 @@ class BenchmarkReport:
             disable_progress_bar,
             seed_sampling,
             evalu,
+            subtitle,
         )
         self.report_alternative.report
 

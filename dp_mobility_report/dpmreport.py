@@ -89,6 +89,7 @@ class DpMobilityReport:
         disable_progress_bar: bool = False,
         seed_sampling: int = None,
         evalu: bool = False,
+        subtitle: str = None,
     ) -> None:
         preprocessing.validate_input(
             df,
@@ -179,7 +180,8 @@ class DpMobilityReport:
         )
         self.evalu = evalu
         self.disable_progress_bar = disable_progress_bar
-
+        self.subtitle = subtitle
+        
         # initialize parallel processing
         pandarallel.initialize(verbose=0)
 
