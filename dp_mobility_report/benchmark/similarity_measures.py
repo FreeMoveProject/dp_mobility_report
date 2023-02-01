@@ -16,17 +16,22 @@ from dp_mobility_report import constants as const
 if TYPE_CHECKING:
     from dp_mobility_report import BenchmarkReport
 
-# catch warning from scipy
-def _entropy(pk: np.array, qk: np.array,)-> float:
-    if (np.sum(pk) == 0) or (np.sum(qk) == 0):
-        return np.nan
-    else: entropy(pk, qk)
 
 # catch warning from scipy
-def _jensenshannon(p: np.array, q: np.array,)-> float:
-    if (np.sum(p) == 0) or (np.sum(q) == 0):
+def _entropy(pk: np.array, qk: np.array) -> float:
+    if (np.sum(pk) == 0) | (np.sum(qk) == 0):
         return np.nan
-    else: jensenshannon(p, q)
+    else:
+        return entropy(pk, qk)
+
+
+# catch warning from scipy
+def _jensenshannon(p: np.array, q: np.array) -> float:
+    if (np.sum(p) == 0) | (np.sum(q) == 0):
+        return np.nan
+    else:
+        return jensenshannon(p, q)
+
 
 def _moving_average(arr: np.array, size: int) -> np.array:
     return np.convolve(arr, np.ones(size), "valid") / size

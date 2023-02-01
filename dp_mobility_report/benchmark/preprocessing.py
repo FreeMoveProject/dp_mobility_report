@@ -31,12 +31,14 @@ def _resample_to_prec(
         const.PREC_DATE: "1D",
     }
     df[const.DATETIME] = pd.to_datetime(df[const.DATETIME])
-    return (
+    df_resampled = (
         df.set_index(const.DATETIME)
         .resample(precision_names[target_precision], label="left")
         .sum()
         .reset_index()
     )
+    df_resampled[const.DATETIME] = df_resampled[const.DATETIME].dt.date
+    return df_resampled
 
 
 def unify_trips_over_time(base: DfSection, alternative: DfSection) -> None:
