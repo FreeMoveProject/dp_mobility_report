@@ -378,7 +378,7 @@ def multi_choropleth_map(
     # color
     if is_cmap_diverging:
         cmap = const.DIVERGING_CMAP
-        norm = mpl.colors.TwoSlopeNorm(vmin=min_scale, vcenter=vcenter, vmax=max_scale)
+        norm = mpl.colors.TwoSlopeNorm(vmin=min_scale, vcenter=vcenter, vmax=max_scale) #TODO if vmin > vcenter or vmax < vcenter, set vmin and vmax to 0?
     else:
         cmap = const.BASE_CMAP  # STANDARD_CMAP
         norm = mpl.colors.Normalize(vmin=min_scale, vmax=max_scale)

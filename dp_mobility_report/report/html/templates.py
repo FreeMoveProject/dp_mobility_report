@@ -42,7 +42,7 @@ def render_html(
     with tqdm(  # progress bar
         total=4, desc="Create HTML Output", disable=disable_progress_bar
     ) as pbar:
-
+        
         args["config_segment"] = config_templates.render_config(dpmreport)
 
         if not set(const.OVERVIEW_ELEMENTS).issubset(dpmreport.analysis_exclusion):
@@ -100,6 +100,7 @@ def render_benchmark_html(
         args["config_segment"] = config_templates.render_benchmark_config(
             benchmarkreport
         )
+        args["similarity_info"] = config_templates.render_similarity_info()
 
         if not set(const.OVERVIEW_ELEMENTS).issubset(
             benchmarkreport.analysis_exclusion

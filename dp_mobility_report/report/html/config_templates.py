@@ -68,7 +68,11 @@ def render_benchmark_config(benchmarkreport: "BenchmarkReport") -> str:
     template_structure = get_template("config_segment.html")
     return template_structure.render(args)
 
+def render_similarity_info():
 
+        template_structure = get_template("similarity_info.html")
+        return template_structure.render() 
+        
 def render_config_table(dpmreport: "DpMobilityReport") -> str:
 
     config_list = [
@@ -81,6 +85,7 @@ def render_config_table(dpmreport: "DpMobilityReport") -> str:
         },
         {"name": "Budget split", "value": fmt_config(dpmreport.budget_split)},
         {"name": "Evaluation dev. mode", "value": fmt(dpmreport.evalu)},
+        {"name": "Excluded analyses", "value": fmt_config(dpmreport.analysis_exclusion)},
     ]
 
     # create html from template
@@ -131,9 +136,8 @@ def render_benchmark_config_table(benchmarkreport: "BenchmarkReport") -> str:
             "name": "Excluded analyses",
             "value": (
                 fmt_config(benchmarkreport.analysis_exclusion),
-                fmt_config(benchmarkreport.analysis_exclusion),
             ),
-        },  # TODO verbundene zelle
+        }, 
     ]
 
     # create html from template
