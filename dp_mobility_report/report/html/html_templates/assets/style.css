@@ -139,17 +139,36 @@ input {
   overflow: hidden;
   padding: 0.15cm; /* Padding von accordion bars*/
 }
+
+.tab-structure {
+  width: 100%;
+  color: #2c3e50; /* Schriftfarbe accordion box überschrift */
+  overflow: hidden;
+  padding: 0.15cm; /* Padding von accordion bars*/
+}
+
 .tab-label {
   display: flex;
   justify-content: space-between;
   padding: 0.8em; /*Abstand Überschrift zum border wenn accordion nicht ausgeklappt*/
   background: #2c3e50; /* Hintergrundfarbe accordion bar ohne hover*/
-  /* font-weight: bold; */
   cursor: pointer;
-  /* Icon */
 }
+
+.tab-label-structure {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.8em; /*Abstand Überschrift zum border wenn accordion nicht ausgeklappt*/
+  background: white; /* Hintergrundfarbe accordion bar ohne hover*/
+  cursor: pointer;
+  border-radius: 25px;
+}
+
 .tab-label:hover {
   background: #1a252f;
+}
+.tab-label-structure:hover {
+  background: #d6e1ed;
 }
 .tab-label::after {
   content: "❯";
@@ -184,6 +203,6 @@ input:checked + .tab-label::after {
   transform: rotate(90deg);
 }
 input:checked ~ .tab-content {
-  max-height: 100vh;
+  max-height: 5000vh; /*Maximale Lange von Accordion, auskommentiert*/
   padding: 1em; /* Seitenabstand vom Text wenn accordions ausgeklappt*/
 }
