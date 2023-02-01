@@ -475,7 +475,7 @@ def render_trips_over_time(trips_over_time: DfSection) -> str:
             rotate_label=True,
         )
         html = v_utils.fig_to_html(chart)
-    plt.close()
+    plt.close(chart)
     return html
 
 
@@ -510,7 +510,7 @@ def render_benchmark_trips_over_time(
             rotate_label=True,
         )
         html = v_utils.fig_to_html(chart)
-    plt.close()
+    plt.close(chart)
     return html
 
 
@@ -523,7 +523,7 @@ def render_trips_per_weekday(trips_per_weekday: SeriesSection) -> str:
         y_axis_label="% of trips",
         rotate_label=True,
     )
-    plt.close()
+    plt.close(chart)
     return v_utils.fig_to_html(chart)
 
 
@@ -540,7 +540,7 @@ def render_benchmark_trips_per_weekday(
         y_axis_label="% of trips",
         rotate_label=True,
     )
-    plt.close()
+    plt.close(chart)
     return v_utils.fig_to_html(chart)
 
 
@@ -561,5 +561,5 @@ def render_trips_per_hour(
         margin_of_error=margin_of_error,
     )
     html = v_utils.fig_to_html(chart)
-    plt.close()
+    plt.close(chart)
     return html

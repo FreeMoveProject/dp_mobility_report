@@ -425,7 +425,7 @@ def render_flows_cumsum(
         add_diagonal=diagonal,
     )
     html = v_utils.fig_to_html(chart)
-    plt.close()
+    plt.close(chart)
     return html
 
 
@@ -466,7 +466,7 @@ def render_most_freq_flows_ranking(
         margin_of_error=od_flows.margin_of_error_laplace,
     )
     html_ranking = v_utils.fig_to_html(ranking)
-    plt.close()
+    plt.close(ranking)
     return html_ranking
 
 
@@ -527,7 +527,7 @@ def render_most_freq_flows_ranking_benchmark(
         margin_of_error_alternative=od_flows_alternative.margin_of_error_laplace,
     )
     html_ranking = v_utils.fig_to_html(ranking)
-    plt.close()
+    plt.close(ranking)
     return html_ranking
 
 
