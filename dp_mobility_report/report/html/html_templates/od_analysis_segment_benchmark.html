@@ -2,9 +2,9 @@
 <div>
     <h3>OD flows between tiles</h3>
     <p>privacy budget base: {{od_eps[0]}}</p>
-    <p>95%-confidence interval: +/-{{od_moe[0]}}</p>
+    <p>95% CI base: +/-{{od_moe[0]}}</p>
     <p>privacy budget alternative: {{od_eps[1]}}</p>
-    <p>95%-confidence interval: +/-{{od_moe[1]}}</p>
+    <p>95% CI alternative: +/-{{od_moe[1]}}</p>
     <div>
 
         <iframe src="{{output_filename}}/maps/od_map.html" width="100%" height="600" style="border:1px solid black;">
@@ -62,9 +62,9 @@
     <div>
         <h3>Travel time of trips (in minutes)</h3>
         <p>privacy budget base: {{travel_time_eps[0]}}</p>
-        <p>95%-confidence interval: +/-: {{travel_time_moe[0]}}</p>
+        <p>95% CI base: +/-: {{travel_time_moe[0]}}</p>
         <p>privacy budget alternative: {{travel_time_eps[1]}}</p>
-        <p>95%-confidence interval: +/-: {{travel_time_moe[1]}}</p>
+        <p>95% CI alternative: +/-: {{travel_time_moe[1]}}</p>
 
         {{travel_time_hist}}
         <p class="grey info">
@@ -85,9 +85,9 @@
     <div>
         <h3>Jump length (in kilometers)</h3>
         <p>privacy budget base: {{jump_length_eps[0]}}</p>
-        <p>95%-confidence interval: +/- {{jump_length_moe[0]}}</p>
+        <p>95% CI base: +/- {{jump_length_moe[0]}}</p>
         <p>privacy budget alternative: {{jump_length_eps[1]}}</p>
-        <p>95%-confidence interval: +/- {{jump_length_moe[1]}}</p>
+        <p>95% CI alterative: +/- {{jump_length_moe[1]}}</p>
 
         <p class="info">The jump length is the straight-line distance between the origin and destination.</p>
         {{jump_length_hist}}

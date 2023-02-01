@@ -4,7 +4,7 @@
 <div>
     <h3>OD flows between tiles</h3>
     <p>privacy budget: {{od_eps}}</p>
-    <p>95%-confidence interval: +/-{{od_moe}}</p>
+    <p>95% CI: +/-{{od_moe}}</p>
     <div>
         <p class = "info">
           {{privacy_info}}
@@ -63,7 +63,7 @@
     <div>
         <h3>Travel time of trips (in minutes)</h3>
         <p>privacy budget: {{travel_time_eps}}</p>
-        <p>95%-confidence interval: +/-: {{travel_time_moe}}</p>
+        <p>95% CI: +/-: {{travel_time_moe}}</p>
 
         {{travel_time_hist}}
         <p class="grey info">
@@ -82,7 +82,7 @@
     <div>
         <h3>Jump length (in kilometers)</h3>
         <p>privacy budget: {{travel_time_eps}}</p>
-        <p>95%-confidence interval: +/- {{travel_time_moe}}</p>
+        <p>95% CI: +/- {{travel_time_moe}}</p>
 
         <p class="info">The jump length is the straight-line distance between the origin and destination.</p>
         {{jump_length_hist}}
