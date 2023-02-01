@@ -171,11 +171,16 @@ class DpMobilityReport:
         self._analysis_exclusion = preprocessing.clean_analysis_exclusion(
             analysis_selection,
             analysis_exclusion,
-            has_tessellation = (tessellation is not None),
-            has_timestamps = pd.core.dtypes.common.is_datetime64_dtype(self.df[const.DATETIME]),
-            has_od_flows = max(self.df[const.TID].value_counts())
+            has_tessellation=(tessellation is not None),
+            has_timestamps=pd.core.dtypes.common.is_datetime64_dtype(
+                self.df[const.DATETIME]
+            ),
+            has_od_flows=max(self.df[const.TID].value_counts())
             > 1,  # are there trips with more than a single record?
-            has_consecutive_user_trips = max(self.df.groupby(const.UID).nunique()[const.TID]) > 1
+            has_consecutive_user_trips=max(
+                self.df.groupby(const.UID).nunique()[const.TID]
+            )
+            > 1,
         )
         self._budget_split = preprocessing.clean_budget_split(
             budget_split, self._analysis_exclusion

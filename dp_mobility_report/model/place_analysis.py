@@ -98,7 +98,9 @@ def get_visits_per_time_tile(
         & dpmreport.df[const.TILE_ID].isin(dpmreport.tessellation[const.TILE_ID])
     ][[const.TILE_ID, const.IS_WEEKEND, "timewindows"]]
 
-    moe = diff_privacy.laplace_margin_of_error(0.95, eps, dpmreport.count_sensitivity_base)
+    moe = diff_privacy.laplace_margin_of_error(
+        0.95, eps, dpmreport.count_sensitivity_base
+    )
 
     # create full combination of all times and tiles for application of dp
     tile_ids = dpmreport.tessellation[const.TILE_ID].unique()

@@ -110,7 +110,6 @@ def validate_input(
     if not all([np.issubdtype(item, int) for item in timewindows]):
         raise TypeError("not all items of 'timewindows' are integers.")
 
-
     _validate_bool(user_privacy, f"{user_privacy=}".split("=")[0])
     _validate_bool(evalu, f"{user_privacy=}".split("=")[0])
     _validate_bool(disable_progress_bar, f"{user_privacy=}".split("=")[0])
@@ -246,9 +245,13 @@ def clean_analysis_exclusion(
             "There are only incomplete trips, i.e., no trips with more than a single record. OD analyses cannot be conducted, thus they are excluded from the report."
         )
         analysis_exclusion += const.OD_ELEMENTS
-    
-    if (const.USER_TIME_DELTA not in analysis_exclusion) & (not has_consecutive_user_trips):
-        warnings.warn("No user has more than one trip (this is also the case, if max_trips_per_user=1). No analysis of consecutive trips of a user can be conducted and will thus be excluded.")
+
+    if (const.USER_TIME_DELTA not in analysis_exclusion) & (
+        not has_consecutive_user_trips
+    ):
+        warnings.warn(
+            "No user has more than one trip (this is also the case, if max_trips_per_user=1). No analysis of consecutive trips of a user can be conducted and will thus be excluded."
+        )
         analysis_exclusion += [const.USER_TIME_DELTA]
 
     # deduplicate in case analyses and segments were included

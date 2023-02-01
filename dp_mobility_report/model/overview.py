@@ -226,7 +226,9 @@ def get_trips_per_weekday(
             dpmreport.count_sensitivity_base,
         ),
     )
-    moe = diff_privacy.laplace_margin_of_error(0.95, eps, dpmreport.count_sensitivity_base)
+    moe = diff_privacy.laplace_margin_of_error(
+        0.95, eps, dpmreport.count_sensitivity_base
+    )
 
     # as percent instead of absolute values
     trip_sum = np.sum(trips_per_weekday)
@@ -276,7 +278,9 @@ def get_trips_per_hour(
     hour_weekday[const.TIME_CATEGORY] = (
         hour_weekday[const.IS_WEEKEND] + " " + hour_weekday[const.POINT_TYPE]
     )
-    moe = diff_privacy.laplace_margin_of_error(0.95, eps, dpmreport.count_sensitivity_base)
+    moe = diff_privacy.laplace_margin_of_error(
+        0.95, eps, dpmreport.count_sensitivity_base
+    )
 
     # as percent instead of absolute values
     trip_sum = np.sum(

@@ -428,13 +428,21 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
     dpmr = DpMobilityReport(test_data, privacy_budget=None)
     report = dpmr.report
     assert isinstance(report, dict)
-    assert set(dpmr.analysis_exclusion) == set([const.VISITS_PER_TILE, const.VISITS_PER_TIME_TILE, const.OD_FLOWS, const.JUMP_LENGTH, const.TRAVEL_TIME, const.USER_TILE_COUNT, const.MOBILITY_ENTROPY])
+    assert set(dpmr.analysis_exclusion) == {
+        const.VISITS_PER_TILE,
+        const.VISITS_PER_TIME_TILE,
+        const.OD_FLOWS,
+        const.USER_TILE_COUNT,
+        const.MOBILITY_ENTROPY,
+    }
     assert list(report.keys()) == [
         const.DS_STATISTICS,
         const.MISSING_VALUES,
         const.TRIPS_OVER_TIME,
         const.TRIPS_PER_WEEKDAY,
         const.TRIPS_PER_HOUR,
+        const.TRAVEL_TIME,
+        const.JUMP_LENGTH,
         const.TRIPS_PER_USER,
         const.USER_TIME_DELTA,
         const.RADIUS_OF_GYRATION,
@@ -448,7 +456,14 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
     )
     report = dpmr.report
 
-    assert set(dpmr.analysis_exclusion) == set([const.TRIPS_OVER_TIME, const.TRIPS_PER_WEEKDAY, const.TRIPS_PER_HOUR, const.VISITS_PER_TIME_TILE, const.TRAVEL_TIME, const.USER_TIME_DELTA])
+    assert set(dpmr.analysis_exclusion) == {
+        const.TRIPS_OVER_TIME,
+        const.TRIPS_PER_WEEKDAY,
+        const.TRIPS_PER_HOUR,
+        const.VISITS_PER_TIME_TILE,
+        const.TRAVEL_TIME,
+        const.USER_TIME_DELTA,
+    }
     assert list(report.keys()) == [
         const.DS_STATISTICS,
         const.MISSING_VALUES,
@@ -491,7 +506,7 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
         dpmr = DpMobilityReport(df, test_tessellation, privacy_budget=None)
     report = dpmr.report
     assert isinstance(report, dict)
-    assert set(dpmr.analysis_exclusion) == set([const.USER_TIME_DELTA])
+    assert set(dpmr.analysis_exclusion) == {const.USER_TIME_DELTA}
 
     assert list(report.keys()) == [
         const.DS_STATISTICS,
@@ -730,4 +745,3 @@ def test_to_html_file(test_data, test_data_sequence, test_tessellation, tmp_path
     tids = test_data.groupby(const.UID).first()[const.TID]
     df = test_data[test_data[const.TID].isin(tids)]
     DpMobilityReport(df, test_tessellation, privacy_budget=None).to_file(file_name)
-
