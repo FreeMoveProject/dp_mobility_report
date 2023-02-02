@@ -376,10 +376,10 @@ def multi_choropleth_map(
     # upper and lower bound
     if min_scale is None:
         min_scale = counts_per_tile_timewindow.iloc[:, 2:].min().min()
-        min_scale = min_scale if not math.isnan(min_scale) else 0
+        min_scale = min_scale if not math.isnan(min_scale) else 0 #TODO idea: if min_scale > 0, min_scale = 0
     if max_scale is None:
         max_scale = counts_per_tile_timewindow.iloc[:, 2:].max().max()
-        max_scale = max_scale if not math.isnan(max_scale) else 2
+        max_scale = max_scale if not math.isnan(max_scale) else 2 #TODO idea: if max_scale < 0, max_scale = 0 
 
     # color
     if is_cmap_diverging:
