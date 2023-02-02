@@ -27,7 +27,7 @@ def test_od_shape():
 
 
 def test_get_od_shape(test_dpmreport):
-    od_shape = od_analysis.get_od_shape(test_dpmreport.df, test_dpmreport.tessellation)
+    od_shape = od_analysis.get_od_shape(test_dpmreport.df)
     assert len(od_shape) == 100
     assert od_shape.columns.tolist() == [
         const.TID,

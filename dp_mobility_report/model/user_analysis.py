@@ -16,13 +16,12 @@ def get_trips_per_user(
     dpmreport: "DpMobilityReport", eps: Optional[float]
 ) -> TupleSection:
     user_nunique = dpmreport.df.groupby(const.UID).nunique()[const.TID]
-    max_trips = dpmreport.max_trips_per_user if dpmreport.user_privacy else None
 
     return m_utils.hist_section(
         user_nunique,
         eps,
         sensitivity=1,
-        hist_max=max_trips,
+        hist_max=dpmreport.max_trips_per_user,
         bin_type=int,
         evalu=dpmreport.evalu,
     )
@@ -42,9 +41,7 @@ def get_user_time_delta(
     )
     user_time_delta[(same_tid) | (~same_user)] = None
     user_time_delta = user_time_delta[user_time_delta.notnull()]
-
-    if len(user_time_delta) < 1:
-        return None
+    # there should be at least one value, as it what checked in preprossing if there are consecutive trips
 
     sec = m_utils.hist_section(
         (user_time_delta.dt.total_seconds() / 3600),  # convert to hours
