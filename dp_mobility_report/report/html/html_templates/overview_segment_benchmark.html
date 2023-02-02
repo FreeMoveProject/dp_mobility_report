@@ -25,17 +25,20 @@
         <p>95% CI base: +/- {{trips_over_time_moe[0]}}</p>
         <p>privacy budget alternative: {{trips_over_time_eps[1]}}</p>
         <p>95% CI alternative: +/- {{trips_over_time_moe[1]}}</p>
-        {{trips_over_time_linechart}}
-        <p class ="info">
-            {{trips_over_time_info}}
-        </p>
-        {{trips_over_time_measure}}
+        <div>
+            {{trips_over_time_linechart}}
+            <p class ="info">
+                {{trips_over_time_info}}
+            </p>
+            {{trips_over_time_measure}}
+        </div>
     </div>
-
-    {{trips_over_time_summary_table}}
-    <p class="info">
-        {{trips_over_time_moe_info}}
-    </p>
+    <div>
+        {{trips_over_time_summary_table}}
+        <p class="info">
+            {{trips_over_time_moe_info}}
+        </p>
+    </div>
     {% endif %}
 
     {% if trips_per_weekday_barchart %}
@@ -45,8 +48,10 @@
         <p>95% CI base: +/- {{trips_per_weekday_moe[0]}}</p>
         <p>privacy budget alternative: {{trips_per_weekday_eps[1]}}</p>
         <p>95% CI alternative: +/- {{trips_per_weekday_moe[1]}}</p>
-        {{trips_per_weekday_barchart}}
-        {{trips_per_weekday_measure}}
+        <div>
+            {{trips_per_weekday_barchart}}
+            {{trips_per_weekday_measure}}
+        </div>
     </div>
     {% endif %} 
 
@@ -57,8 +62,10 @@
         <p>95% CI base: +/- {{trips_per_hour_moe[0]}}</p>
         <p>privacy budget alternative: {{ trips_per_hour_eps[1]}}</p>
         <p>95% CI alternative: +/- {{trips_per_hour_moe[1]}}</p>
-        {{trips_per_hour_linechart}}
-        {{trips_per_hour_measure}}
+        <div>
+            {{trips_per_hour_linechart}}
+            {{trips_per_hour_measure}}
+        </div>
     </div>
     {% endif %}
 </div>

@@ -1,6 +1,5 @@
 {% if visits_per_tile_cumsum_linechart %}
 <div>
-
     <h3>Visits per tile</h3>
     <p>privacy budget: {{ visits_per_tile_eps }}</p>
     <p>95% CI: +/- {{ visits_per_tile_moe }}</p>
@@ -23,7 +22,8 @@
 <div>
     <h4>Five-number summary: visits per tile</h4>
     {{visits_per_tile_summary_table}}
-
+</div>
+<div>
     <h4>Cumulated sum of visits per tile</h4>
     {{visits_per_tile_cumsum_linechart}}
     

@@ -2,15 +2,19 @@
 <div>
     <h3>Number of trips per user</h3>
     <p>privacy budget: {{trips_per_user_eps}}</p>
-    {{trips_per_user_hist}}
-    <p class="grey info">
-        {{trips_per_user_info}}
-    </p>
+    <div>
+        {{trips_per_user_hist}}
+        <p class="grey info">
+            {{trips_per_user_info}}
+        </p>
+    </div>
     <h4>Five number summary: trips per user</h4>
-    {{trips_per_user_summary_table}}
-    <p class="info">
-        {{trips_per_user_moe_info}}
-    </p>
+    <div>
+        {{trips_per_user_summary_table}}
+        <p class="info">
+            {{trips_per_user_moe_info}}
+        </p>
+    </div>
 </div>
 {% endif %}
 
@@ -23,10 +27,12 @@
         {{time_between_traj_hist_info}}
     </p>
     <h4>Five number summary: time between consecutive trips of a user</h4>
-    {{time_between_traj_summary_table}}
-    <p class="info">
-        {{time_between_traj_moe_info}}
-    </p>
+    <div>
+        {{time_between_traj_summary_table}}
+        <p class="info">
+            {{time_between_traj_moe_info}}
+        </p>
+    </div>
 
     {%if plausi_check_info %}
     <p class="warning-text">
@@ -46,16 +52,19 @@
     <p class ="info">
         The radius of gyration is the characteristic distance traveled by an individual during a period of time.
     </p>
-    
-    {{radius_of_gyration_hist}}
-    <p class="grey info">
-        {{radius_of_gyration_hist_info}}
-    </p>
+    <div>
+        {{radius_of_gyration_hist}}
+        <p class="grey info">
+            {{radius_of_gyration_hist_info}}
+        </p>
+    </div>
     <h4>Five number summary: radius of gyration</h4>
-    {{radius_of_gyration_summary_table}}
-    <p class="info">
-        {{radius_of_gyration_moe_info}}
-    </p>
+    <div>
+        {{radius_of_gyration_summary_table}}
+        <p class="info">
+            {{radius_of_gyration_moe_info}}
+        </p>
+    </div>
 </div>
 {% endif %}
     
@@ -63,11 +72,13 @@
 <div>
     <h3>Number of distinct tiles per user</h3>
     <p>privacy budget: {{distinct_tiles_user_eps}}</p>
-    {{distinct_tiles_user_hist}}
-    {{distinct_tiles_user_summary_table}}
-    <p class="info">
-        {{distinct_tiles_moe_info}}
-    </p>
+    <div>
+        {{distinct_tiles_user_hist}}
+        {{distinct_tiles_user_summary_table}}
+        <p class="info">
+            {{distinct_tiles_moe_info}}
+        </p>
+    </div>
 </div>
 {% endif %}
 
@@ -94,12 +105,15 @@
         to be visited by the user.
         Intuitively, the more trips per user are entailed in the data, the more meaningful the mobility entropy.
     </p> -->
-    
-    {{mobility_entropy_hist}}
+    <div>
+        {{mobility_entropy_hist}}
+    </div>
     <h4>Five number summary: mobility entropy</h4>
-    {{mobility_entropy_summary_table}}
-    <p class="info">
-        {{mobility_entropy_moe_info}}
-    </p>
+    <div>
+        {{mobility_entropy_summary_table}}
+        <p class="info">
+            {{mobility_entropy_moe_info}}
+        </p>
+    </div>
 </div>
 {% endif %}

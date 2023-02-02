@@ -45,17 +45,20 @@
     </div>
 
     <div>
-        <h4>Five number summary: flows per OD pair</h4>
-        {{flows_summary_table}}
-        {{flows_summary_measure}}
-        <h4>Cumulated sum of flows per OD pair</h4>
-        {{flows_cumsum_linechart}}
-
-        <p class="info">
-            The cumulated sum of flows visualizes the distribution of flows over OD pairs:
-            If all OD connections are traveled equally, the cumulated sum follows a straight diagonal line. 
-            The larger the share of single OD connections in the total number of flows, the steeper the curve.
-        </p>
+        <div>
+            <h4>Five number summary: flows per OD pair</h4>
+            {{flows_summary_table}}
+            {{flows_summary_measure}}
+        </div>
+        <div>
+            <h4>Cumulated sum of flows per OD pair</h4>
+            {{flows_cumsum_linechart}}
+            <p class="info">
+                The cumulated sum of flows visualizes the distribution of flows over OD pairs:
+                If all OD connections are traveled equally, the cumulated sum follows a straight diagonal line. 
+                The larger the share of single OD connections in the total number of flows, the steeper the curve.
+            </p>
+        </div>
     </div>  
     
     <div>
@@ -75,19 +78,21 @@
         <p>95% CI base: +/-: {{travel_time_moe[0]}}</p>
         <p>privacy budget alternative: {{travel_time_eps[1]}}</p>
         <p>95% CI alternative: +/-: {{travel_time_moe[1]}}</p>
-
-        {{travel_time_hist}}
-        <p class="grey info">
-            {{travel_time_hist_info}}
-        </p>
-        {{travel_time_measure}}
-            
+        <div>
+            {{travel_time_hist}}
+            <p class="grey info">
+                {{travel_time_hist_info}}
+            </p>
+            {{travel_time_measure}}
+        </div>
+        <div>
             <h4>Five number summary: travel time</h4>
             {{travel_time_summary_table}}
             <p class="info">
                 {{travel_time_moe_info}}
             </p>
             {{travel_time_summary_measure}}
+        </div>
     </div>
     {% endif %} 
 
@@ -98,20 +103,22 @@
         <p>95% CI base: +/- {{jump_length_moe[0]}}</p>
         <p>privacy budget alternative: {{jump_length_eps[1]}}</p>
         <p>95% CI alterative: +/- {{jump_length_moe[1]}}</p>
-
         <p class="info">The jump length is the straight-line distance between the origin and destination.</p>
-        {{jump_length_hist}}
-        <p class="grey info">
-            {{jump_length_hist_info}}
-        </p>
-        {{jump_length_measure}}
+        <div>
+            {{jump_length_hist}}
+            <p class="grey info">
+                {{jump_length_hist_info}}
+            </p>
+            {{jump_length_measure}}
+        </div>  
+        <div>
             <h4>Five number summary: jump length</h4>
             {{jump_length_summary_table}}
             <p class="info">
                 {{jump_length_moe_info}}
             </p>
             {{jump_length_summary_measure}}
-
+        </div>
     </div>
     {% endif %}
 </div>

@@ -12,8 +12,6 @@
               </svg>
       </button>
     </h3>
-
-
     <p>privacy budget base: {{ visits_per_tile_eps[0] }}</p>
     <p>95% CI base: +/- {{ visits_per_tile_moe[0] }}</p>
     <p>privacy budget alternative: {{ visits_per_tile_eps[1] }}</p>
@@ -49,21 +47,28 @@
 
 <div>
     <h4>Five-number summary: visits per tile</h4>
-    {{visits_per_tile_summary_table}}
-    {{visits_per_tile_summary_measure}}
-    <h4>Cumulated sum of visits per tile</h4>
-    {{visits_per_tile_cumsum_linechart}}
-    <p class="info">
-        The cumulated sum of visits visualizes the distribution of visits over tiles:
-        If all tiles are visited equally, the cumulated sum follows a straight diagonal line. 
-        The larger the share of single tiles in the total number of visits, the steeper the curve.
-    </p>
+    <div>
+      {{visits_per_tile_summary_table}}
+      {{visits_per_tile_summary_measure}}
+    </div>
 </div>
-
+<div>
+    <h4>Cumulated sum of visits per tile</h4>
+    <div>
+      {{visits_per_tile_cumsum_linechart}}
+      <p class="info">
+          The cumulated sum of visits visualizes the distribution of visits over tiles:
+          If all tiles are visited equally, the cumulated sum follows a straight diagonal line. 
+          The larger the share of single tiles in the total number of visits, the steeper the curve.
+      </p>
+    </div>
+</div>
 <div>
     <h4>Ranking of most frequently visited tiles</h4>
-    {{most_freq_tiles_ranking}}
-    {{visits_per_tile_ranking_measure}}
+    <div>
+      {{most_freq_tiles_ranking}}
+      {{visits_per_tile_ranking_measure}}
+    </div>
 </div>
 {% endif %} 
 

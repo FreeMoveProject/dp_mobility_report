@@ -22,17 +22,20 @@
         <h3>Trips over time</h3>
         <p>privacy budget: {{trips_over_time_eps}}</p>
         <p>95% CI: +/- {{trips_over_time_moe}}</p>
-        {{trips_over_time_linechart}}
-
-        <p class ="info">
-            {{trips_over_time_info}}
-        </p>
+        <div>
+            {{trips_over_time_linechart}}
+            <p class ="info">
+                {{trips_over_time_info}}
+            </p>
+        </div>
     </div>
 
-    {{trips_over_time_summary_table}}
-    <p class="info">
-        {{trips_over_time_moe_info}}
-    </p> 
+    <div>
+        {{trips_over_time_summary_table}}
+        <p class="info">
+            {{trips_over_time_moe_info}}
+        </p> 
+    </div>
     {% endif %}
     
     {% if trips_per_weekday_barchart %}
@@ -40,7 +43,9 @@
         <h3>Trips per weekday</h3>        
         <p>privacy budget: {{trips_per_weekday_eps}}</p>
         <p>95% CI: +/- {{trips_per_weekday_moe}}</p>
-        {{trips_per_weekday_barchart}}
+        <div>
+            {{trips_per_weekday_barchart}}
+        </div>
     </div>
     {% endif %} 
 
@@ -49,7 +54,9 @@
         <h3>Trips per hour of day</h3>
         <p>privacy budget: {{ trips_per_hour_eps }}</p>
         <p>95% CI: +/- {{trips_per_hour_moe}}</p>
-        {{trips_per_hour_linechart}}
+        <div>
+            {{trips_per_hour_linechart}}
+        </div>
     </div>
     {% endif %}
 </div>
