@@ -12,13 +12,13 @@ p{
 }
 
 .container {
-    max-width: 80%;
+    max-width: 90%;
     padding: 40px 80px 80px 40px;
 }
 
 .container_legend {
     max-width: 100%;
-    padding: 40px 80px 80px 40px;
+    /*padding: 20px 20px 20px 20px;*/
 }
 
 .segment {
@@ -61,7 +61,6 @@ p{
 tdconfig, thconfig {
   border: 1px solid black;
 }
-
 
 
 .medium-size-table{
