@@ -363,7 +363,7 @@ def render_most_freq_tiles_ranking(visits_per_tile: DfSection, top_x: int = 10) 
         topx_tiles["rank"].astype(str)
         + ": "
         + topx_tiles[const.TILE_NAME]
-        + "(Id: "
+        + " (Id: "
         + topx_tiles[const.TILE_ID]
         + ")"
     )
@@ -373,6 +373,8 @@ def render_most_freq_tiles_ranking(visits_per_tile: DfSection, top_x: int = 10) 
         "number of visits per tile",
         y_labels=labels,
         margin_of_error=visits_per_tile.margin_of_error_laplace,
+        figsize=(8, max(6, min(len(labels)*0.5, 8))),
+
     )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close()
@@ -404,7 +406,7 @@ def render_most_freq_tiles_ranking_benchmark(
         topx_tiles_merged["rank"].astype(str)
         + ": "
         + topx_tiles_merged[const.TILE_NAME]
-        + "(Id: "
+        + " (Id: "
         + topx_tiles_merged[const.TILE_ID]
         + ")"
     )
@@ -416,6 +418,8 @@ def render_most_freq_tiles_ranking_benchmark(
         x_alternative=topx_tiles_merged.visits_alternative,
         margin_of_error=visits_per_tile_base.margin_of_error_laplace,
         margin_of_error_alternative=visits_per_tile_alternative.margin_of_error_laplace,
+        figsize=(8, max(6, min(len(labels)*0.5, 8))),
+
     )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close()

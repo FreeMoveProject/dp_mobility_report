@@ -462,6 +462,8 @@ def render_trips_over_time(trips_over_time: DfSection) -> str:
             x_axis_label="Date",
             y_axis_label="% of trips",
             rotate_label=True,
+            figsize=(max(5, min(9, len(trips_over_time.data.values))), 6),
+
         )
         html = v_utils.fig_to_html(chart)
     else:
@@ -473,6 +475,7 @@ def render_trips_over_time(trips_over_time: DfSection) -> str:
             y_axis_label="% of trips",
             margin_of_error=trips_over_time.margin_of_error_laplace,
             rotate_label=True,
+            figsize=(9,6),
         )
         html = v_utils.fig_to_html(chart)
     plt.close()
@@ -494,6 +497,7 @@ def render_benchmark_trips_over_time(
             x_axis_label="Date",
             y_axis_label="% of trips",
             rotate_label=True,
+            figsize=(max(5, min(9, len(trips_over_time.data.values))), 6),
         )
         html = v_utils.fig_to_html(chart)
 
@@ -508,6 +512,7 @@ def render_benchmark_trips_over_time(
             margin_of_error=trips_over_time.margin_of_error_laplace,
             margin_of_error_alternative=trips_over_time_alternative.margin_of_error_laplace,
             rotate_label=True,
+            figsize=(9,6),
         )
         html = v_utils.fig_to_html(chart)
     plt.close()
@@ -522,6 +527,7 @@ def render_trips_per_weekday(trips_per_weekday: SeriesSection) -> str:
         x_axis_label="Weekday",
         y_axis_label="% of trips",
         rotate_label=True,
+        figsize=(max(5, min(9, len(trips_per_weekday.data.values))), 6),
     )
     plt.close()
     return v_utils.fig_to_html(chart)
@@ -539,6 +545,7 @@ def render_benchmark_trips_per_weekday(
         x_axis_label="Weekday",
         y_axis_label="% of trips",
         rotate_label=True,
+        figsize=(max(5, min(9, len(trips_per_weekday.data.values))), 6),
     )
     plt.close()
     return v_utils.fig_to_html(chart)
@@ -559,6 +566,7 @@ def render_trips_per_hour(
         y_axis_label="% of trips",
         hue_order=["weekday start", "weekday end", "weekend start", "weekend end"],
         margin_of_error=margin_of_error,
+        figsize=(10,6),
     )
     html = v_utils.fig_to_html(chart)
     plt.close()

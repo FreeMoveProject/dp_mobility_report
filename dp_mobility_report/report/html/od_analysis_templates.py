@@ -455,7 +455,7 @@ def render_most_freq_flows_ranking(
         topx_flows["rank"].astype(str)
         + ": "
         + topx_flows[f"{const.TILE_NAME}_origin"]
-        + " - \n"
+        + " - "
         + topx_flows[f"{const.TILE_NAME}_destination"]
     )
 
@@ -464,6 +464,8 @@ def render_most_freq_flows_ranking(
         "Number of flows per OD pair",
         y_labels=labels,
         margin_of_error=od_flows.margin_of_error_laplace,
+        figsize=(8, max(6, min(len(labels)*0.5, 8))),
+
     )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close()
@@ -514,7 +516,7 @@ def render_most_freq_flows_ranking_benchmark(
         topx_flows_merged["rank"].astype(str)
         + ": "
         + topx_flows_merged[f"{const.TILE_NAME}_origin"]
-        + " - \n"
+        + " - "
         + topx_flows_merged[f"{const.TILE_NAME}_destination"]
     )
 
@@ -525,6 +527,7 @@ def render_most_freq_flows_ranking_benchmark(
         y_labels=labels,
         margin_of_error=od_flows_base.margin_of_error_laplace,
         margin_of_error_alternative=od_flows_alternative.margin_of_error_laplace,
+        figsize=(8, max(6, min(len(labels)*0.5, 8))),
     )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close()
@@ -549,6 +552,7 @@ def render_travel_time_hist(
         x_axis_type=int,
         margin_of_error=travel_time_hist.margin_of_error_laplace,
         margin_of_error_alternative=alternative_moe,
+        figsize=(max(6, min(len(travel_time_hist.data[1])*0.5,10)), 6),
     )
     html_hist = v_utils.fig_to_html(hist)
     plt.close()
@@ -574,6 +578,7 @@ def render_jump_length_hist(
         x_axis_type=float,
         margin_of_error=jump_length_hist.margin_of_error_laplace,
         margin_of_error_alternative=alternative_moe,
+        figsize=(max(6, min(len(jump_length_hist.data[1])*0.5,10)), 6),
     )
     html_hist = v_utils.fig_to_html(hist)
     plt.close()

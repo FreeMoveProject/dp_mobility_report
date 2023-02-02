@@ -38,6 +38,7 @@ def histogram(
     rotate_label: bool = False,
     x_axis_type: Type = float,
     ndigits_x_label: int = 2,
+    figsize : tuple = (6.4,4.8),
 ) -> mpl.figure.Figure:
     bins = hist[1]
     counts = hist[0]
@@ -88,6 +89,7 @@ def histogram(
         margin_of_error=margin_of_error,
         margin_of_error_alternative=margin_of_error_alternative,
         rotate_label=rotate_label,
+        figsize=figsize,
     )
 
 
@@ -100,8 +102,9 @@ def barchart(
     margin_of_error: Optional[Union[float, list]] = None,
     margin_of_error_alternative: Optional[Union[float, list]] = None,
     rotate_label: bool = False,
+    figsize: tuple = (6.4,4.8),
 ) -> mpl.figure.Figure:
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=figsize)
     bar_base = ax.bar(
         x, y, yerr=margin_of_error, align="center", alpha=0.5, capsize=10, label="base"
     )
@@ -139,8 +142,9 @@ def linechart(
     margin_of_error: float = None,
     add_diagonal: bool = False,
     rotate_label: bool = False,
+    figsize: tuple = (6.4,4.8),
 ) -> mpl.figure.Figure:
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=figsize)
     if margin_of_error is not None:
         ax.fill_between(
             data[x],
@@ -176,8 +180,9 @@ def linechart_new(
     margin_of_error_alternative: float = None,
     add_diagonal: bool = False,
     rotate_label: bool = False,
+    figsize: tuple = (6.4,4.8),
 ) -> mpl.figure.Figure:
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=figsize)
     if margin_of_error is not None:
         ax.fill_between(
             data[x],
@@ -225,8 +230,9 @@ def multi_linechart(
     style: Optional[str] = None,
     hue_order: Optional[list] = None,
     margin_of_error: Optional[float] = None,
+    figsize: tuple = (9,6),
 ) -> mpl.figure.Figure:
-    fig = plt.figure(figsize=(9, 6))
+    fig = plt.figure(figsize=figsize)
     plot = fig.add_subplot(111)
     palette = ["#99065a", "#e289ba", "#2c6a19", "#99cd60"]
 
@@ -442,10 +448,11 @@ def ranking(
     y_labels: list = None,
     margin_of_error: Optional[float] = None,
     margin_of_error_alternative: Optional[float] = None,
+    figsize: tuple = (7,5)
 ) -> mpl.figure.Figure:
     y = list(range(1, len(x) + 1))[::-1]
     y_labels = y if y_labels is None else y_labels
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=figsize)
     bar_base = ax.errorbar(
         x,
         y,
