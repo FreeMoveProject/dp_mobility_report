@@ -1,7 +1,7 @@
 History
 *********
 
-0.2.1 (2023-02-01)
+0.2.2 (2023-02-01)
 ==================
 * Bug fix: exclude user_time_delta if there is no user with at least two trips.
 * Bug fix: set max_trips_per_user correctly if user_privacy=False.
