@@ -79,10 +79,6 @@ def render_config_table(dpmreport: "DpMobilityReport") -> str:
         {"name": "Max. trips per user", "value": fmt(dpmreport.max_trips_per_user)},
         {"name": "Privacy budget", "value": fmt(dpmreport.privacy_budget)},
         {"name": "User privacy", "value": fmt(dpmreport.user_privacy)},
-        {
-            "name": "Excluded analyses",
-            "value": fmt_config(dpmreport.analysis_exclusion),
-        },
         {"name": "Budget split", "value": fmt_config(dpmreport.budget_split)},
         {"name": "Evaluation dev. mode", "value": fmt(dpmreport.evalu)},
         {"name": "Excluded analyses", "value": fmt_config(dpmreport.analysis_exclusion)},
