@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from geopandas import GeoDataFrame
 from haversine import Unit, haversine
-from scipy.spatial import distance
+from scipy.spatial.distance import jensenshannon
 from scipy.stats import entropy, kendalltau, wasserstein_distance
 from tqdm.auto import tqdm
 
@@ -15,6 +15,22 @@ from dp_mobility_report import constants as const
 
 if TYPE_CHECKING:
     from dp_mobility_report import BenchmarkReport
+
+
+# catch warning from scipy
+def _entropy(pk: np.array, qk: np.array) -> float:
+    if (np.sum(pk) == 0) | (np.sum(qk) == 0):
+        return np.nan
+    else:
+        return entropy(pk, qk)
+
+
+# catch warning from scipy
+def _jensenshannon(p: np.array, q: np.array) -> float:
+    if (np.sum(p) == 0) | (np.sum(q) == 0):
+        return np.nan
+    else:
+        return jensenshannon(p, q)
 
 
 def _moving_average(arr: np.array, size: int) -> np.array:
@@ -163,7 +179,11 @@ def compute_similarity_measures(
     top_n_coverage_dict: dict = {}
     cost_matrix = None
 
-    disable_emd = len(tessellation) > const.DISABLE_EMD_THRESHOLD if (tessellation is not None) else True
+    disable_emd = (
+        len(tessellation) > const.DISABLE_EMD_THRESHOLD
+        if (tessellation is not None)
+        else True
+    )
 
     if disable_emd and (
         (const.VISITS_PER_TILE not in analysis_exclusion)
@@ -208,10 +228,10 @@ def compute_similarity_measures(
             )
 
             trips_over_time.fillna(0, inplace=True)
-            kld_dict[const.TRIPS_OVER_TIME] = entropy(
+            kld_dict[const.TRIPS_OVER_TIME] = _entropy(
                 pk=trips_over_time.trips_alternative, qk=trips_over_time.trips_base
             )
-            jsd_dict[const.TRIPS_OVER_TIME] = distance.jensenshannon(
+            jsd_dict[const.TRIPS_OVER_TIME] = _jensenshannon(
                 p=trips_over_time.trips_alternative, q=trips_over_time.trips_base
             )
             smape_dict[const.TRIPS_OVER_TIME] = symmetric_mape(
@@ -230,10 +250,10 @@ def compute_similarity_measures(
                 axis=1,
             )
             trips_per_weekday.fillna(0, inplace=True)
-            kld_dict[const.TRIPS_PER_WEEKDAY] = entropy(
+            kld_dict[const.TRIPS_PER_WEEKDAY] = _entropy(
                 pk=trips_per_weekday.iloc[:, 0], qk=trips_per_weekday.iloc[:, 1]
             )
-            jsd_dict[const.TRIPS_PER_WEEKDAY] = distance.jensenshannon(
+            jsd_dict[const.TRIPS_PER_WEEKDAY] = _jensenshannon(
                 p=trips_per_weekday.iloc[:, 0], q=trips_per_weekday.iloc[:, 1]
             )
             smape_dict[const.TRIPS_PER_WEEKDAY] = symmetric_mape(
@@ -250,10 +270,10 @@ def compute_similarity_measures(
                 suffixes=("_alternative", "_base"),
             )
             trips_per_hour.fillna(0, inplace=True)
-            kld_dict[const.TRIPS_PER_HOUR] = entropy(
+            kld_dict[const.TRIPS_PER_HOUR] = _entropy(
                 pk=trips_per_hour.perc_alternative, qk=trips_per_hour.perc_base
             )
-            jsd_dict[const.TRIPS_PER_HOUR] = distance.jensenshannon(
+            jsd_dict[const.TRIPS_PER_HOUR] = _jensenshannon(
                 p=trips_per_hour.perc_alternative, q=trips_per_hour.perc_base
             )
             smape_dict[const.TRIPS_PER_HOUR] = symmetric_mape(
@@ -281,26 +301,22 @@ def compute_similarity_measures(
             rel_counts_base = (
                 visits_per_tile.visits_base / visits_per_tile.visits_base.sum()
             )
-            kld_dict[const.VISITS_PER_TILE] = entropy(
+            kld_dict[const.VISITS_PER_TILE] = _entropy(
                 pk=rel_counts_alternative, qk=rel_counts_base
             )
-            jsd_dict[const.VISITS_PER_TILE] = distance.jensenshannon(
+            jsd_dict[const.VISITS_PER_TILE] = _jensenshannon(
                 p=rel_counts_alternative, q=rel_counts_base
             )
             smape_dict[const.VISITS_PER_TILE] = symmetric_mape(
                 alternative=rel_counts_alternative, base=rel_counts_base
             )
 
-            most_freq_base = (
-                report_base[const.VISITS_PER_TILE].data.sort_values(
-                    by=["visits"], ascending=False, ignore_index=True
-                )
+            most_freq_base = report_base[const.VISITS_PER_TILE].data.sort_values(
+                by=["visits"], ascending=False, ignore_index=True
             )
-            most_freq_alternative = (
-                report_alternative[const.VISITS_PER_TILE].data.sort_values(
-                    by=["visits"], ascending=False, ignore_index=True
-                )
-            )
+            most_freq_alternative = report_alternative[
+                const.VISITS_PER_TILE
+            ].data.sort_values(by=["visits"], ascending=False, ignore_index=True)
 
             # mute kendall_tau warning by replacing str tile_ids with ints
             tile_id_to_index = {
@@ -392,11 +408,11 @@ def compute_similarity_measures(
             )
             rel_counts_timew_base = counts_timew_base / counts_timew_base.sum()
 
-            kld_dict[const.VISITS_PER_TIME_TILE] = entropy(
+            kld_dict[const.VISITS_PER_TIME_TILE] = _entropy(
                 pk=rel_counts_timew_alternative.to_numpy().flatten(),
                 qk=rel_counts_timew_base.to_numpy().flatten(),
             )
-            jsd_dict[const.VISITS_PER_TIME_TILE] = distance.jensenshannon(
+            jsd_dict[const.VISITS_PER_TIME_TILE] = _jensenshannon(
                 p=rel_counts_timew_alternative.to_numpy().flatten(),
                 q=rel_counts_timew_base.to_numpy().flatten(),
             )
@@ -480,10 +496,10 @@ def compute_similarity_measures(
             rel_alternative = od_flows_alternative / (od_flows_alternative.sum())
             rel_base = od_flows_base / od_flows_base.sum()
 
-            kld_dict[const.OD_FLOWS] = entropy(
+            kld_dict[const.OD_FLOWS] = _entropy(
                 pk=rel_alternative.to_numpy(), qk=rel_base.to_numpy()
             )
-            jsd_dict[const.OD_FLOWS] = distance.jensenshannon(
+            jsd_dict[const.OD_FLOWS] = _jensenshannon(
                 p=rel_alternative.to_numpy(), q=rel_base.to_numpy()
             )
             smape_dict[const.OD_FLOWS] = symmetric_mape(
@@ -523,11 +539,11 @@ def compute_similarity_measures(
         pbar.update()
 
         if const.TRAVEL_TIME not in analysis_exclusion:
-            kld_dict[const.TRAVEL_TIME] = entropy(
+            kld_dict[const.TRAVEL_TIME] = _entropy(
                 pk=report_alternative[const.TRAVEL_TIME].data[0],
                 qk=report_base[const.TRAVEL_TIME].data[0],
             )
-            jsd_dict[const.TRAVEL_TIME] = distance.jensenshannon(
+            jsd_dict[const.TRAVEL_TIME] = _jensenshannon(
                 p=report_alternative[const.TRAVEL_TIME].data[0],
                 q=report_base[const.TRAVEL_TIME].data[0],
             )
@@ -549,11 +565,11 @@ def compute_similarity_measures(
         pbar.update()
 
         if const.JUMP_LENGTH not in analysis_exclusion:
-            kld_dict[const.JUMP_LENGTH] = entropy(
+            kld_dict[const.JUMP_LENGTH] = _entropy(
                 pk=report_alternative[const.JUMP_LENGTH].data[0],
                 qk=report_base[const.JUMP_LENGTH].data[0],
             )
-            jsd_dict[const.JUMP_LENGTH] = distance.jensenshannon(
+            jsd_dict[const.JUMP_LENGTH] = _jensenshannon(
                 p=report_alternative[const.JUMP_LENGTH].data[0],
                 q=report_base[const.JUMP_LENGTH].data[0],
             )
@@ -598,11 +614,11 @@ def compute_similarity_measures(
             ):  # if each user only has one trip then `USER_TIME_DELTA` is None
                 smape_dict[const.USER_TIME_DELTA_QUARTILES] = None
             else:
-                kld_dict[const.USER_TIME_DELTA] = entropy(
+                kld_dict[const.USER_TIME_DELTA] = _entropy(
                     pk=report_alternative[const.USER_TIME_DELTA].data[0],
                     qk=report_base[const.USER_TIME_DELTA].data[0],
                 )
-                jsd_dict[const.USER_TIME_DELTA] = distance.jensenshannon(
+                jsd_dict[const.USER_TIME_DELTA] = _jensenshannon(
                     p=report_alternative[const.USER_TIME_DELTA].data[0],
                     q=report_base[const.USER_TIME_DELTA].data[0],
                 )
@@ -628,11 +644,11 @@ def compute_similarity_measures(
 
         if const.RADIUS_OF_GYRATION not in analysis_exclusion:
 
-            kld_dict[const.RADIUS_OF_GYRATION] = entropy(
+            kld_dict[const.RADIUS_OF_GYRATION] = _entropy(
                 pk=report_alternative[const.RADIUS_OF_GYRATION].data[0],
                 qk=report_base[const.RADIUS_OF_GYRATION].data[0],
             )
-            jsd_dict[const.RADIUS_OF_GYRATION] = distance.jensenshannon(
+            jsd_dict[const.RADIUS_OF_GYRATION] = _jensenshannon(
                 p=report_alternative[const.RADIUS_OF_GYRATION].data[0],
                 q=report_base[const.RADIUS_OF_GYRATION].data[0],
             )
@@ -654,11 +670,11 @@ def compute_similarity_measures(
         pbar.update()
 
         if const.USER_TILE_COUNT not in analysis_exclusion:
-            kld_dict[const.USER_TILE_COUNT] = entropy(
+            kld_dict[const.USER_TILE_COUNT] = _entropy(
                 pk=report_alternative[const.USER_TILE_COUNT].data[0],
                 qk=report_base[const.USER_TILE_COUNT].data[0],
             )
-            jsd_dict[const.USER_TILE_COUNT] = distance.jensenshannon(
+            jsd_dict[const.USER_TILE_COUNT] = _jensenshannon(
                 p=report_alternative[const.USER_TILE_COUNT].data[0],
                 q=report_base[const.USER_TILE_COUNT].data[0],
             )
@@ -680,11 +696,11 @@ def compute_similarity_measures(
         pbar.update()
 
         if const.MOBILITY_ENTROPY not in analysis_exclusion:
-            kld_dict[const.MOBILITY_ENTROPY] = entropy(
+            kld_dict[const.MOBILITY_ENTROPY] = _entropy(
                 pk=report_alternative[const.MOBILITY_ENTROPY].data[0],
                 qk=report_base[const.MOBILITY_ENTROPY].data[0],
             )
-            jsd_dict[const.MOBILITY_ENTROPY] = distance.jensenshannon(
+            jsd_dict[const.MOBILITY_ENTROPY] = _jensenshannon(
                 p=report_alternative[const.MOBILITY_ENTROPY].data[0],
                 q=report_base[const.MOBILITY_ENTROPY].data[0],
             )

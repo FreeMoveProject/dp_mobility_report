@@ -4,7 +4,6 @@ import config
 import geopandas as gpd
 import pandas as pd
 
-from dp_mobility_report import constants as const
 from dp_mobility_report.benchmark.benchmarkreport import BenchmarkReport
 
 path_data = config.path_data
