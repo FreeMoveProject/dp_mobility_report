@@ -71,8 +71,7 @@
           Additionally, JSD provides a smoothed and normalized version of KLD, with scores between 0 (meaning identical) and 1 (meaning entirely different)
           when using the base-2 logarithm, thus making it easier to relate the resulting score within a fixed finite range. 
           Formally, the JSD is defined for two probability distributions P and Q as: 
-          $$D_{JS}(P||Q) := \frac{1}{2} D_{KL}(P\left\Vert\frac{P+Q}{2}\right) + \frac{1}{2} D_{KL}(Q\left\Vert\frac{P+Q}{2}\right)$$ </p>
-
+          $$D_{JS}(P||Q) := \frac{1}{2} D_{KL}\biggl( P\left\Vert\frac{P+Q}{2}\right ) + \frac{1}{2} D_{KL}\biggl((Q\left\Vert\frac{P+Q}{2}\right)$$
         <p>Following this advantage of the JSD compared to the KLD, the JSD is chosen as a default measure over the KLD. </p>
         </div>
     </div>
