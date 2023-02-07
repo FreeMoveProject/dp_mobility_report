@@ -11,10 +11,18 @@
           </svg>
         </button>
     </h3>
-    <p>privacy budget base: {{od_eps[0]}}</p>
-    <p>95% CI base: +/-{{od_moe[0]}}</p>
-    <p>privacy budget alternative: {{od_eps[1]}}</p>
-    <p>95% CI alternative: +/-{{od_moe[1]}}</p>
+    <table class="default">               
+        <tr>
+          <th style="width:30%">Base:</th>
+          <td style="width:30%">privacy budget: {{od_eps[0]}}</td>
+          <td style="width:30%">95% CI: +/- {{od_moe[0]}}</td>
+        </tr>
+        <tr>
+          <th style="width:30%">Alternative:</th>
+          <td style="width:30%">privacy budget: {{od_eps[1]}}</td>
+          <td style="width:30%">95% CI: +/- {{od_moe[1]}}</td>
+        </tr>
+      </table>
     <div>
 
         <iframe src="{{output_filename}}/maps/od_map.html" width="100%" height="600" style="border:1px solid black;">
@@ -74,10 +82,18 @@
     {% if travel_time_hist %}
     <div>
         <h3>Travel time of trips (in minutes)</h3>
-        <p>privacy budget base: {{travel_time_eps[0]}}</p>
-        <p>95% CI base: +/-: {{travel_time_moe[0]}}</p>
-        <p>privacy budget alternative: {{travel_time_eps[1]}}</p>
-        <p>95% CI alternative: +/-: {{travel_time_moe[1]}}</p>
+        <table class="default">               
+            <tr>
+              <th style="width:30%">Base:</th>
+              <td style="width:30%">privacy budget: {{travel_time_eps[0]}}</td>
+              <td style="width:30%">95% CI: +/- {{travel_time_moe[0]}}</td>
+            </tr>
+            <tr>
+              <th style="width:30%">Alternative:</th>
+              <td style="width:30%">privacy budget: {{travel_time_eps[1]}}</td>
+              <td style="width:30%">95% CI: +/- {{travel_time_moe[1]}}</td>
+            </tr>
+          </table>
         <div>
             {{travel_time_hist}}
             <p class="grey info">
@@ -99,10 +115,18 @@
     {% if jump_length_hist %}  
     <div>
         <h3>Jump length (in kilometers)</h3>
-        <p>privacy budget base: {{jump_length_eps[0]}}</p>
-        <p>95% CI base: +/- {{jump_length_moe[0]}}</p>
-        <p>privacy budget alternative: {{jump_length_eps[1]}}</p>
-        <p>95% CI alterative: +/- {{jump_length_moe[1]}}</p>
+        <table class="default">               
+            <tr>
+              <th style="width:30%">Base:</th>
+              <td style="width:30%">privacy budget: {{jump_length_eps[0]}}</td>
+              <td style="width:30%">95% CI: +/- {{jump_length_moe[0]}}</td>
+            </tr>
+            <tr>
+              <th style="width:30%">Alternative:</th>
+              <td style="width:30%">privacy budget: {{jump_length_eps[1]}}</td>
+              <td style="width:30%">95% CI: +/- {{jump_length_moe[1]}}</td>
+            </tr>
+          </table>
         <p class="info">The jump length is the straight-line distance between the origin and destination.</p>
         <div>
             {{jump_length_hist}}
