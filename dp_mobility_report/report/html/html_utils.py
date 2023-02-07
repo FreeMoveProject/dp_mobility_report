@@ -135,6 +135,7 @@ def fmt(value: Any, target_type: Optional[type] = None) -> Any:
         if math.isinf(value) or np.isnan(value):
             return "not defined"
         value = round(value, 2)
+        value = "{:.2f}".format(value)
     if isinstance(value, (float, np.floating, int, np.integer)) and not isinstance(
         value, bool
     ):
