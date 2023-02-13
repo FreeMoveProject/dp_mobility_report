@@ -136,17 +136,22 @@ def _mobility_entropy(df: pd.DataFrame) -> np.ndarray:
         tile_visits_by_user.count_by_user / tile_visits_by_user.total_visits
     )
 
-    entropy = tile_visits_by_user.groupby(const.UID).probs.apply(
-        lambda x: stats.entropy(x, base=2)
-    )
+    # if all visits are outside the tessellation, there are no visits by user
+    if (len (tile_visits_by_user) > 0):
 
-    n_vals = df.groupby(const.UID)[const.TILE_ID].nunique()
-    entropy = np.where(
-        n_vals > 1,
-        np.divide(entropy, np.log2(n_vals, where=n_vals > 1), where=n_vals > 1),
-        0,
-    )
-    return entropy
+        entropy = tile_visits_by_user.groupby(const.UID).probs.apply(
+            lambda x: stats.entropy(x, base=2)
+        )
+
+        n_vals = df.groupby(const.UID)[const.TILE_ID].nunique()
+        entropy = np.where(
+            n_vals > 1,
+            np.divide(entropy, np.log2(n_vals, where=n_vals > 1), where=n_vals > 1),
+            0,
+        )
+        return entropy
+    else:
+        return np.array([])
 
 
 def get_mobility_entropy(

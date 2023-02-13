@@ -42,6 +42,37 @@ def hist_section(
     epsi_quant = epsi * 5 if epsi is not None else None
 
     series = Series(series) if isinstance(series, np.ndarray) else series
+
+    # if there are no values in the series, construct a respective hist section
+    if len(series) == 0:
+        if (hist_max is None) and (hist_min is None):
+            hist_min = 0
+            hist_max = 10
+        elif (hist_max is None):
+            hist_max = hist_min + 1
+        elif (hist_min is None):
+            hist_min = hist_max - 1
+        if (bin_range is None):
+            bin_range = 1
+            
+        bins = np.arange(hist_min, hist_max+bin_range, bin_range)
+        counts = np.zeros(len(bins)-1)
+        
+        dp_counts = diff_privacy.counts_dp(counts, epsi, sensitivity)
+        moe_laplace = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
+        
+        quartiles = pd.Series(np.repeat(np.nan, 5), index=["min", "25%", "50%", "75%", "max"])
+        moe_expmech = np.nan
+
+        return TupleSection(
+        data=(dp_counts, bins),
+        privacy_budget=eps,
+        quartiles=quartiles,
+        margin_of_error_laplace=moe_laplace,
+        margin_of_error_expmech=moe_expmech,
+    )
+
+
     quartiles, moe_expmech = diff_privacy.quartiles_dp(series, epsi_quant, sensitivity)
     series = cut_outliers(
         series, min_value=quartiles["min"], max_value=quartiles["max"]
@@ -166,6 +197,8 @@ def get_epsi(evalu: bool, eps: Optional[float], elements: int) -> Optional[float
 
 def _cumsum(array: np.array) -> np.array:
     array[::-1].sort()
+    if array.sum() == 0:
+        return array
     return (array.cumsum() / array.sum()).round(2)
 
 
