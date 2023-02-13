@@ -1,6 +1,12 @@
 History
 *********
 
+0.2.3 (2023-02-13)
+==================
+* Bug fix: handle if no visit is within the tessallation
+* Bug fix: handle if no OD trip is within the tessallation
+* Bug fix: unify histogram bins rounding issue
+
 0.2.2 (2023-02-01)
 ==================
 * Bug fix: exclude user_time_delta if there is no user with at least two trips.
