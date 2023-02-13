@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from haversine import haversine
 from pandas import DataFrame, Series
+import math
 
 from dp_mobility_report.model.section import TupleSection
 from dp_mobility_report.privacy import diff_privacy
@@ -13,6 +14,15 @@ def haversine_dist(coords: List[float]) -> float:
     # coords: provide coordinates as lat_start, lng_start, lat_end, lng_end
     return haversine((coords[0], coords[1]), (coords[2], coords[3]))
 
+
+def _round_up(n, decimals=0):
+    multiplier = 10 ** decimals
+    return math.ceil(n * multiplier) / multiplier
+
+
+def _round_down(n, decimals=0):
+    multiplier = 10 ** decimals
+    return math.floor(n * multiplier) / multiplier
 
 def cut_outliers(
     data: Series,
@@ -82,10 +92,10 @@ def hist_section(
     # hist_min and hist_max determine how the output histogram looks like
 
     # max value of histogram: either given as input or determined by dp max
-    hist_max = hist_max if (hist_max is not None) else quartiles["max"]
+    hist_max = hist_max if (hist_max is not None) else _round_up(quartiles["max"], 3)
 
     # min value of histogram: either given as input or determined by dp min
-    hist_min = hist_min if (hist_min is not None) else quartiles["min"]
+    hist_min = hist_min if (hist_min is not None) else _round_down(quartiles["min"], 3)
 
     # if all values above defined max, create one histogram bin greater hist_max
     if hist_min > hist_max:
@@ -128,12 +138,12 @@ def hist_section(
             bin_range = (hist_max - hist_min) / 10
 
         # "snap" hist_max_input to bin_range (for pretty hist bins): E.g., if bin range is 5, and the dp max value is 23, max_value snaps to 25
-        hist_max_input = hist_max if hist_max > quartiles["max"] else quartiles["max"]
+        hist_max_input = hist_max if hist_max > quartiles["max"] else _round_up(quartiles["max"], 3)
         hist_max_input = (
-            round(hist_max_input, 2)
+                hist_max_input
             if round((hist_max_input - hist_min) % bin_range, 2) == 0
-            else round(hist_max_input
-            + (bin_range - ((hist_max_input - hist_min) % bin_range)), 2)
+            else hist_max_input
+            + (bin_range - ((hist_max_input - hist_min) % bin_range))
         )
         max_bins = int((hist_max_input - hist_min) / bin_range)
         max_bins = (
