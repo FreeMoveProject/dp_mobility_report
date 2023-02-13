@@ -60,7 +60,7 @@ def render_place_analysis(
         quartiles = report[const.VISITS_PER_TILE].quartiles.round()
 
         args["visits_per_tile_summary_table"] = render_summary(
-            quartiles.astype(int),  # extrapolate visits from dp record count
+            quartiles, int  # extrapolate visits from dp record count
         )
         args["visits_per_tile_cumsum_linechart"] = render_visits_per_tile_cumsum(
             report[const.VISITS_PER_TILE],
