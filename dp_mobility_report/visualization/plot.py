@@ -459,7 +459,7 @@ def ranking(
         capsize=10,
         label="base",
     )
-    if (x_alternative is not None):
+    if x_alternative is not None:
         if all(np.isnan(x_alternative)):
             x_alternative = np.zeros(len(x_alternative))
         bar_alt = ax.errorbar(

@@ -137,7 +137,7 @@ def _mobility_entropy(df: pd.DataFrame) -> np.ndarray:
     )
 
     # if all visits are outside the tessellation, there are no visits by user
-    if (len (tile_visits_by_user) > 0):
+    if len(tile_visits_by_user) > 0:
 
         entropy = tile_visits_by_user.groupby(const.UID).probs.apply(
             lambda x: stats.entropy(x, base=2)

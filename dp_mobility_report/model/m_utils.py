@@ -1,10 +1,10 @@
+import math
 from typing import List, Optional, Tuple, Type, Union
 
 import numpy as np
 import pandas as pd
 from haversine import haversine
 from pandas import DataFrame, Series
-import math
 
 from dp_mobility_report.model.section import TupleSection
 from dp_mobility_report.privacy import diff_privacy
@@ -15,14 +15,15 @@ def haversine_dist(coords: List[float]) -> float:
     return haversine((coords[0], coords[1]), (coords[2], coords[3]))
 
 
-def _round_up(n, decimals=0):
-    multiplier = 10 ** decimals
+def _round_up(n: Union[float, int], decimals: int = 0) -> float:
+    multiplier = 10**decimals
     return math.ceil(n * multiplier) / multiplier
 
 
-def _round_down(n, decimals=0):
-    multiplier = 10 ** decimals
+def _round_down(n: Union[float, int], decimals: int = 0) -> float:
+    multiplier = 10**decimals
     return math.floor(n * multiplier) / multiplier
+
 
 def cut_outliers(
     data: Series,
@@ -58,30 +59,31 @@ def hist_section(
         if (hist_max is None) and (hist_min is None):
             hist_min = 0
             hist_max = 10
-        elif (hist_max is None):
+        elif hist_max is None:
             hist_max = hist_min + 1
-        elif (hist_min is None):
+        elif hist_min is None:
             hist_min = hist_max - 1
-        if (bin_range is None):
+        if bin_range is None:
             bin_range = 1
-            
-        bins = np.arange(hist_min, hist_max+bin_range, bin_range)
-        counts = np.zeros(len(bins)-1)
-        
+
+        bins = np.arange(hist_min, hist_max + bin_range, bin_range)
+        counts = np.zeros(len(bins) - 1)
+
         dp_counts = diff_privacy.counts_dp(counts, epsi, sensitivity)
         moe_laplace = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
-        
-        quartiles = pd.Series(np.repeat(np.nan, 5), index=["min", "25%", "50%", "75%", "max"])
+
+        quartiles = pd.Series(
+            np.repeat(np.nan, 5), index=["min", "25%", "50%", "75%", "max"]
+        )
         moe_expmech = np.nan
 
         return TupleSection(
-        data=(dp_counts, bins),
-        privacy_budget=eps,
-        quartiles=quartiles,
-        margin_of_error_laplace=moe_laplace,
-        margin_of_error_expmech=moe_expmech,
-    )
-
+            data=(dp_counts, bins),
+            privacy_budget=eps,
+            quartiles=quartiles,
+            margin_of_error_laplace=moe_laplace,
+            margin_of_error_expmech=moe_expmech,
+        )
 
     quartiles, moe_expmech = diff_privacy.quartiles_dp(series, epsi_quant, sensitivity)
     series = cut_outliers(
@@ -138,9 +140,11 @@ def hist_section(
             bin_range = (hist_max - hist_min) / 10
 
         # "snap" hist_max_input to bin_range (for pretty hist bins): E.g., if bin range is 5, and the dp max value is 23, max_value snaps to 25
-        hist_max_input = hist_max if hist_max > quartiles["max"] else _round_up(quartiles["max"], 3)
         hist_max_input = (
-                hist_max_input
+            hist_max if hist_max > quartiles["max"] else _round_up(quartiles["max"], 3)
+        )
+        hist_max_input = (
+            hist_max_input
             if round((hist_max_input - hist_min) % bin_range, 2) == 0
             else hist_max_input
             + (bin_range - ((hist_max_input - hist_min) % bin_range))
