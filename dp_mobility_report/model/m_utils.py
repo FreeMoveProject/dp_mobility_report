@@ -130,10 +130,10 @@ def hist_section(
         # "snap" hist_max_input to bin_range (for pretty hist bins): E.g., if bin range is 5, and the dp max value is 23, max_value snaps to 25
         hist_max_input = hist_max if hist_max > quartiles["max"] else quartiles["max"]
         hist_max_input = (
-            hist_max_input
+            round(hist_max_input, 2)
             if round((hist_max_input - hist_min) % bin_range, 2) == 0
-            else hist_max_input
-            + (bin_range - ((hist_max_input - hist_min) % bin_range))
+            else round(hist_max_input
+            + (bin_range - ((hist_max_input - hist_min) % bin_range)), 2)
         )
         max_bins = int((hist_max_input - hist_min) / bin_range)
         max_bins = (
