@@ -12,11 +12,14 @@ from shapely.geometry import Point
 from dp_mobility_report import constants as const
 
 
-def has_points_inside_tessellation(df: pd.DataFrame, tessellation: Optional[GeoDataFrame]) -> bool:
+def has_points_inside_tessellation(
+    df: pd.DataFrame, tessellation: Optional[GeoDataFrame]
+) -> bool:
     if tessellation is None:
         return True
-    
+
     return not all(df[const.TILE_ID].isna())
+
 
 def validate_inclusion_exclusion(
     analysis_selection: Optional[List[str]], analysis_exclusion: Optional[List[str]]
@@ -245,8 +248,9 @@ def clean_analysis_exclusion(
 
     if (has_tessellation) & (not has_points_inside_tessellation):
         analysis_exclusion += const.TESSELLATION_ELEMENTS
-        warnings.warn("No records are within the given tessellation. All analyses based on the tessellation will be excluded.")
-
+        warnings.warn(
+            "No records are within the given tessellation. All analyses based on the tessellation will be excluded."
+        )
 
     if not has_timestamps:
         # warning in validation

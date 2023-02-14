@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 import dp_mobility_report.constants as const
-from dp_mobility_report.report.html.html_utils import fmt, fmt_config, get_template
 from dp_mobility_report.model.preprocessing import has_points_inside_tessellation
+from dp_mobility_report.report.html.html_utils import fmt, fmt_config, get_template
 
 if TYPE_CHECKING:
     from dp_mobility_report import BenchmarkReport, DpMobilityReport
@@ -21,10 +21,10 @@ def render_config(dpmreport: "DpMobilityReport") -> str:
             "tessellation_info"
         ] = "No tessellation has been provided. All analyses based on the tessellation have been excluded."
     elif not has_points_inside_tessellation(dpmreport.df, dpmreport.tessellation):
-                args[
+        args[
             "tessellation_info"
         ] = "No records are within the given tessellation. All analyses based on the tessellation have been excluded."
-                
+
     if not pd.core.dtypes.common.is_datetime64_dtype(dpmreport.df[const.DATETIME]):
         args[
             "timestamp_info"
@@ -49,11 +49,20 @@ def render_benchmark_config(benchmarkreport: "BenchmarkReport") -> str:
         args[
             "tessellation_info"
         ] = "No tessellation has been provided. All analyses based on the tessellation have been excluded."
-    elif (not has_points_inside_tessellation(benchmarkreport.report_base.df, benchmarkreport.report_base.tessellation)) | (not has_points_inside_tessellation(benchmarkreport.report_alternative.df, benchmarkreport.report_alternative.tessellation)):
-                args[
+    elif (
+        not has_points_inside_tessellation(
+            benchmarkreport.report_base.df, benchmarkreport.report_base.tessellation
+        )
+    ) | (
+        not has_points_inside_tessellation(
+            benchmarkreport.report_alternative.df,
+            benchmarkreport.report_alternative.tessellation,
+        )
+    ):
+        args[
             "tessellation_info"
         ] = "No records are within the given tessellation. All analyses based on the tessellation have been excluded."
-             
+
     if (
         not pd.core.dtypes.common.is_datetime64_dtype(
             benchmarkreport.report_base.df[const.DATETIME]

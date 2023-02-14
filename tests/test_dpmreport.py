@@ -532,10 +532,10 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
 
     with pytest.warns(Warning):
         dpmr = DpMobilityReport(df, test_tessellation, privacy_budget=None)
-    
+
     report = dpmr.report
     assert isinstance(report, dict)
-    
+
     assert set(dpmr.analysis_exclusion) == {
         const.VISITS_PER_TILE,
         const.VISITS_PER_TIME_TILE,
@@ -555,6 +555,7 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
         const.USER_TIME_DELTA,
         const.RADIUS_OF_GYRATION,
     ]
+
 
 def test_analysis_exclusion(test_data, test_tessellation):
     dpmr = DpMobilityReport(
@@ -783,4 +784,3 @@ def test_to_html_file(test_data, test_data_sequence, test_tessellation, tmp_path
     file_name = tmp_path / "html/test_output7.html"
     DpMobilityReport(df, test_tessellation).to_file(file_name)
     assert file_name.is_file()
-
