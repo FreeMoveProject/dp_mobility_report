@@ -172,6 +172,7 @@ class DpMobilityReport:
             analysis_selection,
             analysis_exclusion,
             has_tessellation=(tessellation is not None),
+            has_points_inside_tessellation = preprocessing.has_points_inside_tessellation(self.df, self.tessellation),
             has_timestamps=pd.core.dtypes.common.is_datetime64_dtype(
                 self.df[const.DATETIME]
             ),
