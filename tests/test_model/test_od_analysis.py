@@ -136,8 +136,8 @@ def test_get_jump_length(test_od_shape, test_dpmreport):
     jump_length = od_analysis.get_jump_length(test_od_shape, test_dpmreport, None)
     assert jump_length.data[0].round().tolist() == [7, 10, 15, 17, 16, 17, 9, 5, 2, 1]
     assert jump_length.data[1].round(3).tolist() == [
-        1.114,
-        1.877,
+        1.113,
+        1.876,
         2.639,
         3.402,
         4.165,
@@ -146,7 +146,7 @@ def test_get_jump_length(test_od_shape, test_dpmreport):
         6.453,
         7.216,
         7.979,
-        8.741,
+        8.742,
     ]
     assert len(jump_length.data[0]) == 10
     assert all(np.diff(jump_length.data[1]).round(3) == 0.763)

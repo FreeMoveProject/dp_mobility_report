@@ -24,18 +24,26 @@ def get_template(template_name: str) -> jinja2.Template:
     return jinja2_env.get_template(template_name)
 
 
-def render_summary(summary: Series) -> str:
+def render_summary(summary: Series, target_type: Optional[type] = None) -> str:
     summary_list = [
-        {"name": "Min.", "value": fmt(summary["min"])},
-        {"name": "Max.", "value": fmt(summary["max"])},
+        {"name": "Min.", "value": fmt(summary["min"], target_type)},
+        {"name": "Max.", "value": fmt(summary["max"], target_type)},
     ]
     if "25%" in summary:
-        summary_list.insert(1, {"name": "75%", "value": fmt(summary["75%"])})
-        summary_list.insert(1, {"name": "Median", "value": fmt(summary["50%"])})
-        summary_list.insert(1, {"name": "25%", "value": fmt(summary["25%"])})
+        summary_list.insert(
+            1, {"name": "75%", "value": fmt(summary["75%"], target_type)}
+        )
+        summary_list.insert(
+            1, {"name": "Median", "value": fmt(summary["50%"], target_type)}
+        )
+        summary_list.insert(
+            1, {"name": "25%", "value": fmt(summary["25%"], target_type)}
+        )
 
     if "mean" in summary:
-        summary_list.insert(0, {"name": "Mean", "value": fmt(summary["mean"])})
+        summary_list.insert(
+            0, {"name": "Mean", "value": fmt(summary["mean"], target_type)}
+        )
 
     template_table = jinja2_env.get_template("table.html")
     summary_html = template_table.render(rows=summary_list)
@@ -129,6 +137,10 @@ def render_moe_info(margin_of_error: int) -> str:
 
 
 def fmt(value: Any, target_type: Optional[type] = None) -> Any:
+    if (value is None) or (
+        isinstance(value, (float, np.floating, int, np.integer)) and math.isnan(value)
+    ):
+        return "-"
     if target_type and (value is not None):
         value = target_type(value)
     if isinstance(value, (float, np.floating)):

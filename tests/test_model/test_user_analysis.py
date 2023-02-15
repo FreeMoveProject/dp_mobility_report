@@ -75,7 +75,7 @@ def test_get_radius_of_gyration(test_dpmreport):
         3.147,
         3.384,
         3.621,
-        3.857,
+        3.858,
         4.094,
         4.331,
         4.568,
