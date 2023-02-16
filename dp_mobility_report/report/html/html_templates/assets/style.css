@@ -173,8 +173,19 @@ input {
   content: "❯";
   width: 1em;
   height: 1em;
+  text-align: end;
+  transition: all 0.35s;
+}
+
+.tab-label-structure::after {
+  content: "❯";
+  width: 2em;
+  height: 2em;
+  font-size: larger;
   text-align: center;
   transition: all 0.35s;
+  margin-top: 0.5em;
+
 }
 .tab-content {
   max-height: 0;
@@ -199,6 +210,9 @@ input:checked + .tab-label {
   background: #1a252f;
 }
 input:checked + .tab-label::after {
+  transform: rotate(90deg);
+}
+input:checked + .tab-label-structure::after {
   transform: rotate(90deg);
 }
 input:checked ~ .tab-content {
