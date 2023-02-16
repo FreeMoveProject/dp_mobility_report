@@ -91,6 +91,9 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
         args["distinct_tiles_user_eps"] = render_eps(
             report[const.USER_TILE_COUNT].privacy_budget
         )
+        args["distinct_tiles_user_hist_info"] = render_user_input_info(
+            dpmreport.max_user_tile_count, dpmreport.bin_range_user_tile_count
+        )
         args["distinct_tiles_user_hist"] = render_distinct_tiles_user(
             report[const.USER_TILE_COUNT]
         )
@@ -217,7 +220,10 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
             render_eps(report_base[const.USER_TILE_COUNT].privacy_budget),
             render_eps(report_alternative[const.USER_TILE_COUNT].privacy_budget),
         )
-
+        args["distinct_tiles_user_hist_info"] = render_user_input_info(
+            benchmark.report_base.max_user_tile_count,
+            benchmark.report_base.bin_range_user_tile_count,
+        )
         args["distinct_tiles_user_hist"] = render_distinct_tiles_user(
             report_base[const.USER_TILE_COUNT],
             report_alternative[const.USER_TILE_COUNT],
