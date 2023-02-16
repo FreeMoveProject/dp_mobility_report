@@ -46,6 +46,9 @@ def render_html(
         
         args["config_segment"] = config_templates.render_config(dpmreport)
 
+        if dpmreport.privacy_budget is not None:
+            args["dp_info"] = config_templates.render_dp_info()
+            
         if not set(const.OVERVIEW_ELEMENTS).issubset(dpmreport.analysis_exclusion):
             args["overview_segment"] = overview_templates.render_overview(dpmreport)
         pbar.update()
@@ -103,6 +106,7 @@ def render_benchmark_html(
             benchmarkreport
         )
         args["similarity_info"] = config_templates.render_similarity_info()
+        args["dp_info"] = config_templates.render_dp_info()
 
         if not set(const.OVERVIEW_ELEMENTS).issubset(
             benchmarkreport.analysis_exclusion

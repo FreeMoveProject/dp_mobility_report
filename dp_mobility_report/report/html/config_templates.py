@@ -73,6 +73,11 @@ def render_similarity_info():
         template_structure = get_template("similarity_info.html")
         return template_structure.render() 
         
+def render_dp_info():
+
+        template_structure = get_template("dp_info.html")
+        return template_structure.render() 
+
 def render_config_table(dpmreport: "DpMobilityReport") -> str:
 
     config_list = [
