@@ -57,6 +57,9 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
             There are overlapping trips in the dataset.
             The negative minimum time delta implies that there is a trip of a user that starts before the previous one has ended. 
             This might be an indication of an error in the dataset."""
+        args["time_between_traj_hist_info"] = render_user_input_info(
+            dpmreport.max_user_time_delta, dpmreport.bin_range_user_time_delta
+        )
         args["time_between_traj_hist"] = render_time_between_traj(
             report[const.USER_TIME_DELTA]
         )
@@ -155,6 +158,10 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
         args["time_between_traj_eps"] = (
             render_eps(report_base[const.USER_TIME_DELTA].privacy_budget),
             render_eps(report_alternative[const.USER_TIME_DELTA].privacy_budget),
+        )
+        args["time_between_traj_hist_info"] = render_user_input_info(
+            benchmark.report_base.max_user_time_delta,
+            benchmark.report_base.bin_range_user_time_delta,
         )
         args["time_between_traj_hist"] = render_time_between_traj(
             report_base[const.USER_TIME_DELTA],
