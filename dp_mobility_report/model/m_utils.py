@@ -1,3 +1,4 @@
+import math
 from typing import List, Optional, Tuple, Type, Union
 
 import numpy as np
@@ -12,6 +13,16 @@ from dp_mobility_report.privacy import diff_privacy
 def haversine_dist(coords: List[float]) -> float:
     # coords: provide coordinates as lat_start, lng_start, lat_end, lng_end
     return haversine((coords[0], coords[1]), (coords[2], coords[3]))
+
+
+def _round_up(n: Union[float, int], decimals: int = 0) -> float:
+    multiplier = 10**decimals
+    return math.ceil(n * multiplier) / multiplier
+
+
+def _round_down(n: Union[float, int], decimals: int = 0) -> float:
+    multiplier = 10**decimals
+    return math.floor(n * multiplier) / multiplier
 
 
 def cut_outliers(
@@ -42,6 +53,7 @@ def hist_section(
     epsi_quant = epsi * 5 if epsi is not None else None
 
     series = Series(series) if isinstance(series, np.ndarray) else series
+
     quartiles, moe_expmech = diff_privacy.quartiles_dp(series, epsi_quant, sensitivity)
     series = cut_outliers(
         series, min_value=quartiles["min"], max_value=quartiles["max"]
@@ -51,10 +63,10 @@ def hist_section(
     # hist_min and hist_max determine how the output histogram looks like
 
     # max value of histogram: either given as input or determined by dp max
-    hist_max = hist_max if (hist_max is not None) else quartiles["max"]
+    hist_max = hist_max if (hist_max is not None) else _round_up(quartiles["max"], 3)
 
     # min value of histogram: either given as input or determined by dp min
-    hist_min = hist_min if (hist_min is not None) else quartiles["min"]
+    hist_min = hist_min if (hist_min is not None) else _round_down(quartiles["min"], 3)
 
     # if all values above defined max, create one histogram bin greater hist_max
     if hist_min > hist_max:
@@ -97,7 +109,9 @@ def hist_section(
             bin_range = (hist_max - hist_min) / 10
 
         # "snap" hist_max_input to bin_range (for pretty hist bins): E.g., if bin range is 5, and the dp max value is 23, max_value snaps to 25
-        hist_max_input = hist_max if hist_max > quartiles["max"] else quartiles["max"]
+        hist_max_input = (
+            hist_max if hist_max > quartiles["max"] else _round_up(quartiles["max"], 3)
+        )
         hist_max_input = (
             hist_max_input
             if round((hist_max_input - hist_min) % bin_range, 2) == 0
@@ -166,6 +180,8 @@ def get_epsi(evalu: bool, eps: Optional[float], elements: int) -> Optional[float
 
 def _cumsum(array: np.array) -> np.array:
     array[::-1].sort()
+    if array.sum() == 0:
+        return array
     return (array.cumsum() / array.sum()).round(2)
 
 

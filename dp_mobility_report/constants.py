@@ -55,9 +55,7 @@ USER_ELEMENTS = [
 ]
 
 ELEMENTS = OVERVIEW_ELEMENTS + PLACE_ELEMENTS + OD_ELEMENTS + USER_ELEMENTS
-TESSELLATION_ELEMENTS = (
-    PLACE_ELEMENTS + OD_ELEMENTS + [USER_TILE_COUNT, MOBILITY_ENTROPY]
-)  # TODO: include or exclude travel_time and jump_length?
+TESSELLATION_ELEMENTS = PLACE_ELEMENTS + [OD_FLOWS, USER_TILE_COUNT, MOBILITY_ENTROPY]
 TIMESTAMP_ANALYSES = [
     TRIPS_OVER_TIME,
     TRIPS_PER_WEEKDAY,
@@ -76,10 +74,20 @@ TID = "tid"
 LAT = "lat"
 LNG = "lng"
 DATETIME = "datetime"
-TILE_ID_END = "tile_id_end"
-LNG_END = "lng_end"
-LAT_END = "lat_end"
-DATETIME_END = "datetime_end"
+
+POINT_TYPE = "point_type"
+START = "start"
+END = "end"
+TILE_ID = "tile_id"
+TILE_NAME = "tile_name"
+GEOMETRY = "geometry"
+
+TILE_ID_END = TILE_ID + "_" + END
+LNG_END = LNG + "_" + END
+LAT_END = LAT + "_" + END
+DATETIME_END = DATETIME + "_" + END
+
+# TIME
 DATE = "date"
 DAY_NAME = "day_name"
 HOUR = "hour"
@@ -87,13 +95,7 @@ IS_WEEKEND = "is_weekend"
 WEEKDAY = "weekday"
 WEEKEND = "weekend"
 TIME_CATEGORY = "time category"
-POINT_TYPE = "point_type"
-START = "start"
-END = "end"
 
-TILE_ID = "tile_id"
-TILE_NAME = "tile_name"
-GEOMETRY = "geometry"
 
 # OTHER
 DEFAULT_CRS = CRS.from_epsg(4326)

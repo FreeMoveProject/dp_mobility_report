@@ -60,7 +60,7 @@ def render_place_analysis(
         quartiles = report[const.VISITS_PER_TILE].quartiles.round()
 
         args["visits_per_tile_summary_table"] = render_summary(
-            quartiles.astype(int),  # extrapolate visits from dp record count
+            quartiles, int  # extrapolate visits from dp record count
         )
         args["visits_per_tile_cumsum_linechart"] = render_visits_per_tile_cumsum(
             report[const.VISITS_PER_TILE],
@@ -375,7 +375,7 @@ def render_most_freq_tiles_ranking(visits_per_tile: DfSection, top_x: int = 10) 
         margin_of_error=visits_per_tile.margin_of_error_laplace,
     )
     html_ranking = v_utils.fig_to_html(ranking)
-    plt.close()
+    plt.close(ranking)
     return html_ranking
 
 
@@ -418,7 +418,7 @@ def render_most_freq_tiles_ranking_benchmark(
         margin_of_error_alternative=visits_per_tile_alternative.margin_of_error_laplace,
     )
     html_ranking = v_utils.fig_to_html(ranking)
-    plt.close()
+    plt.close(ranking)
     return html_ranking
 
 
@@ -517,13 +517,16 @@ def _create_timewindow_segment(df: pd.DataFrame, tessellation: GeoDataFrame) -> 
     deviation_choropleth = plot.multi_choropleth_map(
         dev_from_avg, tessellation, is_cmap_diverging=True, min_scale=0, vcenter=1
     )
-    return f"""<h4>Number of visits</h4>
+    html = f"""<h4>Number of visits</h4>
         {v_utils.fig_to_html_as_png(visits_choropleth)}
         <h4>Deviation from tile average</h4>
         <div><p>The average of each cell 
         over all time windows equals 1 (100% of average traffic). 
         A value of < 1 (> 1) means that a tile is visited less (more) frequently in this time window than it is on average.</p></div>
         {v_utils.fig_to_html_as_png(deviation_choropleth)}"""  # svg might get too large
+    plt.close(visits_choropleth)
+    plt.close(deviation_choropleth)
+    return html
 
 
 def _create_timewindow_segment_benchmark(
@@ -532,5 +535,7 @@ def _create_timewindow_segment_benchmark(
     visits_choropleth = plot.multi_choropleth_map(
         df_deviation, tessellation, is_cmap_diverging=True, min_scale=-2, max_scale=2
     )
-    return f"""<h4>Deviation from base</h4>
+    html = f"""<h4>Deviation from base</h4>
         {v_utils.fig_to_html_as_png(visits_choropleth)}"""  # svg might get too large
+    plt.close(visits_choropleth)
+    return html

@@ -5,7 +5,6 @@ if TYPE_CHECKING:
 
 import numpy as np
 import pandas as pd
-from geopandas import GeoDataFrame
 
 from dp_mobility_report import constants as const
 from dp_mobility_report.model import m_utils
@@ -13,28 +12,22 @@ from dp_mobility_report.model.section import DfSection, TupleSection
 from dp_mobility_report.privacy import diff_privacy
 
 
-def get_od_shape(df: pd.DataFrame, tessellation: GeoDataFrame) -> pd.DataFrame:
-    ends_od_shape = (
-        df[(df[const.POINT_TYPE] == const.END)][
-            [const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]
-        ]
-        .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
-        .rename(
-            columns={
-                const.TILE_ID: const.TILE_ID_END,
-                const.LAT: const.LAT_END,
-                const.LNG: const.LNG_END,
-                const.DATETIME: const.DATETIME_END,
-            }
-        )
-    )
+def get_od_shape(df: pd.DataFrame) -> pd.DataFrame:
+    if const.TILE_ID in df.columns:
+        columns = [const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]
+    else:
+        columns = [const.TID, const.DATETIME, const.LAT, const.LNG]
 
-    od_shape = (
-        df[(df[const.POINT_TYPE] == const.START)][
-            [const.TID, const.TILE_ID, const.DATETIME, const.LAT, const.LNG]
-        ]
-        .merge(tessellation[[const.TILE_ID]], on=const.TILE_ID, how="left")
-        .merge(ends_od_shape, on=const.TID, how="inner")
+    ends_od_shape = df[(df[const.POINT_TYPE] == const.END)][columns]
+
+    # change column name except for TID
+    ends_od_shape.columns = [
+        col_name + "_" + const.END if col_name != const.TID else col_name
+        for col_name in ends_od_shape.columns
+    ]
+
+    od_shape = df[(df[const.POINT_TYPE] == const.START)][columns].merge(
+        ends_od_shape, on=const.TID, how="inner"
     )
 
     return od_shape
@@ -45,7 +38,7 @@ def get_od_flows(
     dpmreport: "DpMobilityReport",
     eps: Optional[float],
 ) -> DfSection:
-    sensitivity = dpmreport.max_trips_per_user
+    sensitivity = dpmreport.count_sensitivity_base
     od_flows = (
         od_shape[od_shape[const.TILE_ID].notna() & od_shape[const.TILE_ID_END].notna()]
         .groupby([const.TILE_ID, const.TILE_ID_END])
@@ -108,7 +101,7 @@ def get_travel_time(
     return m_utils.hist_section(
         travel_time,
         eps,
-        dpmreport.max_trips_per_user,
+        dpmreport.count_sensitivity_base,
         hist_max=dpmreport.max_travel_time,
         bin_range=dpmreport.bin_range_travel_time,
         bin_type=int,
@@ -127,7 +120,7 @@ def get_jump_length(
     return m_utils.hist_section(
         jump_length,
         eps,
-        dpmreport.max_trips_per_user,
+        dpmreport.count_sensitivity_base,
         hist_max=dpmreport.max_jump_length,
         bin_range=dpmreport.bin_range_jump_length,
         evalu=dpmreport.evalu,

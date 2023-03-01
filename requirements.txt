@@ -10,7 +10,7 @@ pandarallel
 pandas
 pyproj
 pytest
-geopandas==0.10.2
+geopandas
 rtree
 scipy
 geojson

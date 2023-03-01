@@ -1,6 +1,18 @@
 History
 *********
 
+0.2.3 (2023-02-13)
+==================
+* Bug fix: handle if no visit is within the tessallation
+* Bug fix: handle if no OD trip is within the tessallation
+* Bug fix: unify histogram bins rounding issue
+
+0.2.2 (2023-02-01)
+==================
+* Bug fix: exclude user_time_delta if there is no user with at least two trips.
+* Bug fix: set max_trips_per_user correctly if user_privacy=False.
+* Enhancement: do not exclude jump_length and travel_time if no tessellation is given
+
 0.2.1 (2023-01-24)
 ==================
 * Bug fix: Correct range of scale for visits per time and tile map. 
