@@ -7,7 +7,7 @@ If you want to use the DP-Star algorithm and use the script to sync the config-f
 5. Then you have to create the synthetic datasets.
 You can do that manually and store the files in "/data/dpstar_synthetic_datasets", or use the "synthetic_dataset_config.py" script and then run the DP-Star algorithm. The datasets will then be stored in the given folder automatically. 
 6. If you used the DP-Star Package, remember to use the "dpstar_for_dpmob.py" script to modify the datasets so they can be used in the mobility report package.
-7. Run the "dpstar_reports_gen.py" script.
+7. Run the "generate_similarity_measures.py" script.
 8. The similarity measure results will be in the "evaluation_results" folder in the "evaluation_database.csv" file
 
 

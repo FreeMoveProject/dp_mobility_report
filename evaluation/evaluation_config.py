@@ -1,18 +1,17 @@
 
 # General Settings
-NUMBER_OF_RUNS = 5
-EPSILON = 20
+NUMBER_OF_RUNS = 10
+EPSILON = 4
 MAX_TRIPS = None
 USER_PRIVACY = False
 SYNTHETIC_ALGORITHM_NAME = "DPSTAR"
-
 # If you only want to generate similarity measures for one algorithm, you can set the other to False
 GENERATE_SYNTHETIC_SIMILARITY_MEASURES = True
 GENERATE_DP_SIMILARITY_MEASURES = True
 
 # NEED TO INSERT ABSOLUT PATHS ON YOUR SYSTEM TO DP_STAR PROJECT AND THIS PROJECT
-PATH_ABSOLUT = "/Users/alex/PycharmProjects/dp_mobility_report_eval"
-PATH_DPSTAR = "/Users/alex/PycharmProjects/dpstar"
+PATH_ABSOLUT = ""
+PATH_DPSTAR = ""
 
 
 

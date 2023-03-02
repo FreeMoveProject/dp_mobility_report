@@ -8,11 +8,11 @@ import numpy as np
 
 # State which runs you want to plot
 ALGORITHMS = ["DPSTAR", "DP"]
-NUMBER_OF_RUNS = 5
-EPSILON = 20
+NUMBER_OF_RUNS = 10
+EPSILON = 4
 MAX_TRIPS = "None"
 USER_PRIVACY = False
-MEASURES_TO_PLOT = ["n_records", "n_users"]
+MEASURES_TO_PLOT = ["n_records", "n_users", "n_locations", "visits_per_tile", "user_tile_count"]
 
 # Reads in the CSV File or prints an Error Message
 if os.path.isfile(evaluation_config.PATH_CSV_FILE):
@@ -38,7 +38,7 @@ for measure in MEASURES_TO_PLOT:
     ax = plt.gca()
     for idx, algorithm_selected_columns in enumerate(algorithms_selected_columns):
         color = next(ax._get_lines.prop_cycler)['color']
-        plt.plot(algorithm_selected_columns, color=color, label=ALGORITHMS[idx] + " Raw")
+        plt.plot(algorithm_selected_columns, color=color, marker="X", markersize="10", linestyle="", label=ALGORITHMS[idx] + " Raw")
         plt.axhline(np.nanmean(algorithm_selected_columns), color=color, linestyle="--", dashes=(5, 7), label=ALGORITHMS[idx] + " Average")
 
     plt.title(measure)
