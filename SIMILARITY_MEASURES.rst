@@ -219,6 +219,7 @@ The coverage of the top :math:`n` locations [2] is defined by the true positive 
 This measure represents how well the alternative dataset is similar to the base dataset considering the most visited locations.
 
 
+References:
 
 [1] Gursoy, M. E., Liu, L., Truex, S., Yu, L., & Wei, W. (2018, October). Utility-aware synthesis of differentially private and attack-resilient location traces. In Proceedings of the 2018 ACM SIGSAC conference on computer and communications security (pp. 196-211).
 [2] Bindschaedler, V., & Shokri, R. (2016, May). Synthesizing plausible privacy-preserving location traces. In 2016 IEEE Symposium on Security and Privacy (SP) (pp. 546-563). IEEE.
