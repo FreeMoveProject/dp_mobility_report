@@ -19,7 +19,17 @@
 <div>
     {% if trips_over_time_linechart %}
     <div>
-        <h3>Trips over time</h3>
+        <div class="tab-structure-info-button">
+            <input type="checkbox" id="tripsovertime">
+            <label class="tab-label-structure-info-button" for="tripsovertime"><h3>Trips over time <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+              </svg></h3></label>
+            <div class="tab-content">
+                This visualization shows the trips over time. The y-axis shows the percentage of trips while the x-axis will show the timeline aggregated as indicated below the visualization.
+            </div>
+        </div>
+
         <p>privacy budget: {{trips_over_time_eps}}</p>
         <p>95% CI: +/- {{trips_over_time_moe}}</p>
         <div>
@@ -51,7 +61,16 @@
 
     {% if trips_per_hour_linechart %}
     <div>
-        <h3>Trips per hour of day</h3>
+        <div class="tab-structure-info-button">
+            <input type="checkbox" id="tripsperhour">
+            <label class="tab-label-structure-info-button" for="tripsperhour"><h3>Trips per hour of day <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+              </svg></h3></label>
+            <div class="tab-content">
+                This linechart shows the percentage of trips per hour of the day. The legend shows the different time categories (weekday start, weekday end, weekend start, weekend end) indicating the start and end timestamp of each trip and if the trip was during the week or on the weekend.
+            </div>
+        </div>
         <p>privacy budget: {{ trips_per_hour_eps }}</p>
         <p>95% CI: +/- {{trips_per_hour_moe}}</p>
         <div>
