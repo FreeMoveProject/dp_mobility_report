@@ -159,11 +159,11 @@ def render_benchmark_place_analysis(
         )
 
     if const.VISITS_PER_TIME_TILE not in benchmark.analysis_exclusion:
-        args["visits_per_time_tile_eps"] = (
+        args["visits_per_tile_timewindow_eps"] = (
             render_eps(report_base[const.VISITS_PER_TIME_TILE].privacy_budget),
             render_eps(report_alternative[const.VISITS_PER_TIME_TILE].privacy_budget),
         )
-        args["visits_per_time_tile_moe"] = (
+        args["visits_per_tile_timewindow_moe"] = (
             fmt_moe(report_base[const.VISITS_PER_TIME_TILE].margin_of_error_laplace),
             fmt_moe(
                 report_alternative[const.VISITS_PER_TIME_TILE].margin_of_error_laplace
