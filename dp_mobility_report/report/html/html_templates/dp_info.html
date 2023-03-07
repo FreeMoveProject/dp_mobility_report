@@ -1,23 +1,21 @@
+<h2>Differential Privacy</b></h2>
+  <p> 
+    This report offers to provide a differential privacy guarantee indicated by the privacy budget in the configurations above and the privacy budget listed for each analysis. The notion of differential privacy and the used mechanisms are described shortly below. 
+    For more information see <a href="https://dp-mobility-report.readthedocs.io/en/latest/index.html">here.</a> </p>
+  <p>
+    Assume a company owns a mobility data set T and needs to release a report. 
+    For the mobility data report, statistics are computed and visualised as can be seen in this report. 
+    Despite the aggregation of data, the mobility report consists of summary statistics which are 
+    vulnerable to reconstruction attacks [1]. By observing answers from measures, 
+    an attacker can recover secret information, such as trips.
+    Differential privacy provides mathematical guarantees for the privacy of an individual [2]. 
+    The concept of differential privacy is that the output of an algorithm \(\mathcal{A}\) remains nearly unchanged if the 
+    records of one individual are removed or added. In this way, differential privacy limits the impact of a 
+    single individual on the analysis outcome, preventing the reconstruction of an individual's data. </p>
 
-  <h2>Differential Privacy</b></h2>
-  <p> TODO </p>
 
-  <div class="tabs">
-    <div class="tab">
-      <input type="checkbox" id="DP">
-      <label class="tab-label" for="DP">Epsilon Differential Privacy</label>
-      <div class="tab-content">
-        <p> TODO </p>
-        
-    </div>
-    </div>
-    <div class="tab">
-      <input type="checkbox" id="EM">
-      <label class="tab-label" for="EM">Exponential Mechanism</label>
-      <div class="tab-content">
-        <p> TODO </p>
-        
-              </div>
-    </div>
-  </div>
+
+    <p>[1] Dwork, C., and A. Roth. 2013. “The Algorithmic Foundations of Differential Privacy.” Foundations and Trends in Theoretical Computer Science 9 (3–4): 211–407. doi:10.1561/ 0400000042.</p>
+    <p>[2] Dwork, C., F. McSherry, K. Nissim, and A. Smith. 2006. “Calibrating Noise to Sensitivity in Private Data Analysis.” TCC '06: Proceedings of the 3rd Theory of Cryptography Conference, New York, United States, 265–284. Springer.</p>
+    
 
