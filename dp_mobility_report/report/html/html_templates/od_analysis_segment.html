@@ -1,16 +1,17 @@
 {% if flows_cumsum_linechart %}
 <div>
-    <h3>OD flows between tiles
-        <button type="button" class="btn btn-outline-dark btn-sm" data-toggle="tooltip" data-placement="center" 
-        title="The following visualization shows the OD flows between the tiles (according to the provided tessellation).
-        The origin of the OD flows is indicated by a small circle and by clicking on one OD connection, information on the origin and destination cell name as well as the count of for this OD connection will show up. 
-        The legend for the intra-tile flows is below. The intra-tile flow is defined as the number of OD connections that start and end in the same tile.">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+    <div class="tab-structure-info-button">
+        <input type="checkbox" id="odflows">
+        <label class="tab-label-structure-info-button" for="odflows"><h3>OD flows between tiles <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
             <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
             <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-          </svg>
-        </button>
-    </h3>
+          </svg></h3></label>
+        <div class="tab-content">
+            The following visualization shows the OD flows between the tiles (according to the provided tessellation).
+            The origin of the OD flows is indicated by a small circle and by clicking on one OD connection, information on the origin and destination cell name as well as the count of for this OD connection will show up. 
+            The legend for the intra-tile flows is below. The intra-tile flow is defined as the number of OD connections that start and end in the same tile.
+        </div>
+    </div>
     <p>privacy budget: {{od_eps}}</p>
     <p>95% CI: +/-{{od_moe}}</p>
     <div>
@@ -44,18 +45,32 @@
         {{flows_summary_table}}
     </div>
     <div>
-        <h4>Cumuluated sum of flows per OD pair</h4>
+        <div class="tab-structure-info-button">
+            <input type="checkbox" id="cumsumperod">
+            <label class="tab-label-structure-info-button" for="cumsumperod"><h4>Cumuluated sum of flows per OD pair <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+              </svg></h4></label>
+            <div class="tab-content">
+                The cumulated sum of flows visualizes the distribution of flows over OD pairs:
+                If all OD connections are traveled equally, the cumulated sum follows a straight diagonal line (gray line). 
+                The larger the share of single OD connections in the total number of flows, the steeper the curve.
+            </div>
+        </div>
         {{flows_cumsum_linechart}}
-
-        <p class="info">
-            The cumulated sum of flows visualizes the distribution of flows over OD pairs:
-            If all OD connections are traveled equally, the cumulated sum follows a straight diagonal line (gray line). 
-            The larger the share of single OD connections in the total number of flows, the steeper the curve.
-        </p>
     </div>  
     
     <div>
-        <h4>Ranking of most frequent OD connections</h4>
+        <div class="tab-structure-info-button">
+            <input type="checkbox" id="rankingfreqod">
+            <label class="tab-label-structure-info-button" for="rankingfreqod"><h4>Ranking of most frequent OD connections <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+              </svg></h4></label>
+            <div class="tab-content">
+                The following visualization shows the ranking of most frequently visited OD connections. The y-axis shows the ranking as well as the tile name according to the provided tessellation. The x-axis indicates the number of flows per OD pair. The margin of error is also visualized.
+            </div>
+        </div> 
         {{most_freq_flows_ranking}}
     </div>
 </div>
@@ -66,7 +81,16 @@
 <div>    
     {% if travel_time_hist %}
     <div>
-        <h3>Travel time of trips (in minutes)</h3>
+        <div class="tab-structure-info-button">
+            <input type="checkbox" id="traveltime">
+            <label class="tab-label-structure-info-button" for="traveltime"><h3>Travel time of trips (in minutes) <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+              </svg></h3></label>
+            <div class="tab-content">
+                The following histogram shows the travel time of trips in minutes. The y-axis indicates the percentage of trips while the x-axis shows the travel time in minutes according to the user configurated bin size and maximum value.
+            </div>
+        </div>         
         <p>privacy budget: {{travel_time_eps}}</p>
         <p>95% CI: +/-: {{travel_time_moe}}</p>
         <div>
@@ -88,10 +112,19 @@
 
     {% if jump_length_hist %}
     <div>
-        <h3>Jump length (in kilometers)</h3>
+        <div class="tab-structure-info-button">
+            <input type="checkbox" id="jumplength">
+            <label class="tab-label-structure-info-button" for="jumplength"><h3>Jump length (in kilometers) <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+              </svg></h3></label>
+            <div class="tab-content">
+                The following histogram shows the jump length in kilometers. The jump length is the straight-line distance between the origin and destination.
+                The y-axis indicates the percentage of trips while the x-axis shows the jump length in kilometers according to the user configurated bin size and maximum value.
+            </div>
+        </div>
         <p>privacy budget: {{travel_time_eps}}</p>
         <p>95% CI: +/- {{travel_time_moe}}</p>
-        <p class="info">The jump length is the straight-line distance between the origin and destination.</p>
         <div>
             {{jump_length_hist}}
             <p class="grey info">
