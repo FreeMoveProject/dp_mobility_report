@@ -7,7 +7,9 @@
         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
       </svg></h3></label>
     <div class="tab-content">
-        <p>The following histogram shows the number of trips per user. The x-axis indicates the percentage of trips and the y-axis the number of trips per user according to the user configured maximum of trips per user. The legend shows the color for the base dataset and the alternative dataset. The margin of error is also visualized.</p>
+        <p>The following histogram shows the number of trips per user of the base and the alternative dataset for the given privacy budget and 95% confidence interval.</p>
+        <p>The x-axis indicates the percentage of trips and the y-axis the number of trips per user according to the user configured maximum of trips per user.</p>
+        <p>The legend shows the color for the base dataset and the alternative dataset.</p>
     </div>
   </div> 
     <table class="default">               
@@ -46,10 +48,9 @@
         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
       </svg></h3></label>
     <div class="tab-content">
-        <p>The following histogram shows the time between consecutive trips of a user. 
-          The x-axis indicates the percentage of trips and the y-axis the hours between trips of the same user according to the user configured bin size and maximum value.
-          The legend shows the color for the base dataset and the alternative dataset. The margin of error is also visualized.
-        </p>
+        <p>The following histogram shows the time between consecutive trips of a user for the base and the alternative dataset for the given privacy budget and 95% confidence interval. </p> 
+        <p>The x-axis shows the percentage of trips and the y-axis the hours between trips of the same user according to the user configured bin size and maximum value.</p>
+        <p>The legend shows the color for the base dataset and the alternative dataset.</p>
     </div>
 </div>    <table class="default">               
         <tr>
@@ -71,9 +72,9 @@
     <h4>Five number summary: time between consecutive trips of a user</h4>
     <div>
         {{time_between_traj_summary_table}}
-        <p class="info">
+        <!-- <p class="info">
             {{time_between_traj_moe_info}}
-        </p>
+        </p> -->
     </div>
     {%if plausi_check_info %}
     <p class="warning-text">
@@ -94,10 +95,10 @@
         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
       </svg></h3></label>
     <div class="tab-content">
-        <p>The following histogram shows the radius of gyration in kilometers. The radius of gyration is the characteristic distance traveled by an individual during a period of time. 
-          The x-axis indicates the percentage of users and the y-axis the radius of gyration in kilometers according to the user configured bin size and maximum value.
-          The legend shows the color for the base dataset and the alternative dataset. The margin of error is also visualized.
-        </p>
+        <p>The following histogram shows the radius of gyration in kilometers of the base and the alternative dataset for the given privacy budget and 95% confidence interval. </p>
+        <p>The radius of gyration is the characteristic distance traveled by an individual during a period of time.</p>
+        <p>The x-axis indicates the percentage of users and the y-axis the radius of gyration in kilometers according to the user configured bin size and maximum value.</p>
+        <p>The legend shows the color for the base dataset and the alternative dataset.</p>
     </div>
   </div>
     <table class="default">               
@@ -121,9 +122,9 @@
     <h4>Five number summary: radius of gyration</h4>
     <div>
         {{radius_of_gyration_summary_table}}
-        <p class="info">
+        <!-- <p class="info">
             {{radius_of_gyration_moe_info}}
-        </p>
+        </p> -->
         {{radius_of_gyration_summary_measure}}
     </div>
 </div>
@@ -138,10 +139,9 @@
         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
       </svg></h3></label>
     <div class="tab-content">
-        <p>The following histogram shows the percentage of users that have visited a certain amount of distinct tiles.
-            The x-axis indicates the percentage of users and the y-axis the number of distinct tiles according to the user configurated bin size and maximum value.
-            The legend shows the color for the base dataset and the alternative dataset. The margin of error is also visualized.
-          </p>
+        <p>The following histogram shows the percentage of users that have visited a certain amount of distinct tiles of the base and the alternative dataset for the given privacy budget and 95% confidence interval. </p>
+        <p>The x-axis indicates the percentage of users and the y-axis the number of distinct tiles according to the user configurated bin size and maximum value.</p>
+        <p>The legend shows the color for the base dataset and the alternative dataset.</p>
     </div>
   </div>
     <table class="default">               
@@ -164,9 +164,9 @@
     <h4>Five number summary: distinct tiles per user</h4>
     <div>
         {{distinct_tiles_user_summary_table}}
-        <p class="info">
+        <!-- <p class="info">
             {{distinct_tiles_moe_info}}
-        </p>
+        </p> -->
         {{distinct_tiles_summary_measure}}
     </div>
 </div>
@@ -181,11 +181,13 @@
         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
       </svg></h3></label>
     <div class="tab-content">
+        <p>This histogram visualizes the mobility entropy of the base and the alternative dataset for the given privacy budget and 95% confidence interval.</p>
         <p>The mobility entropy characterizes the heterogeneity of the users visitation patterns and can be interpreted as a measure for the predictability of a users location.
           If a user only visits a single tile, the entropy is 0, i.e., their location is highly predictable. If a user visits, e.g., four different tiles each 10 times, the entropy is 1, i.e., their location is not predictable as every of the four tiles has the same probability to be visited by the user.
-          Intuitively, the more trips per user are entailed in the data, the more meaningful the mobility entropy.
-        </p>
-    </div>
+          Intuitively, the more trips per user are entailed in the data, the more meaningful the mobility entropy.</p>
+          <p>The x-axis shows the percentage of users and the y-axis the mobility entropy according to the user configurated bin size and maximum value.</p>
+          <p>The legend shows the color for the base dataset and the alternative dataset.</p>
+        </div>
   </div>
     <table class="default">               
         <tr>
