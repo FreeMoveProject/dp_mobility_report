@@ -52,9 +52,8 @@
                 <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
               </svg></h4></label>
             <div class="tab-content">
-                The cumulated sum of flows visualizes the distribution of flows over OD pairs:
-                If all OD connections are traveled equally, the cumulated sum follows a straight diagonal line (gray line). 
-                The larger the share of single OD connections in the total number of flows, the steeper the curve.
+                <p>The cumulated sum of flows visualizes the distribution of flows over OD pairs.</p>
+                <p>If all OD connections are traveled equally, the cumulated sum follows a straight diagonal line (gray line). The larger the share of single OD connections in the total number of flows, the steeper the curve.</p>
             </div>
         </div>
         {{flows_cumsum_linechart}}
@@ -68,7 +67,8 @@
                 <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
               </svg></h4></label>
             <div class="tab-content">
-                The following visualization shows the ranking of most frequently visited OD connections. The y-axis shows the ranking as well as the tile name according to the provided tessellation. The x-axis indicates the number of flows per OD pair. The margin of error is also visualized.
+                <p>The following visualization shows the ranking of most frequently visited OD connections for the given privacy budget and 95% confidence interval.</p> 
+                <p>The y-axis shows the ranking as well as the tile name according to the provided tessellation. The x-axis shows the number of flows per OD pair and the 95% confidence interval.</p>
             </div>
         </div> 
         {{most_freq_flows_ranking}}
@@ -88,7 +88,8 @@
                 <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
               </svg></h3></label>
             <div class="tab-content">
-                The following histogram shows the travel time of trips in minutes. The y-axis indicates the percentage of trips while the x-axis shows the travel time in minutes according to the user configurated bin size and maximum value.
+                <p>The following histogram shows the travel time of trips in minutes for the given privacy budget and 95% confidence interval.</p>
+                <p>The y-axis indicates the percentage of trips while the x-axis shows the travel time in minutes according to the user configurated bin size and maximum value.</p>
             </div>
         </div>         
         <p>privacy budget: {{travel_time_eps}}</p>
@@ -119,8 +120,9 @@
                 <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
               </svg></h3></label>
             <div class="tab-content">
-                The following histogram shows the jump length in kilometers. The jump length is the straight-line distance between the origin and destination.
-                The y-axis indicates the percentage of trips while the x-axis shows the jump length in kilometers according to the user configurated bin size and maximum value.
+                <p>The following histogram shows the jump length in kilometers for the given privacy budget and 95% confidence interval.</p> 
+                <p>The jump length is the straight-line distance between the origin and destination.</p>
+                <p>The y-axis indicates the percentage of trips while the x-axis shows the jump length in kilometers according to the user configurated bin size and maximum value.</p>
             </div>
         </div>
         <p>privacy budget: {{travel_time_eps}}</p>
