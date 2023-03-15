@@ -275,7 +275,7 @@ def render_benchmark_dataset_statistics(
             const.SMAPE: fmt(smape[const.N_RECORDS], target_type=float),
         },
         {
-            "name": "Distinct trips",
+            "name": "Number of distinct trips",
             "estimate": (
                 fmt(data_base[const.N_TRIPS], target_type=int),
                 fmt(data_alternative[const.N_TRIPS], target_type=int),
@@ -311,7 +311,7 @@ def render_benchmark_dataset_statistics(
             const.SMAPE: fmt(smape[const.N_INCOMPLETE_TRIPS], target_type=float),
         },
         {
-            "name": "Distinct users",
+            "name": "Number of distinct users",
             "estimate": (
                 fmt(data_base[const.N_USERS], target_type=int),
                 fmt(data_alternative[const.N_USERS], target_type=int),
@@ -323,7 +323,7 @@ def render_benchmark_dataset_statistics(
             const.SMAPE: fmt(smape[const.N_USERS], target_type=float),
         },
         {
-            "name": "Distinct locations (lat & lon combination)",
+            "name": "Number of distinct locations (lat & lon combination)",
             "estimate": (
                 fmt(data_base[const.N_LOCATIONS], target_type=int),
                 fmt(data_alternative[const.N_LOCATIONS], target_type=int),
