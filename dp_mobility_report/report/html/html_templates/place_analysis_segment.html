@@ -9,11 +9,12 @@
         <div class="tab-content">
           <p>The following map shows the visits per tile (according to the provided tessellation).</p>
           <p>The legend below shows the number of visits per tile ranging from 0 to the maximum amount of visits per tile.</p>
+          <p>Tiles below a certain threshold are grayed out: Due to the applied noise, tiles with a low visit count are likely to contain a high percentage of noise. For usability reasons, such unrealistic values are grayed out. More specifically: The threshold is set so that values for tiles with a 5% chance (or higher) of deviating more than 20 percentage points from the estimated value are not shown.</p>
         </div>
     </div>
     <p>privacy budget: {{ visits_per_tile_eps }}</p>
     <p>95% CI: +/- {{ visits_per_tile_moe }}</p>
-    <p class="info">{{privacy_info}}</p>
+    <!-- <p class="info">{{privacy_info}}</p> -->
     
     <iframe src="{{output_filename}}/maps/visits_per_tile_map.html" width="100%" height="600" style="border:1px solid black;">
     </iframe>
