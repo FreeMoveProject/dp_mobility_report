@@ -1,21 +1,18 @@
 <h2>Differential Privacy</b></h2>
   <p> 
-    This report offers to provide a differential privacy guarantee indicated by the privacy budget in the configurations above and the privacy budget listed for each analysis. The notion of differential privacy and the used mechanisms are described shortly below. 
-    For more information see <a href="https://dp-mobility-report.readthedocs.io/en/latest/index.html">here.</a> </p>
+  This report provides differential privacy guarantees. 
+
+    The concept of differential privacy is that the output of an algorithm remains
+    nearly unchanged if the records of one individual are removed or added.
+    In this way, differential privacy limits the impact of a single individual on
+    the analysis outcome, preventing the reconstruction of an individual's data.
+    Broadly speaking, this is achieved by adding calibrated noise to the output and the amount of noise is defined by the <i>privacy_budget</i>.
+    Depending on the setting of <i>user_privacy</i>, noise is either calibrated to only protect single trips (item-level privacy) or to protect the privacy of users (user-level privacy).
+    The privacy budget is split between all analyses.
+    The cofiguration table provides information on the used <i>privacy_budget</i>, the <i>budget_split</i> and <i>user_privacy</i>. 
+    For each analysis, information is provided on the amount of utilized privacy budget. 
+  </p>
+
   <p>
-    Assume a company owns a mobility data set T and needs to release a report. 
-    For the mobility data report, statistics are computed and visualised as can be seen in this report. 
-    Despite the aggregation of data, the mobility report consists of summary statistics which are 
-    vulnerable to reconstruction attacks [1]. By observing answers from measures, 
-    an attacker can recover secret information, such as trips.
-    Differential privacy provides mathematical guarantees for the privacy of an individual [2]. 
-    The concept of differential privacy is that the output of an algorithm \(\mathcal{A}\) remains nearly unchanged if the 
-    records of one individual are removed or added. In this way, differential privacy limits the impact of a 
-    single individual on the analysis outcome, preventing the reconstruction of an individual's data. </p>
-
-
-
-    <p>[1] Dwork, C., and A. Roth. 2013. “The Algorithmic Foundations of Differential Privacy.” Foundations and Trends in Theoretical Computer Science 9 (3–4): 211–407. doi:10.1561/ 0400000042.</p>
-    <p>[2] Dwork, C., F. McSherry, K. Nissim, and A. Smith. 2006. “Calibrating Noise to Sensitivity in Private Data Analysis.” TCC '06: Proceedings of the 3rd Theory of Cryptography Conference, New York, United States, 265–284. Springer.</p>
-    
-
+    The <i>Laplace mechanism</i> is used for counts and the <i>Exponential mechanism</i> for the five number summaries.
+    Details on the notion of differential privacy and the used mechanisms are provided <a href="https://dp-mobility-report.readthedocs.io/en/latest/index.html">in the documentation.</a> </p>
