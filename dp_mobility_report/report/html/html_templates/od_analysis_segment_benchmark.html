@@ -7,9 +7,9 @@
             <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
           </svg></h3></label>
         <div class="tab-content">
-            The following visualization shows the OD flows between the tiles (according to the provided tessellation) for the base and the alternative dataset as well as the intra-tile flow deviations. These three visualizations can be chosen in the layer control. 
-            The origin of the OD flows is indicated by a small circle and by clicking on one OD connection, information on the origin and destination cell name as well as the number of OD connections will show up. 
-            The legend for the intra-tile flow deviations are below and range from -2 to 2. The intra-tile flow is defined as the number of OD connections that start and end in the same tile. This visualizations shows the deviation of intra-tile flows of the alternative dataset from the base dataset.
+            <p>The following map shows the OD flows between the tiles (according to the provided tessellation) for the base and the alternative dataset as well as the intra-tile flow deviations for the given privacy budget and 95% confidence interval. These three visualizations can be chosen in the layer control. </p>
+            <p>The origin of the OD flows is indicated by a small circle and by clicking on one OD connection, information on the origin and destination cell name as well as the number of OD connections will show up. </p>
+            <p>The legend for the intra-tile flow deviations are below and range from -2 to 2. The intra-tile flow is defined as the number of OD connections that start and end in the same tile. This visualizations shows the deviation of intra-tile flows of the alternative dataset from the base dataset.</p>
         </div>
     </div>
     <table class="default">               
@@ -67,9 +67,8 @@
                     <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
                   </svg></h4></label>
                 <div class="tab-content">
-                    The cumulated sum of flows visualizes the distribution of flows over OD pairs:
-                    If all OD connections are traveled equally, the cumulated sum follows a straight diagonal line. 
-                    The larger the share of single OD connections in the total number of flows, the steeper the curve.
+                    <p>The cumulated sum of flows visualizes the distribution of flows over OD pairs.</p>
+                    <p>If all OD connections are traveled equally, the cumulated sum follows a straight diagonal line. The larger the share of single OD connections in the total number of flows, the steeper the curve.</p>
                 </div>
             </div>
             {{flows_cumsum_linechart}}
@@ -84,10 +83,9 @@
                 <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
               </svg></h4></label>
             <div class="tab-content">
-                The following visualization shows the ranking of most frequent OD connections for the base dataset and the alternative dataset. 
-                The y-axis shows the ranking as well as the tile name according to the provided tessellation. 
-                The x-axis indicates the percentage of flows per OD pair. The margin of error is also visualized. 
-                The ranking includes the union of the top 10 most frequently visited tiles of both dataset and therefore a minimum 10 to a maximum 20 most frequent OD pairs.
+                <p>The following visualization shows the ranking of most frequent OD connections for the base and the alternative dataset for the given privacy budget and 95% confidence interval. </p>
+                <p>The y-axis shows the ranking as well as the tile name according to the provided tessellation. The x-axis shows the percentage of flows per OD pair and the 95% confidence interval. </p> 
+                <p>The ranking includes the union of the top 10 most frequently visited tiles of both dataset and therefore a minimum 10 to a maximum 20 most frequent OD pairs.</p>
             </div>
           </div>
         {{most_freq_flows_ranking}}
@@ -107,9 +105,9 @@
                 <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
               </svg></h3></label>
             <div class="tab-content">
-                The following histogram shows the travel time of trips in minutes. 
-                The y-axis indicates the percentage of trips while the x-axis shows the travel time in minutes according to the user configurated bin size and maximum value. 
-                The legend indicates the colors for the base dataset and the alternative dataset. The margin of error is also visualized.
+                <p>The following histogram shows the travel time of trips in minutes for the given privacy budget and 95% confidence interval for the base and alternative dataset. </p>
+                <p>The y-axis indicates the percentage of trips while the x-axis shows the travel time in minutes according to the user configurated bin size and maximum value. </p>
+                <p>The legend indicates the colors for the base dataset and the alternative dataset.</p>
             </div>
         </div>          
         <table class="default">               
@@ -151,9 +149,10 @@
                 <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
               </svg></h3></label>
             <div class="tab-content">
-                The following histogram shows the jump length in kilometers. The jump length is the straight-line distance between the origin and destination.
-                The y-axis indicates the percentage of trips while the x-axis shows the jump length in kilometers according to the user configurated bin size and maximum value.
-                The legend indicates the colors for the base dataset and the alternative dataset. The margin of error is also visualized.
+                <p>The following histogram shows the jump length in kilometers of the base and alternative dataset for the given privacy budget and 95% confidence interval. </p>
+                <p>The jump length is the straight-line distance between the origin and destination.</p>
+                <p>The y-axis shows the percentage of trips while the x-axis shows the jump length in kilometers according to the user configurated bin size and maximum value.</p>
+                <p>The legend shows the colors for the base dataset and the alternative dataset.</p>
             </div>
         </div>        <table class="default">               
             <tr>
