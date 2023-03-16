@@ -68,15 +68,18 @@ def render_benchmark_config(benchmarkreport: "BenchmarkReport") -> str:
     template_structure = get_template("config_segment.html")
     return template_structure.render(args)
 
+
 def render_similarity_info():
 
-        template_structure = get_template("similarity_info.html")
-        return template_structure.render() 
-        
+    template_structure = get_template("similarity_info.html")
+    return template_structure.render()
+
+
 def render_dp_info():
 
-        template_structure = get_template("dp_info.html")
-        return template_structure.render() 
+    template_structure = get_template("dp_info.html")
+    return template_structure.render()
+
 
 def render_config_table(dpmreport: "DpMobilityReport") -> str:
 
@@ -86,7 +89,10 @@ def render_config_table(dpmreport: "DpMobilityReport") -> str:
         {"name": "User privacy", "value": fmt(dpmreport.user_privacy)},
         {"name": "Budget split", "value": fmt_config(dpmreport.budget_split)},
         {"name": "Evaluation dev. mode", "value": fmt(dpmreport.evalu)},
-        {"name": "Excluded analyses", "value": fmt_config(dpmreport.analysis_exclusion)},
+        {
+            "name": "Excluded analyses",
+            "value": fmt_config(dpmreport.analysis_exclusion),
+        },
     ]
 
     # create html from template
@@ -135,10 +141,8 @@ def render_benchmark_config_table(benchmarkreport: "BenchmarkReport") -> str:
         },
         {
             "name": "Excluded analyses",
-            "value": (
-                fmt_config(benchmarkreport.analysis_exclusion),
-            ),
-        }, 
+            "value": (fmt_config(benchmarkreport.analysis_exclusion),),
+        },
     ]
 
     # create html from template

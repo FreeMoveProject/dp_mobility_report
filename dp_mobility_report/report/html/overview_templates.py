@@ -456,7 +456,6 @@ def render_trips_over_time(trips_over_time: DfSection) -> str:
             y_axis_label="% of trips",
             rotate_label=True,
             figsize=(max(5, min(9, len(trips_over_time.data.values))), 6),
-
         )
         html = v_utils.fig_to_html(chart)
     else:
@@ -468,7 +467,7 @@ def render_trips_over_time(trips_over_time: DfSection) -> str:
             y_axis_label="% of trips",
             margin_of_error=trips_over_time.margin_of_error_laplace,
             rotate_label=True,
-            figsize=(9,6),
+            figsize=(9, 6),
         )
         html = v_utils.fig_to_html(chart)
     plt.close()
@@ -505,7 +504,7 @@ def render_benchmark_trips_over_time(
             margin_of_error=trips_over_time.margin_of_error_laplace,
             margin_of_error_alternative=trips_over_time_alternative.margin_of_error_laplace,
             rotate_label=True,
-            figsize=(9,6),
+            figsize=(9, 6),
         )
         html = v_utils.fig_to_html(chart)
     plt.close()
@@ -559,7 +558,7 @@ def render_trips_per_hour(
         y_axis_label="% of trips",
         hue_order=["weekday start", "weekday end", "weekend start", "weekend end"],
         margin_of_error=margin_of_error,
-        figsize=(10,6),
+        figsize=(10, 6),
     )
     html = v_utils.fig_to_html(chart)
     plt.close()

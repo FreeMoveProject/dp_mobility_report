@@ -21,7 +21,7 @@ from dp_mobility_report.report.html.html_utils import (
     render_benchmark_summary,
     render_eps,
     render_summary,
-    render_user_input_info
+    render_user_input_info,
 )
 from dp_mobility_report.visualization import plot, v_utils
 
@@ -76,8 +76,16 @@ def render_place_analysis(
         args["visits_per_tile_time_map"] = render_visits_per_time_tile(
             report[const.VISITS_PER_TIME_TILE], tessellation, THRESHOLD
         )
-        args["visits_per_tile_time_info"] = f"User configuration of timewindows: " + str([f"{first} - {second}" for first, second in zip(dpmreport.timewindows[0:-1], dpmreport.timewindows[1:])])
-
+        args[
+            "visits_per_tile_time_info"
+        ] = f"User configuration of timewindows: " + str(
+            [
+                f"{first} - {second}"
+                for first, second in zip(
+                    dpmreport.timewindows[0:-1], dpmreport.timewindows[1:]
+                )
+            ]
+        )
 
     template_structure = get_template("place_analysis_segment.html")
 
@@ -169,7 +177,17 @@ def render_benchmark_place_analysis(
             report_alternative[const.VISITS_PER_TIME_TILE],
             tessellation,
         )
-        args["visits_per_tile_time_info"] = f"User configuration of timewindows: " + str([f"{first} - {second}" for first, second in zip(benchmark.report_base.timewindows[0:-1], benchmark.report_base.timewindows[1:])])
+        args[
+            "visits_per_tile_time_info"
+        ] = f"User configuration of timewindows: " + str(
+            [
+                f"{first} - {second}"
+                for first, second in zip(
+                    benchmark.report_base.timewindows[0:-1],
+                    benchmark.report_base.timewindows[1:],
+                )
+            ]
+        )
 
         args["visits_per_time_tile_measure"] = template_measures.render(
             all_available_measures(const.VISITS_PER_TIME_TILE, benchmark)
@@ -371,8 +389,7 @@ def render_most_freq_tiles_ranking(visits_per_tile: DfSection, top_x: int = 10) 
         "number of visits per tile",
         y_labels=labels,
         margin_of_error=visits_per_tile.margin_of_error_laplace,
-        figsize=(8, max(6, min(len(labels)*0.5, 8))),
-
+        figsize=(8, max(6, min(len(labels) * 0.5, 8))),
     )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close()
@@ -416,8 +433,7 @@ def render_most_freq_tiles_ranking_benchmark(
         x_alternative=topx_tiles_merged.visits_alternative,
         margin_of_error=visits_per_tile_base.margin_of_error_laplace,
         margin_of_error_alternative=visits_per_tile_alternative.margin_of_error_laplace,
-        figsize=(8, max(6, min(len(labels)*0.5, 8))),
-
+        figsize=(8, max(6, min(len(labels) * 0.5, 8))),
     )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close()

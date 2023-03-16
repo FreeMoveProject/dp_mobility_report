@@ -163,7 +163,11 @@ def compute_similarity_measures(
     top_n_coverage_dict: dict = {}
     cost_matrix = None
 
-    disable_emd = len(tessellation) > const.DISABLE_EMD_THRESHOLD if (tessellation is not None) else True
+    disable_emd = (
+        len(tessellation) > const.DISABLE_EMD_THRESHOLD
+        if (tessellation is not None)
+        else True
+    )
 
     if disable_emd and (
         (const.VISITS_PER_TILE not in analysis_exclusion)
@@ -291,16 +295,12 @@ def compute_similarity_measures(
                 alternative=rel_counts_alternative, base=rel_counts_base
             )
 
-            most_freq_base = (
-                report_base[const.VISITS_PER_TILE].data.sort_values(
-                    by=["visits"], ascending=False, ignore_index=True
-                )
+            most_freq_base = report_base[const.VISITS_PER_TILE].data.sort_values(
+                by=["visits"], ascending=False, ignore_index=True
             )
-            most_freq_alternative = (
-                report_alternative[const.VISITS_PER_TILE].data.sort_values(
-                    by=["visits"], ascending=False, ignore_index=True
-                )
-            )
+            most_freq_alternative = report_alternative[
+                const.VISITS_PER_TILE
+            ].data.sort_values(by=["visits"], ascending=False, ignore_index=True)
 
             # mute kendall_tau warning by replacing str tile_ids with ints
             tile_id_to_index = {

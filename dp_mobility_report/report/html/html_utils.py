@@ -120,7 +120,6 @@ def render_user_input_info(
             bin size: {bin_size}"""
 
 
-
 def fmt(value: Any, target_type: Optional[type] = None) -> Any:
     if target_type and (value is not None):
         value = target_type(value)

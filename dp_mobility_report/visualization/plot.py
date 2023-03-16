@@ -38,7 +38,7 @@ def histogram(
     rotate_label: bool = False,
     x_axis_type: Type = float,
     ndigits_x_label: int = 2,
-    figsize : tuple = (6.4,4.8),
+    figsize: tuple = (6.4, 4.8),
 ) -> mpl.figure.Figure:
     bins = hist[1]
     counts = hist[0]
@@ -102,7 +102,7 @@ def barchart(
     margin_of_error: Optional[Union[float, list]] = None,
     margin_of_error_alternative: Optional[Union[float, list]] = None,
     rotate_label: bool = False,
-    figsize: tuple = (6.4,4.8),
+    figsize: tuple = (6.4, 4.8),
 ) -> mpl.figure.Figure:
     fig, ax = plt.subplots(figsize=figsize)
     bar_base = ax.bar(
@@ -142,7 +142,7 @@ def linechart(
     margin_of_error: float = None,
     add_diagonal: bool = False,
     rotate_label: bool = False,
-    figsize: tuple = (6.4,4.8),
+    figsize: tuple = (6.4, 4.8),
 ) -> mpl.figure.Figure:
     fig, ax = plt.subplots(figsize=figsize)
     if margin_of_error is not None:
@@ -180,7 +180,7 @@ def linechart_new(
     margin_of_error_alternative: float = None,
     add_diagonal: bool = False,
     rotate_label: bool = False,
-    figsize: tuple = (6.4,4.8),
+    figsize: tuple = (6.4, 4.8),
 ) -> mpl.figure.Figure:
     fig, ax = plt.subplots(figsize=figsize)
     if margin_of_error is not None:
@@ -230,7 +230,7 @@ def multi_linechart(
     style: Optional[str] = None,
     hue_order: Optional[list] = None,
     margin_of_error: Optional[float] = None,
-    figsize: tuple = (9,6),
+    figsize: tuple = (9, 6),
 ) -> mpl.figure.Figure:
     fig = plt.figure(figsize=figsize)
     plot = fig.add_subplot(111)
@@ -379,13 +379,15 @@ def multi_choropleth_map(
         min_scale = min_scale if not math.isnan(min_scale) else 0
     if max_scale is None:
         max_scale = counts_per_tile_timewindow.iloc[:, 2:].max().max()
-        max_scale = max_scale if not math.isnan(max_scale) else 2 
+        max_scale = max_scale if not math.isnan(max_scale) else 2
 
     # color
     if is_cmap_diverging:
         cmap = const.DIVERGING_CMAP
-        min_scale = vcenter-1 if min_scale >= vcenter else min_scale # if all values are the same, there are no deviations from average, but matplotlib needs ascending order of minscale, vcenter, maxscale
-        max_scale = vcenter+1 if max_scale <= vcenter else max_scale
+        min_scale = (
+            vcenter - 1 if min_scale >= vcenter else min_scale
+        )  # if all values are the same, there are no deviations from average, but matplotlib needs ascending order of minscale, vcenter, maxscale
+        max_scale = vcenter + 1 if max_scale <= vcenter else max_scale
         norm = mpl.colors.TwoSlopeNorm(vmin=min_scale, vcenter=vcenter, vmax=max_scale)
     else:
         cmap = const.BASE_CMAP  # STANDARD_CMAP
@@ -450,7 +452,7 @@ def ranking(
     y_labels: list = None,
     margin_of_error: Optional[float] = None,
     margin_of_error_alternative: Optional[float] = None,
-    figsize: tuple = (7,5)
+    figsize: tuple = (7, 5),
 ) -> mpl.figure.Figure:
     y = list(range(1, len(x) + 1))[::-1]
     y_labels = y if y_labels is None else y_labels

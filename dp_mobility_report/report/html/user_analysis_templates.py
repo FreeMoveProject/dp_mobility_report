@@ -261,8 +261,7 @@ def render_trips_per_user(
         x_axis_type=int,
         margin_of_error=trips_per_user_hist.margin_of_error_laplace,
         margin_of_error_alternative=alternative_moe,
-        figsize=(max(7, min(len(trips_per_user_hist.data[1])*0.5,11)), 6),
-
+        figsize=(max(7, min(len(trips_per_user_hist.data[1]) * 0.5, 11)), 6),
     )
     return v_utils.fig_to_html(hist)
 
@@ -286,8 +285,7 @@ def render_time_between_traj(
         ndigits_x_label=1,
         margin_of_error=time_between_traj_hist.margin_of_error_laplace,
         margin_of_error_alternative=alternative_moe,
-        figsize=(max(7, min(len(time_between_traj_hist.data[1])*0.5,11)), 6),
-
+        figsize=(max(7, min(len(time_between_traj_hist.data[1]) * 0.5, 11)), 6),
     )
     html = v_utils.fig_to_html(hist)
     plt.close()
@@ -312,8 +310,7 @@ def render_radius_of_gyration(
         x_axis_type=float,
         margin_of_error=radius_of_gyration_hist.margin_of_error_laplace,
         margin_of_error_alternative=alternative_error,
-        figsize=(max(7, min(len(radius_of_gyration_hist.data[1])*0.5,11)), 6),
-
+        figsize=(max(7, min(len(radius_of_gyration_hist.data[1]) * 0.5, 11)), 6),
     )
     html = v_utils.fig_to_html(hist)
     plt.close()
@@ -338,7 +335,7 @@ def render_distinct_tiles_user(
         x_axis_type=int,
         margin_of_error=user_tile_count_hist.margin_of_error_laplace,
         margin_of_error_alternative=alternative_error,
-        figsize=(max(7, min(len(user_tile_count_hist.data[1])*0.5,11)), 6),
+        figsize=(max(7, min(len(user_tile_count_hist.data[1]) * 0.5, 11)), 6),
     )
     html = v_utils.fig_to_html(hist)
     plt.close()
@@ -366,7 +363,7 @@ def render_mobility_entropy(
         y_axis_label="% of users",
         margin_of_error=mobility_entropy.margin_of_error_laplace,
         margin_of_error_alternative=alternative_error,
-        figsize=(max(7, min(len(mobility_entropy.data[1])*0.5,11)), 6),
+        figsize=(max(7, min(len(mobility_entropy.data[1]) * 0.5, 11)), 6),
     )
     html = v_utils.fig_to_html(hist)
     plt.close()

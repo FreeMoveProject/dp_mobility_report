@@ -37,18 +37,18 @@ def render_html(
     args: dict = {}
 
     args["title"] = "DP Mobility Report"
-    args["subtitle"] = dpmreport.subtitle 
+    args["subtitle"] = dpmreport.subtitle
     args["output_filename"] = output_filename
 
     with tqdm(  # progress bar
         total=4, desc="Create HTML Output", disable=disable_progress_bar
     ) as pbar:
-        
+
         args["config_segment"] = config_templates.render_config(dpmreport)
 
         if dpmreport.privacy_budget is not None:
             args["dp_info"] = config_templates.render_dp_info()
-            
+
         if not set(const.OVERVIEW_ELEMENTS).issubset(dpmreport.analysis_exclusion):
             args["overview_segment"] = overview_templates.render_overview(dpmreport)
         pbar.update()

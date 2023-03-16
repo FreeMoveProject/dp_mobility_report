@@ -181,7 +181,7 @@ class DpMobilityReport:
         self.evalu = evalu
         self.disable_progress_bar = disable_progress_bar
         self.subtitle = subtitle
-        
+
         # initialize parallel processing
         pandarallel.initialize(verbose=0)
 
