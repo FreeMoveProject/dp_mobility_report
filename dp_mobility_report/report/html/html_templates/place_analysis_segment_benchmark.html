@@ -28,7 +28,6 @@
         <td style="width:30%">95% CI: +/- {{visits_per_tile_moe[1]}}</td>
       </tr>
     </table>
-    <p class="info">{{privacy_info}}</p>
     
     <iframe src="{{output_filename}}/maps/visits_per_tile_map.html" width="100%" height="600" style="border:1px solid black;">
     </iframe>
@@ -110,7 +109,6 @@
       </svg></h3></label>
     <div class="tab-content">
       <p>Each map shows deviations of the alternative dataset from the base dataset for the <strong>arrivals (destinations)</strong> for the respective time window for each tile, split by weekday and weekend, as absolute counts and as the deviation from tile average for the given privacy budget and 95% confidence interval.</p>    
-      <p>Tiles below a certain threshold are grayed out: Due to the applied noise, tiles with a low visit count are likely to contain a high percentage of noise. For usability reasons, such unrealistic values are grayed out. More specifically: The threshold is set so that values for tiles with a 5% chance (or higher) of deviating more than 20 percentage points from the estimated value are not shown.</p>
     </div>
   </div> 
     <table class="default">               

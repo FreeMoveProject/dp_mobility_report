@@ -36,12 +36,6 @@ def render_place_analysis(
     report = dpmreport.report
     tessellation = dpmreport.tessellation
 
-    args[
-        "privacy_info"
-    ] = f"""Tiles below a certain threshold are grayed out: 
-        Due to the applied noise, tiles with a low visit count are likely to contain a high percentage of noise. 
-        For usability reasons, such unrealistic values are grayed out. 
-        More specifically: The threshold is set so that values for tiles with a 5% chance (or higher) of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are not shown."""
     args["output_filename"] = output_filename
 
     if const.VISITS_PER_TILE not in dpmreport.analysis_exclusion:
