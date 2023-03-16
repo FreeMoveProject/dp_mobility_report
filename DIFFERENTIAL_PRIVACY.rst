@@ -2,7 +2,7 @@
 Differential Privacy
 ============================================================
 
-In the following all definitions and notions concerning diferential privacy guarantees provided in this package are explained.
+In the following all definitions and notions concerning differential privacy guarantees provided in this package are explained.
 
 This mobility report creates aggregations of data. Though, despite that, the computed `statistics`_ are still vulnerable to reconstruction attacks [1].
 By observing answers from measures an attacker can recover information about indiviual users.

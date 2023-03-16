@@ -376,15 +376,17 @@ def multi_choropleth_map(
     # upper and lower bound
     if min_scale is None:
         min_scale = counts_per_tile_timewindow.iloc[:, 2:].min().min()
-        min_scale = min_scale if not math.isnan(min_scale) else 0 #TODO idea: if min_scale > 0, min_scale = 0
+        min_scale = min_scale if not math.isnan(min_scale) else 0
     if max_scale is None:
         max_scale = counts_per_tile_timewindow.iloc[:, 2:].max().max()
-        max_scale = max_scale if not math.isnan(max_scale) else 2 #TODO idea: if max_scale < 0, max_scale = 0 
+        max_scale = max_scale if not math.isnan(max_scale) else 2 
 
     # color
     if is_cmap_diverging:
         cmap = const.DIVERGING_CMAP
-        norm = mpl.colors.TwoSlopeNorm(vmin=min_scale, vcenter=vcenter, vmax=max_scale) #TODO if vmin > vcenter or vmax < vcenter, set vmin and vmax to 0?
+        min_scale = vcenter-1 if min_scale >= vcenter else min_scale # if all values are the same, there are no deviations from average, but matplotlib needs ascending order of minscale, vcenter, maxscale
+        max_scale = vcenter+1 if max_scale <= vcenter else max_scale
+        norm = mpl.colors.TwoSlopeNorm(vmin=min_scale, vcenter=vcenter, vmax=max_scale)
     else:
         cmap = const.BASE_CMAP  # STANDARD_CMAP
         norm = mpl.colors.Normalize(vmin=min_scale, vmax=max_scale)
