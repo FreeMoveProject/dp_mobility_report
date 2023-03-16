@@ -21,7 +21,6 @@ from dp_mobility_report.report.html.html_utils import (
     render_benchmark_summary,
     render_eps,
     render_summary,
-    render_user_input_info,
 )
 from dp_mobility_report.visualization import plot, v_utils
 
@@ -76,9 +75,7 @@ def render_place_analysis(
         args["visits_per_tile_time_map"] = render_visits_per_time_tile(
             report[const.VISITS_PER_TIME_TILE], tessellation, THRESHOLD
         )
-        args[
-            "visits_per_tile_time_info"
-        ] = f"User configuration of timewindows: " + str(
+        args["visits_per_tile_time_info"] = "User configuration of timewindows: " + str(
             [
                 f"{first} - {second}"
                 for first, second in zip(
@@ -177,9 +174,7 @@ def render_benchmark_place_analysis(
             report_alternative[const.VISITS_PER_TIME_TILE],
             tessellation,
         )
-        args[
-            "visits_per_tile_time_info"
-        ] = f"User configuration of timewindows: " + str(
+        args["visits_per_tile_time_info"] = "User configuration of timewindows: " + str(
             [
                 f"{first} - {second}"
                 for first, second in zip(

@@ -69,13 +69,13 @@ def render_benchmark_config(benchmarkreport: "BenchmarkReport") -> str:
     return template_structure.render(args)
 
 
-def render_similarity_info():
+def render_similarity_info() -> str:
 
     template_structure = get_template("similarity_info.html")
     return template_structure.render()
 
 
-def render_dp_info():
+def render_dp_info() -> str:
 
     template_structure = get_template("dp_info.html")
     return template_structure.render()
