@@ -11,7 +11,6 @@ from dp_mobility_report.report.html.html_utils import (
     get_template,
     render_benchmark_summary,
     render_eps,
-    render_moe_info,
     render_summary,
 )
 
@@ -61,9 +60,6 @@ def render_overview(dpmreport: "DpMobilityReport") -> str:
         )
         args["trips_over_time_linechart"] = render_trips_over_time(
             report[const.TRIPS_OVER_TIME]
-        )
-        args["trips_over_time_moe_info"] = render_moe_info(
-            report[const.TRIPS_OVER_TIME].margin_of_error_expmech
         )
         args["trips_over_time_summary_table"] = render_summary(
             report[const.TRIPS_OVER_TIME].quartiles
@@ -141,9 +137,6 @@ def render_benchmark_overview(benchmark: "BenchmarkReport") -> str:
         args["trips_over_time_linechart"] = render_benchmark_trips_over_time(
             report_base[const.TRIPS_OVER_TIME],
             report_alternative[const.TRIPS_OVER_TIME],
-        )
-        args["trips_over_time_moe_info"] = render_moe_info(
-            report_base[const.TRIPS_OVER_TIME].margin_of_error_expmech
         )
         args["trips_over_time_summary_table"] = render_benchmark_summary(
             report_base[const.TRIPS_OVER_TIME].quartiles,

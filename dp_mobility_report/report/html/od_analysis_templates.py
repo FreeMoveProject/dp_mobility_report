@@ -22,7 +22,6 @@ from dp_mobility_report.report.html.html_utils import (
     get_template,
     render_benchmark_summary,
     render_eps,
-    render_moe_info,
     render_summary,
     render_user_input_info,
 )
@@ -77,9 +76,6 @@ def render_od_analysis(
             dpmreport.max_travel_time, dpmreport.bin_range_travel_time
         )
         args["travel_time_hist"] = render_travel_time_hist(report[const.TRAVEL_TIME])
-        args["travel_time_moe_info"] = render_moe_info(
-            report[const.TRAVEL_TIME].margin_of_error_expmech
-        )
         args["travel_time_summary_table"] = render_summary(
             report[const.TRAVEL_TIME].quartiles
         )
@@ -94,9 +90,6 @@ def render_od_analysis(
             dpmreport.max_jump_length, dpmreport.bin_range_jump_length
         )
         args["jump_length_hist"] = render_jump_length_hist(report[const.JUMP_LENGTH])
-        args["jump_length_moe_info"] = render_moe_info(
-            report[const.JUMP_LENGTH].margin_of_error_expmech
-        )
         args["jump_length_summary_table"] = render_summary(
             report[const.JUMP_LENGTH].quartiles
         )
@@ -186,9 +179,6 @@ def render_benchmark_od_analysis(
         args["travel_time_hist"] = render_travel_time_hist(
             report_base[const.TRAVEL_TIME], report_alternative[const.TRAVEL_TIME]
         )
-        args["travel_time_moe_info"] = render_moe_info(
-            report_base[const.TRAVEL_TIME].margin_of_error_expmech
-        )
         args["travel_time_summary_table"] = render_benchmark_summary(
             report_base[const.TRAVEL_TIME].quartiles,
             report_alternative[const.TRAVEL_TIME].quartiles,
@@ -217,9 +207,6 @@ def render_benchmark_od_analysis(
         )
         args["jump_length_hist"] = render_jump_length_hist(
             report_base[const.JUMP_LENGTH], report_alternative[const.JUMP_LENGTH]
-        )
-        args["jump_length_moe_info"] = render_moe_info(
-            report_base[const.JUMP_LENGTH].margin_of_error_expmech
         )
         args["jump_length_summary_table"] = render_benchmark_summary(
             report_base[const.JUMP_LENGTH].quartiles,
