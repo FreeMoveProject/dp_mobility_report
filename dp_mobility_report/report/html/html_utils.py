@@ -138,7 +138,9 @@ def fmt(value: Any, target_type: Optional[type] = None) -> Any:
 def fmt_moe(margin_of_error: Optional[float]) -> float:
     if (margin_of_error is None) or (margin_of_error == 0):
         return 0
-    return round(margin_of_error, 1)
+    else:
+        margin_of_error = round(margin_of_error, 1)
+        return f"{margin_of_error:,}"
 
 
 def fmt_config(value: Union[dict, list]) -> str:
