@@ -38,7 +38,7 @@ def render_summary(summary: Series) -> str:
         summary_list.insert(0, {"name": "Mean", "value": fmt(summary["mean"])})
 
     template_table = jinja2_env.get_template("table.html")
-    summary_html = template_table.render(rows=summary_list)
+    summary_html = template_table.render(rows=summary_list, align="right-align")
     return summary_html
 
 

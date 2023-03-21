@@ -408,7 +408,7 @@ def render_flows_cumsum(
         y="cum_perc",
         data_alternative=df_cumsum_alternative,
         x_axis_label="Number of OD tile pairs",
-        y_axis_label="Cumulated sum of flows between OD pairs",
+        y_axis_label="Cumulated sum of relative OD flow counts",
         add_diagonal=diagonal,
     )
     html = v_utils.fig_to_html(chart)

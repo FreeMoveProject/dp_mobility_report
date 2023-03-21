@@ -359,7 +359,7 @@ def render_visits_per_tile_cumsum(
         y="cum_perc",
         data_alternative=df_cumsum_alternative,
         x_axis_label="Number of tiles",
-        y_axis_label="Cumulated sum of visits per tile",
+        y_axis_label="Cumulated sum of relative visits per tile",
         add_diagonal=diagonal,
     )
     html = v_utils.fig_to_html(chart)
@@ -533,7 +533,7 @@ def _create_timewindow_segment(df: pd.DataFrame, tessellation: GeoDataFrame) -> 
     return f"""<h4>Number of visits</h4>
         {v_utils.fig_to_html_as_png(visits_choropleth)}
         <h4>Deviation from tile average</h4>
-        <div><p>The average of each cell 
+        <div><p>The average of each tile 
         over all time windows equals 1 (100% of average traffic). 
         A value of < 1 (> 1) means that a tile is visited less (more) frequently in this time window than it is on average.</p></div>
         {v_utils.fig_to_html_as_png(deviation_choropleth)}"""  # svg might get too large

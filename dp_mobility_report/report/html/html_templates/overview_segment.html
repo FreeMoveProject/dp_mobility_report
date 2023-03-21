@@ -7,7 +7,8 @@
             <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
           </svg></h3></label>
         <div class="tab-content">
-            <p>The following table shows the dataset statistics with the given privacy budget. It provides the estimate numbers as well as the 95% confidence interval.</p>
+            <p>The following table shows the key figures of the dataset.</p>
+            <p>The allocated privacy budget for this statistic is shown below and noise is applied accordingly to compute the estimate and the 95% confidence interval.</p>
         </div>
     </div>
     <p>privacy budget: {{dataset_stats_eps[0]}}</p>
@@ -24,7 +25,8 @@
             <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
           </svg></h3></label>
         <div class="tab-content">
-            <p>The following table shows the missing values of the dataset with the given privacy budget. It provides the estimate numbers as well as the 95% confidence interval.</p>
+            <p>The following table shows the number of missing values for each column of the dataset.</p> 
+            <p>The allocated privacy budget for this statistic is shown below and noise is applied accordingly to compute the estimate and the 95% confidence interval.</p>
         </div>
     </div>
     <p>privacy budget: {{missing_values_eps[0]}}</p>
@@ -44,8 +46,9 @@
                 <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
               </svg></h3></label>
             <div class="tab-content">
-                <p>This visualization shows the trips over time with the given privacy budget and 95% confidence interval. </p>
-                <p>The y-axis shows the percentage of trips while the x-axis will show the timeline aggregated as indicated below the visualization.</p>
+                <p>This visualization shows the relative number of trips on a timeline. Depending on the timespan of the dataset, it is either aggregated by day, week or month (indicted below the graph).</p>
+                <p>The allocated privacy budget for this statistic is shown below and noise is applied accordingly to compute the estimate (blue line) and the 95% confidence interval. The confidence interval is visualized as the shaded error band.</p>
+                <p>The y-axis shows the percentage of trips while the x-axis shows the timeline.</p>
             </div>
         </div>
         <p>privacy budget: {{trips_over_time_eps}}</p>
@@ -72,7 +75,8 @@
                 <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
               </svg></h3></label>
             <div class="tab-content">
-                <p>This histogram shows the trips per weekday with the given privacy budget and 95% confidence interval. </p>
+                <p>This histogram shows the relative number of trips per weekday. </p>
+                <p>The allocated privacy budget for this statistic is shown below and noise is applied accordingly to compute the estimate (bars) and the 95% confidence interval (error bar).</p>
                 <p>The y-axis shows the percentage of trips while the x-axis shows the weekdays.</p>
             </div>
         </div>        
@@ -93,7 +97,8 @@
                 <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
               </svg></h3></label>
             <div class="tab-content">
-                <p>This linechart shows the percentage of trips per hour of the day with the given privacy budget and 95% confidence interval.</p>
+                <p>This linechart shows the relative number of trips per hour over the course of a day, disaggregated by weekday and weekend.</p>
+                <p>The allocated privacy budget for this statistic is shown below and noise is applied accordingly to compute the estimate (lines). The confidence interval is indicated below but not visualized in the graph due to visual clarity. </p>
                 <p>The legend shows the different time categories (weekday start, weekday end, weekend start, weekend end) indicating the start and end timestamp of each trip and if the trip was during the week or on the weekend.</p>
                 <p>The y-axis shows the percentage of trips while the x-axis shows the hour of the day.</p>
             </div>

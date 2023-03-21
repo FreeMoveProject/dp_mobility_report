@@ -233,3 +233,10 @@ input:checked ~ .tab-content {
   max-height: 5000vh; /*Maximale Lange von Accordion, auskommentiert*/
   padding: 1em; /* Seitenabstand vom Text wenn accordions ausgeklappt*/
 }
+
+.left-align {
+  text-align: left;
+}
+.right-align {
+  text-align: right;
+}

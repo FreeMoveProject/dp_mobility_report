@@ -7,19 +7,23 @@
         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
       </svg></h3></label>
     <div class="tab-content">
-        <p>The following histogram shows the number of trips per user of the base and the alternative dataset for the given privacy budget and 95% confidence interval.</p>
-        <p>The x-axis indicates the percentage of trips and the y-axis the number of trips per user according to the user configured maximum of trips per user.</p>
-        <p>The legend shows the color for the base dataset and the alternative dataset.</p>
+      <p>The following histogram shows the distribution of number of trips per user for both datasets, i.e. how many trips a user contributed to each dataset.</p>
+      <p>The y-axis indicates the relative number of users and the x-axis shows the range of the histogram bins according to the user configured maximum of trips per user.</p>
+      <p>The allocated privacy budgets for both datasets are shown below and noise is applied accordingly to compute the estimate (bars) and the 95% confidence interval (error bar).</p>
+      <p> The legend indicates the color for the base dataset and the alternative dataset.</p>
+      <p>All applicable similarity measures are displayed in the orange box below.</p>
     </div>
   </div> 
     <table class="default">               
         <tr>
           <th style="width:30%">Base:</th>
           <td style="width:30%">privacy budget: {{trips_per_user_eps[0]}}</td>
+          <td style="width:30%">95% CI: +/- TODO</td>
         </tr>
         <tr>
           <th style="width:30%">Alternative:</th>
           <td style="width:30%">privacy budget: {{trips_per_user_eps[1]}}</td>
+          <td style="width:30%">95% CI: +/- TODO</td>
         </tr>
       </table>
     {{trips_per_user_hist}}
@@ -45,18 +49,22 @@
         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
       </svg></h3></label>
     <div class="tab-content">
-        <p>The following histogram shows the time between consecutive trips of a user for the base and the alternative dataset for the given privacy budget and 95% confidence interval. </p> 
-        <p>The x-axis shows the percentage of trips and the y-axis the hours between trips of the same user according to the user configured bin size and maximum value.</p>
-        <p>The legend shows the color for the base dataset and the alternative dataset.</p>
+      <p>The following histogram shows the distribution of time between consecutive trips of a user for both datasets, i.e. the time that passes between the end of one trip and the beginning of the following trip of one user.</p>
+      <p>The y-axis indicates the relative number of trips and the x-axis shows the range of the histogram bins in hours between trips of the same user according to the user configured bin size and maximum value.</p>
+      <p>The allocated privacy budgets for both datasets are shown below and noise is applied accordingly to compute the estimate (bars) and the 95% confidence interval (error bar).</p>
+      <p> The legend indicates the color for the base dataset and the alternative dataset.</p>
+      <p>All applicable similarity measures are displayed in the orange box below.</p>
     </div>
 </div>    <table class="default">               
         <tr>
           <th style="width:30%">Base:</th>
           <td style="width:30%">privacy budget: {{time_between_traj_eps[0]}}</td>
+          <td style="width:30%">95% CI: +/- TODO</td>
         </tr>
         <tr>
           <th style="width:30%">Alternative:</th>
           <td style="width:30%">privacy budget: {{time_between_traj_eps[1]}}</td>
+          <td style="width:30%">95% CI: +/- TODO</td>
         </tr>
       </table>
     <div>
@@ -89,20 +97,23 @@
         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
       </svg></h3></label>
     <div class="tab-content">
-        <p>The following histogram shows the radius of gyration in kilometers of the base and the alternative dataset for the given privacy budget and 95% confidence interval. </p>
-        <p>The radius of gyration is the characteristic distance traveled by an individual during a period of time.</p>
-        <p>The x-axis indicates the percentage of users and the y-axis the radius of gyration in kilometers according to the user configured bin size and maximum value.</p>
-        <p>The legend shows the color for the base dataset and the alternative dataset.</p>
+      <p>The following histogram shows the distribution of the radii of gyration for both datasets. The radius of gyration is the characteristic distance traveled by an individual during a period of time.</p>
+      <p>The y-axis indicates the relative number of users and the x-axis shows the range of the histogram bins in kilometers according to the user configured bin size and maximum value.</p>
+      <p>The allocated privacy budgets for both datasets are shown below and noise is applied accordingly to compute the estimate (bars) and the 95% confidence interval (error bar).</p>
+      <p> The legend indicates the color for the base dataset and the alternative dataset.</p>
+      <p>All applicable similarity measures are displayed in the orange box below.</p>
     </div>
   </div>
     <table class="default">               
         <tr>
           <th style="width:30%">Base:</th>
           <td style="width:30%">privacy budget: {{radius_of_gyration_eps[0]}}</td>
+          <td style="width:30%">95% CI: +/- TODO</td>
         </tr>
         <tr>
           <th style="width:30%">Alternative:</th>
           <td style="width:30%">privacy budget: {{radius_of_gyration_eps[1]}}</td>
+          <td style="width:30%">95% CI: +/- TODO</td>
         </tr>
       </table>
 
@@ -130,19 +141,23 @@
         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
       </svg></h3></label>
     <div class="tab-content">
-        <p>The following histogram shows the percentage of users that have visited a certain amount of distinct tiles of the base and the alternative dataset for the given privacy budget and 95% confidence interval. </p>
-        <p>The x-axis indicates the percentage of users and the y-axis the number of distinct tiles according to the user configurated bin size and maximum value.</p>
-        <p>The legend shows the color for the base dataset and the alternative dataset.</p>
+      <p>The following histogram shows the distribution of how many distinct tiles a user has visited for both datasets. It describes the diversity of locations a user visits.</p>
+      <p>The y-axis indicates the relative number of users and the x-axis shows the number of distinct tiles according to the user configured bin size and maximum value.</p>
+      <p>The allocated privacy budgets for both datasets are shown below and noise is applied accordingly to compute the estimate (bars) and the 95% confidence interval (error bar).</p>
+      <p> The legend indicates the color for the base dataset and the alternative dataset.</p>
+      <p>All applicable similarity measures are displayed in the orange box below.</p>
     </div>
   </div>
     <table class="default">               
         <tr>
           <th style="width:30%">Base:</th>
           <td style="width:30%">privacy budget: {{distinct_tiles_user_eps[0]}}</td>
+          <td style="width:30%">95% CI: +/- TODO</td>
         </tr>
         <tr>
           <th style="width:30%">Alternative:</th>
           <td style="width:30%">privacy budget: {{distinct_tiles_user_eps[1]}}</td>
+          <td style="width:30%">95% CI: +/- TODO</td>
         </tr>
       </table>
     <div>
@@ -169,33 +184,28 @@
         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
       </svg></h3></label>
     <div class="tab-content">
-        <p>This histogram visualizes the mobility entropy of the base and the alternative dataset for the given privacy budget and 95% confidence interval.</p>
-        <p>The mobility entropy characterizes the heterogeneity of the users visitation patterns and can be interpreted as a measure for the predictability of a users location.
-          If a user only visits a single tile, the entropy is 0, i.e., their location is highly predictable. If a user visits, e.g., four different tiles each 10 times, the entropy is 1, i.e., their location is not predictable as every of the four tiles has the same probability to be visited by the user.
-          Intuitively, the more trips per user are entailed in the data, the more meaningful the mobility entropy.</p>
-          <p>The x-axis shows the percentage of users and the y-axis the mobility entropy according to the user configurated bin size and maximum value.</p>
-          <p>The legend shows the color for the base dataset and the alternative dataset.</p>
-        </div>
+      <p>The following histogram shows the distribution of the mobility entropy for both datasets.</p>
+      <p>The mobility entropy characterizes the heterogeneity of the users visitation patterns and can be interpreted as a measure for the predictability of a users location.
+        If a user only visits a single tile, the entropy is 0, i.e., their location is highly predictable. If a user visits, e.g., four different tiles each 10 times, the entropy is 1, i.e., their location is not predictable as every of the four tiles has the same probability to be visited by the user.
+        Intuitively, the more trips per user are entailed in the data, the more meaningful the mobility entropy.</p>
+      <p>The y-axis indicates the relative number of users and the x-axis shows the range of histogram bins for the mobility entropy.</p>
+      <p>The allocated privacy budgets for both datasets are shown below and noise is applied accordingly to compute the estimate (bars) and the 95% confidence interval (error bar).</p>
+      <p>The legend indicates the color for the base dataset and the alternative dataset.</p>
+      <p>All applicable similarity measures are displayed in the orange box below.</p>
+    </div>
   </div>
     <table class="default">               
         <tr>
           <th style="width:30%">Base:</th>
           <td style="width:30%">privacy budget: {{mobility_entropy_eps[0]}}</td>
+          <td style="width:30%">95% CI: +/- TODO</td>
         </tr>
         <tr>
           <th style="width:30%">Alternative:</th>
           <td style="width:30%">privacy budget: {{mobility_entropy_eps[1]}}</td>
+          <td style="width:30%">95% CI: +/- TODO</td>
         </tr>
       </table>
-    <!-- <p class="info">
-        The mobility entropy characterizes the heterogeneity of the users visitation patterns
-        and can be interpreted as a measure for the predictability of a users location.
-        If a user only visits a single tile, the entropy is 0, i.e., their location is highly predictable.
-        It a user visits, e.g., four different tiles each 10 times, the entropy is 1, i.e., their 
-        location is not predictable as every of the four tiles has the same probability 
-        to be visited by the user.
-        Intuitively, the more trips per user are entailed in the data, the more meaningful the mobility entropy.
-    </p> -->
     <div>
         {{mobility_entropy_hist}}
         {{mobility_entropy_measure}}

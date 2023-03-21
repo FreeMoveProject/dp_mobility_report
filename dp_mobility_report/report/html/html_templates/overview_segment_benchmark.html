@@ -7,8 +7,9 @@
         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
       </svg></h3></label>
     <div class="tab-content">
-        <p>The following table shows the dataset statistics with the given privacy budget for the base and the alternative dataset.</p>
-        <p>It provides the estimate numbers and the 95% confidence interval as well as the symmetric mean absolute percentage error.</p>
+        <p>The following table shows the key figures of the base and the alternative dataset.</p>
+        <p>The allocated privacy budget for each dataset are shown below and noise is applied accordingly to compute the estimate and the 95% confidence interval.</p>
+        <p>The symmetric mean absolute percentage error between base and alternative estimates is computed and indicated in the last column.</p>
     </div>
   </div>
     <table class="default">               
@@ -34,8 +35,10 @@
         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
       </svg></h3></label>
     <div class="tab-content">
-        <p>The following table shows the missing values of the datasets with the given privacy budget for the base and alternative dataset.</p>
-        <p>It provides the estimate numbers and the 95% confidence interval as well as the symmetric mean absolute percentage error.</p>
+        <p>The following table shows the number of missing values for each column of the two datasets.</p>
+        <p>The allocated privacy budget for each dataset are shown below and noise is applied accordingly to compute the estimate and the 95% confidence interval.</p>
+        <p>The symmetric mean absolute percentage error between base and alternative estimates is computed and indicated in the last column.</p>
+
     </div>
   </div>
   <table class="default">               
@@ -61,7 +64,8 @@
           <label class="tab-label-structure-info-button" for="tripsovertime"><h3>Trips over time <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
               <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/> <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/> </svg></h3></label>
           <div class="tab-content">
-              <p>This visualization shows the trips over time with the given privacy budget and 95% confidence interval for the base and alternative dataset.</p>
+              <p>This visualization shows the relative number of trips on a timeline of the base and alternative dataset.</p>
+              <p>The allocated privacy budget for each dataset are shown below and noise is applied accordingly to compute the estimate (blue and orange line) and the 95% confidence interval. The confidence interval is visualized as shaded error bands, colored respectively for base and alternative.</p>
               <p>The y-axis shows the percentage of trips while the x-axis will show the timeline aggregated as indicated below the visualization. The legend indicates the color for the base dataset and the alternative dataset. </p>
           </div>
       </div>
@@ -98,8 +102,9 @@
         <label class="tab-label-structure-info-button" for="tripsperweekday"><h3>Trips per weekday <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
             <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/> <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/> </svg></h3></label>
         <div class="tab-content">
-            <p>This histogram visualizes the percentage of trips per weekday for the given privacy budget and 95% confidence interval for the base and alternative dataset.</p>
-            <p>The y-axis shows the percentage of trips while the x-axis shows the weekdays.</p>
+            <p>This histogram visualizes the relative number of trips per weekday for the base and alternative dataset.</p>
+            <p>The allocated privacy budgets for both datasets are shown below and noise is applied accordingly to compute the estimate (bars) and the 95% confidence interval (error bar).</p>
+            <p>The y-axis shows the percentage of trips while the x-axis shows the weekdays. The legend indicates the color for the base dataset and the alternative dataset.</p>
           </div>
     </div> 
         <table class="default">               
@@ -128,7 +133,8 @@
         <label class="tab-label-structure-info-button" for="tripsperhour"><h3>Trips per hour of day <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
             <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/> <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/> </svg></h3></label>
         <div class="tab-content">
-          <p>This linechart shows the percentage of trips per hour of the day for the base and alternative dataset with the given privacy budget and 95% confidence interval.</p>
+          <p>This linechart shows the relative number of trips per hour over the course of a day, disaggregated by weekday and weekend for the base and alternative dataset.</p>
+          <p>The allocated privacy budget for both datasets are shown below and noise is applied accordingly to compute the estimate (lines). The confidence interval is indicated below but not visualized in the graph due to visual clarity. </p>
           <p>The legend shows the colors for each time category (weekday start, weekday end, weekend start, weekend end) indicating the start and end timestamp of each trip and if the trip was during the week or on the weekend. Furthermore, the lines are either continuous or dashed for the base and the alternative dataset.</p>
           <p>The y-axis shows the percentage of trips while the x-axis shows the hour of the day.</p>
           </div>

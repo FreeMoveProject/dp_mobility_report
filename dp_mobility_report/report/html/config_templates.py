@@ -97,7 +97,7 @@ def render_config_table(dpmreport: "DpMobilityReport") -> str:
 
     # create html from template
     template_table = get_template("table.html")
-    dataset_stats_html = template_table.render(rows=config_list)
+    dataset_stats_html = template_table.render(rows=config_list, align="left-align")
     return dataset_stats_html
 
 

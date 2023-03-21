@@ -7,9 +7,14 @@
             <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
           </svg></h3></label>
         <div class="tab-content">
-          <p>The following map shows the visits per tile (according to the provided tessellation) with the given privacy budget and 95% confidence interval.</p>
-          <p>The legend below shows the number of visits per tile ranging from 0 to the maximum amount of visits per tile.</p>
-          <p>Tiles below a certain threshold are grayed out: Due to the applied noise, tiles with a low visit count are likely to contain a high percentage of noise. For usability reasons, such unrealistic values are grayed out. More specifically: The threshold is set so that values for tiles with a 5% chance (or higher) of deviating more than 20 percentage points from the estimated value are not shown.</p>
+          <p>The following map shows the spatial distribution of the dataset according to the provided tessellation. 
+            Records outside the tessellation are indicated as number of outliers below the map.</p>
+            <p>The legend below shows the number of visits per tile ranging from 0 to the maximum number of visits per tile.</p>
+            <p>The allocated privacy budget for this map is shown below and noise is applied accordingly onto the counts. 
+                The confidence interval is indicated below.</p>
+          <p>Tiles below a certain threshold are grayed out: Due to the applied noise, tiles with a low visit count are likely to contain a high percentage of noise. 
+            For usability reasons, such unrealistic values are grayed out. 
+            More specifically: The threshold is set so that values for tiles with a 5% chance (or higher) of deviating more than 20 percentage points from the estimated value are not shown.</p>
         </div>
     </div>
     <p>privacy budget: {{ visits_per_tile_eps }}</p>
@@ -30,7 +35,18 @@
 
 
 <div>
-    <h4>Five-number summary: visits per tile</h4>
+    
+    <div class="tab-structure-info-button">
+        <input type="checkbox" id="fivenumber">
+        <label class="tab-label-structure-info-button" for="fivenumber"><h4>Five-number summary: visits per tile <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+          </svg></h4></label>
+        <div class="tab-content">
+            <p>This table shows the mean number of visits per tile as well as the five-number summary consisting of: the most extreme values in the dataset (the maximum and minimum values), the lower and upper quartiles, and the median.</p>
+            <p>These values are computed from the counts visualized above. Thus, no extra privacy budget is used.</p>
+        </div>
+    </div>
     {{visits_per_tile_summary_table}}
 </div>
 <div>
@@ -41,8 +57,10 @@
             <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
           </svg></h4></label>
         <div class="tab-content">
-            <p>The cumulated sum of visits visualizes the distribution of visits over tiles. </p>
+            <p>The following visualization shows the cumulated relative number of visits. This means that the tiles are sorted according to the number of visits in descending order and the relative number of visits are added tile by tile. 
+                Thus, you can use the graph to evaluate how many tiles are needed to cover a certain share of the visits.</p>
             <p>If all tiles are visited equally, the cumulated sum follows a straight diagonal line (gray line). The larger the share of single tiles in the total number of visits, the steeper the curve.</p>
+            <p>These values are computed from the counts visualized above. Thus, no extra privacy budget is used.</p>
         </div>
     </div>
     {{visits_per_tile_cumsum_linechart}}
@@ -56,8 +74,9 @@
             <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
           </svg></h4></label>
         <div class="tab-content">
-            <p>The following visualization shows the ranking of most frequently visited tiles with the margin of error.</p>
-            <p>The y-axis shows the ranking as well as the tile name according to the provided tessellation. The x-axis shows the number of visits per tile.</p>
+            <p>The following visualization shows the ranking of most frequently visited tiles.</p>
+            <p>The y-axis shows the tile name (if provided) and tile ID in order of the ranking. The x-axis shows the number of visits per tile.</p>
+            <p>These values are computed from the counts visualized above. Thus, no extra privacy budget is used. The 95% confidence interval of the visits per tile indicated above also applies here and is visualized with error bars.</p>
         </div>
     </div>    
     {{most_freq_tiles_ranking}}
@@ -74,7 +93,9 @@
             <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
           </svg></h3></label>
         <div class="tab-content">
-            <p>Each map shows the <strong>arrivals (destinations)</strong> for the respective time window for each tile, split by weekday and weekend, as absolute counts and as the deviation from tile average for the given privacy budget and 95% confidence interval.</p>
+            <p>Each map shows the <strong>arrivals (destinations)</strong> for the respective time window for each tile, split by weekday and weekend, as absolute counts and as the deviation from tile average. 
+                The tile average is defined as the mean number of visits in one tile across all time windows. 
+                Thus, the deviation from tile average indicates higher or lower number of visits for this tile during certain time windows of a day.</p>
             <p>Tiles below a certain threshold are grayed out: Due to the applied noise, tiles with a low visit count are likely to contain a high percentage of noise. For usability reasons, such unrealistic values are grayed out. More specifically: The threshold is set so that values for tiles with a 5% chance (or higher) of deviating more than 20 percentage points from the estimated value are not shown.</p>
         </div>
     </div> 
