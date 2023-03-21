@@ -53,9 +53,10 @@ class DpMobilityReport:
         bin_range_user_tile_count: The range a single histogram bin spans for the distinct tiles per user histogram. If ``None`` is given, the histogram bins will be determined automatically. Defaults to ``None``.
         max_user_time_delta:  Upper bound for user time delta histogram. If ``None`` is given, no upper bound is set. Defaults to ``None``.
         bin_range_user_time_delta: The range a single histogram bin spans for user time delta (e.g., 1 for 1 hour bins). If ``None`` is given, the histogram bins will be determined automatically. Defaults to ``None``.
+        subtitle: Custom subtitle that appears at the top of the HTML report. Defaults to ``None``.
         disable_progress_bar: Whether progress bars should be shown. Defaults to ``False``.
         seed_sampling: Provide seed for down-sampling of dataset (according to ``max_trips_per_user``) so that the sampling is reproducible. Defaults to ``None``, i.e., no seed.
-        evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to ``False``."""
+        evalu: Parameter only needed for development and evaluation purposes. Defaults to ``False``."""
 
     _report: dict = {}
     _html: str = ""
@@ -87,10 +88,10 @@ class DpMobilityReport:
         bin_range_user_tile_count: Optional[int] = None,
         max_user_time_delta: Optional[Union[int, float]] = None,
         bin_range_user_time_delta: Optional[Union[int, float]] = None,
+        subtitle: str = None,
         disable_progress_bar: bool = False,
         seed_sampling: int = None,
         evalu: bool = False,
-        subtitle: str = None,
     ) -> None:
         preprocessing.validate_input(
             df,

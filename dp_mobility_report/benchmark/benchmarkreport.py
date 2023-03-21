@@ -55,6 +55,7 @@ class BenchmarkReport:
         bin_range_user_time_delta: The range a single histogram bin spans for user time delta (e.g., 1 for 1 hour bins). Defaults to 4 (hours).
         top_n_ranking: List of 'top n' values that are used to compute the Kendall correlation coefficient and the top n coverage for ranking similarity measures. Values need to be integers > 0. Defaults to ``[10, 50, 100]``.
         measure_selection: Select similarity measure for each analysis that is used for the ``similarity_measures`` property of the ``BenchmarkReport``. If ``None``, the default from ``default_measure_selection()`` will be used.
+        subtitle: Custom subtitle that appears at the top of the HTML report. Defaults to ``None``.
         disable_progress_bar: Whether progress bars should be shown. Defaults to ``False``.
         seed_sampling: Provide seed for down-sampling of dataset (according to ``max_trips_per_user``) so that the sampling is reproducible. Defaults to ``None``, i.e., no seed.
         evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to ``False``."""
@@ -99,10 +100,10 @@ class BenchmarkReport:
         bin_range_user_time_delta: Union[int, float] = 4,
         top_n_ranking: List[int] = [10, 50, 100],
         measure_selection: dict = None,
+        subtitle: str = None,
         disable_progress_bar: bool = False,
         seed_sampling: int = None,
         evalu: bool = False,
-        subtitle: str = None,
     ) -> None:
 
         self.disable_progress_bar = disable_progress_bar
