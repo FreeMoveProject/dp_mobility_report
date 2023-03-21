@@ -23,6 +23,7 @@ from dp_mobility_report.report.html.templates import (
 
 class DpMobilityReport:
     """Generate a (differentially private) mobility report from a mobility dataset. The report will be generated as an HTML file, using the ``.to_file()`` method.
+    
     Args:
         df: ``DataFrame`` containing the mobility data. Expected columns: User ID ``uid``, trip ID ``tid``, timestamp ``datetime`` (or ``int`` to indicate sequence position, if dataset only consists of sequences without timestamps), latitude ``lat`` and longitude ``lng`` in CRS EPSG:4326.
         tessellation: Geopandas ``GeoDataFrame`` containing the tessellation for spatial aggregations. Expected columns: ``tile_id``. If tessellation is not provided in the expected default CRS EPSG:4326, it will automatically be transformed. If no tessellation is provided, all analyses based on the tessellation will automatically be removed.
