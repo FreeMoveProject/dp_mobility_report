@@ -451,7 +451,7 @@ def render_trips_over_time(trips_over_time: DfSection) -> str:
         chart = plot.barchart(
             x=trips_over_time.data[const.DATETIME].to_numpy(),
             y=trips_over_time.data["trips"].to_numpy(),
-            margin_of_error=fmt_moe(trips_over_time.margin_of_error_laplace),
+            margin_of_error=trips_over_time.margin_of_error_laplace,
             x_axis_label="Date",
             y_axis_label="% of trips",
             rotate_label=True,
@@ -482,10 +482,8 @@ def render_benchmark_trips_over_time(
             x=trips_over_time.data[const.DATETIME].to_numpy(),
             y=trips_over_time.data["trips"].to_numpy(),
             y_alternative=trips_over_time_alternative.data["trips"].to_numpy(),
-            margin_of_error=fmt_moe(trips_over_time.margin_of_error_laplace),
-            margin_of_error_alternative=fmt_moe(
-                trips_over_time_alternative.margin_of_error_laplace
-            ),
+            margin_of_error=trips_over_time.margin_of_error_laplace,
+            margin_of_error_alternative=trips_over_time_alternative.margin_of_error_laplace,
             x_axis_label="Date",
             y_axis_label="% of trips",
             rotate_label=True,
