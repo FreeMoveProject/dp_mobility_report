@@ -70,7 +70,7 @@ def render_overview(dpmreport: "DpMobilityReport") -> str:
             report[const.TRIPS_PER_WEEKDAY].privacy_budget
         )
         args["trips_per_weekday_moe"] = fmt_moe(
-            report[const.TRIPS_PER_HOUR].margin_of_error_laplace
+            report[const.TRIPS_PER_WEEKDAY].margin_of_error_laplace
         )
 
         args["trips_per_weekday_barchart"] = render_trips_per_weekday(
