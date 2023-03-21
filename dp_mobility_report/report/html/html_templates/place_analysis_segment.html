@@ -18,7 +18,7 @@
         </div>
     </div>
     <p>privacy budget: {{ visits_per_tile_eps }}</p>
-    <p>95% CI: +/- {{ visits_per_tile_moe }}</p>
+    <p>95% CI: +/- {{ visits_per_tile_moe }} visit(s)</p>
     
     <iframe src="{{output_filename}}/maps/visits_per_tile_map.html" width="100%" height="600" style="border:1px solid black;">
     </iframe>
@@ -100,7 +100,7 @@
         </div>
     </div> 
     <p>privacy budget: {{ visits_per_tile_timewindow_eps }}</p>
-    <p>95% CI: +/- {{ visits_per_tile_timewindow_moe }}</p>
+    <p>95% CI: +/- {{ visits_per_tile_timewindow_moe }} visit(s)</p>
     
         <div class = "map_png">
         {{visits_per_tile_time_map}}
