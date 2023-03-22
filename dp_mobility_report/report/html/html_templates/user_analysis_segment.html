@@ -13,7 +13,7 @@
         </div>
     </div>    
     <p>privacy budget: {{trips_per_user_eps}}</p>
-    <p>95% CI: +/- TODO</p>
+    <p>95% CI: +/- {{trips_per_user_moe}} %</p>
     <div>
         {{trips_per_user_hist}}
         <p class="grey info">
@@ -42,7 +42,7 @@
         </div>
     </div>
     <p>privacy budget: {{time_between_traj_eps}}</p>
-    <p>95% CI: +/- TODO</p>
+    <p>95% CI: +/- {{time_between_traj_moe}} %</p>
     {{time_between_traj_hist}}
     <p class="grey info">
         {{time_between_traj_hist_info}}
@@ -77,7 +77,7 @@
         </div>
     </div>
     <p>privacy budget: {{radius_of_gyration_eps}}</p>
-    <p>95% CI: +/- TODO</p>
+    <p>95% CI: +/- {{radius_of_gyration_moe}} %</p>
     <div>
         {{radius_of_gyration_hist}}
         <p class="grey info">
@@ -106,7 +106,7 @@
         </div>
     </div>
     <p>privacy budget: {{distinct_tiles_user_eps}}</p>
-    <p>95% CI: +/- TODO</p>
+    <p>95% CI: +/- {{distinct_tiles_user_moe}} %</p>
     <div>
         {{distinct_tiles_user_hist}}
         <p class="grey info">
@@ -136,7 +136,7 @@
         </div>
     </div>
     <p>privacy budget: {{mobility_entropy_eps}}</p>
-    <p>95% CI: +/- TODO</p>
+    <p>95% CI: +/- {{mobility_entropy_moe}} %</p>
     <div>
         {{mobility_entropy_hist}}
     </div>

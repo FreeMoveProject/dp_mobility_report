@@ -124,7 +124,7 @@ def render_benchmark_od_analysis(
         )
         args["od_moe"] = (
             fmt_moe(report_base[const.OD_FLOWS].margin_of_error_laplace),
-            fmt_moe(report_base[const.OD_FLOWS].margin_of_error_laplace),
+            fmt_moe(report_alternative[const.OD_FLOWS].margin_of_error_laplace),
         )
 
         args["od_legend"] = render_benchmark_origin_destination_flows(
