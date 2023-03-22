@@ -446,9 +446,9 @@ def _basemap(center_x: float, center_y: float, zoom_start: int = 10) -> folium.M
 
 
 def ranking(
-    x: np.ndarray,
+    x: Union[np.ndarray, pd.Series],
     x_axis_label: str,
-    x_alternative: Optional[np.ndarray] = None,
+    x_alternative: Union[np.ndarray, pd.Series] = None,
     y_labels: list = None,
     margin_of_error: Optional[float] = None,
     margin_of_error_alternative: Optional[float] = None,
@@ -457,6 +457,9 @@ def ranking(
     y = list(range(1, len(x) + 1))[::-1]
     y_labels = y if y_labels is None else y_labels
     fig, ax = plt.subplots(figsize=figsize)
+
+    if all(np.isnan(x)):
+        x = np.zeros(len(x))
     bar_base = ax.errorbar(
         x,
         y,
@@ -468,6 +471,8 @@ def ranking(
         label="base",
     )
     if x_alternative is not None:
+        if all(np.isnan(x_alternative)):
+            x_alternative = np.zeros(len(x_alternative))
         bar_alt = ax.errorbar(
             x_alternative,
             y,

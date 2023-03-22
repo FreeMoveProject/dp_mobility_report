@@ -29,7 +29,7 @@ class DpMobilityReport:
         tessellation: Geopandas ``GeoDataFrame`` containing the tessellation for spatial aggregations. Expected columns: ``tile_id``. If tessellation is not provided in the expected default CRS EPSG:4326, it will automatically be transformed. If no tessellation is provided, all analyses based on the tessellation will automatically be removed.
         privacy_budget: privacy_budget for the differentially private report. Defaults to ``None``, i.e., no privacy guarantee is provided.
         user_privacy: Whether item-level or user-level privacy is applied. Defaults to ``True`` (user-level privacy).
-        max_trips_per_user: Maximum number of trips a user is allowed to contribute to the data. Dataset will be sampled accordingly. Defaults to ``None``, i.e., all trips are used. This implies that the actual maximum number of trips per user will be used according to the data, though this violates Differential Privacy.
+        max_trips_per_user: Maximum number of trips a user is allowed to contribute to the data. Dataset will be sampled accordingly. Defaults to ``None``, i.e., all trips are used. This implies that the actual maximum number of trips per user will be used according to the data, though this violates user-level Differential Privacy.
         analysis_selection: Select only needed analyses. A selection reduces computation time and leaves more privacy budget
         for higher accuracy of other analyses. ``analysis_selection`` takes a list of all analyses to be included. Alternatively, a list of analyses to be excluded can be set with ``analysis_exclusion``.
         Either entire segments can be included: ``const.OVERVIEW``, ``const.PLACE_ANALYSIS``, ``const.OD_ANALYSIS``, ``const.USER_ANALYSIS``
@@ -143,8 +143,10 @@ class DpMobilityReport:
                 else df.groupby(const.UID).nunique()[const.TID].max()
             )
 
-            if not user_privacy:
-                self._max_trips_per_user = 1
+            if user_privacy:
+                self.count_sensitivity_base = self._max_trips_per_user
+            else:
+                self.count_sensitivity_base = 1
             self._df = preprocessing.preprocess_data(
                 df.copy(),  # copy, to not overwrite users instance of df
                 self.tessellation,
@@ -172,10 +174,19 @@ class DpMobilityReport:
         self._analysis_exclusion = preprocessing.clean_analysis_exclusion(
             analysis_selection,
             analysis_exclusion,
-            (tessellation is not None),
-            pd.core.dtypes.common.is_datetime64_dtype(self.df[const.DATETIME]),
-            max(self.df[const.TID].value_counts())
+            has_tessellation=(tessellation is not None),
+            has_points_inside_tessellation=preprocessing.has_points_inside_tessellation(
+                self.df, self.tessellation
+            ),
+            has_timestamps=pd.core.dtypes.common.is_datetime64_dtype(
+                self.df[const.DATETIME]
+            ),
+            has_od_flows=max(self.df[const.TID].value_counts())
             > 1,  # are there trips with more than a single record?
+            has_consecutive_user_trips=max(
+                self.df.groupby(const.UID).nunique()[const.TID]
+            )
+            > 1,
         )
         self._budget_split = preprocessing.clean_budget_split(
             budget_split, self._analysis_exclusion

@@ -425,26 +425,45 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
     ]
 
     # without tessellation
-    report = DpMobilityReport(test_data, privacy_budget=None).report
+    dpmr = DpMobilityReport(test_data, privacy_budget=None)
+    report = dpmr.report
     assert isinstance(report, dict)
+    assert set(dpmr.analysis_exclusion) == {
+        const.VISITS_PER_TILE,
+        const.VISITS_PER_TIME_TILE,
+        const.OD_FLOWS,
+        const.USER_TILE_COUNT,
+        const.MOBILITY_ENTROPY,
+    }
     assert list(report.keys()) == [
         const.DS_STATISTICS,
         const.MISSING_VALUES,
         const.TRIPS_OVER_TIME,
         const.TRIPS_PER_WEEKDAY,
         const.TRIPS_PER_HOUR,
+        const.TRAVEL_TIME,
+        const.JUMP_LENGTH,
         const.TRIPS_PER_USER,
         const.USER_TIME_DELTA,
         const.RADIUS_OF_GYRATION,
     ]
 
     # without datetime
-    report = DpMobilityReport(
+    dpmr = DpMobilityReport(
         test_data_sequence,
         test_tessellation,
         privacy_budget=None,
-    ).report
+    )
+    report = dpmr.report
 
+    assert set(dpmr.analysis_exclusion) == {
+        const.TRIPS_OVER_TIME,
+        const.TRIPS_PER_WEEKDAY,
+        const.TRIPS_PER_HOUR,
+        const.VISITS_PER_TIME_TILE,
+        const.TRAVEL_TIME,
+        const.USER_TIME_DELTA,
+    }
     assert list(report.keys()) == [
         const.DS_STATISTICS,
         const.MISSING_VALUES,
@@ -460,8 +479,11 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
     # without od
     df = test_data.groupby(const.TID).first().reset_index()
     with pytest.warns(Warning):
-        report = DpMobilityReport(df, test_tessellation, privacy_budget=None).report
+        dpmr = DpMobilityReport(df, test_tessellation, privacy_budget=None)
+    report = dpmr.report
     assert isinstance(report, dict)
+    assert set(dpmr.analysis_exclusion) == set(const.OD_ELEMENTS)
+
     assert list(report.keys()) == [
         const.DS_STATISTICS,
         const.MISSING_VALUES,
@@ -475,6 +497,63 @@ def test_report_output(test_data, test_data_sequence, test_tessellation):
         const.RADIUS_OF_GYRATION,
         const.USER_TILE_COUNT,
         const.MOBILITY_ENTROPY,
+    ]
+
+    # without user_time_analysis
+    tids = test_data.groupby(const.UID).first()[const.TID]
+    df = test_data[test_data[const.TID].isin(tids)]
+    with pytest.warns(Warning):
+        dpmr = DpMobilityReport(df, test_tessellation, privacy_budget=None)
+    report = dpmr.report
+    assert isinstance(report, dict)
+    assert set(dpmr.analysis_exclusion) == {const.USER_TIME_DELTA}
+
+    assert list(report.keys()) == [
+        const.DS_STATISTICS,
+        const.MISSING_VALUES,
+        const.TRIPS_OVER_TIME,
+        const.TRIPS_PER_WEEKDAY,
+        const.TRIPS_PER_HOUR,
+        const.VISITS_PER_TILE,
+        const.VISITS_PER_TIME_TILE,
+        const.OD_FLOWS,
+        const.TRAVEL_TIME,
+        const.JUMP_LENGTH,
+        const.TRIPS_PER_USER,
+        const.RADIUS_OF_GYRATION,
+        const.USER_TILE_COUNT,
+        const.MOBILITY_ENTROPY,
+    ]
+
+    # with no points inside tessellation (all analyses based on tessellation are excluded)
+    df = test_data
+    df.lat = test_data.lng
+    df.lng = test_data.lat
+
+    with pytest.warns(Warning):
+        dpmr = DpMobilityReport(df, test_tessellation, privacy_budget=None)
+
+    report = dpmr.report
+    assert isinstance(report, dict)
+
+    assert set(dpmr.analysis_exclusion) == {
+        const.VISITS_PER_TILE,
+        const.VISITS_PER_TIME_TILE,
+        const.OD_FLOWS,
+        const.USER_TILE_COUNT,
+        const.MOBILITY_ENTROPY,
+    }
+    assert list(report.keys()) == [
+        const.DS_STATISTICS,
+        const.MISSING_VALUES,
+        const.TRIPS_OVER_TIME,
+        const.TRIPS_PER_WEEKDAY,
+        const.TRIPS_PER_HOUR,
+        const.TRAVEL_TIME,
+        const.JUMP_LENGTH,
+        const.TRIPS_PER_USER,
+        const.USER_TIME_DELTA,
+        const.RADIUS_OF_GYRATION,
     ]
 
 
@@ -690,4 +769,18 @@ def test_to_html_file(test_data, test_data_sequence, test_tessellation, tmp_path
     # without timestamps
     file_name = tmp_path / "html/test_output5.html"
     DpMobilityReport(test_data_sequence).to_file(file_name)
+    assert file_name.is_file()
+
+    # with only one trip per user
+    file_name = tmp_path / "html/test_output6.html"
+    tids = test_data.groupby(const.UID).first()[const.TID]
+    df = test_data[test_data[const.TID].isin(tids)]
+    DpMobilityReport(df, test_tessellation, privacy_budget=None).to_file(file_name)
+
+    # with no points inside tessellation
+    df = test_data
+    df.lat = test_data.lng
+    df.lng = test_data.lat
+    file_name = tmp_path / "html/test_output7.html"
+    DpMobilityReport(df, test_tessellation).to_file(file_name)
     assert file_name.is_file()

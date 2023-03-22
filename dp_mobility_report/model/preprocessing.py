@@ -12,6 +12,15 @@ from shapely.geometry import Point
 from dp_mobility_report import constants as const
 
 
+def has_points_inside_tessellation(
+    df: pd.DataFrame, tessellation: Optional[GeoDataFrame]
+) -> bool:
+    if tessellation is None:
+        return True
+
+    return not all(df[const.TILE_ID].isna())
+
+
 def validate_inclusion_exclusion(
     analysis_selection: Optional[List[str]], analysis_exclusion: Optional[List[str]]
 ) -> Tuple[Optional[List[str]], Optional[List[str]]]:
@@ -57,11 +66,6 @@ def validate_input(
 ) -> None:
     if not isinstance(df, DataFrame):
         raise TypeError("'df' is not a Pandas DataFrame.")
-
-    if max(df[const.TID].value_counts()) == 1:
-        warnings.warn(
-            "There are only incomplete trips, i.e., no trips with more than a single record. OD analyses cannot be conducted, thus they are excluded from the report."
-        )
 
     if tessellation is None:
         warnings.warn(
@@ -115,13 +119,17 @@ def validate_input(
     if not all([np.issubdtype(item, int) for item in timewindows]):
         raise TypeError("not all items of 'timewindows' are integers.")
 
+    _validate_bool(user_privacy, f"{user_privacy=}".split("=")[0])
+    _validate_bool(evalu, f"{user_privacy=}".split("=")[0])
+    _validate_bool(disable_progress_bar, f"{user_privacy=}".split("=")[0])
+
     if privacy_budget is not None:
         _validate_numeric_greater_zero(
             privacy_budget, f"{privacy_budget=}".split("=")[0]
         )
-        if max_trips_per_user is None:
+        if (max_trips_per_user is None) & user_privacy:
             warnings.warn(
-                "Input parameter `max_trips_per_user` is `None` even though a privacy budget is given. The actual maximum number of trips per user will be used according to the data, though this violates Differential Privacy."
+                "Input parameter `max_trips_per_user` is `None` even though a privacy budget is given. The actual maximum number of trips per user will be used according to the data, though this violates user-level Differential Privacy."
             )
 
     _validate_int_greater_zero(max_travel_time, f"{max_travel_time=}".split("=")[0])
@@ -150,9 +158,6 @@ def validate_input(
     _validate_numeric_greater_zero(
         bin_range_user_time_delta, f"{bin_range_user_time_delta=}".split("=")[0]
     )
-    _validate_bool(user_privacy, f"{user_privacy=}".split("=")[0])
-    _validate_bool(evalu, f"{user_privacy=}".split("=")[0])
-    _validate_bool(disable_progress_bar, f"{user_privacy=}".split("=")[0])
 
     if not ((seed_sampling is None) or isinstance(seed_sampling, int)):
         raise TypeError("'seed_sampling' is not an integer.")
@@ -184,8 +189,10 @@ def clean_analysis_exclusion(
     analysis_selection: Optional[List[str]],
     analysis_exclusion: Optional[List[str]],
     has_tessellation: bool,
+    has_points_inside_tessellation: bool,
     has_timestamps: bool,
     has_od_flows: bool,
+    has_consecutive_user_trips: bool,
 ) -> List[str]:
     def _remove_elements(elements: list, remove_list: list) -> list:
         return [e for e in elements if e not in remove_list]
@@ -236,13 +243,32 @@ def clean_analysis_exclusion(
         analysis_exclusion = []
 
     if not has_tessellation:
+        # warning in validation
         analysis_exclusion += const.TESSELLATION_ELEMENTS
 
+    if (has_tessellation) & (not has_points_inside_tessellation):
+        analysis_exclusion += const.TESSELLATION_ELEMENTS
+        warnings.warn(
+            "No records are within the given tessellation. All analyses based on the tessellation will be excluded."
+        )
+
     if not has_timestamps:
+        # warning in validation
         analysis_exclusion += const.TIMESTAMP_ANALYSES
 
     if not has_od_flows:
+        warnings.warn(
+            "There are only incomplete trips, i.e., no trips with more than a single record. OD analyses cannot be conducted, thus they are excluded from the report."
+        )
         analysis_exclusion += const.OD_ELEMENTS
+
+    if (const.USER_TIME_DELTA not in analysis_exclusion) & (
+        not has_consecutive_user_trips
+    ):
+        warnings.warn(
+            "No user has more than one trip (this is also the case, if max_trips_per_user=1). No analysis of consecutive trips of a user can be conducted and will thus be excluded."
+        )
+        analysis_exclusion += [const.USER_TIME_DELTA]
 
     # deduplicate in case analyses and segments were included
     analysis_exclusion = list(set(analysis_exclusion))
@@ -368,7 +394,7 @@ def preprocess_data(
             logging.info(
                 "'tile_id' present in data. No new assignment of points to tessellation."
             )
-            df.tile_id = df.tile_id.astype(str)
+            df[const.TILE_ID] = df[const.TILE_ID].astype(str)
 
     df = sample_trips(df, max_trips_per_user, user_privacy, seed)
     return df

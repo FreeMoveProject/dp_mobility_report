@@ -58,9 +58,7 @@ def render_od_analysis(
             report[const.OD_FLOWS], len(dpmreport.tessellation)
         )
         quartiles = report[const.OD_FLOWS].quartiles.round()
-        if not any(np.isnan(quartiles)):
-            quartiles = quartiles.astype(int)
-        args["flows_summary_table"] = render_summary(quartiles)
+        args["flows_summary_table"] = render_summary(quartiles, int)
         args["flows_cumsum_linechart"] = render_flows_cumsum(
             report[const.OD_FLOWS], diagonal=True
         )
@@ -414,7 +412,7 @@ def render_flows_cumsum(
         add_diagonal=diagonal,
     )
     html = v_utils.fig_to_html(chart)
-    plt.close()
+    plt.close(chart)
     return html
 
 
@@ -456,7 +454,7 @@ def render_most_freq_flows_ranking(
         figsize=(8, max(6, min(len(labels) * 0.5, 8))),
     )
     html_ranking = v_utils.fig_to_html(ranking)
-    plt.close()
+    plt.close(ranking)
     return html_ranking
 
 
@@ -518,7 +516,7 @@ def render_most_freq_flows_ranking_benchmark(
         figsize=(8, max(6, min(len(labels) * 0.5, 8))),
     )
     html_ranking = v_utils.fig_to_html(ranking)
-    plt.close()
+    plt.close(ranking)
     return html_ranking
 
 
