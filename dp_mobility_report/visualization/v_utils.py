@@ -9,6 +9,7 @@ def fig_to_html(fig: Figure) -> str:
     img = io.StringIO()
     fig.savefig(img, format="svg", bbox_inches="tight")
     img_string = img.getvalue()
+    img_string = resize_width(img_string, 100)
     return img_string
 
 

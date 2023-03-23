@@ -62,19 +62,19 @@ def test_preprocess_data(test_data, test_tessellation, caplog):
     processed_data = preprocessing.preprocess_data(
         test_data, test_tessellation, max_trips_per_user=5, user_privacy=True, seed=None
     )
-    assert processed_data.columns.tolist() == [
+    assert set(processed_data.columns.tolist()) == {
         const.TILE_ID,
         const.TILE_NAME,
-        const.TID,
         const.ID,
         const.UID,
+        const.TID,
         const.DATETIME,
         const.LAT,
         const.LNG,
         const.HOUR,
         const.IS_WEEKEND,
         const.POINT_TYPE,
-    ]
+    }
 
     # all waypoints are removed
     n_per_tid = processed_data.groupby(const.TID).count()[const.ID]

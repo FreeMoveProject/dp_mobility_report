@@ -1,0 +1,168 @@
+
+  <h2>Similarity measures</b></h2>
+  <p>The similarity of two mobility reports is evaluated in the following benchmark report using similarity measures. 
+    Specifically, a set of measures is computed for each chosen analysis of the report which can be found below each analysis 
+    indicated by a light orange background. </p>
+
+  <p>In the following the similarity measures relative error (RE), Kullback-Leibler divergence (KLD), Jensen-Shannon divergence 
+    (JSD), earth mover's distance (EMD) and
+    symmetric mean average percentage error (SMAPE) will be explained, as well as the reasoning why the specific measures are 
+    available for each analyses and which measure is the default measure and why. </p>
+
+  <div class="tabs">
+    <div class="tab">
+      <input type="checkbox" id="chck2">
+      <label class="tab-label" for="chck2">Symmetric mean absolute percentage error (SMAPE)</label>
+      <div class="tab-content">
+        <p>The symmetric mean absolute percentage error (SMAPE) is an accuracy measure based on percentage (or relative) errors. 
+          In contrast to the mean absolute percentage error, SMAPE has both a lower bound (0, meaning identical) and an upper 
+          bound (2, meaning entirely different). 
+          $$ SMAPE =  \frac{1}{n} \sum_{i=1}^{n} \frac {|alternative_{i} - base_{i}|}{(|base_{i}| + |alternative_{i}|) \div 2}$$ </p>
+
+        <p>SMAPE is computed for all analyses. </p>
+        <p>For single counts (e.g., dataset statistics, missing values), n=1 with \(base_{i}\) (\(alternative_{i}\) respectively) 
+          refering to the respective count value. For the five number summary, n=5 with \(base_{i}\) (\(alternative_{i}\) respectively) 
+          refering to \(i_{th}\) value of the summary. For all other analyses, n equals the number of histogram bins. </p>
+        <p>SMAPE is employed as the default measure for single counts and for the evaluation of the five number summary, as KLD,
+           JSD and EMD are not suitable. </p>
+        
+    </div>
+    </div>
+    <div class="tab">
+      <input type="checkbox" id="chck3">
+      <label class="tab-label" for="chck3">Kullback-Leibler divergence (KLD)</label>
+      <div class="tab-content">
+        <p>The Kullback-Leibler divergence (KLD), also called relative entropy, is a widely used statistic to measure how far a 
+          probability distribution P deviates from a reference probability distribution Q on the same probability space \(\mathcal{X}\).
+          For discrete distributions P and Q, it is formally defined as:
+          $$D_{KL}(P||Q):= \sum\limits_{x \in \mathcal{X}: P(x)>0} P(x)\cdot \log \frac{P(x)}{Q(x)}$$</p>
+        
+        <p>For example, considering a tessellation (\(\mathcal{X}\)) the spatial distribution can be evaluated by comparing the relative 
+          counts in the synthetic data (P) per tile x to the relative counts per tile in the reference dataset (Q). 
+          The larger the deviation of P from Q, the larger the value of the resulting KLD, with a minimum value of 0 for identical 
+          distributions.</p>
+        <p> Note that KLD is not symmetric, i.e., \(D_{KL}(P||Q)~\neq~D_{KL}(Q||P)\), which is why KLD is best applicable in settings 
+          with a reference model Q and a fitted model P. 
+          However, the lack of symmetry implies that it is not a distance metric in the  mathematical sense.</p>
+      
+        <p>It is worth noting that KLD is only defined if \(Q(x)\neq 0\) for all x in the support of P, while this constraint is not 
+          required for JSD.
+          In practice, both KLD and JSD are computed for discrete approximations of continuous distributions, e.g., histograms approximating 
+          the relative number of trips over time based on daily or hourly counts. However, the choice of histogram bins has an impact in 
+          two respects:
+          Say we want to compare the number of visits per tile. Depending on the granularity of the chosen tessellation, there might be 
+          tiles with 0 visits in the real dataset but >0 visits in the synthetic dataset, thus KLD would not be defined for such cases.
+          Additionally, the resulting values for both KLD and JSD vary according to the choice of bins, e.g., by reducing the granularity 
+          of the tessellation, the values of KLD and JSD will tend to be smaller. </p>
+        
+        <p>The KLD is computed for the following analyses: trips over time, trips per weekday, trips per hour, visits per tile, visits 
+          per tile timewindow, OD flows, travel time, jump length and radius of gyration.
+          The KLD might be <i>None</i> (or <i>not defined</i>) due to the fact, that it is not defined for \(Q(x)\neq 0\) for all x in the 
+          support of P and therefore the JSD is set as a default measure.</p>
+        
+              </div>
+    </div>
+    <div class="tab">
+      <input type="checkbox" id="chck4">
+      <label class="tab-label" for="chck4">Jensen-Shannon divergence (JSD)</label>
+      <div class="tab-content">
+        <p>The Jensen-Shannon divergence (JSD) solves this asymmetry by building on the KLD to calculate a symmetrical score in the 
+          sense that the divergence of P from Q is the same as Q from P: \(D_{JS}(P||Q) = D_{JS}(Q||P)\).
+          Additionally, JSD provides a smoothed and normalized version of KLD, with scores between 0 (meaning identical) and 1 (meaning entirely different)
+          when using the base-2 logarithm, thus making it easier to relate the resulting score within a fixed finite range. 
+          Formally, the JSD is defined for two probability distributions P and Q as: 
+          $$D_{JS}(P||Q) := \frac{1}{2} D_{KL}\biggl( P\left\Vert\frac{P+Q}{2}\right ) + \frac{1}{2} D_{KL}\biggl((Q\left\Vert\frac{P+Q}{2}\right)$$
+        <p>Following this advantage of the JSD compared to the KLD, the JSD is chosen as a default measure over the KLD. </p>
+        </div>
+    </div>
+    <div class="tab">
+      <input type="checkbox" id="chck5">
+      <label class="tab-label" for="chck5">Earth mover's distance (EMD)</label>
+      <div class="tab-content">
+        <p>Both KLD and JSD do not account for a distance of instances in the probability space \(\mathcal{X}\). However, 
+          the earth mover's distance (EMD) between two empirical distributions allows to take a notion of distance, like the 
+          underlying geometry of the space into account. 
+          Informally, the EMD is proportional to the minimum amount of work required to convert one distribution into the other. </p>
+        
+        <p>Suppose we have a tessellation, each tile denoted by \(\{x_1, \ldots , x_n\}\) with a corresponding notion of distance 
+          \(dis(x_i, x_j)\) being the Haversine distance between the centroids of tiles \(x_i\) and \(x_j\). 
+          For two empirical distributions P and Q represented by the visits in the given tiles \(\{p_1, \ldots , p_n\}\) and
+          \(\{q_1, \ldots , q_n\}\), respectively, 
+          the EMD can be defined as where \(f_{ij}\) is the optimal flow that minimizes the work to transform P into Q. </p>
+        
+        <p>The amount of work is determined by the defined distance between instances (i.e., tiles), thus, it allows for an intuitive 
+          interpretation.
+          In the given example, an EMD of 100 signifies 
+          that on average each record of the first distribution needs to be moved 100 meters to reproduce the second distribution. 
+          On the downside, there is no fixed range as for the
+          JSD which provides values between 0 and 1. Thus the EMD always needs to be interpreted in the context of the dataset and 
+          the EMD of different datasets cannot be compared directly.</p>
+        
+         
+        <p>In the same manner, the EMD can be computed for histograms, by defining a distance between histogram bins. 
+        To measure the distance between histogram bins, the difference between the midrange values of each bin pair is computed. 
+        For tiles, the centroid of each tile is used to compute the haversine distance. </p>
+        
+        <p>Thus the EMD is available for the following analyses provided in the following units: 
+          <ul>
+            <li> visits per tile: distance in meters</li>
+          
+            <li> visits per time tile: average distance in meters for each timewindow </li>
+          
+            <li>travel time: distance in minutes</li>
+          
+            <li>jump length: distance in kilometers</li>
+          
+            <li>trips per user: distance in counts of trips</li>
+          
+            <li>radius of gyration: distance in kilometers </li>
+          </ul>
+        </p>
+
+        <p>The EDM can only be computed, if a notion of distance between histogram bins or tiles can be computed. 
+          For example, there is no trivial distance between weekdays (you could argue that the categorization of weekdays and weekend 
+          is more important than the number of days lying inbetween). Thus, we decided to omit the EMD if there is no intuitive distance 
+          measure. 
+          The EMD is the default measure for visits per tile and visits per tile timewindow, as the underlying geometry is especially 
+          important to account for here. </p>
+        
+        </div>
+    </div>
+    <div class="tab">
+      <input type="checkbox" id="chck6">
+      <label class="tab-label" for="chck6">Kendall correlation coefficient (KT)</label>
+      <div class="tab-content">
+       <p> The Kendall's \(\tau\) coefficient, also known as the Kendall rank correlation coefficient, is a measure of the strength and 
+          direction of association that exists between two variables measured on an ordinal scale. It is a non-parametric measure of 
+          statistical associations based on the ranks of the data, i.e., the similarity of two rankings such as a ranking of most 
+          visited locations of two datasets. 
+          It returns a value between -1 and 1, where -1 means no relationship and 1 is a perfect relationship, determining the strength 
+          of association based on the pattern of concordance (ordered in the same way) and discordance (ordered differently) between all 
+          pairs, defined as follows:
+          $$\tau= \frac{\textrm{number of concordant pairs} - \textrm{number of discordant pairs}}{\textrm{number of pairs}}$$ </p>
+        
+        <p>Let's consider a list of locations \(\langle l_1,...,l_n \rangle\) and let \(pop(D, l_i)\) denote the popularity of 
+          \(l_i\), i.e., the number of times \(l_i\) is visited by trajectories in dataset \(D\) and compute the popularity 
+          \(pop(D_{base}, l_i)\) for a base dataset and \(pop(D_{alt}, l_i)\) for an alternative dataset for all \(l_i\). 
+          Then, we say that a pair of locations \((l_i, l_j)\) are concordant if either of the following hold:
+
+          \((pop(D_{ref}, l_i) > pop(D_{ref}, l_j)) \wedge (pop(D_{syn}, l_i) > pop(D_{syn}, l_j))\) or 
+          
+          \((pop(D_{ref}, l_i) < pop(D_{ref}, l_j)) \wedge (pop(D_{syn}, l_i) < pop(D_{syn}, l_j))\), 
+          i.e., their popularity ranks (in sorted order) agree. They are said to be discordant if their ranks disagree. </p>
+        
+        </div>
+    </div>
+    <div class="tab">
+      <input type="checkbox" id="chck7">
+      <label class="tab-label" for="chck7">  Coverage of the top n locations (TOP_N)</label>
+      <div class="tab-content">
+
+        <p> The coverage of the top n locations is defined by the true positive ratio: 
+          $$\frac{|top_n(D_{base})\ \cap\ top_n(D_{alt})|}{n}$$, where n is the number of top locations and \(top_n(D_{base})\) is 
+          the n top locations of the base dataset and \(top_n(D_{alt})\) the n top locations of the alternative dataset.</p>
+        <p>This measure represents how well the alternative dataset is similar to the base dataset considering the most visited locations.</p>
+        </div>
+    </div>
+  </div>
+

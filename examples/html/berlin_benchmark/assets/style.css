@@ -1,0 +1,242 @@
+div {
+    padding: 16px 0px 16px 0px;
+}
+
+div2 {
+  padding: 0;
+}
+
+p{
+    max-width: 100%;
+    margin: 6px 0px 6px 0px;
+}
+
+.container {
+    max-width: 90%;
+    padding: 40px 10px 40px 10px;
+}
+
+.container_legend {
+    max-width: 100%;
+    /*padding: 20px 20px 20px 20px;*/
+}
+
+.segment {
+    margin-top: 20px;
+    padding: 35px;
+    box-shadow: 5px 5px 15px silver;
+	border-radius: 5px;
+}
+
+.warning {
+    width: 100%;
+    background-color: #FFCCCB;
+    padding: 8px;
+    border: solid #a94442;
+    border-width: 3px;
+}
+
+.warning-text {
+    color: #a94442;
+}
+
+.estimate{
+    font-weight: bold
+}
+
+/* .table-header{
+    text-align: right;
+}*/
+.table-rowheader{
+    text-align: left;
+}
+
+.table{
+    text-align: right;
+    border-collapse: collapse;
+    border-style: hidden;
+}
+
+
+tdconfig, thconfig {
+  border: 1px solid black;
+}
+
+
+.medium-size-table{
+    max-width: 100%;
+}
+
+.map_png{
+    width: 80%;
+}
+
+img {
+    max-width: 100%;
+}
+
+.info{
+    font-style:italic;
+}
+
+.grey{
+    background-color: rgb(223, 223, 223);
+}
+
+.white{
+    background-color: rgb(255, 255, 255);
+}
+
+.measure{
+    background-color: #f8ccb4;
+}
+
+
+body {
+  color: #2c3e50; /* Schriftfarbe */
+  background: #f7fdff; /* Hintergrundfarbe */
+  padding: 0 1em 1em;
+}
+
+h1 {
+  margin: 0;
+  line-height: 2;
+  text-align: center;
+}
+
+h2 {
+  margin: 0 0 0.5em;
+  font-weight: normal;
+}
+
+input {
+  position: absolute;
+  opacity: 0;
+  z-index: -1;
+}
+
+.row {
+  display: flex;
+}
+.row .col {
+  flex: 1;
+}
+.row .col:last-child {
+  margin-left: 1em;
+}
+
+/* Accordion styles */
+.tabs {
+  border-radius: 8px;
+  /*overflow: hidden;*/
+  box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.5); /* Schatten Boxen*/
+}
+
+.tab {
+  width: 100%;
+  color: rgb(255, 255, 255); /* Schriftfarbe accordion box überschrift */
+  overflow: hidden;
+  padding: 0.15cm; /* Padding von accordion bars*/
+}
+
+.tab-structure {
+  width: 100%;
+  color: #2c3e50; /* Schriftfarbe accordion box überschrift */
+  overflow: hidden;
+  padding: 0.15cm; /* Padding von accordion bars*/
+}
+
+.tab-structure-info-button{
+  width: 100%;
+  color: #2c3e50; /* Schriftfarbe accordion box überschrift */
+  overflow: hidden;
+  padding: 0cm; /* Padding von accordion bars*/
+}
+
+.tab-label {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.8em; /*Abstand Überschrift zum border wenn accordion nicht ausgeklappt*/
+  background: #2c3e50; /* Hintergrundfarbe accordion bar ohne hover*/
+  cursor: pointer;
+}
+
+.tab-label-structure {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.8em; /*Abstand Überschrift zum border wenn accordion nicht ausgeklappt*/
+  background: white; /* Hintergrundfarbe accordion bar ohne hover*/
+  cursor: pointer;
+  border-radius: 25px;
+}
+.tab-label-structure-info-button {
+  display: flex;
+  justify-content: space-between;
+  padding: 0em; /*Abstand Überschrift zum border wenn accordion nicht ausgeklappt*/
+  background: white; /* Hintergrundfarbe accordion bar ohne hover*/
+  cursor: pointer;
+  border-radius: 25px;
+}
+.tab-label:hover {
+  background: #1a252f;
+}
+.tab-label-structure:hover {
+  background: #d6e1ed;
+}
+.tab-label::after {
+  content: "❯";
+  width: 1em;
+  height: 1em;
+  text-align: end;
+  transition: all 0.35s;
+}
+
+.tab-label-structure::after {
+  content: "❯";
+  width: 2em;
+  height: 2em;
+  font-size: larger;
+  text-align: center;
+  transition: all 0.35s;
+  margin-top: 0.5em;
+
+}
+.tab-content {
+  max-height: 0;
+  padding: 0 1em;
+  color: #2c3e50; /*Schriftfarbe wenn accordion ausgeklappt*/
+  background: rgb(255, 255, 255); /*Hintergrundfarbe wenn accordion ausgeklappt*/
+  transition: all 0.35s;
+}
+.tab-close {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1em;
+  font-size: 0.75em;
+  background: #2c3e50;
+  cursor: pointer;
+}
+.tab-close:hover {
+  background: #1a252f;
+}
+
+input:checked + .tab-label {
+  background: #1a252f;
+}
+input:checked + .tab-label::after {
+  transform: rotate(90deg);
+}
+input:checked + .tab-label-structure::after {
+  transform: rotate(90deg);
+}
+input:checked ~ .tab-content {
+  max-height: 5000vh; /*Maximale Lange von Accordion, auskommentiert*/
+  padding: 1em; /* Seitenabstand vom Text wenn accordions ausgeklappt*/
+}
+
+.left-align {
+  text-align: left;
+}
+.right-align {
+  text-align: right;
+}

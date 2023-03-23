@@ -87,23 +87,35 @@ def render_benchmark_config(benchmarkreport: "BenchmarkReport") -> str:
     return template_structure.render(args)
 
 
+def render_similarity_info() -> str:
+
+    template_structure = get_template("similarity_info.html")
+    return template_structure.render()
+
+
+def render_dp_info() -> str:
+
+    template_structure = get_template("dp_info.html")
+    return template_structure.render()
+
+
 def render_config_table(dpmreport: "DpMobilityReport") -> str:
 
     config_list = [
         {"name": "Max. trips per user", "value": fmt(dpmreport.max_trips_per_user)},
         {"name": "Privacy budget", "value": fmt(dpmreport.privacy_budget)},
         {"name": "User privacy", "value": fmt(dpmreport.user_privacy)},
+        {"name": "Budget split", "value": fmt_config(dpmreport.budget_split)},
+        {"name": "Evaluation dev. mode", "value": fmt(dpmreport.evalu)},
         {
             "name": "Excluded analyses",
             "value": fmt_config(dpmreport.analysis_exclusion),
         },
-        {"name": "Budget split", "value": fmt_config(dpmreport.budget_split)},
-        {"name": "Evaluation dev. mode", "value": fmt(dpmreport.evalu)},
     ]
 
     # create html from template
     template_table = get_template("table.html")
-    dataset_stats_html = template_table.render(rows=config_list)
+    dataset_stats_html = template_table.render(rows=config_list, align="left-align")
     return dataset_stats_html
 
 
@@ -147,11 +159,8 @@ def render_benchmark_config_table(benchmarkreport: "BenchmarkReport") -> str:
         },
         {
             "name": "Excluded analyses",
-            "value": (
-                fmt_config(benchmarkreport.analysis_exclusion),
-                fmt_config(benchmarkreport.analysis_exclusion),
-            ),
-        },  # TODO verbundene zelle
+            "value": (fmt_config(benchmarkreport.analysis_exclusion),),
+        },
     ]
 
     # create html from template
