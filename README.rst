@@ -201,12 +201,11 @@ Madrid `CRTM survey`_ data: [`Code used for Madrid`_]
 * `Report of Madrid without DP`_
 * `Report of Madrid with DP epsilon=10`_
 
-Beijing `Geolife`_ dataset: [`Code used for Beijing`_][`Code used for Benchmarkreport of Beijing`_]
-
+Beijing `Geolife`_ dataset: [`Code used for Beijing`_]
 * `Report of Beijing without DP`_
 * `Report of Beijing with DP epsilon=50`_
 
-Benchmark Report:
+Benchmark Report: [`Code used for Benchmarkreport of Berlin`_]
 
 * `Benchmarkreport of Berlin without DP and with DP epsilon=1`_
 
