@@ -1,6 +1,15 @@
 History
 *********
 
+0.2.4 (2023-03-23)
+==================
+* Enhance HTML design 
+* Include info texts for all analyses
+* Include documentation for differential privacy and an info box about DP in the report
+* Enhance documentation
+* Add option for `subtitle` in DpMobilityReport and BenchmarkReport to name the report.
+
+
 0.2.3 (2023-02-13)
 ==================
 * Bug fix: handle if no visit is within the tessallation
