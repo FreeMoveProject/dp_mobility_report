@@ -107,9 +107,12 @@ def render_benchmark_place_analysis(
             render_eps(report_base[const.VISITS_PER_TILE].privacy_budget),
             render_eps(report_alternative[const.VISITS_PER_TILE].privacy_budget),
         )
+        #change moe unit to relative counts
+        rel_visits_per_tile_moe_base = report_base[const.VISITS_PER_TILE].margin_of_error_laplace / report_base[const.VISITS_PER_TILE].data["visits"].sum() if report_base[const.VISITS_PER_TILE].data["visits"].sum() > 0 else report_base[const.VISITS_PER_TILE].margin_of_error_laplace
+        rel_visits_per_tile_moe_alternative = report_alternative[const.VISITS_PER_TILE].margin_of_error_laplace / report_alternative[const.VISITS_PER_TILE].data["visits"].sum() if report_alternative[const.VISITS_PER_TILE].data["visits"].sum() else report_alternative[const.VISITS_PER_TILE].margin_of_error_laplace
         args["visits_per_tile_moe"] = (
-            fmt_moe(report_base[const.VISITS_PER_TILE].margin_of_error_laplace),
-            fmt_moe(report_alternative[const.VISITS_PER_TILE].margin_of_error_laplace),
+            fmt_moe(rel_visits_per_tile_moe_base), 
+            fmt_moe(rel_visits_per_tile_moe_alternative),
         )
 
         args["points_outside_tessellation_info_base"] = render_points_outside_tess(
@@ -141,6 +144,8 @@ def render_benchmark_place_analysis(
         args["most_freq_tiles_ranking"] = render_most_freq_tiles_ranking_benchmark(
             report_base[const.VISITS_PER_TILE],
             report_alternative[const.VISITS_PER_TILE],
+            rel_visits_per_tile_moe_base,
+            rel_visits_per_tile_moe_alternative,
         )
         args["visits_per_tile_measure"] = template_measures.render(
             all_available_measures(const.VISITS_PER_TILE, benchmark)
@@ -394,6 +399,8 @@ def render_most_freq_tiles_ranking(visits_per_tile: DfSection, top_x: int = 10) 
 def render_most_freq_tiles_ranking_benchmark(
     visits_per_tile_base: DfSection,
     visits_per_tile_alternative: DfSection,
+    rel_visits_per_tile_moe_base: float,
+    rel_visits_per_tile_moe_alternative: float,
     top_x: int = 10,
 ) -> str:
     topx_tiles_base = visits_per_tile_base.data.nlargest(top_x, "visits")
@@ -426,8 +433,8 @@ def render_most_freq_tiles_ranking_benchmark(
         x_axis_label="percentage of visits per tile",
         y_labels=labels,
         x_alternative=topx_tiles_merged.visits_alternative,
-        margin_of_error=visits_per_tile_base.margin_of_error_laplace,
-        margin_of_error_alternative=visits_per_tile_alternative.margin_of_error_laplace,
+        margin_of_error=rel_visits_per_tile_moe_base,
+        margin_of_error_alternative=rel_visits_per_tile_moe_alternative,
         figsize=(8, max(6, min(len(labels) * 0.5, 8))),
     )
     html_ranking = v_utils.fig_to_html(ranking)

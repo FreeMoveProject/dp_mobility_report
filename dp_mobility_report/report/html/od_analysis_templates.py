@@ -466,13 +466,9 @@ def render_most_freq_flows_ranking_benchmark(
 ) -> str:
 
     topx_flows_base = od_flows_base.data.nlargest(top_x, "flow")
-    topx_flows_base["flow"] = (
-        topx_flows_base["flow"] / topx_flows_base["flow"].sum() * 100
-    )
+    topx_flows_base["flow"] = (topx_flows_base["flow"] / od_flows_base.data["flow"].sum() * 100) if od_flows_base.data["flow"].sum() > 0 else topx_flows_base["flow"]
     topx_flows_alternative = od_flows_alternative.data.nlargest(top_x, "flow")
-    topx_flows_alternative["flow"] = (
-        topx_flows_alternative["flow"] / topx_flows_alternative["flow"].sum() * 100
-    )
+    topx_flows_alternative["flow"] = (topx_flows_alternative["flow"] / od_flows_alternative.data["flow"].sum() * 100) if od_flows_alternative.data["flow"].sum() else topx_flows_alternative["flow"]
 
     topx_flows_merged = topx_flows_base.merge(
         topx_flows_alternative,
@@ -505,14 +501,15 @@ def render_most_freq_flows_ranking_benchmark(
         + " - "
         + topx_flows_merged[f"{const.TILE_NAME}_destination"]
     )
-
+    moe_base = od_flows_base.margin_of_error_laplace / od_flows_base.data["flow"].sum() if od_flows_base.data["flow"].sum() > 0 else od_flows_base.margin_of_error_laplace
+    moe_alterative = od_flows_alternative.margin_of_error_laplace / od_flows_alternative.data["flow"].sum() if od_flows_alternative.data["flow"].sum() > 0 else od_flows_alternative.margin_of_error_laplace
     ranking = plot.ranking(
         x=topx_flows_merged.flow_base,
         x_alternative=topx_flows_merged.flow_alternative,
         x_axis_label="percentage of flows per OD pair",
         y_labels=labels,
-        margin_of_error=od_flows_base.margin_of_error_laplace,
-        margin_of_error_alternative=od_flows_alternative.margin_of_error_laplace,
+        margin_of_error=moe_base,
+        margin_of_error_alternative=moe_alterative,
         figsize=(8, max(6, min(len(labels) * 0.5, 8))),
     )
     html_ranking = v_utils.fig_to_html(ranking)
