@@ -202,6 +202,7 @@ Madrid `CRTM survey`_ data: [`Code used for Madrid`_]
 * `Report of Madrid with DP epsilon=10`_
 
 Beijing `Geolife`_ dataset: [`Code used for Beijing`_]
+
 * `Report of Beijing without DP`_
 * `Report of Beijing with DP epsilon=50`_
 
