@@ -207,6 +207,7 @@ Beijing `Geolife`_ dataset: [`Code used for Beijing`_][`Code used for Benchmarkr
 * `Report of Beijing with DP epsilon=50`_
 
 Benchmark Report:
+
 * `Benchmarkreport of Berlin without DP and with DP epsilon=1`_
 
 (Here you find the `code of the data preprocessing`_ to obtain the needed format)
