@@ -10,10 +10,10 @@ from dp_mobility_report import constants as const
 from dp_mobility_report.model.section import TupleSection
 from dp_mobility_report.report.html.html_utils import (
     all_available_measures,
+    fmt_moe,
     get_template,
     render_benchmark_summary,
     render_eps,
-    fmt_moe, 
     render_summary,
     render_user_input_info,
 )
@@ -33,7 +33,9 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
         args["trips_per_user_eps"] = render_eps(
             report[const.TRIPS_PER_USER].privacy_budget
         )
-        args["trips_per_user_moe"] = fmt_moe(report[const.TRIPS_PER_USER].margin_of_error_laplace)
+        args["trips_per_user_moe"] = fmt_moe(
+            report[const.TRIPS_PER_USER].margin_of_error_laplace
+        )
         args["trips_per_user_hist"] = render_trips_per_user(
             report[const.TRIPS_PER_USER]
         )
@@ -45,7 +47,9 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
         args["time_between_traj_eps"] = render_eps(
             report[const.USER_TIME_DELTA].privacy_budget
         )
-        args["time_between_traj_moe"] = fmt_moe(report[const.USER_TIME_DELTA].margin_of_error_laplace)
+        args["time_between_traj_moe"] = fmt_moe(
+            report[const.USER_TIME_DELTA].margin_of_error_laplace
+        )
         if report[const.USER_TIME_DELTA].quartiles["min"] < timedelta(seconds=0):
             args[
                 "plausi_check_info"
@@ -67,7 +71,9 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
         args["radius_of_gyration_eps"] = render_eps(
             report[const.RADIUS_OF_GYRATION].privacy_budget
         )
-        args["radius_of_gyration_moe"] = fmt_moe(report[const.RADIUS_OF_GYRATION].margin_of_error_laplace)
+        args["radius_of_gyration_moe"] = fmt_moe(
+            report[const.RADIUS_OF_GYRATION].margin_of_error_laplace
+        )
         args["radius_of_gyration_hist_info"] = render_user_input_info(
             dpmreport.max_radius_of_gyration, dpmreport.bin_range_radius_of_gyration
         )
@@ -82,7 +88,9 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
         args["distinct_tiles_user_eps"] = render_eps(
             report[const.USER_TILE_COUNT].privacy_budget
         )
-        args["distinct_tiles_user_moe"] = fmt_moe(report[const.USER_TILE_COUNT].margin_of_error_laplace)
+        args["distinct_tiles_user_moe"] = fmt_moe(
+            report[const.USER_TILE_COUNT].margin_of_error_laplace
+        )
         args["distinct_tiles_user_hist_info"] = render_user_input_info(
             dpmreport.max_user_tile_count, dpmreport.bin_range_user_tile_count
         )
@@ -97,7 +105,9 @@ def render_user_analysis(dpmreport: "DpMobilityReport") -> str:
         args["mobility_entropy_eps"] = render_eps(
             report[const.MOBILITY_ENTROPY].privacy_budget
         )
-        args["mobility_entropy_moe"] = fmt_moe(report[const.MOBILITY_ENTROPY].margin_of_error_laplace)
+        args["mobility_entropy_moe"] = fmt_moe(
+            report[const.MOBILITY_ENTROPY].margin_of_error_laplace
+        )
         args["mobility_entropy_hist"] = render_mobility_entropy(
             report[const.MOBILITY_ENTROPY]
         )
@@ -126,8 +136,10 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
             render_eps(report_base[const.TRIPS_PER_USER].privacy_budget),
             render_eps(report_alternative[const.TRIPS_PER_USER].privacy_budget),
         )
-        args["trips_per_user_moe"] = (fmt_moe(report_base[const.TRIPS_PER_USER].margin_of_error_laplace),
-                                      fmt_moe(report_alternative[const.TRIPS_PER_USER].margin_of_error_laplace))
+        args["trips_per_user_moe"] = (
+            fmt_moe(report_base[const.TRIPS_PER_USER].margin_of_error_laplace),
+            fmt_moe(report_alternative[const.TRIPS_PER_USER].margin_of_error_laplace),
+        )
         # args["trips_per_user_hist"] = render_trips_per_user(report_base[const.TRIPS_PER_USER],report_alternative[const.TRIPS_PER_USER]) #TODO bins need to be the same
         args["trips_per_user_summary_table"] = render_benchmark_summary(
             report_base[const.TRIPS_PER_USER].quartiles,
@@ -147,8 +159,10 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
             render_eps(report_base[const.USER_TIME_DELTA].privacy_budget),
             render_eps(report_alternative[const.USER_TIME_DELTA].privacy_budget),
         )
-        args["time_between_traj_moe"] = (fmt_moe(report_base[const.USER_TIME_DELTA].margin_of_error_laplace),
-                                         fmt_moe(report_alternative[const.USER_TIME_DELTA].margin_of_error_laplace))
+        args["time_between_traj_moe"] = (
+            fmt_moe(report_base[const.USER_TIME_DELTA].margin_of_error_laplace),
+            fmt_moe(report_alternative[const.USER_TIME_DELTA].margin_of_error_laplace),
+        )
         args["time_between_traj_hist_info"] = render_user_input_info(
             benchmark.report_base.max_user_time_delta,
             benchmark.report_base.bin_range_user_time_delta,
@@ -174,8 +188,12 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
             render_eps(report_base[const.RADIUS_OF_GYRATION].privacy_budget),
             render_eps(report_alternative[const.RADIUS_OF_GYRATION].privacy_budget),
         )
-        args["radius_of_gyration_moe"] = (fmt_moe(report_base[const.RADIUS_OF_GYRATION].margin_of_error_laplace),
-                                          fmt_moe(report_alternative[const.RADIUS_OF_GYRATION].margin_of_error_laplace))
+        args["radius_of_gyration_moe"] = (
+            fmt_moe(report_base[const.RADIUS_OF_GYRATION].margin_of_error_laplace),
+            fmt_moe(
+                report_alternative[const.RADIUS_OF_GYRATION].margin_of_error_laplace
+            ),
+        )
         args["radius_of_gyration_hist_info"] = render_user_input_info(
             benchmark.report_base.max_radius_of_gyration,
             benchmark.report_base.bin_range_radius_of_gyration,
@@ -202,8 +220,10 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
             render_eps(report_base[const.USER_TILE_COUNT].privacy_budget),
             render_eps(report_alternative[const.USER_TILE_COUNT].privacy_budget),
         )
-        args["distinct_tiles_user_moe"] = (fmt_moe(report_base[const.USER_TILE_COUNT].margin_of_error_laplace),
-                                           fmt_moe(report_alternative[const.USER_TILE_COUNT].margin_of_error_laplace))
+        args["distinct_tiles_user_moe"] = (
+            fmt_moe(report_base[const.USER_TILE_COUNT].margin_of_error_laplace),
+            fmt_moe(report_alternative[const.USER_TILE_COUNT].margin_of_error_laplace),
+        )
         args["distinct_tiles_user_hist_info"] = render_user_input_info(
             benchmark.report_base.max_user_tile_count,
             benchmark.report_base.bin_range_user_tile_count,
@@ -230,8 +250,10 @@ def render_benchmark_user_analysis(benchmark: "BenchmarkReport") -> str:
             render_eps(report_base[const.MOBILITY_ENTROPY].privacy_budget),
             render_eps(report_alternative[const.MOBILITY_ENTROPY].privacy_budget),
         )
-        args["mobility_entropy_moe"] = (fmt_moe(report_base[const.MOBILITY_ENTROPY].margin_of_error_laplace),
-                                        fmt_moe(report_alternative[const.MOBILITY_ENTROPY].margin_of_error_laplace))
+        args["mobility_entropy_moe"] = (
+            fmt_moe(report_base[const.MOBILITY_ENTROPY].margin_of_error_laplace),
+            fmt_moe(report_alternative[const.MOBILITY_ENTROPY].margin_of_error_laplace),
+        )
         args["mobility_entropy_hist"] = render_mobility_entropy(
             report_base[const.MOBILITY_ENTROPY],
             report_alternative[const.MOBILITY_ENTROPY],

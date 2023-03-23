@@ -147,9 +147,9 @@ def fmt(value: Any, target_type: Optional[type] = None) -> Any:
     return value
 
 
-def fmt_moe(margin_of_error: Optional[float]) -> float:
+def fmt_moe(margin_of_error: Optional[float]) -> str:
     if (margin_of_error is None) or (margin_of_error == 0):
-        return 0
+        return "0.0"
     else:
         margin_of_error = round(margin_of_error, 1)
         return f"{margin_of_error:,}"

@@ -107,11 +107,21 @@ def render_benchmark_place_analysis(
             render_eps(report_base[const.VISITS_PER_TILE].privacy_budget),
             render_eps(report_alternative[const.VISITS_PER_TILE].privacy_budget),
         )
-        #change moe unit to relative counts
-        rel_visits_per_tile_moe_base = report_base[const.VISITS_PER_TILE].margin_of_error_laplace / report_base[const.VISITS_PER_TILE].data["visits"].sum() if report_base[const.VISITS_PER_TILE].data["visits"].sum() > 0 else report_base[const.VISITS_PER_TILE].margin_of_error_laplace
-        rel_visits_per_tile_moe_alternative = report_alternative[const.VISITS_PER_TILE].margin_of_error_laplace / report_alternative[const.VISITS_PER_TILE].data["visits"].sum() if report_alternative[const.VISITS_PER_TILE].data["visits"].sum() else report_alternative[const.VISITS_PER_TILE].margin_of_error_laplace
+        # change moe unit to relative counts
+        rel_visits_per_tile_moe_base = (
+            report_base[const.VISITS_PER_TILE].margin_of_error_laplace
+            / report_base[const.VISITS_PER_TILE].data["visits"].sum()
+            if report_base[const.VISITS_PER_TILE].data["visits"].sum() > 0
+            else report_base[const.VISITS_PER_TILE].margin_of_error_laplace
+        )
+        rel_visits_per_tile_moe_alternative = (
+            report_alternative[const.VISITS_PER_TILE].margin_of_error_laplace
+            / report_alternative[const.VISITS_PER_TILE].data["visits"].sum()
+            if report_alternative[const.VISITS_PER_TILE].data["visits"].sum()
+            else report_alternative[const.VISITS_PER_TILE].margin_of_error_laplace
+        )
         args["visits_per_tile_moe"] = (
-            fmt_moe(rel_visits_per_tile_moe_base), 
+            fmt_moe(rel_visits_per_tile_moe_base),
             fmt_moe(rel_visits_per_tile_moe_alternative),
         )
 
