@@ -23,6 +23,7 @@ from dp_mobility_report.report.html.templates import (
 
 class DpMobilityReport:
     """Generate a (differentially private) mobility report from a mobility dataset. The report will be generated as an HTML file, using the ``.to_file()`` method.
+
     Args:
         df: ``DataFrame`` containing the mobility data. Expected columns: User ID ``uid``, trip ID ``tid``, timestamp ``datetime`` (or ``int`` to indicate sequence position, if dataset only consists of sequences without timestamps), latitude ``lat`` and longitude ``lng`` in CRS EPSG:4326.
         tessellation: Geopandas ``GeoDataFrame`` containing the tessellation for spatial aggregations. Expected columns: ``tile_id``. If tessellation is not provided in the expected default CRS EPSG:4326, it will automatically be transformed. If no tessellation is provided, all analyses based on the tessellation will automatically be removed.
@@ -52,9 +53,10 @@ class DpMobilityReport:
         bin_range_user_tile_count: The range a single histogram bin spans for the distinct tiles per user histogram. If ``None`` is given, the histogram bins will be determined automatically. Defaults to ``None``.
         max_user_time_delta:  Upper bound for user time delta histogram. If ``None`` is given, no upper bound is set. Defaults to ``None``.
         bin_range_user_time_delta: The range a single histogram bin spans for user time delta (e.g., 1 for 1 hour bins). If ``None`` is given, the histogram bins will be determined automatically. Defaults to ``None``.
+        subtitle: Custom subtitle that appears at the top of the HTML report. Defaults to ``None``.
         disable_progress_bar: Whether progress bars should be shown. Defaults to ``False``.
         seed_sampling: Provide seed for down-sampling of dataset (according to ``max_trips_per_user``) so that the sampling is reproducible. Defaults to ``None``, i.e., no seed.
-        evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to ``False``."""
+        evalu: Parameter only needed for development and evaluation purposes. Defaults to ``False``."""
 
     _report: dict = {}
     _html: str = ""
@@ -86,6 +88,7 @@ class DpMobilityReport:
         bin_range_user_tile_count: Optional[int] = None,
         max_user_time_delta: Optional[Union[int, float]] = None,
         bin_range_user_time_delta: Optional[Union[int, float]] = None,
+        subtitle: str = None,
         disable_progress_bar: bool = False,
         seed_sampling: int = None,
         evalu: bool = False,
@@ -172,6 +175,9 @@ class DpMobilityReport:
             analysis_selection,
             analysis_exclusion,
             has_tessellation=(tessellation is not None),
+            has_points_inside_tessellation=preprocessing.has_points_inside_tessellation(
+                self.df, self.tessellation
+            ),
             has_timestamps=pd.core.dtypes.common.is_datetime64_dtype(
                 self.df[const.DATETIME]
             ),
@@ -187,6 +193,7 @@ class DpMobilityReport:
         )
         self.evalu = evalu
         self.disable_progress_bar = disable_progress_bar
+        self.subtitle = subtitle
 
         # initialize parallel processing
         pandarallel.initialize(verbose=0)

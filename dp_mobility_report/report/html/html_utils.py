@@ -24,21 +24,29 @@ def get_template(template_name: str) -> jinja2.Template:
     return jinja2_env.get_template(template_name)
 
 
-def render_summary(summary: Series) -> str:
+def render_summary(summary: Series, target_type: Optional[type] = None) -> str:
     summary_list = [
-        {"name": "Min.", "value": fmt(summary["min"])},
-        {"name": "Max.", "value": fmt(summary["max"])},
+        {"name": "Min.", "value": fmt(summary["min"], target_type)},
+        {"name": "Max.", "value": fmt(summary["max"], target_type)},
     ]
     if "25%" in summary:
-        summary_list.insert(1, {"name": "75%", "value": fmt(summary["75%"])})
-        summary_list.insert(1, {"name": "Median", "value": fmt(summary["50%"])})
-        summary_list.insert(1, {"name": "25%", "value": fmt(summary["25%"])})
+        summary_list.insert(
+            1, {"name": "75%", "value": fmt(summary["75%"], target_type)}
+        )
+        summary_list.insert(
+            1, {"name": "Median", "value": fmt(summary["50%"], target_type)}
+        )
+        summary_list.insert(
+            1, {"name": "25%", "value": fmt(summary["25%"], target_type)}
+        )
 
     if "mean" in summary:
-        summary_list.insert(0, {"name": "Mean", "value": fmt(summary["mean"])})
+        summary_list.insert(
+            0, {"name": "Mean", "value": fmt(summary["mean"], target_type)}
+        )
 
     template_table = jinja2_env.get_template("table.html")
-    summary_html = template_table.render(rows=summary_list)
+    summary_html = template_table.render(rows=summary_list, align="right-align")
     return summary_html
 
 
@@ -120,21 +128,18 @@ def render_user_input_info(
             bin size: {bin_size}"""
 
 
-def render_moe_info(margin_of_error: int) -> str:
-    return """To provide privacy, quartile values are not necessarily the true values but, e.g., instead of the true maximum value the 
-        second or third highest value is displayed.
-        This is achieved by the so-called exponential mechanism, where a value is drawn based on probabilites defined by the privacy budget. 
-        Generally, a value closer to the true value has a higher chance of being drawn."""
-    # The true quartile values lie with a <b>95% chance within ± {margin_of_error} records</b> away from the true values.""" # TODO: margin_of_error reveals true record count?
-
-
 def fmt(value: Any, target_type: Optional[type] = None) -> Any:
+    if (value is None) or (
+        isinstance(value, (float, np.floating, int, np.integer)) and math.isnan(value)
+    ):
+        return "-"
     if target_type and (value is not None):
         value = target_type(value)
     if isinstance(value, (float, np.floating)):
         if math.isinf(value) or np.isnan(value):
             return "not defined"
         value = round(value, 2)
+        value = f"{value:.2f}"
     if isinstance(value, (float, np.floating, int, np.integer)) and not isinstance(
         value, bool
     ):
@@ -142,10 +147,12 @@ def fmt(value: Any, target_type: Optional[type] = None) -> Any:
     return value
 
 
-def fmt_moe(margin_of_error: Optional[float]) -> float:
+def fmt_moe(margin_of_error: Optional[float]) -> str:
     if (margin_of_error is None) or (margin_of_error == 0):
-        return 0
-    return round(margin_of_error, 1)
+        return "0.0"
+    else:
+        margin_of_error = round(margin_of_error, 1)
+        return f"{margin_of_error:,}"
 
 
 def fmt_config(value: Union[dict, list]) -> str:

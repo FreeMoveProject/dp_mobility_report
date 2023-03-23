@@ -1,0 +1,18 @@
+<h2>Differential Privacy</b></h2>
+  <p> 
+  This report provides differential privacy guarantees. 
+
+    The concept of differential privacy is that the output of an algorithm remains
+    nearly unchanged if the records of one individual are removed or added.
+    In this way, differential privacy limits the impact of a single individual on
+    the analysis outcome, preventing the reconstruction of an individual's data.
+    Broadly speaking, this is achieved by adding calibrated noise to the output and the amount of noise is defined by the <i>privacy_budget</i>.
+    Depending on the setting of <i>user_privacy</i>, noise is either calibrated to only protect single trips (item-level privacy) or to protect the privacy of users (user-level privacy).
+    The privacy budget is split between all analyses.
+    The cofiguration table provides information on the used <i>privacy_budget</i>, the <i>budget_split</i> and <i>user_privacy</i>. 
+    For each analysis, information is provided on the amount of utilized privacy budget. 
+  </p>
+
+  <p>
+    The <i>Laplace mechanism</i> is used for counts and the <i>Exponential mechanism</i> for the five number summaries.
+    Details on the notion of differential privacy and the used mechanisms are provided <a href="https://dp-mobility-report.readthedocs.io/en/latest/index.html">in the documentation.</a> </p>

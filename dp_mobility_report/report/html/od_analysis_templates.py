@@ -22,7 +22,6 @@ from dp_mobility_report.report.html.html_utils import (
     get_template,
     render_benchmark_summary,
     render_eps,
-    render_moe_info,
     render_summary,
     render_user_input_info,
 )
@@ -59,7 +58,7 @@ def render_od_analysis(
             report[const.OD_FLOWS], len(dpmreport.tessellation)
         )
         quartiles = report[const.OD_FLOWS].quartiles.round()
-        args["flows_summary_table"] = render_summary(quartiles.astype(int))
+        args["flows_summary_table"] = render_summary(quartiles, int)
         args["flows_cumsum_linechart"] = render_flows_cumsum(
             report[const.OD_FLOWS], diagonal=True
         )
@@ -77,9 +76,6 @@ def render_od_analysis(
             dpmreport.max_travel_time, dpmreport.bin_range_travel_time
         )
         args["travel_time_hist"] = render_travel_time_hist(report[const.TRAVEL_TIME])
-        args["travel_time_moe_info"] = render_moe_info(
-            report[const.TRAVEL_TIME].margin_of_error_expmech
-        )
         args["travel_time_summary_table"] = render_summary(
             report[const.TRAVEL_TIME].quartiles
         )
@@ -94,9 +90,6 @@ def render_od_analysis(
             dpmreport.max_jump_length, dpmreport.bin_range_jump_length
         )
         args["jump_length_hist"] = render_jump_length_hist(report[const.JUMP_LENGTH])
-        args["jump_length_moe_info"] = render_moe_info(
-            report[const.JUMP_LENGTH].margin_of_error_expmech
-        )
         args["jump_length_summary_table"] = render_summary(
             report[const.JUMP_LENGTH].quartiles
         )
@@ -129,7 +122,7 @@ def render_benchmark_od_analysis(
         )
         args["od_moe"] = (
             fmt_moe(report_base[const.OD_FLOWS].margin_of_error_laplace),
-            fmt_moe(report_base[const.OD_FLOWS].margin_of_error_laplace),
+            fmt_moe(report_alternative[const.OD_FLOWS].margin_of_error_laplace),
         )
 
         args["od_legend"] = render_benchmark_origin_destination_flows(
@@ -186,9 +179,6 @@ def render_benchmark_od_analysis(
         args["travel_time_hist"] = render_travel_time_hist(
             report_base[const.TRAVEL_TIME], report_alternative[const.TRAVEL_TIME]
         )
-        args["travel_time_moe_info"] = render_moe_info(
-            report_base[const.TRAVEL_TIME].margin_of_error_expmech
-        )
         args["travel_time_summary_table"] = render_benchmark_summary(
             report_base[const.TRAVEL_TIME].quartiles,
             report_alternative[const.TRAVEL_TIME].quartiles,
@@ -217,9 +207,6 @@ def render_benchmark_od_analysis(
         )
         args["jump_length_hist"] = render_jump_length_hist(
             report_base[const.JUMP_LENGTH], report_alternative[const.JUMP_LENGTH]
-        )
-        args["jump_length_moe_info"] = render_moe_info(
-            report_base[const.JUMP_LENGTH].margin_of_error_expmech
         )
         args["jump_length_summary_table"] = render_benchmark_summary(
             report_base[const.JUMP_LENGTH].quartiles,
@@ -421,7 +408,7 @@ def render_flows_cumsum(
         y="cum_perc",
         data_alternative=df_cumsum_alternative,
         x_axis_label="Number of OD tile pairs",
-        y_axis_label="Cumulated sum of flows between OD pairs",
+        y_axis_label="Cumulated sum of relative OD flow counts",
         add_diagonal=diagonal,
     )
     html = v_utils.fig_to_html(chart)
@@ -455,7 +442,7 @@ def render_most_freq_flows_ranking(
         topx_flows["rank"].astype(str)
         + ": "
         + topx_flows[f"{const.TILE_NAME}_origin"]
-        + " - \n"
+        + " - "
         + topx_flows[f"{const.TILE_NAME}_destination"]
     )
 
@@ -464,6 +451,7 @@ def render_most_freq_flows_ranking(
         "Number of flows per OD pair",
         y_labels=labels,
         margin_of_error=od_flows.margin_of_error_laplace,
+        figsize=(8, max(6, min(len(labels) * 0.5, 8))),
     )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close(ranking)
@@ -479,11 +467,15 @@ def render_most_freq_flows_ranking_benchmark(
 
     topx_flows_base = od_flows_base.data.nlargest(top_x, "flow")
     topx_flows_base["flow"] = (
-        topx_flows_base["flow"] / topx_flows_base["flow"].sum() * 100
+        (topx_flows_base["flow"] / od_flows_base.data["flow"].sum() * 100)
+        if od_flows_base.data["flow"].sum() > 0
+        else topx_flows_base["flow"]
     )
     topx_flows_alternative = od_flows_alternative.data.nlargest(top_x, "flow")
     topx_flows_alternative["flow"] = (
-        topx_flows_alternative["flow"] / topx_flows_alternative["flow"].sum() * 100
+        (topx_flows_alternative["flow"] / od_flows_alternative.data["flow"].sum() * 100)
+        if od_flows_alternative.data["flow"].sum()
+        else topx_flows_alternative["flow"]
     )
 
     topx_flows_merged = topx_flows_base.merge(
@@ -514,17 +506,28 @@ def render_most_freq_flows_ranking_benchmark(
         topx_flows_merged["rank"].astype(str)
         + ": "
         + topx_flows_merged[f"{const.TILE_NAME}_origin"]
-        + " - \n"
+        + " - "
         + topx_flows_merged[f"{const.TILE_NAME}_destination"]
     )
-
+    moe_base = (
+        od_flows_base.margin_of_error_laplace / od_flows_base.data["flow"].sum()
+        if od_flows_base.data["flow"].sum() > 0
+        else od_flows_base.margin_of_error_laplace
+    )
+    moe_alterative = (
+        od_flows_alternative.margin_of_error_laplace
+        / od_flows_alternative.data["flow"].sum()
+        if od_flows_alternative.data["flow"].sum() > 0
+        else od_flows_alternative.margin_of_error_laplace
+    )
     ranking = plot.ranking(
         x=topx_flows_merged.flow_base,
         x_alternative=topx_flows_merged.flow_alternative,
         x_axis_label="percentage of flows per OD pair",
         y_labels=labels,
-        margin_of_error=od_flows_base.margin_of_error_laplace,
-        margin_of_error_alternative=od_flows_alternative.margin_of_error_laplace,
+        margin_of_error=moe_base,
+        margin_of_error_alternative=moe_alterative,
+        figsize=(8, max(6, min(len(labels) * 0.5, 8))),
     )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close(ranking)
@@ -549,6 +552,7 @@ def render_travel_time_hist(
         x_axis_type=int,
         margin_of_error=travel_time_hist.margin_of_error_laplace,
         margin_of_error_alternative=alternative_moe,
+        figsize=(max(6, min(len(travel_time_hist.data[1]) * 0.5, 10)), 6),
     )
     html_hist = v_utils.fig_to_html(hist)
     plt.close()
@@ -574,6 +578,7 @@ def render_jump_length_hist(
         x_axis_type=float,
         margin_of_error=jump_length_hist.margin_of_error_laplace,
         margin_of_error_alternative=alternative_moe,
+        figsize=(max(6, min(len(jump_length_hist.data[1]) * 0.5, 10)), 6),
     )
     html_hist = v_utils.fig_to_html(hist)
     plt.close()

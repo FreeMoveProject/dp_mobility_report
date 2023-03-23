@@ -4,4 +4,4 @@ from dp_mobility_report.benchmark.b_utils import default_measure_selection  # no
 from dp_mobility_report.benchmark.benchmarkreport import BenchmarkReport  # noqa: F401
 from dp_mobility_report.dpmreport import DpMobilityReport  # noqa: F401
 
-__version__ = "0.2.2"
+__version__ = "0.2.4"

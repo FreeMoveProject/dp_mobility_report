@@ -34,13 +34,13 @@ Place Analysis
 OD Analysis
 ***********
 
-* **Origin-destination flows (:code:`OD_FLOWS`):** Compute the counts of all origin-destination combinations.
+* **Origin-destination flows** (:code:`OD_FLOWS`): Compute the counts of all origin-destination combinations.
 	
-* **Travel time (:code:`TRAVEL_TIME`):** Histogram of travel times, bins of histogram are chosen according to input if provided.
+* **Travel time** (:code:`TRAVEL_TIME`): Histogram of travel times, bins of histogram are chosen according to input if provided.
 
 * **Travel time quartiles:** Five number summary of travel times
 
-* **Jump length (:code:`JUMP_LENGTH`):** The geographical straight-line distance between the trip's origin and destination.
+* **Jump length** (:code:`JUMP_LENGTH`): The geographical straight-line distance between the trip's origin and destination.
 
 * **Jump length quartiles:** Five number summary of jump lengths.
 	

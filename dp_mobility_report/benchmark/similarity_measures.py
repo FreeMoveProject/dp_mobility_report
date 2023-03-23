@@ -60,9 +60,13 @@ def earth_movers_distance1D(
     # distinguish between single int bins and ranges
     if len(u_hist[0]) == len(u_hist_bins):
         u_values = u_hist_bins
-        v_values = v_hist_bins
     else:  # computes moving average if hist buckets within a range
         u_values = _moving_average(u_hist_bins, 2)
+
+    # distinguish between single int bins and ranges
+    if len(v_hist[0]) == len(v_hist_bins):
+        v_values = v_hist_bins
+    else:  # computes moving average if hist buckets within a range
         v_values = _moving_average(v_hist_bins, 2)
 
     u_weights = u_hist[0]

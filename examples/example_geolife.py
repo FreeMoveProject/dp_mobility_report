@@ -33,6 +33,7 @@ report = DpMobilityReport(
     bin_range_radius_of_gyration=2,
     max_user_time_delta=48,
     bin_range_user_time_delta=4,
+    subtitle="Geolife Dataset - no privacy",
 )
 report.to_file(
     os.path.join(path_html_output, "geolife_noPrivacy.html"), top_n_flows=100
@@ -52,5 +53,6 @@ report = DpMobilityReport(
     bin_range_jump_length=3,
     max_radius_of_gyration=18,
     bin_range_radius_of_gyration=1.5,
+    subtitle="Geolife Dataset - privacy",
 )
 report.to_file(os.path.join(path_html_output, "geolife.html"), top_n_flows=100)

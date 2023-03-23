@@ -31,6 +31,7 @@ report = DpMobilityReport(
     bin_range_jump_length=3,
     max_radius_of_gyration=18,
     bin_range_radius_of_gyration=1.5,
+    subtitle="Berlin Dataset - privacy",
 )
 report.to_file(os.path.join(path_html_output, "berlin.html"), top_n_flows=300)
 
@@ -45,5 +46,6 @@ report = DpMobilityReport(
     bin_range_jump_length=3,
     max_radius_of_gyration=18,
     bin_range_radius_of_gyration=1.5,
+    subtitle="Berlin Dataset - no privacy",
 )
 report.to_file(os.path.join(path_html_output, "berlin_noPrivacy.html"), top_n_flows=300)

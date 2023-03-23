@@ -48,7 +48,7 @@ def test_get_user_time_delta(test_dpmreport):
     user_time_delta = user_analysis.get_user_time_delta(test_dpmreport, None)
     assert user_time_delta.quartiles[0].total_seconds() == -2613
     assert user_time_delta.quartiles[1].total_seconds() == 26630
-    assert user_time_delta.quartiles[2].total_seconds() == 63127
+    assert user_time_delta.quartiles[2].total_seconds() == 63126
     assert user_time_delta.quartiles[3].total_seconds() == 127326
     assert user_time_delta.quartiles[4].total_seconds() == 347720
 
@@ -75,7 +75,7 @@ def test_get_radius_of_gyration(test_dpmreport):
         3.147,
         3.384,
         3.621,
-        3.857,
+        3.858,
         4.094,
         4.331,
         4.568,

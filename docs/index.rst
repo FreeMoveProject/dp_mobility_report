@@ -10,6 +10,7 @@ Welcome to the DpMobilityReport's documentation!
    modules
    analyses
    similarity_measures
+   differential_privacy
    contributing
    authors
    history

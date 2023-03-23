@@ -121,7 +121,7 @@ SMAPE is employed as the default measure for single counts and for the evaluatio
 
 Kullback-Leibler Divergence (KLD)
 **********************************
-The Kullback-Leibler divergence (KLD), also called relative entropy, is a widely used statistic to measure how far a probability distribution :math:`P` deviates from a reference probability distribution :math:`Q` on the same probability space :math:`\mathcal{X}`.
+The Kullback-Leibler divergence (KLD) [1], also called relative entropy, is a widely used statistic to measure how far a probability distribution :math:`P` deviates from a reference probability distribution :math:`Q` on the same probability space :math:`\mathcal{X}`.
 For discrete distributions :math:`P` and :math:`Q`, it is formally defined as 
 :math:`D_{KL}(P||Q):= \sum\limits_{x \in \mathcal{X}: P(x)>0} P(x)\cdot \log \frac{P(x)}{Q(x)}`.
 
@@ -152,8 +152,7 @@ Following this advantage of the JSD compared to the KLD, the JSD is chosen as a 
 
 Earth mover's distance (EMD)
 ********************************
-Both KLD and JSD do not account for a distance of instances in the probability 
-space :math:`\mathcal{X}`. However, the earth mover's distance (EMD) between two empirical distributions allows to take a notion of distance, like the underlying geometry of the space into account. 
+Both KLD and JSD do not account for a distance of instances in the probability space :math:`\mathcal{X}`. However, the earth mover's distance (EMD) [2] between two empirical distributions allows to take a notion of distance, like the underlying geometry of the space into account. 
 Informally, the EMD is proportional to the minimum amount of work required to convert one distribution into the other. 
 
 Suppose we have a tessellation, each tile denoted by :math:`\{x_1, \ldots , x_n\}` with a corresponding notion of distance :math:`dis(x_i, x_j)` 
@@ -203,7 +202,7 @@ The Kendall's :math:`\tau` coefficient, also known as the Kendall rank correlati
 two variables measured on an ordinal scale. It is a non-parametric measure of statistical associations based on the ranks of the data, i.e., the similarity of two rankings 
 such as a ranking of most visited locations of two datasets. 
 It returns a value between :math:`-1` and :math:`1`, where :math:`-1` means negative correlation, :math:`0` means no relationship and :math:`1` means positive correlation, 
-determining the strength of association based on the pattern of concordance (ordered in the same way) and discordance (ordered differently) between all pairs, defined as follows [1]:
+determining the strength of association based on the pattern of concordance (ordered in the same way) and discordance (ordered differently) between all pairs, defined as follows [3]:
 :math:`\tau= \frac{\textrm{number of concordant pairs} - \textrm{number of discordant pairs}}{\textrm{number of pairs}}`
 
 Let's consider a list of locations :math:`\langle l_1,...,l_n \rangle` and let :math:`pop(D, l_i)` denote the popularity of :math:`l_i`, i.e., the number of times :math:`l_i` is visited by trajectories in dataset :math:`D` and compute the popularity :math:`pop(D_{base}, l_i)` for a base dataset and :math:`pop(D_{alt}, l_i)` for an alternative dataset for all :math:`l_i`. Then, we say that a pair of locations :math:`(l_i, l_j)` are concordant if either of the following hold:
@@ -215,10 +214,13 @@ Let's consider a list of locations :math:`\langle l_1,...,l_n \rangle` and let :
 Coverage of the top n locations (TOP_N)
 ********************************************
 
-The coverage of the top :math:`n` locations [2] is defined by the true positive ratio: :math:`\frac{|top_n(D_{base})\ \cap\ top_n(D_{alt})|}{n}`, where :math:`n` is the number of top locations and :math:`top_n(D_{base})` is the :math:`n` top locations of the base dataset and :math:`top_n(D_{alt})` the :math:`n` top locations of the alternative dataset.
+The coverage of the top :math:`n` locations [4] is defined by the true positive ratio: :math:`\frac{|top_n(D_{base})\ \cap\ top_n(D_{alt})|}{n}`, where :math:`n` is the number of top locations and :math:`top_n(D_{base})` is the :math:`n` top locations of the base dataset and :math:`top_n(D_{alt})` the :math:`n` top locations of the alternative dataset.
 This measure represents how well the alternative dataset is similar to the base dataset considering the most visited locations.
 
 
+References:
 
-[1] Gursoy, M. E., Liu, L., Truex, S., Yu, L., & Wei, W. (2018, October). Utility-aware synthesis of differentially private and attack-resilient location traces. In Proceedings of the 2018 ACM SIGSAC conference on computer and communications security (pp. 196-211).
-[2] Bindschaedler, V., & Shokri, R. (2016, May). Synthesizing plausible privacy-preserving location traces. In 2016 IEEE Symposium on Security and Privacy (SP) (pp. 546-563). IEEE.
+[1] S. Kullback and R. A. Leibler. 1951. On Information and Sufficiency. The Annals of Mathematical Statistics, 22, 1, (March 1951), 79–86. doi: 10.1214/aoms/1177729694.
+[2] E. Levina and P. Bickel. 2001. The Earth Mover's distance is the Mallows distance: some insights from statistics. In Proceedings Eighth IEEE International Conference on Computer Vision. ICCV 2001. Volume 2. (July 2001), 251–256 vol.2. doi: 10.1109/ICCV.2001.937632.
+[3] Gursoy, M. E., Liu, L., Truex, S., Yu, L., & Wei, W. (2018, October). Utility-aware synthesis of differentially private and attack-resilient location traces. In Proceedings of the 2018 ACM SIGSAC conference on computer and communications security (pp. 196-211).
+[4] Bindschaedler, V., & Shokri, R. (2016, May). Synthesizing plausible privacy-preserving location traces. In 2016 IEEE Symposium on Security and Privacy (SP) (pp. 546-563). IEEE.

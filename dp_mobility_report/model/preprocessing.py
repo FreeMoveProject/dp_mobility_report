@@ -12,6 +12,15 @@ from shapely.geometry import Point
 from dp_mobility_report import constants as const
 
 
+def has_points_inside_tessellation(
+    df: pd.DataFrame, tessellation: Optional[GeoDataFrame]
+) -> bool:
+    if tessellation is None:
+        return True
+
+    return not all(df[const.TILE_ID].isna())
+
+
 def validate_inclusion_exclusion(
     analysis_selection: Optional[List[str]], analysis_exclusion: Optional[List[str]]
 ) -> Tuple[Optional[List[str]], Optional[List[str]]]:
@@ -180,6 +189,7 @@ def clean_analysis_exclusion(
     analysis_selection: Optional[List[str]],
     analysis_exclusion: Optional[List[str]],
     has_tessellation: bool,
+    has_points_inside_tessellation: bool,
     has_timestamps: bool,
     has_od_flows: bool,
     has_consecutive_user_trips: bool,
@@ -235,6 +245,12 @@ def clean_analysis_exclusion(
     if not has_tessellation:
         # warning in validation
         analysis_exclusion += const.TESSELLATION_ELEMENTS
+
+    if (has_tessellation) & (not has_points_inside_tessellation):
+        analysis_exclusion += const.TESSELLATION_ELEMENTS
+        warnings.warn(
+            "No records are within the given tessellation. All analyses based on the tessellation will be excluded."
+        )
 
     if not has_timestamps:
         # warning in validation
@@ -361,7 +377,7 @@ def preprocess_data(
 
     # remove waypoints
     df = df.sort_values(const.DATETIME).groupby(const.TID).nth([0, -1])
-    df.reset_index(inplace=True)
+    df.reset_index(inplace=True, drop=True)
 
     # assign start and end as point_type
     df[const.POINT_TYPE] = "start"
@@ -378,7 +394,7 @@ def preprocess_data(
             logging.info(
                 "'tile_id' present in data. No new assignment of points to tessellation."
             )
-            df.tile_id = df.tile_id.astype(str)
+            df[const.TILE_ID] = df[const.TILE_ID].astype(str)
 
     df = sample_trips(df, max_trips_per_user, user_privacy, seed)
     return df

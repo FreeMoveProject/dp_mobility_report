@@ -38,6 +38,7 @@ def histogram(
     rotate_label: bool = False,
     x_axis_type: Type = float,
     ndigits_x_label: int = 2,
+    figsize: tuple = (6.4, 4.8),
 ) -> mpl.figure.Figure:
     bins = hist[1]
     counts = hist[0]
@@ -88,6 +89,7 @@ def histogram(
         margin_of_error=margin_of_error,
         margin_of_error_alternative=margin_of_error_alternative,
         rotate_label=rotate_label,
+        figsize=figsize,
     )
 
 
@@ -100,8 +102,9 @@ def barchart(
     margin_of_error: Optional[Union[float, list]] = None,
     margin_of_error_alternative: Optional[Union[float, list]] = None,
     rotate_label: bool = False,
+    figsize: tuple = (6.4, 4.8),
 ) -> mpl.figure.Figure:
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=figsize)
     bar_base = ax.bar(
         x, y, yerr=margin_of_error, align="center", alpha=0.5, capsize=10, label="base"
     )
@@ -139,8 +142,9 @@ def linechart(
     margin_of_error: float = None,
     add_diagonal: bool = False,
     rotate_label: bool = False,
+    figsize: tuple = (6.4, 4.8),
 ) -> mpl.figure.Figure:
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=figsize)
     if margin_of_error is not None:
         ax.fill_between(
             data[x],
@@ -176,8 +180,9 @@ def linechart_new(
     margin_of_error_alternative: float = None,
     add_diagonal: bool = False,
     rotate_label: bool = False,
+    figsize: tuple = (6.4, 4.8),
 ) -> mpl.figure.Figure:
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=figsize)
     if margin_of_error is not None:
         ax.fill_between(
             data[x],
@@ -225,8 +230,9 @@ def multi_linechart(
     style: Optional[str] = None,
     hue_order: Optional[list] = None,
     margin_of_error: Optional[float] = None,
+    figsize: tuple = (9, 6),
 ) -> mpl.figure.Figure:
-    fig = plt.figure(figsize=(9, 6))
+    fig = plt.figure(figsize=figsize)
     plot = fig.add_subplot(111)
     palette = ["#99065a", "#e289ba", "#2c6a19", "#99cd60"]
 
@@ -378,6 +384,10 @@ def multi_choropleth_map(
     # color
     if is_cmap_diverging:
         cmap = const.DIVERGING_CMAP
+        min_scale = (
+            vcenter - 1 if min_scale >= vcenter else min_scale
+        )  # if all values are the same, there are no deviations from average, but matplotlib needs ascending order of minscale, vcenter, maxscale
+        max_scale = vcenter + 1 if max_scale <= vcenter else max_scale
         norm = mpl.colors.TwoSlopeNorm(vmin=min_scale, vcenter=vcenter, vmax=max_scale)
     else:
         cmap = const.BASE_CMAP  # STANDARD_CMAP
@@ -436,16 +446,20 @@ def _basemap(center_x: float, center_y: float, zoom_start: int = 10) -> folium.M
 
 
 def ranking(
-    x: np.ndarray,
+    x: Union[np.ndarray, pd.Series],
     x_axis_label: str,
-    x_alternative: Optional[np.ndarray] = None,
+    x_alternative: Union[np.ndarray, pd.Series] = None,
     y_labels: list = None,
     margin_of_error: Optional[float] = None,
     margin_of_error_alternative: Optional[float] = None,
+    figsize: tuple = (7, 5),
 ) -> mpl.figure.Figure:
     y = list(range(1, len(x) + 1))[::-1]
     y_labels = y if y_labels is None else y_labels
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=figsize)
+
+    if all(np.isnan(x)):
+        x = np.zeros(len(x))
     bar_base = ax.errorbar(
         x,
         y,
@@ -457,6 +471,8 @@ def ranking(
         label="base",
     )
     if x_alternative is not None:
+        if all(np.isnan(x_alternative)):
+            x_alternative = np.zeros(len(x_alternative))
         bar_alt = ax.errorbar(
             x_alternative,
             y,

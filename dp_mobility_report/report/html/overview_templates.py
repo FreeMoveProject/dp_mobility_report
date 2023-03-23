@@ -11,7 +11,6 @@ from dp_mobility_report.report.html.html_utils import (
     get_template,
     render_benchmark_summary,
     render_eps,
-    render_moe_info,
     render_summary,
 )
 
@@ -62,9 +61,6 @@ def render_overview(dpmreport: "DpMobilityReport") -> str:
         args["trips_over_time_linechart"] = render_trips_over_time(
             report[const.TRIPS_OVER_TIME]
         )
-        args["trips_over_time_moe_info"] = render_moe_info(
-            report[const.TRIPS_OVER_TIME].margin_of_error_expmech
-        )
         args["trips_over_time_summary_table"] = render_summary(
             report[const.TRIPS_OVER_TIME].quartiles
         )
@@ -74,7 +70,7 @@ def render_overview(dpmreport: "DpMobilityReport") -> str:
             report[const.TRIPS_PER_WEEKDAY].privacy_budget
         )
         args["trips_per_weekday_moe"] = fmt_moe(
-            report[const.TRIPS_PER_HOUR].margin_of_error_laplace
+            report[const.TRIPS_PER_WEEKDAY].margin_of_error_laplace
         )
 
         args["trips_per_weekday_barchart"] = render_trips_per_weekday(
@@ -141,9 +137,6 @@ def render_benchmark_overview(benchmark: "BenchmarkReport") -> str:
         args["trips_over_time_linechart"] = render_benchmark_trips_over_time(
             report_base[const.TRIPS_OVER_TIME],
             report_alternative[const.TRIPS_OVER_TIME],
-        )
-        args["trips_over_time_moe_info"] = render_moe_info(
-            report_base[const.TRIPS_OVER_TIME].margin_of_error_expmech
         )
         args["trips_over_time_summary_table"] = render_benchmark_summary(
             report_base[const.TRIPS_OVER_TIME].quartiles,
@@ -217,7 +210,7 @@ def render_dataset_statistics(dataset_statistics: DictSection) -> str:
             "margin_of_error": fmt_moe(moe[const.N_RECORDS]),
         },
         {
-            "name": "Distinct trips",
+            "name": "Number of distinct trips",
             "estimate": fmt(data[const.N_TRIPS], target_type=int),
             "margin_of_error": fmt_moe(moe[const.N_TRIPS]),
         },
@@ -232,12 +225,12 @@ def render_dataset_statistics(dataset_statistics: DictSection) -> str:
             "margin_of_error": fmt_moe(moe[const.N_INCOMPLETE_TRIPS]),
         },
         {
-            "name": "Distinct users",
+            "name": "Number of distinct users",
             "estimate": fmt(data[const.N_USERS], target_type=int),
             "margin_of_error": fmt_moe(moe[const.N_USERS]),
         },
         {
-            "name": "Distinct locations (lat & lon combination)",
+            "name": "Number of distinct locations (lat & lon combination)",
             "estimate": fmt(data[const.N_LOCATIONS], target_type=int),
             "margin_of_error": fmt_moe(moe[const.N_LOCATIONS]),
         },
@@ -275,7 +268,7 @@ def render_benchmark_dataset_statistics(
             const.SMAPE: fmt(smape[const.N_RECORDS], target_type=float),
         },
         {
-            "name": "Distinct trips",
+            "name": "Number of distinct trips",
             "estimate": (
                 fmt(data_base[const.N_TRIPS], target_type=int),
                 fmt(data_alternative[const.N_TRIPS], target_type=int),
@@ -311,7 +304,7 @@ def render_benchmark_dataset_statistics(
             const.SMAPE: fmt(smape[const.N_INCOMPLETE_TRIPS], target_type=float),
         },
         {
-            "name": "Distinct users",
+            "name": "Number of distinct users",
             "estimate": (
                 fmt(data_base[const.N_USERS], target_type=int),
                 fmt(data_alternative[const.N_USERS], target_type=int),
@@ -323,7 +316,7 @@ def render_benchmark_dataset_statistics(
             const.SMAPE: fmt(smape[const.N_USERS], target_type=float),
         },
         {
-            "name": "Distinct locations (lat & lon combination)",
+            "name": "Number of distinct locations (lat & lon combination)",
             "estimate": (
                 fmt(data_base[const.N_LOCATIONS], target_type=int),
                 fmt(data_alternative[const.N_LOCATIONS], target_type=int),
@@ -458,10 +451,11 @@ def render_trips_over_time(trips_over_time: DfSection) -> str:
         chart = plot.barchart(
             x=trips_over_time.data[const.DATETIME].to_numpy(),
             y=trips_over_time.data["trips"].to_numpy(),
-            margin_of_error=fmt_moe(trips_over_time.margin_of_error_laplace),
+            margin_of_error=trips_over_time.margin_of_error_laplace,
             x_axis_label="Date",
             y_axis_label="% of trips",
             rotate_label=True,
+            figsize=(max(5, min(9, len(trips_over_time.data.values))), 6),
         )
         html = v_utils.fig_to_html(chart)
     else:
@@ -473,6 +467,7 @@ def render_trips_over_time(trips_over_time: DfSection) -> str:
             y_axis_label="% of trips",
             margin_of_error=trips_over_time.margin_of_error_laplace,
             rotate_label=True,
+            figsize=(9, 6),
         )
         html = v_utils.fig_to_html(chart)
     plt.close(chart)
@@ -487,13 +482,12 @@ def render_benchmark_trips_over_time(
             x=trips_over_time.data[const.DATETIME].to_numpy(),
             y=trips_over_time.data["trips"].to_numpy(),
             y_alternative=trips_over_time_alternative.data["trips"].to_numpy(),
-            margin_of_error=fmt_moe(trips_over_time.margin_of_error_laplace),
-            margin_of_error_alternative=fmt_moe(
-                trips_over_time_alternative.margin_of_error_laplace
-            ),
+            margin_of_error=trips_over_time.margin_of_error_laplace,
+            margin_of_error_alternative=trips_over_time_alternative.margin_of_error_laplace,
             x_axis_label="Date",
             y_axis_label="% of trips",
             rotate_label=True,
+            figsize=(max(5, min(9, len(trips_over_time.data.values))), 6),
         )
         html = v_utils.fig_to_html(chart)
 
@@ -508,6 +502,7 @@ def render_benchmark_trips_over_time(
             margin_of_error=trips_over_time.margin_of_error_laplace,
             margin_of_error_alternative=trips_over_time_alternative.margin_of_error_laplace,
             rotate_label=True,
+            figsize=(9, 6),
         )
         html = v_utils.fig_to_html(chart)
     plt.close(chart)
@@ -522,6 +517,7 @@ def render_trips_per_weekday(trips_per_weekday: SeriesSection) -> str:
         x_axis_label="Weekday",
         y_axis_label="% of trips",
         rotate_label=True,
+        figsize=(max(5, min(9, len(trips_per_weekday.data.values))), 6),
     )
     plt.close(chart)
     return v_utils.fig_to_html(chart)
@@ -539,6 +535,7 @@ def render_benchmark_trips_per_weekday(
         x_axis_label="Weekday",
         y_axis_label="% of trips",
         rotate_label=True,
+        figsize=(max(5, min(9, len(trips_per_weekday.data.values))), 6),
     )
     plt.close(chart)
     return v_utils.fig_to_html(chart)
@@ -559,6 +556,7 @@ def render_trips_per_hour(
         y_axis_label="% of trips",
         hue_order=["weekday start", "weekday end", "weekend start", "weekend end"],
         margin_of_error=margin_of_error,
+        figsize=(10, 6),
     )
     html = v_utils.fig_to_html(chart)
     plt.close(chart)

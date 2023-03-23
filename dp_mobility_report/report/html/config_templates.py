@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 import dp_mobility_report.constants as const
+from dp_mobility_report.model.preprocessing import has_points_inside_tessellation
 from dp_mobility_report.report.html.html_utils import fmt, fmt_config, get_template
 
 if TYPE_CHECKING:
@@ -19,6 +20,10 @@ def render_config(dpmreport: "DpMobilityReport") -> str:
         args[
             "tessellation_info"
         ] = "No tessellation has been provided. All analyses based on the tessellation have been excluded."
+    elif not has_points_inside_tessellation(dpmreport.df, dpmreport.tessellation):
+        args[
+            "tessellation_info"
+        ] = "No records are within the given tessellation. All analyses based on the tessellation have been excluded."
 
     if not pd.core.dtypes.common.is_datetime64_dtype(dpmreport.df[const.DATETIME]):
         args[
@@ -44,6 +49,19 @@ def render_benchmark_config(benchmarkreport: "BenchmarkReport") -> str:
         args[
             "tessellation_info"
         ] = "No tessellation has been provided. All analyses based on the tessellation have been excluded."
+    elif (
+        not has_points_inside_tessellation(
+            benchmarkreport.report_base.df, benchmarkreport.report_base.tessellation
+        )
+    ) | (
+        not has_points_inside_tessellation(
+            benchmarkreport.report_alternative.df,
+            benchmarkreport.report_alternative.tessellation,
+        )
+    ):
+        args[
+            "tessellation_info"
+        ] = "No records are within the given tessellation. All analyses based on the tessellation have been excluded."
 
     if (
         not pd.core.dtypes.common.is_datetime64_dtype(
@@ -69,23 +87,35 @@ def render_benchmark_config(benchmarkreport: "BenchmarkReport") -> str:
     return template_structure.render(args)
 
 
+def render_similarity_info() -> str:
+
+    template_structure = get_template("similarity_info.html")
+    return template_structure.render()
+
+
+def render_dp_info() -> str:
+
+    template_structure = get_template("dp_info.html")
+    return template_structure.render()
+
+
 def render_config_table(dpmreport: "DpMobilityReport") -> str:
 
     config_list = [
         {"name": "Max. trips per user", "value": fmt(dpmreport.max_trips_per_user)},
         {"name": "Privacy budget", "value": fmt(dpmreport.privacy_budget)},
         {"name": "User privacy", "value": fmt(dpmreport.user_privacy)},
+        {"name": "Budget split", "value": fmt_config(dpmreport.budget_split)},
+        {"name": "Evaluation dev. mode", "value": fmt(dpmreport.evalu)},
         {
             "name": "Excluded analyses",
             "value": fmt_config(dpmreport.analysis_exclusion),
         },
-        {"name": "Budget split", "value": fmt_config(dpmreport.budget_split)},
-        {"name": "Evaluation dev. mode", "value": fmt(dpmreport.evalu)},
     ]
 
     # create html from template
     template_table = get_template("table.html")
-    dataset_stats_html = template_table.render(rows=config_list)
+    dataset_stats_html = template_table.render(rows=config_list, align="left-align")
     return dataset_stats_html
 
 
@@ -129,11 +159,8 @@ def render_benchmark_config_table(benchmarkreport: "BenchmarkReport") -> str:
         },
         {
             "name": "Excluded analyses",
-            "value": (
-                fmt_config(benchmarkreport.analysis_exclusion),
-                fmt_config(benchmarkreport.analysis_exclusion),
-            ),
-        },  # TODO verbundene zelle
+            "value": (fmt_config(benchmarkreport.analysis_exclusion),),
+        },
     ]
 
     # create html from template

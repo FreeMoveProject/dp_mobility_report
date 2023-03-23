@@ -5,6 +5,7 @@ include LICENSE
 include README.rst
 include ANALYSES.rst
 include SIMILARITY_MEASURES.rst
+include DIFFERENTIAL_PRIVACY.rst
 
 include *.py
 recursive-exclude * __pycache__

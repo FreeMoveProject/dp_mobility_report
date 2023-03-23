@@ -35,12 +35,6 @@ def render_place_analysis(
     report = dpmreport.report
     tessellation = dpmreport.tessellation
 
-    args[
-        "privacy_info"
-    ] = f"""Tiles below a certain threshold are grayed out: 
-        Due to the applied noise, tiles with a low visit count are likely to contain a high percentage of noise. 
-        For usability reasons, such unrealistic values are grayed out. 
-        More specifically: The threshold is set so that values for tiles with a 5% chance (or higher) of deviating more than {round(THRESHOLD * 100)} percentage points from the estimated value are not shown."""
     args["output_filename"] = output_filename
 
     if const.VISITS_PER_TILE not in dpmreport.analysis_exclusion:
@@ -60,7 +54,7 @@ def render_place_analysis(
         quartiles = report[const.VISITS_PER_TILE].quartiles.round()
 
         args["visits_per_tile_summary_table"] = render_summary(
-            quartiles.astype(int),  # extrapolate visits from dp record count
+            quartiles, int  # extrapolate visits from dp record count
         )
         args["visits_per_tile_cumsum_linechart"] = render_visits_per_tile_cumsum(
             report[const.VISITS_PER_TILE],
@@ -80,6 +74,14 @@ def render_place_analysis(
 
         args["visits_per_tile_time_map"] = render_visits_per_time_tile(
             report[const.VISITS_PER_TIME_TILE], tessellation, THRESHOLD
+        )
+        args["visits_per_tile_time_info"] = "User configuration of timewindows: " + str(
+            [
+                f"{first} - {second}"
+                for first, second in zip(
+                    dpmreport.timewindows[0:-1], dpmreport.timewindows[1:]
+                )
+            ]
         )
 
     template_structure = get_template("place_analysis_segment.html")
@@ -105,9 +107,22 @@ def render_benchmark_place_analysis(
             render_eps(report_base[const.VISITS_PER_TILE].privacy_budget),
             render_eps(report_alternative[const.VISITS_PER_TILE].privacy_budget),
         )
+        # change moe unit to relative counts
+        rel_visits_per_tile_moe_base = (
+            report_base[const.VISITS_PER_TILE].margin_of_error_laplace
+            / report_base[const.VISITS_PER_TILE].data["visits"].sum()
+            if report_base[const.VISITS_PER_TILE].data["visits"].sum() > 0
+            else report_base[const.VISITS_PER_TILE].margin_of_error_laplace
+        )
+        rel_visits_per_tile_moe_alternative = (
+            report_alternative[const.VISITS_PER_TILE].margin_of_error_laplace
+            / report_alternative[const.VISITS_PER_TILE].data["visits"].sum()
+            if report_alternative[const.VISITS_PER_TILE].data["visits"].sum()
+            else report_alternative[const.VISITS_PER_TILE].margin_of_error_laplace
+        )
         args["visits_per_tile_moe"] = (
-            fmt_moe(report_base[const.VISITS_PER_TILE].margin_of_error_laplace),
-            fmt_moe(report_alternative[const.VISITS_PER_TILE].margin_of_error_laplace),
+            fmt_moe(rel_visits_per_tile_moe_base),
+            fmt_moe(rel_visits_per_tile_moe_alternative),
         )
 
         args["points_outside_tessellation_info_base"] = render_points_outside_tess(
@@ -139,6 +154,8 @@ def render_benchmark_place_analysis(
         args["most_freq_tiles_ranking"] = render_most_freq_tiles_ranking_benchmark(
             report_base[const.VISITS_PER_TILE],
             report_alternative[const.VISITS_PER_TILE],
+            rel_visits_per_tile_moe_base,
+            rel_visits_per_tile_moe_alternative,
         )
         args["visits_per_tile_measure"] = template_measures.render(
             all_available_measures(const.VISITS_PER_TILE, benchmark)
@@ -156,11 +173,11 @@ def render_benchmark_place_analysis(
         )
 
     if const.VISITS_PER_TIME_TILE not in benchmark.analysis_exclusion:
-        args["visits_per_time_tile_eps"] = (
+        args["visits_per_tile_timewindow_eps"] = (
             render_eps(report_base[const.VISITS_PER_TIME_TILE].privacy_budget),
             render_eps(report_alternative[const.VISITS_PER_TIME_TILE].privacy_budget),
         )
-        args["visits_per_time_tile_moe"] = (
+        args["visits_per_tile_timewindow_moe"] = (
             fmt_moe(report_base[const.VISITS_PER_TIME_TILE].margin_of_error_laplace),
             fmt_moe(
                 report_alternative[const.VISITS_PER_TIME_TILE].margin_of_error_laplace
@@ -171,6 +188,15 @@ def render_benchmark_place_analysis(
             report_base[const.VISITS_PER_TIME_TILE],
             report_alternative[const.VISITS_PER_TIME_TILE],
             tessellation,
+        )
+        args["visits_per_tile_time_info"] = "User configuration of timewindows: " + str(
+            [
+                f"{first} - {second}"
+                for first, second in zip(
+                    benchmark.report_base.timewindows[0:-1],
+                    benchmark.report_base.timewindows[1:],
+                )
+            ]
         )
 
         args["visits_per_time_tile_measure"] = template_measures.render(
@@ -348,7 +374,7 @@ def render_visits_per_tile_cumsum(
         y="cum_perc",
         data_alternative=df_cumsum_alternative,
         x_axis_label="Number of tiles",
-        y_axis_label="Cumulated sum of visits per tile",
+        y_axis_label="Cumulated sum of relative visits per tile",
         add_diagonal=diagonal,
     )
     html = v_utils.fig_to_html(chart)
@@ -363,7 +389,7 @@ def render_most_freq_tiles_ranking(visits_per_tile: DfSection, top_x: int = 10) 
         topx_tiles["rank"].astype(str)
         + ": "
         + topx_tiles[const.TILE_NAME]
-        + "(Id: "
+        + " (Id: "
         + topx_tiles[const.TILE_ID]
         + ")"
     )
@@ -373,6 +399,7 @@ def render_most_freq_tiles_ranking(visits_per_tile: DfSection, top_x: int = 10) 
         "number of visits per tile",
         y_labels=labels,
         margin_of_error=visits_per_tile.margin_of_error_laplace,
+        figsize=(8, max(6, min(len(labels) * 0.5, 8))),
     )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close(ranking)
@@ -382,6 +409,8 @@ def render_most_freq_tiles_ranking(visits_per_tile: DfSection, top_x: int = 10) 
 def render_most_freq_tiles_ranking_benchmark(
     visits_per_tile_base: DfSection,
     visits_per_tile_alternative: DfSection,
+    rel_visits_per_tile_moe_base: float,
+    rel_visits_per_tile_moe_alternative: float,
     top_x: int = 10,
 ) -> str:
     topx_tiles_base = visits_per_tile_base.data.nlargest(top_x, "visits")
@@ -404,7 +433,7 @@ def render_most_freq_tiles_ranking_benchmark(
         topx_tiles_merged["rank"].astype(str)
         + ": "
         + topx_tiles_merged[const.TILE_NAME]
-        + "(Id: "
+        + " (Id: "
         + topx_tiles_merged[const.TILE_ID]
         + ")"
     )
@@ -414,8 +443,9 @@ def render_most_freq_tiles_ranking_benchmark(
         x_axis_label="percentage of visits per tile",
         y_labels=labels,
         x_alternative=topx_tiles_merged.visits_alternative,
-        margin_of_error=visits_per_tile_base.margin_of_error_laplace,
-        margin_of_error_alternative=visits_per_tile_alternative.margin_of_error_laplace,
+        margin_of_error=rel_visits_per_tile_moe_base,
+        margin_of_error_alternative=rel_visits_per_tile_moe_alternative,
+        figsize=(8, max(6, min(len(labels) * 0.5, 8))),
     )
     html_ranking = v_utils.fig_to_html(ranking)
     plt.close(ranking)
@@ -520,7 +550,7 @@ def _create_timewindow_segment(df: pd.DataFrame, tessellation: GeoDataFrame) -> 
     html = f"""<h4>Number of visits</h4>
         {v_utils.fig_to_html_as_png(visits_choropleth)}
         <h4>Deviation from tile average</h4>
-        <div><p>The average of each cell 
+        <div><p>The average of each tile 
         over all time windows equals 1 (100% of average traffic). 
         A value of < 1 (> 1) means that a tile is visited less (more) frequently in this time window than it is on average.</p></div>
         {v_utils.fig_to_html_as_png(deviation_choropleth)}"""  # svg might get too large

@@ -1,12 +1,33 @@
-<h2>Origin-destination (OD) analysis</h2>
-
 {% if flows_cumsum_linechart %}
 <div>
-    <h3>OD flows between tiles</h3>
-    <p>privacy budget base: {{od_eps[0]}}</p>
-    <p>95%-confidence interval: +/-{{od_moe[0]}}</p>
-    <p>privacy budget alternative: {{od_eps[1]}}</p>
-    <p>95%-confidence interval: +/-{{od_moe[1]}}</p>
+    <div class="tab-structure-info-button">
+        <input type="checkbox" id="odflows">
+        <label class="tab-label-structure-info-button" for="odflows"><h3>OD flows between tiles <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+          </svg></h3></label>
+        <div class="tab-content">
+            <p>The following map shows the origin-destination (OD) flows between the tiles according to the provided tessellation for the base and the alternative dataset. 
+                Additionally, the intra-tile flow deviations from base are displayed. The intra-tile flow is defined as the number of OD connections that start and end in the same tile. 
+                These three visualizations can be chosen in the layer control. </p>
+            <p>The origin of the OD flows is indicated by a small circle and by clicking on one OD connection, information on the origin and destination cell name as well as the number of OD connections will show up. </p>
+            <p>The legend for the intra-tile flow deviations are below and range from -2 to 2. The deviations are computed as follows: (alternative - base) / ((|base| + |alternative|) / 2).</p>
+            <p>The allocated privacy budget for this map is shown below and noise is applied accordingly onto the relative counts. The confidence interval is indicated below.</p>
+            <p>All applicable similarity measures are displayed in the orange box below the map.</p>
+        </div>
+    </div>
+    <table class="default">               
+        <tr>
+          <th style="width:30%">Base:</th>
+          <td style="width:30%">privacy budget: {{od_eps[0]}}</td>
+          <td style="width:30%">95% CI: +/- {{od_moe[0]}} flow(s)</td>
+        </tr>
+        <tr>
+          <th style="width:30%">Alternative:</th>
+          <td style="width:30%">privacy budget: {{od_eps[1]}}</td>
+          <td style="width:30%">95% CI: +/- {{od_moe[1]}} flow(s)</td>
+        </tr>
+      </table>
     <div>
 
         <iframe src="{{output_filename}}/maps/od_map.html" width="100%" height="600" style="border:1px solid black;">
@@ -37,21 +58,59 @@
     </div>
 
     <div>
-        <h4>Five number summary: flows per OD pair</h4>
-        {{flows_summary_table}}
-        {{flows_summary_measure}}
-        <h4>Cumulated sum of flows per OD pair</h4>
-        {{flows_cumsum_linechart}}
-
-        <p class="info">
-            The cumulated sum of flows visualizes the distribution of flows over OD pairs:
-            If all OD connections are traveled equally, the cumulated sum follows a straight diagonal line. 
-            The larger the share of single OD connections in the total number of flows, the steeper the curve.
-        </p>
+        <div>
+            <div class="tab-structure-info-button">
+                <input type="checkbox" id="fivenumberodflows">
+                <label class="tab-label-structure-info-button" for="fivenumberodflows"><h4>Five-number summary: flows per OD pair <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                  </svg></h4></label>
+                <div class="tab-content">
+                    <p>This table shows the mean number of visits per tile for each dataset as well as the five-number summary consisting of: the most extreme values in the dataset (the maximum and minimum values), the lower and upper quartiles, and the median.</p>
+                    <p>These values are computed from the counts visualized above. Thus, no extra privacy budget is used.</p>
+                    <p>The symmetric mean absolute percentage error consisting of all the above counts is displayed in the orange box below.</p>
+                </div>
+            </div>
+            {{flows_summary_table}}
+            {{flows_summary_measure}}
+        </div>
+        <div>
+            <div class="tab-structure-info-button">
+                <input type="checkbox" id="cumsumperod">
+                <label class="tab-label-structure-info-button" for="cumsumperod"><h4>Cumuluated sum of flows per OD pair <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                  </svg></h4></label>
+                <div class="tab-content">
+                    <p>The following visualization shows the cumulated relative number of flows per OD pair of both datasets. This means that the OD pairs are sorted according to the number of flows in descending order and the relative number of flows are added OD pair by OD pair. 
+                        Thus, you can use the graph to evaluate how many OD pairs are needed to cover a certain share of the flows.</p>
+                    <p>If all OD pairs are visited equally, the cumulated sum follows a straight diagonal line. The larger the share of a single OD pair in the total number of flows, the steeper the curve.</p>
+                    <p>These values are computed from the counts visualized above. Thus, no extra privacy budget is used.</p>
+                    <p>The legend indicates the color for the base dataset and the alternative dataset.</p>
+                </div>
+            </div>
+            {{flows_cumsum_linechart}}
+        </div>
     </div>  
     
     <div>
-        <h4>Ranking of most frequent OD connections</h4>
+        <div class="tab-structure-info-button">
+            <input type="checkbox" id="rankingfreqod">
+            <label class="tab-label-structure-info-button" for="rankingfreqod"><h4>Ranking of most frequent OD connections <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+              </svg></h4></label>
+            <div class="tab-content">
+                <p>The following visualization shows the ranking of most frequently visited OD connections for the base and the alternative dataset.</p>
+                <p>The ranking includes the union of the top 10 most frequently visited tiles of both dataset and therefore a minimum 10 to a maximum 20 most frequently visited tiles.</p>
+                <p>The y-axis shows the tile name of origin and destination in order of the ranking (starting with the top 10 base connections). The x-axis shows the number of flows per OD pair.</p>
+                <p>These values are computed from the counts visualized above. Thus, no extra privacy budget is used. 
+                    The 95% confidence interval of the flows per OD pair indicated above also applies here and is visualized with error bars.</p>
+                <p> The legend indicates the color for the base dataset and the alternative dataset.</p>
+                <p>The Kendall rank correlation coefficient and the coverage of top n locations are displayed in the orange box below the map. Both measures are computed for the configured top n values (default: 10, 50, 100).</p>
+
+            </div>
+          </div>
         {{most_freq_flows_ranking}}
         {{od_flows_ranking_measure}}
     </div>
@@ -62,48 +121,86 @@
 <div>
     {% if travel_time_hist %}
     <div>
-        <h3>Travel time of trips (in minutes)</h3>
-        <p>privacy budget base: {{travel_time_eps[0]}}</p>
-        <p>95%-confidence interval: +/-: {{travel_time_moe[0]}}</p>
-        <p>privacy budget alternative: {{travel_time_eps[1]}}</p>
-        <p>95%-confidence interval: +/-: {{travel_time_moe[1]}}</p>
-
-        {{travel_time_hist}}
-        <p class="grey info">
-            {{travel_time_hist_info}}
-        </p>
-        {{travel_time_measure}}
-            
+        <div class="tab-structure-info-button">
+            <input type="checkbox" id="traveltime">
+            <label class="tab-label-structure-info-button" for="traveltime"><h3>Travel time of trips (in minutes) <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+              </svg></h3></label>
+            <div class="tab-content">
+                <p>The following histogram shows the distribution of travel time for both datasets. The travel time is computed as the time difference between start and end timestamp of a trip in minutes.</p>
+                <p>The y-axis indicates the relative counts of trips while the x-axis shows the range of histogram bins in minutes according to the user configurated bin size and maximum value.</p>
+                <p>The allocated privacy budgets for both datasets are shown below and noise is applied accordingly to compute the estimate (bars) and the 95% confidence interval (error bar).</p>
+                <p>The legend indicates the color for the base dataset and the alternative dataset.</p>
+                <p>All applicable similarity measures are displayed in the orange box below.</p>
+            </div>
+        </div>          
+        <table class="default">               
+            <tr>
+              <th style="width:30%">Base:</th>
+              <td style="width:30%">privacy budget: {{travel_time_eps[0]}}</td>
+              <td style="width:30%">95% CI: +/- {{travel_time_moe[0]}} %</td>
+            </tr>
+            <tr>
+              <th style="width:30%">Alternative:</th>
+              <td style="width:30%">privacy budget: {{travel_time_eps[1]}}</td>
+              <td style="width:30%">95% CI: +/- {{travel_time_moe[1]}} %</td>
+            </tr>
+          </table>
+        <div>
+            {{travel_time_hist}}
+            <p class="grey info">
+                {{travel_time_hist_info}}
+            </p>
+            {{travel_time_measure}}
+        </div>
+        <div>
             <h4>Five number summary: travel time</h4>
             {{travel_time_summary_table}}
-            <p class="info">
-                {{travel_time_moe_info}}
-            </p>
             {{travel_time_summary_measure}}
+        </div>
     </div>
     {% endif %} 
 
     {% if jump_length_hist %}  
     <div>
-        <h3>Jump length (in kilometers)</h3>
-        <p>privacy budget base: {{jump_length_eps[0]}}</p>
-        <p>95%-confidence interval: +/- {{jump_length_moe[0]}}</p>
-        <p>privacy budget alternative: {{jump_length_eps[1]}}</p>
-        <p>95%-confidence interval: +/- {{jump_length_moe[1]}}</p>
-
-        <p class="info">The jump length is the straight-line distance between the origin and destination.</p>
-        {{jump_length_hist}}
-        <p class="grey info">
-            {{jump_length_hist_info}}
-        </p>
-        {{jump_length_measure}}
+        <div class="tab-structure-info-button">
+            <input type="checkbox" id="jumplength">
+            <label class="tab-label-structure-info-button" for="jumplength"><h3>Jump length (in kilometers) <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+              </svg></h3></label>
+            <div class="tab-content">
+                <p>The following histogram shows the distribution of jump length for both datasets. The jump length is the straight-line distance between the origin and destination.</p>
+                <p>The y-axis indicates the relative counts of trips while the x-axis shows the range of histogram bins in kilometers according to the user configurated bin size and maximum value.</p>
+                <p>The allocated privacy budgets for both datasets are shown below and noise is applied accordingly to compute the estimate (bars) and the 95% confidence interval (error bar).</p>
+                <p>The legend indicates the color for the base dataset and the alternative dataset.</p>
+                <p>All applicable similarity measures are displayed in the orange box below.</p>
+            </div>
+        </div>        <table class="default">               
+            <tr>
+              <th style="width:30%">Base:</th>
+              <td style="width:30%">privacy budget: {{jump_length_eps[0]}}</td>
+              <td style="width:30%">95% CI: +/- {{jump_length_moe[0]}} %</td>
+            </tr>
+            <tr>
+              <th style="width:30%">Alternative:</th>
+              <td style="width:30%">privacy budget: {{jump_length_eps[1]}}</td>
+              <td style="width:30%">95% CI: +/- {{jump_length_moe[1]}} %</td>
+            </tr>
+          </table>
+        <div>
+            {{jump_length_hist}}
+            <p class="grey info">
+                {{jump_length_hist_info}}
+            </p>
+            {{jump_length_measure}}
+        </div>  
+        <div>
             <h4>Five number summary: jump length</h4>
             {{jump_length_summary_table}}
-            <p class="info">
-                {{jump_length_moe_info}}
-            </p>
             {{jump_length_summary_measure}}
-
+        </div>
     </div>
     {% endif %}
 </div>

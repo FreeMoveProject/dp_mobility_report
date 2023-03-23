@@ -7,6 +7,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 <title>DP Mobility Report</title>
 <meta name="description" content="DP Mobility Report rendered as HTML.">
@@ -16,34 +18,73 @@
     
 <div class="container">
     <h1>{{title}}</h1>
-
+    {% if subtitle %} 
+    <h3 style="text-align: center"> {{subtitle}} </h3>
+    {% endif %}
     {%if config_segment %}
     <div class="segment grey">
         {{config_segment}}
     </div>
     {% endif %}
 
+    {% if similarity_info %}
+    <div class="segment grey">
+        {{similarity_info}}
+    </div>
+    {% endif %}
+
+
+    {% if dp_info %}
+    <div class="segment grey">
+        {{dp_info}}
+    </div>
+    {% endif %}
+
     {% if overview_segment %}
-    <div class="segment">
-        {{overview_segment}}
+    <div class="segment white">
+        <div class="tab-structure">
+            <input type="checkbox" id="overview">
+            <label class="tab-label-structure" for="overview"><h2>Overview</h2></label>
+            <div class="tab-content">
+                {{overview_segment}}
+            </div>
+        </div>
     </div>
     {% endif %}
 
     {% if place_analysis_segment %}
-    <div class="segment">
-        {{place_analysis_segment}}
+    <div class="segment white">
+        <div class="tab-structure">
+            <input type="checkbox" id="place_analysis">
+            <label class="tab-label-structure" for="place_analysis"><h2>Place Analysis</h2></label>
+            <div class="tab-content">
+                {{place_analysis_segment}}
+            </div>
+        </div>
     </div>
     {% endif %}
 
     {% if od_analysis_segment %}
-    <div class="segment">
-        {{od_analysis_segment}}
+    <div class="segment white">
+        <div class="tab-structure">
+            <input type="checkbox" id="od_analysis">
+            <label class="tab-label-structure" for="od_analysis"><h2>Origin-destination (OD) analysis</h2></label>
+            <div class="tab-content">
+                {{od_analysis_segment}}
+            </div>
+        </div>
     </div>
     {% endif %}
 
     {% if user_analysis_segment %}
-    <div class="segment">
-        {{user_analysis_segment}}
+    <div class="segment white">
+        <div class="tab-structure">
+            <input type="checkbox" id="user_analysis_segment">
+            <label class="tab-label-structure" for="user_analysis_segment"><h2>User analysis</h2></label>
+            <div class="tab-content">
+                {{user_analysis_segment}}
+            </div>
+        </div>
     </div>
     {% endif %}
 </div>
