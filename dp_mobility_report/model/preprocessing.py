@@ -376,7 +376,7 @@ def preprocess_data(
         )
 
     # remove waypoints
-    df = df.sort_values(const.DATETIME).groupby(const.TID, as_index =False).nth([0, -1])
+    df = df.sort_values(const.DATETIME).groupby(const.TID, as_index=False).nth([0, -1])
 
     # assign start and end as point_type
     df[const.POINT_TYPE] = "start"
