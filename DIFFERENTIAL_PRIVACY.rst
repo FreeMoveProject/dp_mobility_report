@@ -16,7 +16,7 @@ the analysis outcome, preventing the reconstruction of an individual's data.
 
 **Definition: Differential Privacy**
 
-Let :math:`\text{Range}(\mathcal{A})` be a randomized algorithm that 
+Let :math:`\mathcal{A}` be a randomized algorithm that 
 takes a mobility dataset :math:`T` as input and outputs a value from some output space :math:`\text{Range}(\mathcal{A})`.
 For an :math:`\varepsilon > 0`, :math:`\mathcal{A}` is said to be 
 :math:`\varepsilon`-differentially private, if for all pairs of datasets :math:`T_1` and :math:`T_2` differing in all
