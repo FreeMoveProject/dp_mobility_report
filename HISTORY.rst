@@ -1,6 +1,10 @@
 History
 *********
 
+0.2.7 (2023-03-30)
+==================
+* Update requirements
+
 0.2.6 (2023-03-24)
 ==================
 * Bug fix: shape mismatch in similarity_measures for edge case (only counts in bin "inf")
