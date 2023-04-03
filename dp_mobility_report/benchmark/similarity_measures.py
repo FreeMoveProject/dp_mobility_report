@@ -240,7 +240,7 @@ def compute_similarity_measures(
             )
             smape_dict[const.TRIPS_OVER_TIME] = symmetric_mape(
                 alternative=trips_over_time.trips_alternative,
-                base=trips_over_time.trip_count_base,
+                base=trips_over_time.trips_base,
             )
         pbar.update()
 
