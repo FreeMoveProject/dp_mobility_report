@@ -1,6 +1,10 @@
 History
 *********
 
+0.2.8 (2023-04-03)
+==================
+* Bug fix: smape of trips per day
+
 0.2.7 (2023-03-30)
 ==================
 * Update requirements
