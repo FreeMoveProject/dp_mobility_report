@@ -22,10 +22,10 @@ tessellation = gpd.read_file(os.path.join(path_data, "berlin_tessellation.gpkg")
 benchmarkreport = BenchmarkReport(
     df_base=df,
     tessellation=tessellation,
-    privacy_budget_base=None,
-    privacy_budget_alternative=1,
+    #privacy_budget_base=None,
+    #privacy_budget_alternative=1,
     max_trips_per_user_base=None,
-    max_trips_per_user_alternative=5,
+    max_trips_per_user_alternative=1,
     analysis_exclusion=[
         const.USER_TIME_DELTA
     ],  # exclude analyses that you are not interested in, so save privacy budget
