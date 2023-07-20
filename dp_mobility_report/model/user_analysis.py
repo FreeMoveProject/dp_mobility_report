@@ -143,7 +143,7 @@ def _mobility_entropy(df: pd.DataFrame) -> np.ndarray:
     n_vals = df.groupby(const.UID)[const.TILE_ID].nunique()
     entropy = np.where(
         n_vals > 1,
-        np.divide(entropy, np.log2(n_vals, where=n_vals > 1), where=n_vals > 1),
+        np.divide(entropy, np.log2(n_vals)),
         0,
     )
     return entropy
