@@ -86,7 +86,6 @@ def hist_section(
             ].sum()  # sum up to single > max count
             counts = counts[: len(bins)]  # remove long tail
 
-
     # if all values above defined max, create one histogram bin greater hist_max
     elif hist_min > hist_max:
         bins = np.array([hist_max, np.inf])
