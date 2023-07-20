@@ -116,7 +116,7 @@ def validate_input(
     timewindows = (
         np.array(timewindows) if isinstance(timewindows, list) else timewindows
     )
-    if not all([np.issubdtype(item, int) for item in timewindows]):
+    if not all(np.issubdtype(item, int) for item in timewindows):
         raise TypeError("not all items of 'timewindows' are integers.")
 
     _validate_bool(user_privacy, f"{user_privacy=}".split("=")[0])
