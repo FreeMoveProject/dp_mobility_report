@@ -218,15 +218,16 @@ if you use dp-mobility-report please cite the `following paper`_:
 
 .. code-block::
 
-        @article{
-                doi:10.1080/17489725.2022.2148008,
-                title = {Towards Mobility Reports with User-Level Privacy},
-                author = {Kapp, Alexandra and {von Voigt}, Saskia Nu{\~n}ez and Mihaljevi{\'c}, Helena and Tschorsch, Florian},
-                year = {2022},
-                journal = {Journal of Location Based Services},
-                eprint = {https://www.tandfonline.com/doi/pdf/10.1080/17489725.2022.2148008},
-                publisher = {{Taylor \& Francis}},
-                doi = {10.1080/17489725.2022.2148008}
+        @article{doi:10.1080/17489725.2022.2148008,
+                        author = {Alexandra Kapp and Saskia Nuñez von Voigt and Helena Mihaljević and Florian Tschorsch},
+                        title = {Towards mobility reports with user-level privacy},
+                        journal = {Journal of Location Based Services},
+                        volume = {17},
+                        number = {2},
+                        pages = {95-121},
+                        year  = {2023},
+                        publisher = {Taylor & Francis},
+                        doi = {10.1080/17489725.2022.2148008}
         }
 
 
