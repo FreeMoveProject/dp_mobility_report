@@ -442,7 +442,7 @@ def sample_trips(
             )
         )
         return df.loc[
-            df[const.TID].isin(np.concatenate(tid_sample.values)),
+            df[const.TID].isin(np.concatenate(tid_sample.values))
         ]
     else:
         return df
