@@ -1,6 +1,10 @@
 History
 *********
 
+0.2.9 (2023-08-17)
+==================
+* Fix to work with pandas 2.1.0rc0 update
+
 0.2.8 (2023-04-03)
 ==================
 * Bug fix: smape of trips per day
