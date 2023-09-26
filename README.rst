@@ -237,6 +237,12 @@ Credits
 This package was highly inspired by the `pandas-profiling/pandas-profiling`_ and `scikit-mobility`_ packages.
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
+
+
+This package was developed as part of the freemove project which is funded by:
+
+.. image:: https://www.freemove.space/assets/images/bmbf-logo.svg
+
  
 .. _`example dataset`: https://github.com/FreeMoveProject/dp_mobility_report/blob/main/tests/test_files/test_data.csv
 .. _`example tessellation`: https://github.com/FreeMoveProject/dp_mobility_report/blob/main/tests/test_files/test_tessellation.geojson
