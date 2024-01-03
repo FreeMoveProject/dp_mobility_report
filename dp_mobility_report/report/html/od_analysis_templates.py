@@ -319,8 +319,7 @@ def render_benchmark_origin_destination_flows(
         left_on=const.TILE_ID,
         right_on="origin",
     )
-
-    tessellation_intra_flows.deviation.fillna(0, inplace=True)
+    tessellation_intra_flows["deviation"] = tessellation_intra_flows.deviation.fillna(0)
 
     map, intra_tile_legend = plot.choropleth_map(
         tessellation_intra_flows,
