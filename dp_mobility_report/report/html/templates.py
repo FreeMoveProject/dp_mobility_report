@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Tuple
 
-import pkg_resources  # type: ignore
+from importlib.metadata import files
 from tqdm.auto import tqdm
 
 if TYPE_CHECKING:
@@ -149,10 +149,8 @@ def create_html_assets(output_file: Path) -> None:
     if path.is_dir():
         shutil.rmtree(path)
     os.mkdir(path)
-
-    asset_folder = pkg_resources.resource_filename(
-        "dp_mobility_report", "report/html/html_templates/assets/"
-    )
+    
+    asset_folder = [p for p in files('dp_mobility_report') if 'report/html/html_templates/assets/' in str(p)][0].locate().parent
 
     for file_name in os.listdir(asset_folder):
         # only copy .css files (e.g., not __init__.py)
