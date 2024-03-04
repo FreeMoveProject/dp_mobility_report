@@ -150,7 +150,7 @@ def get_trips_over_time(
     if range_of_days > timedelta(days=712):  # more than two years (102 weeks)
         resample = "M"
         datetime_precision = const.PREC_MONTH
-    if range_of_days > timedelta(days=90):  # more than three months
+    elif range_of_days > timedelta(days=90):  # more than three months
         resample = "W-Mon"
         datetime_precision = const.PREC_WEEK
     else:

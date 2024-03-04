@@ -22,3 +22,4 @@ Shapely
 tqdm
 typing
 opencv-python
+fiona<1.10

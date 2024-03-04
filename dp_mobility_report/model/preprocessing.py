@@ -120,8 +120,8 @@ def validate_input(
         raise TypeError("not all items of 'timewindows' are integers.")
 
     _validate_bool(user_privacy, f"{user_privacy=}".split("=")[0])
-    _validate_bool(evalu, f"{user_privacy=}".split("=")[0])
-    _validate_bool(disable_progress_bar, f"{user_privacy=}".split("=")[0])
+    _validate_bool(evalu, f"{evalu=}".split("=")[0])
+    _validate_bool(disable_progress_bar, f"{disable_progress_bar=}".split("=")[0])
 
     if privacy_budget is not None:
         _validate_numeric_greater_zero(
@@ -441,8 +441,6 @@ def sample_trips(
                 )
             )
         )
-        return df.loc[
-            df[const.TID].isin(np.concatenate(tid_sample.values))
-        ]
+        return df.loc[df[const.TID].isin(np.concatenate(tid_sample.values))]
     else:
         return df

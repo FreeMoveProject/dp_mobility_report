@@ -1,5 +1,10 @@
 History
 *********
+0.2.11 (2024-03-04)
+===================
+* Fix copy-paste errors in validation of preprocessing
+* Fix bug: get_trips_over_time can never reach "month" condition
+
 0.2.10 (2024-01-03)
 ===================
 * Fix to work with pandas 2.2.0rc0 update

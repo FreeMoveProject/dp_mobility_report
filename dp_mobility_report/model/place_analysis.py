@@ -38,7 +38,7 @@ def get_visits_per_tile(
         on=const.TILE_ID,
         how="outer",
     ).sort_values("visits", ascending=False)
-    
+
     visits_per_tile.loc[visits_per_tile.visits.isna(), "visits"] = 0
 
     visits_per_tile["visits"] = diff_privacy.counts_dp(
