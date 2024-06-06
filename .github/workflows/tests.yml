@@ -23,10 +23,10 @@ jobs:
     steps:
         # Checkout the latest code from the repo
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         # Setup which version of Python to use
       - name: Set Up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
         # Display the Python version being used
