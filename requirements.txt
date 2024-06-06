@@ -12,7 +12,7 @@ pyproj
 pytest
 geopandas
 rtree
-scipy<=0.13.1
+scipy<=1.13.1
 geojson
 shapely
 seaborn
