@@ -5,14 +5,14 @@ folium==0.12.1.post1
 haversine
 Jinja2
 matplotlib
-numpy<2
+numpy
 pandarallel
 pandas
 pyproj
 pytest
 geopandas
 rtree
-scipy
+scipy<=0.13.1
 geojson
 shapely
 seaborn
