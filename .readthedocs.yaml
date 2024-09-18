@@ -15,9 +15,4 @@ build:
 python:
   install:
     - requirements: requirements.txt
-    - method: pip
-      path: .
-      package: sphinx
-    - method: pip
-      path: .
-      package: sphinx_rtd_theme
+    - requirements: docs/requirements.txt
