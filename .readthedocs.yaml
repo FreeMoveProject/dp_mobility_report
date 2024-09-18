@@ -13,9 +13,9 @@ build:
 
 # Optionally declare the Python requirements required to build your docs
 python:
-   install:
-   - requirements: requirements.txt
-   - method: pip
-   package: sphinx
-   - method: pip
-   package: sphinx_rtd_theme
+  install:
+    - requirements: requirements.txt
+    - method: pip
+      package: sphinx
+    - method: pip
+      package: sphinx_rtd_theme
